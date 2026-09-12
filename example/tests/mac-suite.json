@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Mac native template acceptance",
+  "platforms": [
+    "darwin"
+  ],
+  "steps": [
+    {
+      "name": "Open actual template",
+      "operation": {
+        "op": "open",
+        "as": "template",
+        "file": "$artifact"
+      }
+    },
+    {
+      "name": "Execute portable native VBA acceptance",
+      "operation": {
+        "op": "run",
+        "macro": "$project.Studio.NativeAcceptance"
+      }
+    },
+    {
+      "name": "Inspect saved observable marker",
+      "operation": {
+        "op": "get",
+        "target": "template",
+        "member": "content"
+      },
+      "assert": [
+        {
+          "kind": "contains",
+          "expected": "WORDWRIGHT_NATIVE_OK"
+        }
+      ]
+    }
+  ]
+}

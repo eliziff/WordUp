@@ -1,0 +1,111 @@
+{
+  "blocks": [
+    {
+      "text": "Editorial Studio",
+      "style": "StudioTitle"
+    },
+    {
+      "type": "content_control",
+      "blocks": [
+        {
+          "text": "Author name",
+          "style": "StudioBody"
+        }
+      ],
+      "tag": "author",
+      "title": "Author"
+    },
+    {
+      "style": "StudioBody",
+      "inlines": [
+        {
+          "text": "A native template, not a screenshot. Edit the styles, form, Ribbon and VBA as source."
+        },
+        {
+          "footnote": [
+            {
+              "text": "This is a native Word footnote with its own reference marker.",
+              "run": {
+                "size_pt": 9
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "rows": [
+        [
+          {
+            "text": "Component"
+          },
+          {
+            "text": "Editable source"
+          }
+        ],
+        [
+          {
+            "text": "VBA and forms"
+          },
+          {
+            "text": "Text modules and persistent native MSForms storage"
+          }
+        ],
+        [
+          {
+            "text": "Document design"
+          },
+          {
+            "text": "Named styles, content controls, footnotes and saved parts"
+          }
+        ]
+      ],
+      "columns_pt": [
+        144,
+        360
+      ],
+      "header_rows": 1
+    },
+    {
+      "text": "A reusable editorial note is also saved in Quick Parts.",
+      "style": "StudioNote"
+    }
+  ],
+  "page": {
+    "width_pt": 612,
+    "height_pt": 792,
+    "margins_pt": {
+      "bottom": 54,
+      "footer": 24,
+      "header": 24,
+      "left": 54,
+      "right": 54,
+      "top": 54
+    },
+    "header": [
+      {
+        "text": "WORDWRIGHT / NATIVE TEMPLATE",
+        "run": {
+          "size_pt": 8
+        }
+      }
+    ],
+    "footer": [
+      {
+        "paragraph": {
+          "alignment": "right"
+        },
+        "inlines": [
+          {
+            "text": "Page "
+          },
+          {
+            "text": "1",
+            "field": "PAGE"
+          }
+        ]
+      }
+    ]
+  }
+}

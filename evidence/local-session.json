@@ -1,0 +1,1832 @@
+{
+  "transport": "local Unix socket (Linux build only)",
+  "trials": [
+    {
+      "wall_ms": 3.532,
+      "response": {
+        "duration_ms": 1.396,
+        "result": {
+          "coverage": "lexical symbols, XML syntax, duplicate ribbon IDs and unresolved callback warnings; not full VBA or RibbonX validation",
+          "diagnostics": [],
+          "symbols": [
+            {
+              "declaration": "Public Function PlatformReport() As String",
+              "kind": "Function",
+              "line": 3,
+              "module": "PlatformProbe",
+              "name": "PlatformReport"
+            },
+            {
+              "declaration": "Public Sub OnRibbonLoad(ByVal ribbon As IRibbonUI)",
+              "kind": "Sub",
+              "line": 4,
+              "module": "Studio",
+              "name": "OnRibbonLoad"
+            },
+            {
+              "declaration": "Public Sub ShowStudio(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 7,
+              "module": "Studio",
+              "name": "ShowStudio"
+            },
+            {
+              "declaration": "Public Sub NormalizeButton(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 10,
+              "module": "Studio",
+              "name": "NormalizeButton"
+            },
+            {
+              "declaration": "Public Sub NormalizeSelection()",
+              "kind": "Sub",
+              "line": 13,
+              "module": "Studio",
+              "name": "NormalizeSelection"
+            },
+            {
+              "declaration": "Public Function NativeAcceptance() As String",
+              "kind": "Function",
+              "line": 35,
+              "module": "Studio",
+              "name": "NativeAcceptance"
+            },
+            {
+              "declaration": "Public Function RibbonAcceptance() As Boolean",
+              "kind": "Function",
+              "line": 53,
+              "module": "Studio",
+              "name": "RibbonAcceptance"
+            },
+            {
+              "declaration": "Public Function BuildingBlockAcceptance() As String",
+              "kind": "Function",
+              "line": 62,
+              "module": "Studio",
+              "name": "BuildingBlockAcceptance"
+            },
+            {
+              "declaration": "Public Function NormalizationAcceptance() As String",
+              "kind": "Function",
+              "line": 70,
+              "module": "Studio",
+              "name": "NormalizationAcceptance"
+            },
+            {
+              "declaration": "Private Sub cmdClose_Click()",
+              "kind": "Sub",
+              "line": 3,
+              "module": "StudioForm",
+              "name": "cmdClose_Click"
+            },
+            {
+              "declaration": "Private Sub cmdNormalize_Click()",
+              "kind": "Sub",
+              "line": 6,
+              "module": "StudioForm",
+              "name": "cmdNormalize_Click"
+            }
+          ],
+          "vba_compiled": false,
+          "word_executed": false
+        }
+      }
+    },
+    {
+      "wall_ms": 3.861,
+      "response": {
+        "duration_ms": 1.347,
+        "result": {
+          "coverage": "lexical symbols, XML syntax, duplicate ribbon IDs and unresolved callback warnings; not full VBA or RibbonX validation",
+          "diagnostics": [],
+          "symbols": [
+            {
+              "declaration": "Public Function PlatformReport() As String",
+              "kind": "Function",
+              "line": 3,
+              "module": "PlatformProbe",
+              "name": "PlatformReport"
+            },
+            {
+              "declaration": "Public Sub OnRibbonLoad(ByVal ribbon As IRibbonUI)",
+              "kind": "Sub",
+              "line": 4,
+              "module": "Studio",
+              "name": "OnRibbonLoad"
+            },
+            {
+              "declaration": "Public Sub ShowStudio(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 7,
+              "module": "Studio",
+              "name": "ShowStudio"
+            },
+            {
+              "declaration": "Public Sub NormalizeButton(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 10,
+              "module": "Studio",
+              "name": "NormalizeButton"
+            },
+            {
+              "declaration": "Public Sub NormalizeSelection()",
+              "kind": "Sub",
+              "line": 13,
+              "module": "Studio",
+              "name": "NormalizeSelection"
+            },
+            {
+              "declaration": "Public Function NativeAcceptance() As String",
+              "kind": "Function",
+              "line": 35,
+              "module": "Studio",
+              "name": "NativeAcceptance"
+            },
+            {
+              "declaration": "Public Function RibbonAcceptance() As Boolean",
+              "kind": "Function",
+              "line": 53,
+              "module": "Studio",
+              "name": "RibbonAcceptance"
+            },
+            {
+              "declaration": "Public Function BuildingBlockAcceptance() As String",
+              "kind": "Function",
+              "line": 62,
+              "module": "Studio",
+              "name": "BuildingBlockAcceptance"
+            },
+            {
+              "declaration": "Public Function NormalizationAcceptance() As String",
+              "kind": "Function",
+              "line": 70,
+              "module": "Studio",
+              "name": "NormalizationAcceptance"
+            },
+            {
+              "declaration": "Private Sub cmdClose_Click()",
+              "kind": "Sub",
+              "line": 3,
+              "module": "StudioForm",
+              "name": "cmdClose_Click"
+            },
+            {
+              "declaration": "Private Sub cmdNormalize_Click()",
+              "kind": "Sub",
+              "line": 6,
+              "module": "StudioForm",
+              "name": "cmdNormalize_Click"
+            }
+          ],
+          "vba_compiled": false,
+          "word_executed": false
+        }
+      }
+    },
+    {
+      "wall_ms": 3.826,
+      "response": {
+        "duration_ms": 1.351,
+        "result": {
+          "coverage": "lexical symbols, XML syntax, duplicate ribbon IDs and unresolved callback warnings; not full VBA or RibbonX validation",
+          "diagnostics": [],
+          "symbols": [
+            {
+              "declaration": "Public Function PlatformReport() As String",
+              "kind": "Function",
+              "line": 3,
+              "module": "PlatformProbe",
+              "name": "PlatformReport"
+            },
+            {
+              "declaration": "Public Sub OnRibbonLoad(ByVal ribbon As IRibbonUI)",
+              "kind": "Sub",
+              "line": 4,
+              "module": "Studio",
+              "name": "OnRibbonLoad"
+            },
+            {
+              "declaration": "Public Sub ShowStudio(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 7,
+              "module": "Studio",
+              "name": "ShowStudio"
+            },
+            {
+              "declaration": "Public Sub NormalizeButton(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 10,
+              "module": "Studio",
+              "name": "NormalizeButton"
+            },
+            {
+              "declaration": "Public Sub NormalizeSelection()",
+              "kind": "Sub",
+              "line": 13,
+              "module": "Studio",
+              "name": "NormalizeSelection"
+            },
+            {
+              "declaration": "Public Function NativeAcceptance() As String",
+              "kind": "Function",
+              "line": 35,
+              "module": "Studio",
+              "name": "NativeAcceptance"
+            },
+            {
+              "declaration": "Public Function RibbonAcceptance() As Boolean",
+              "kind": "Function",
+              "line": 53,
+              "module": "Studio",
+              "name": "RibbonAcceptance"
+            },
+            {
+              "declaration": "Public Function BuildingBlockAcceptance() As String",
+              "kind": "Function",
+              "line": 62,
+              "module": "Studio",
+              "name": "BuildingBlockAcceptance"
+            },
+            {
+              "declaration": "Public Function NormalizationAcceptance() As String",
+              "kind": "Function",
+              "line": 70,
+              "module": "Studio",
+              "name": "NormalizationAcceptance"
+            },
+            {
+              "declaration": "Private Sub cmdClose_Click()",
+              "kind": "Sub",
+              "line": 3,
+              "module": "StudioForm",
+              "name": "cmdClose_Click"
+            },
+            {
+              "declaration": "Private Sub cmdNormalize_Click()",
+              "kind": "Sub",
+              "line": 6,
+              "module": "StudioForm",
+              "name": "cmdNormalize_Click"
+            }
+          ],
+          "vba_compiled": false,
+          "word_executed": false
+        }
+      }
+    },
+    {
+      "wall_ms": 3.499,
+      "response": {
+        "duration_ms": 1.107,
+        "result": {
+          "coverage": "lexical symbols, XML syntax, duplicate ribbon IDs and unresolved callback warnings; not full VBA or RibbonX validation",
+          "diagnostics": [],
+          "symbols": [
+            {
+              "declaration": "Public Function PlatformReport() As String",
+              "kind": "Function",
+              "line": 3,
+              "module": "PlatformProbe",
+              "name": "PlatformReport"
+            },
+            {
+              "declaration": "Public Sub OnRibbonLoad(ByVal ribbon As IRibbonUI)",
+              "kind": "Sub",
+              "line": 4,
+              "module": "Studio",
+              "name": "OnRibbonLoad"
+            },
+            {
+              "declaration": "Public Sub ShowStudio(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 7,
+              "module": "Studio",
+              "name": "ShowStudio"
+            },
+            {
+              "declaration": "Public Sub NormalizeButton(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 10,
+              "module": "Studio",
+              "name": "NormalizeButton"
+            },
+            {
+              "declaration": "Public Sub NormalizeSelection()",
+              "kind": "Sub",
+              "line": 13,
+              "module": "Studio",
+              "name": "NormalizeSelection"
+            },
+            {
+              "declaration": "Public Function NativeAcceptance() As String",
+              "kind": "Function",
+              "line": 35,
+              "module": "Studio",
+              "name": "NativeAcceptance"
+            },
+            {
+              "declaration": "Public Function RibbonAcceptance() As Boolean",
+              "kind": "Function",
+              "line": 53,
+              "module": "Studio",
+              "name": "RibbonAcceptance"
+            },
+            {
+              "declaration": "Public Function BuildingBlockAcceptance() As String",
+              "kind": "Function",
+              "line": 62,
+              "module": "Studio",
+              "name": "BuildingBlockAcceptance"
+            },
+            {
+              "declaration": "Public Function NormalizationAcceptance() As String",
+              "kind": "Function",
+              "line": 70,
+              "module": "Studio",
+              "name": "NormalizationAcceptance"
+            },
+            {
+              "declaration": "Private Sub cmdClose_Click()",
+              "kind": "Sub",
+              "line": 3,
+              "module": "StudioForm",
+              "name": "cmdClose_Click"
+            },
+            {
+              "declaration": "Private Sub cmdNormalize_Click()",
+              "kind": "Sub",
+              "line": 6,
+              "module": "StudioForm",
+              "name": "cmdNormalize_Click"
+            }
+          ],
+          "vba_compiled": false,
+          "word_executed": false
+        }
+      }
+    },
+    {
+      "wall_ms": 3.442,
+      "response": {
+        "duration_ms": 1.214,
+        "result": {
+          "coverage": "lexical symbols, XML syntax, duplicate ribbon IDs and unresolved callback warnings; not full VBA or RibbonX validation",
+          "diagnostics": [],
+          "symbols": [
+            {
+              "declaration": "Public Function PlatformReport() As String",
+              "kind": "Function",
+              "line": 3,
+              "module": "PlatformProbe",
+              "name": "PlatformReport"
+            },
+            {
+              "declaration": "Public Sub OnRibbonLoad(ByVal ribbon As IRibbonUI)",
+              "kind": "Sub",
+              "line": 4,
+              "module": "Studio",
+              "name": "OnRibbonLoad"
+            },
+            {
+              "declaration": "Public Sub ShowStudio(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 7,
+              "module": "Studio",
+              "name": "ShowStudio"
+            },
+            {
+              "declaration": "Public Sub NormalizeButton(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 10,
+              "module": "Studio",
+              "name": "NormalizeButton"
+            },
+            {
+              "declaration": "Public Sub NormalizeSelection()",
+              "kind": "Sub",
+              "line": 13,
+              "module": "Studio",
+              "name": "NormalizeSelection"
+            },
+            {
+              "declaration": "Public Function NativeAcceptance() As String",
+              "kind": "Function",
+              "line": 35,
+              "module": "Studio",
+              "name": "NativeAcceptance"
+            },
+            {
+              "declaration": "Public Function RibbonAcceptance() As Boolean",
+              "kind": "Function",
+              "line": 53,
+              "module": "Studio",
+              "name": "RibbonAcceptance"
+            },
+            {
+              "declaration": "Public Function BuildingBlockAcceptance() As String",
+              "kind": "Function",
+              "line": 62,
+              "module": "Studio",
+              "name": "BuildingBlockAcceptance"
+            },
+            {
+              "declaration": "Public Function NormalizationAcceptance() As String",
+              "kind": "Function",
+              "line": 70,
+              "module": "Studio",
+              "name": "NormalizationAcceptance"
+            },
+            {
+              "declaration": "Private Sub cmdClose_Click()",
+              "kind": "Sub",
+              "line": 3,
+              "module": "StudioForm",
+              "name": "cmdClose_Click"
+            },
+            {
+              "declaration": "Private Sub cmdNormalize_Click()",
+              "kind": "Sub",
+              "line": 6,
+              "module": "StudioForm",
+              "name": "cmdNormalize_Click"
+            }
+          ],
+          "vba_compiled": false,
+          "word_executed": false
+        }
+      }
+    },
+    {
+      "wall_ms": 3.297,
+      "response": {
+        "duration_ms": 1.124,
+        "result": {
+          "coverage": "lexical symbols, XML syntax, duplicate ribbon IDs and unresolved callback warnings; not full VBA or RibbonX validation",
+          "diagnostics": [],
+          "symbols": [
+            {
+              "declaration": "Public Function PlatformReport() As String",
+              "kind": "Function",
+              "line": 3,
+              "module": "PlatformProbe",
+              "name": "PlatformReport"
+            },
+            {
+              "declaration": "Public Sub OnRibbonLoad(ByVal ribbon As IRibbonUI)",
+              "kind": "Sub",
+              "line": 4,
+              "module": "Studio",
+              "name": "OnRibbonLoad"
+            },
+            {
+              "declaration": "Public Sub ShowStudio(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 7,
+              "module": "Studio",
+              "name": "ShowStudio"
+            },
+            {
+              "declaration": "Public Sub NormalizeButton(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 10,
+              "module": "Studio",
+              "name": "NormalizeButton"
+            },
+            {
+              "declaration": "Public Sub NormalizeSelection()",
+              "kind": "Sub",
+              "line": 13,
+              "module": "Studio",
+              "name": "NormalizeSelection"
+            },
+            {
+              "declaration": "Public Function NativeAcceptance() As String",
+              "kind": "Function",
+              "line": 35,
+              "module": "Studio",
+              "name": "NativeAcceptance"
+            },
+            {
+              "declaration": "Public Function RibbonAcceptance() As Boolean",
+              "kind": "Function",
+              "line": 53,
+              "module": "Studio",
+              "name": "RibbonAcceptance"
+            },
+            {
+              "declaration": "Public Function BuildingBlockAcceptance() As String",
+              "kind": "Function",
+              "line": 62,
+              "module": "Studio",
+              "name": "BuildingBlockAcceptance"
+            },
+            {
+              "declaration": "Public Function NormalizationAcceptance() As String",
+              "kind": "Function",
+              "line": 70,
+              "module": "Studio",
+              "name": "NormalizationAcceptance"
+            },
+            {
+              "declaration": "Private Sub cmdClose_Click()",
+              "kind": "Sub",
+              "line": 3,
+              "module": "StudioForm",
+              "name": "cmdClose_Click"
+            },
+            {
+              "declaration": "Private Sub cmdNormalize_Click()",
+              "kind": "Sub",
+              "line": 6,
+              "module": "StudioForm",
+              "name": "cmdNormalize_Click"
+            }
+          ],
+          "vba_compiled": false,
+          "word_executed": false
+        }
+      }
+    },
+    {
+      "wall_ms": 2.897,
+      "response": {
+        "duration_ms": 1.175,
+        "result": {
+          "coverage": "lexical symbols, XML syntax, duplicate ribbon IDs and unresolved callback warnings; not full VBA or RibbonX validation",
+          "diagnostics": [],
+          "symbols": [
+            {
+              "declaration": "Public Function PlatformReport() As String",
+              "kind": "Function",
+              "line": 3,
+              "module": "PlatformProbe",
+              "name": "PlatformReport"
+            },
+            {
+              "declaration": "Public Sub OnRibbonLoad(ByVal ribbon As IRibbonUI)",
+              "kind": "Sub",
+              "line": 4,
+              "module": "Studio",
+              "name": "OnRibbonLoad"
+            },
+            {
+              "declaration": "Public Sub ShowStudio(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 7,
+              "module": "Studio",
+              "name": "ShowStudio"
+            },
+            {
+              "declaration": "Public Sub NormalizeButton(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 10,
+              "module": "Studio",
+              "name": "NormalizeButton"
+            },
+            {
+              "declaration": "Public Sub NormalizeSelection()",
+              "kind": "Sub",
+              "line": 13,
+              "module": "Studio",
+              "name": "NormalizeSelection"
+            },
+            {
+              "declaration": "Public Function NativeAcceptance() As String",
+              "kind": "Function",
+              "line": 35,
+              "module": "Studio",
+              "name": "NativeAcceptance"
+            },
+            {
+              "declaration": "Public Function RibbonAcceptance() As Boolean",
+              "kind": "Function",
+              "line": 53,
+              "module": "Studio",
+              "name": "RibbonAcceptance"
+            },
+            {
+              "declaration": "Public Function BuildingBlockAcceptance() As String",
+              "kind": "Function",
+              "line": 62,
+              "module": "Studio",
+              "name": "BuildingBlockAcceptance"
+            },
+            {
+              "declaration": "Public Function NormalizationAcceptance() As String",
+              "kind": "Function",
+              "line": 70,
+              "module": "Studio",
+              "name": "NormalizationAcceptance"
+            },
+            {
+              "declaration": "Private Sub cmdClose_Click()",
+              "kind": "Sub",
+              "line": 3,
+              "module": "StudioForm",
+              "name": "cmdClose_Click"
+            },
+            {
+              "declaration": "Private Sub cmdNormalize_Click()",
+              "kind": "Sub",
+              "line": 6,
+              "module": "StudioForm",
+              "name": "cmdNormalize_Click"
+            }
+          ],
+          "vba_compiled": false,
+          "word_executed": false
+        }
+      }
+    },
+    {
+      "wall_ms": 3.05,
+      "response": {
+        "duration_ms": 1.152,
+        "result": {
+          "coverage": "lexical symbols, XML syntax, duplicate ribbon IDs and unresolved callback warnings; not full VBA or RibbonX validation",
+          "diagnostics": [],
+          "symbols": [
+            {
+              "declaration": "Public Function PlatformReport() As String",
+              "kind": "Function",
+              "line": 3,
+              "module": "PlatformProbe",
+              "name": "PlatformReport"
+            },
+            {
+              "declaration": "Public Sub OnRibbonLoad(ByVal ribbon As IRibbonUI)",
+              "kind": "Sub",
+              "line": 4,
+              "module": "Studio",
+              "name": "OnRibbonLoad"
+            },
+            {
+              "declaration": "Public Sub ShowStudio(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 7,
+              "module": "Studio",
+              "name": "ShowStudio"
+            },
+            {
+              "declaration": "Public Sub NormalizeButton(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 10,
+              "module": "Studio",
+              "name": "NormalizeButton"
+            },
+            {
+              "declaration": "Public Sub NormalizeSelection()",
+              "kind": "Sub",
+              "line": 13,
+              "module": "Studio",
+              "name": "NormalizeSelection"
+            },
+            {
+              "declaration": "Public Function NativeAcceptance() As String",
+              "kind": "Function",
+              "line": 35,
+              "module": "Studio",
+              "name": "NativeAcceptance"
+            },
+            {
+              "declaration": "Public Function RibbonAcceptance() As Boolean",
+              "kind": "Function",
+              "line": 53,
+              "module": "Studio",
+              "name": "RibbonAcceptance"
+            },
+            {
+              "declaration": "Public Function BuildingBlockAcceptance() As String",
+              "kind": "Function",
+              "line": 62,
+              "module": "Studio",
+              "name": "BuildingBlockAcceptance"
+            },
+            {
+              "declaration": "Public Function NormalizationAcceptance() As String",
+              "kind": "Function",
+              "line": 70,
+              "module": "Studio",
+              "name": "NormalizationAcceptance"
+            },
+            {
+              "declaration": "Private Sub cmdClose_Click()",
+              "kind": "Sub",
+              "line": 3,
+              "module": "StudioForm",
+              "name": "cmdClose_Click"
+            },
+            {
+              "declaration": "Private Sub cmdNormalize_Click()",
+              "kind": "Sub",
+              "line": 6,
+              "module": "StudioForm",
+              "name": "cmdNormalize_Click"
+            }
+          ],
+          "vba_compiled": false,
+          "word_executed": false
+        }
+      }
+    },
+    {
+      "wall_ms": 4.275,
+      "response": {
+        "duration_ms": 1.205,
+        "result": {
+          "coverage": "lexical symbols, XML syntax, duplicate ribbon IDs and unresolved callback warnings; not full VBA or RibbonX validation",
+          "diagnostics": [],
+          "symbols": [
+            {
+              "declaration": "Public Function PlatformReport() As String",
+              "kind": "Function",
+              "line": 3,
+              "module": "PlatformProbe",
+              "name": "PlatformReport"
+            },
+            {
+              "declaration": "Public Sub OnRibbonLoad(ByVal ribbon As IRibbonUI)",
+              "kind": "Sub",
+              "line": 4,
+              "module": "Studio",
+              "name": "OnRibbonLoad"
+            },
+            {
+              "declaration": "Public Sub ShowStudio(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 7,
+              "module": "Studio",
+              "name": "ShowStudio"
+            },
+            {
+              "declaration": "Public Sub NormalizeButton(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 10,
+              "module": "Studio",
+              "name": "NormalizeButton"
+            },
+            {
+              "declaration": "Public Sub NormalizeSelection()",
+              "kind": "Sub",
+              "line": 13,
+              "module": "Studio",
+              "name": "NormalizeSelection"
+            },
+            {
+              "declaration": "Public Function NativeAcceptance() As String",
+              "kind": "Function",
+              "line": 35,
+              "module": "Studio",
+              "name": "NativeAcceptance"
+            },
+            {
+              "declaration": "Public Function RibbonAcceptance() As Boolean",
+              "kind": "Function",
+              "line": 53,
+              "module": "Studio",
+              "name": "RibbonAcceptance"
+            },
+            {
+              "declaration": "Public Function BuildingBlockAcceptance() As String",
+              "kind": "Function",
+              "line": 62,
+              "module": "Studio",
+              "name": "BuildingBlockAcceptance"
+            },
+            {
+              "declaration": "Public Function NormalizationAcceptance() As String",
+              "kind": "Function",
+              "line": 70,
+              "module": "Studio",
+              "name": "NormalizationAcceptance"
+            },
+            {
+              "declaration": "Private Sub cmdClose_Click()",
+              "kind": "Sub",
+              "line": 3,
+              "module": "StudioForm",
+              "name": "cmdClose_Click"
+            },
+            {
+              "declaration": "Private Sub cmdNormalize_Click()",
+              "kind": "Sub",
+              "line": 6,
+              "module": "StudioForm",
+              "name": "cmdNormalize_Click"
+            }
+          ],
+          "vba_compiled": false,
+          "word_executed": false
+        }
+      }
+    },
+    {
+      "wall_ms": 4.062,
+      "response": {
+        "duration_ms": 1.304,
+        "result": {
+          "coverage": "lexical symbols, XML syntax, duplicate ribbon IDs and unresolved callback warnings; not full VBA or RibbonX validation",
+          "diagnostics": [],
+          "symbols": [
+            {
+              "declaration": "Public Function PlatformReport() As String",
+              "kind": "Function",
+              "line": 3,
+              "module": "PlatformProbe",
+              "name": "PlatformReport"
+            },
+            {
+              "declaration": "Public Sub OnRibbonLoad(ByVal ribbon As IRibbonUI)",
+              "kind": "Sub",
+              "line": 4,
+              "module": "Studio",
+              "name": "OnRibbonLoad"
+            },
+            {
+              "declaration": "Public Sub ShowStudio(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 7,
+              "module": "Studio",
+              "name": "ShowStudio"
+            },
+            {
+              "declaration": "Public Sub NormalizeButton(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 10,
+              "module": "Studio",
+              "name": "NormalizeButton"
+            },
+            {
+              "declaration": "Public Sub NormalizeSelection()",
+              "kind": "Sub",
+              "line": 13,
+              "module": "Studio",
+              "name": "NormalizeSelection"
+            },
+            {
+              "declaration": "Public Function NativeAcceptance() As String",
+              "kind": "Function",
+              "line": 35,
+              "module": "Studio",
+              "name": "NativeAcceptance"
+            },
+            {
+              "declaration": "Public Function RibbonAcceptance() As Boolean",
+              "kind": "Function",
+              "line": 53,
+              "module": "Studio",
+              "name": "RibbonAcceptance"
+            },
+            {
+              "declaration": "Public Function BuildingBlockAcceptance() As String",
+              "kind": "Function",
+              "line": 62,
+              "module": "Studio",
+              "name": "BuildingBlockAcceptance"
+            },
+            {
+              "declaration": "Public Function NormalizationAcceptance() As String",
+              "kind": "Function",
+              "line": 70,
+              "module": "Studio",
+              "name": "NormalizationAcceptance"
+            },
+            {
+              "declaration": "Private Sub cmdClose_Click()",
+              "kind": "Sub",
+              "line": 3,
+              "module": "StudioForm",
+              "name": "cmdClose_Click"
+            },
+            {
+              "declaration": "Private Sub cmdNormalize_Click()",
+              "kind": "Sub",
+              "line": 6,
+              "module": "StudioForm",
+              "name": "cmdNormalize_Click"
+            }
+          ],
+          "vba_compiled": false,
+          "word_executed": false
+        }
+      }
+    },
+    {
+      "wall_ms": 3.662,
+      "response": {
+        "duration_ms": 1.294,
+        "result": {
+          "coverage": "lexical symbols, XML syntax, duplicate ribbon IDs and unresolved callback warnings; not full VBA or RibbonX validation",
+          "diagnostics": [],
+          "symbols": [
+            {
+              "declaration": "Public Function PlatformReport() As String",
+              "kind": "Function",
+              "line": 3,
+              "module": "PlatformProbe",
+              "name": "PlatformReport"
+            },
+            {
+              "declaration": "Public Sub OnRibbonLoad(ByVal ribbon As IRibbonUI)",
+              "kind": "Sub",
+              "line": 4,
+              "module": "Studio",
+              "name": "OnRibbonLoad"
+            },
+            {
+              "declaration": "Public Sub ShowStudio(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 7,
+              "module": "Studio",
+              "name": "ShowStudio"
+            },
+            {
+              "declaration": "Public Sub NormalizeButton(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 10,
+              "module": "Studio",
+              "name": "NormalizeButton"
+            },
+            {
+              "declaration": "Public Sub NormalizeSelection()",
+              "kind": "Sub",
+              "line": 13,
+              "module": "Studio",
+              "name": "NormalizeSelection"
+            },
+            {
+              "declaration": "Public Function NativeAcceptance() As String",
+              "kind": "Function",
+              "line": 35,
+              "module": "Studio",
+              "name": "NativeAcceptance"
+            },
+            {
+              "declaration": "Public Function RibbonAcceptance() As Boolean",
+              "kind": "Function",
+              "line": 53,
+              "module": "Studio",
+              "name": "RibbonAcceptance"
+            },
+            {
+              "declaration": "Public Function BuildingBlockAcceptance() As String",
+              "kind": "Function",
+              "line": 62,
+              "module": "Studio",
+              "name": "BuildingBlockAcceptance"
+            },
+            {
+              "declaration": "Public Function NormalizationAcceptance() As String",
+              "kind": "Function",
+              "line": 70,
+              "module": "Studio",
+              "name": "NormalizationAcceptance"
+            },
+            {
+              "declaration": "Private Sub cmdClose_Click()",
+              "kind": "Sub",
+              "line": 3,
+              "module": "StudioForm",
+              "name": "cmdClose_Click"
+            },
+            {
+              "declaration": "Private Sub cmdNormalize_Click()",
+              "kind": "Sub",
+              "line": 6,
+              "module": "StudioForm",
+              "name": "cmdNormalize_Click"
+            }
+          ],
+          "vba_compiled": false,
+          "word_executed": false
+        }
+      }
+    },
+    {
+      "wall_ms": 5.208,
+      "response": {
+        "duration_ms": 2.87,
+        "result": {
+          "coverage": "lexical symbols, XML syntax, duplicate ribbon IDs and unresolved callback warnings; not full VBA or RibbonX validation",
+          "diagnostics": [],
+          "symbols": [
+            {
+              "declaration": "Public Function PlatformReport() As String",
+              "kind": "Function",
+              "line": 3,
+              "module": "PlatformProbe",
+              "name": "PlatformReport"
+            },
+            {
+              "declaration": "Public Sub OnRibbonLoad(ByVal ribbon As IRibbonUI)",
+              "kind": "Sub",
+              "line": 4,
+              "module": "Studio",
+              "name": "OnRibbonLoad"
+            },
+            {
+              "declaration": "Public Sub ShowStudio(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 7,
+              "module": "Studio",
+              "name": "ShowStudio"
+            },
+            {
+              "declaration": "Public Sub NormalizeButton(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 10,
+              "module": "Studio",
+              "name": "NormalizeButton"
+            },
+            {
+              "declaration": "Public Sub NormalizeSelection()",
+              "kind": "Sub",
+              "line": 13,
+              "module": "Studio",
+              "name": "NormalizeSelection"
+            },
+            {
+              "declaration": "Public Function NativeAcceptance() As String",
+              "kind": "Function",
+              "line": 35,
+              "module": "Studio",
+              "name": "NativeAcceptance"
+            },
+            {
+              "declaration": "Public Function RibbonAcceptance() As Boolean",
+              "kind": "Function",
+              "line": 53,
+              "module": "Studio",
+              "name": "RibbonAcceptance"
+            },
+            {
+              "declaration": "Public Function BuildingBlockAcceptance() As String",
+              "kind": "Function",
+              "line": 62,
+              "module": "Studio",
+              "name": "BuildingBlockAcceptance"
+            },
+            {
+              "declaration": "Public Function NormalizationAcceptance() As String",
+              "kind": "Function",
+              "line": 70,
+              "module": "Studio",
+              "name": "NormalizationAcceptance"
+            },
+            {
+              "declaration": "Private Sub cmdClose_Click()",
+              "kind": "Sub",
+              "line": 3,
+              "module": "StudioForm",
+              "name": "cmdClose_Click"
+            },
+            {
+              "declaration": "Private Sub cmdNormalize_Click()",
+              "kind": "Sub",
+              "line": 6,
+              "module": "StudioForm",
+              "name": "cmdNormalize_Click"
+            }
+          ],
+          "vba_compiled": false,
+          "word_executed": false
+        }
+      }
+    },
+    {
+      "wall_ms": 3.929,
+      "response": {
+        "duration_ms": 1.482,
+        "result": {
+          "coverage": "lexical symbols, XML syntax, duplicate ribbon IDs and unresolved callback warnings; not full VBA or RibbonX validation",
+          "diagnostics": [],
+          "symbols": [
+            {
+              "declaration": "Public Function PlatformReport() As String",
+              "kind": "Function",
+              "line": 3,
+              "module": "PlatformProbe",
+              "name": "PlatformReport"
+            },
+            {
+              "declaration": "Public Sub OnRibbonLoad(ByVal ribbon As IRibbonUI)",
+              "kind": "Sub",
+              "line": 4,
+              "module": "Studio",
+              "name": "OnRibbonLoad"
+            },
+            {
+              "declaration": "Public Sub ShowStudio(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 7,
+              "module": "Studio",
+              "name": "ShowStudio"
+            },
+            {
+              "declaration": "Public Sub NormalizeButton(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 10,
+              "module": "Studio",
+              "name": "NormalizeButton"
+            },
+            {
+              "declaration": "Public Sub NormalizeSelection()",
+              "kind": "Sub",
+              "line": 13,
+              "module": "Studio",
+              "name": "NormalizeSelection"
+            },
+            {
+              "declaration": "Public Function NativeAcceptance() As String",
+              "kind": "Function",
+              "line": 35,
+              "module": "Studio",
+              "name": "NativeAcceptance"
+            },
+            {
+              "declaration": "Public Function RibbonAcceptance() As Boolean",
+              "kind": "Function",
+              "line": 53,
+              "module": "Studio",
+              "name": "RibbonAcceptance"
+            },
+            {
+              "declaration": "Public Function BuildingBlockAcceptance() As String",
+              "kind": "Function",
+              "line": 62,
+              "module": "Studio",
+              "name": "BuildingBlockAcceptance"
+            },
+            {
+              "declaration": "Public Function NormalizationAcceptance() As String",
+              "kind": "Function",
+              "line": 70,
+              "module": "Studio",
+              "name": "NormalizationAcceptance"
+            },
+            {
+              "declaration": "Private Sub cmdClose_Click()",
+              "kind": "Sub",
+              "line": 3,
+              "module": "StudioForm",
+              "name": "cmdClose_Click"
+            },
+            {
+              "declaration": "Private Sub cmdNormalize_Click()",
+              "kind": "Sub",
+              "line": 6,
+              "module": "StudioForm",
+              "name": "cmdNormalize_Click"
+            }
+          ],
+          "vba_compiled": false,
+          "word_executed": false
+        }
+      }
+    },
+    {
+      "wall_ms": 3.908,
+      "response": {
+        "duration_ms": 1.436,
+        "result": {
+          "coverage": "lexical symbols, XML syntax, duplicate ribbon IDs and unresolved callback warnings; not full VBA or RibbonX validation",
+          "diagnostics": [],
+          "symbols": [
+            {
+              "declaration": "Public Function PlatformReport() As String",
+              "kind": "Function",
+              "line": 3,
+              "module": "PlatformProbe",
+              "name": "PlatformReport"
+            },
+            {
+              "declaration": "Public Sub OnRibbonLoad(ByVal ribbon As IRibbonUI)",
+              "kind": "Sub",
+              "line": 4,
+              "module": "Studio",
+              "name": "OnRibbonLoad"
+            },
+            {
+              "declaration": "Public Sub ShowStudio(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 7,
+              "module": "Studio",
+              "name": "ShowStudio"
+            },
+            {
+              "declaration": "Public Sub NormalizeButton(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 10,
+              "module": "Studio",
+              "name": "NormalizeButton"
+            },
+            {
+              "declaration": "Public Sub NormalizeSelection()",
+              "kind": "Sub",
+              "line": 13,
+              "module": "Studio",
+              "name": "NormalizeSelection"
+            },
+            {
+              "declaration": "Public Function NativeAcceptance() As String",
+              "kind": "Function",
+              "line": 35,
+              "module": "Studio",
+              "name": "NativeAcceptance"
+            },
+            {
+              "declaration": "Public Function RibbonAcceptance() As Boolean",
+              "kind": "Function",
+              "line": 53,
+              "module": "Studio",
+              "name": "RibbonAcceptance"
+            },
+            {
+              "declaration": "Public Function BuildingBlockAcceptance() As String",
+              "kind": "Function",
+              "line": 62,
+              "module": "Studio",
+              "name": "BuildingBlockAcceptance"
+            },
+            {
+              "declaration": "Public Function NormalizationAcceptance() As String",
+              "kind": "Function",
+              "line": 70,
+              "module": "Studio",
+              "name": "NormalizationAcceptance"
+            },
+            {
+              "declaration": "Private Sub cmdClose_Click()",
+              "kind": "Sub",
+              "line": 3,
+              "module": "StudioForm",
+              "name": "cmdClose_Click"
+            },
+            {
+              "declaration": "Private Sub cmdNormalize_Click()",
+              "kind": "Sub",
+              "line": 6,
+              "module": "StudioForm",
+              "name": "cmdNormalize_Click"
+            }
+          ],
+          "vba_compiled": false,
+          "word_executed": false
+        }
+      }
+    },
+    {
+      "wall_ms": 4.168,
+      "response": {
+        "duration_ms": 1.801,
+        "result": {
+          "coverage": "lexical symbols, XML syntax, duplicate ribbon IDs and unresolved callback warnings; not full VBA or RibbonX validation",
+          "diagnostics": [],
+          "symbols": [
+            {
+              "declaration": "Public Function PlatformReport() As String",
+              "kind": "Function",
+              "line": 3,
+              "module": "PlatformProbe",
+              "name": "PlatformReport"
+            },
+            {
+              "declaration": "Public Sub OnRibbonLoad(ByVal ribbon As IRibbonUI)",
+              "kind": "Sub",
+              "line": 4,
+              "module": "Studio",
+              "name": "OnRibbonLoad"
+            },
+            {
+              "declaration": "Public Sub ShowStudio(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 7,
+              "module": "Studio",
+              "name": "ShowStudio"
+            },
+            {
+              "declaration": "Public Sub NormalizeButton(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 10,
+              "module": "Studio",
+              "name": "NormalizeButton"
+            },
+            {
+              "declaration": "Public Sub NormalizeSelection()",
+              "kind": "Sub",
+              "line": 13,
+              "module": "Studio",
+              "name": "NormalizeSelection"
+            },
+            {
+              "declaration": "Public Function NativeAcceptance() As String",
+              "kind": "Function",
+              "line": 35,
+              "module": "Studio",
+              "name": "NativeAcceptance"
+            },
+            {
+              "declaration": "Public Function RibbonAcceptance() As Boolean",
+              "kind": "Function",
+              "line": 53,
+              "module": "Studio",
+              "name": "RibbonAcceptance"
+            },
+            {
+              "declaration": "Public Function BuildingBlockAcceptance() As String",
+              "kind": "Function",
+              "line": 62,
+              "module": "Studio",
+              "name": "BuildingBlockAcceptance"
+            },
+            {
+              "declaration": "Public Function NormalizationAcceptance() As String",
+              "kind": "Function",
+              "line": 70,
+              "module": "Studio",
+              "name": "NormalizationAcceptance"
+            },
+            {
+              "declaration": "Private Sub cmdClose_Click()",
+              "kind": "Sub",
+              "line": 3,
+              "module": "StudioForm",
+              "name": "cmdClose_Click"
+            },
+            {
+              "declaration": "Private Sub cmdNormalize_Click()",
+              "kind": "Sub",
+              "line": 6,
+              "module": "StudioForm",
+              "name": "cmdNormalize_Click"
+            }
+          ],
+          "vba_compiled": false,
+          "word_executed": false
+        }
+      }
+    },
+    {
+      "wall_ms": 4.427,
+      "response": {
+        "duration_ms": 2.292,
+        "result": {
+          "coverage": "lexical symbols, XML syntax, duplicate ribbon IDs and unresolved callback warnings; not full VBA or RibbonX validation",
+          "diagnostics": [],
+          "symbols": [
+            {
+              "declaration": "Public Function PlatformReport() As String",
+              "kind": "Function",
+              "line": 3,
+              "module": "PlatformProbe",
+              "name": "PlatformReport"
+            },
+            {
+              "declaration": "Public Sub OnRibbonLoad(ByVal ribbon As IRibbonUI)",
+              "kind": "Sub",
+              "line": 4,
+              "module": "Studio",
+              "name": "OnRibbonLoad"
+            },
+            {
+              "declaration": "Public Sub ShowStudio(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 7,
+              "module": "Studio",
+              "name": "ShowStudio"
+            },
+            {
+              "declaration": "Public Sub NormalizeButton(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 10,
+              "module": "Studio",
+              "name": "NormalizeButton"
+            },
+            {
+              "declaration": "Public Sub NormalizeSelection()",
+              "kind": "Sub",
+              "line": 13,
+              "module": "Studio",
+              "name": "NormalizeSelection"
+            },
+            {
+              "declaration": "Public Function NativeAcceptance() As String",
+              "kind": "Function",
+              "line": 35,
+              "module": "Studio",
+              "name": "NativeAcceptance"
+            },
+            {
+              "declaration": "Public Function RibbonAcceptance() As Boolean",
+              "kind": "Function",
+              "line": 53,
+              "module": "Studio",
+              "name": "RibbonAcceptance"
+            },
+            {
+              "declaration": "Public Function BuildingBlockAcceptance() As String",
+              "kind": "Function",
+              "line": 62,
+              "module": "Studio",
+              "name": "BuildingBlockAcceptance"
+            },
+            {
+              "declaration": "Public Function NormalizationAcceptance() As String",
+              "kind": "Function",
+              "line": 70,
+              "module": "Studio",
+              "name": "NormalizationAcceptance"
+            },
+            {
+              "declaration": "Private Sub cmdClose_Click()",
+              "kind": "Sub",
+              "line": 3,
+              "module": "StudioForm",
+              "name": "cmdClose_Click"
+            },
+            {
+              "declaration": "Private Sub cmdNormalize_Click()",
+              "kind": "Sub",
+              "line": 6,
+              "module": "StudioForm",
+              "name": "cmdNormalize_Click"
+            }
+          ],
+          "vba_compiled": false,
+          "word_executed": false
+        }
+      }
+    },
+    {
+      "wall_ms": 4.52,
+      "response": {
+        "duration_ms": 1.337,
+        "result": {
+          "coverage": "lexical symbols, XML syntax, duplicate ribbon IDs and unresolved callback warnings; not full VBA or RibbonX validation",
+          "diagnostics": [],
+          "symbols": [
+            {
+              "declaration": "Public Function PlatformReport() As String",
+              "kind": "Function",
+              "line": 3,
+              "module": "PlatformProbe",
+              "name": "PlatformReport"
+            },
+            {
+              "declaration": "Public Sub OnRibbonLoad(ByVal ribbon As IRibbonUI)",
+              "kind": "Sub",
+              "line": 4,
+              "module": "Studio",
+              "name": "OnRibbonLoad"
+            },
+            {
+              "declaration": "Public Sub ShowStudio(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 7,
+              "module": "Studio",
+              "name": "ShowStudio"
+            },
+            {
+              "declaration": "Public Sub NormalizeButton(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 10,
+              "module": "Studio",
+              "name": "NormalizeButton"
+            },
+            {
+              "declaration": "Public Sub NormalizeSelection()",
+              "kind": "Sub",
+              "line": 13,
+              "module": "Studio",
+              "name": "NormalizeSelection"
+            },
+            {
+              "declaration": "Public Function NativeAcceptance() As String",
+              "kind": "Function",
+              "line": 35,
+              "module": "Studio",
+              "name": "NativeAcceptance"
+            },
+            {
+              "declaration": "Public Function RibbonAcceptance() As Boolean",
+              "kind": "Function",
+              "line": 53,
+              "module": "Studio",
+              "name": "RibbonAcceptance"
+            },
+            {
+              "declaration": "Public Function BuildingBlockAcceptance() As String",
+              "kind": "Function",
+              "line": 62,
+              "module": "Studio",
+              "name": "BuildingBlockAcceptance"
+            },
+            {
+              "declaration": "Public Function NormalizationAcceptance() As String",
+              "kind": "Function",
+              "line": 70,
+              "module": "Studio",
+              "name": "NormalizationAcceptance"
+            },
+            {
+              "declaration": "Private Sub cmdClose_Click()",
+              "kind": "Sub",
+              "line": 3,
+              "module": "StudioForm",
+              "name": "cmdClose_Click"
+            },
+            {
+              "declaration": "Private Sub cmdNormalize_Click()",
+              "kind": "Sub",
+              "line": 6,
+              "module": "StudioForm",
+              "name": "cmdNormalize_Click"
+            }
+          ],
+          "vba_compiled": false,
+          "word_executed": false
+        }
+      }
+    },
+    {
+      "wall_ms": 4.547,
+      "response": {
+        "duration_ms": 1.479,
+        "result": {
+          "coverage": "lexical symbols, XML syntax, duplicate ribbon IDs and unresolved callback warnings; not full VBA or RibbonX validation",
+          "diagnostics": [],
+          "symbols": [
+            {
+              "declaration": "Public Function PlatformReport() As String",
+              "kind": "Function",
+              "line": 3,
+              "module": "PlatformProbe",
+              "name": "PlatformReport"
+            },
+            {
+              "declaration": "Public Sub OnRibbonLoad(ByVal ribbon As IRibbonUI)",
+              "kind": "Sub",
+              "line": 4,
+              "module": "Studio",
+              "name": "OnRibbonLoad"
+            },
+            {
+              "declaration": "Public Sub ShowStudio(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 7,
+              "module": "Studio",
+              "name": "ShowStudio"
+            },
+            {
+              "declaration": "Public Sub NormalizeButton(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 10,
+              "module": "Studio",
+              "name": "NormalizeButton"
+            },
+            {
+              "declaration": "Public Sub NormalizeSelection()",
+              "kind": "Sub",
+              "line": 13,
+              "module": "Studio",
+              "name": "NormalizeSelection"
+            },
+            {
+              "declaration": "Public Function NativeAcceptance() As String",
+              "kind": "Function",
+              "line": 35,
+              "module": "Studio",
+              "name": "NativeAcceptance"
+            },
+            {
+              "declaration": "Public Function RibbonAcceptance() As Boolean",
+              "kind": "Function",
+              "line": 53,
+              "module": "Studio",
+              "name": "RibbonAcceptance"
+            },
+            {
+              "declaration": "Public Function BuildingBlockAcceptance() As String",
+              "kind": "Function",
+              "line": 62,
+              "module": "Studio",
+              "name": "BuildingBlockAcceptance"
+            },
+            {
+              "declaration": "Public Function NormalizationAcceptance() As String",
+              "kind": "Function",
+              "line": 70,
+              "module": "Studio",
+              "name": "NormalizationAcceptance"
+            },
+            {
+              "declaration": "Private Sub cmdClose_Click()",
+              "kind": "Sub",
+              "line": 3,
+              "module": "StudioForm",
+              "name": "cmdClose_Click"
+            },
+            {
+              "declaration": "Private Sub cmdNormalize_Click()",
+              "kind": "Sub",
+              "line": 6,
+              "module": "StudioForm",
+              "name": "cmdNormalize_Click"
+            }
+          ],
+          "vba_compiled": false,
+          "word_executed": false
+        }
+      }
+    },
+    {
+      "wall_ms": 4.057,
+      "response": {
+        "duration_ms": 1.715,
+        "result": {
+          "coverage": "lexical symbols, XML syntax, duplicate ribbon IDs and unresolved callback warnings; not full VBA or RibbonX validation",
+          "diagnostics": [],
+          "symbols": [
+            {
+              "declaration": "Public Function PlatformReport() As String",
+              "kind": "Function",
+              "line": 3,
+              "module": "PlatformProbe",
+              "name": "PlatformReport"
+            },
+            {
+              "declaration": "Public Sub OnRibbonLoad(ByVal ribbon As IRibbonUI)",
+              "kind": "Sub",
+              "line": 4,
+              "module": "Studio",
+              "name": "OnRibbonLoad"
+            },
+            {
+              "declaration": "Public Sub ShowStudio(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 7,
+              "module": "Studio",
+              "name": "ShowStudio"
+            },
+            {
+              "declaration": "Public Sub NormalizeButton(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 10,
+              "module": "Studio",
+              "name": "NormalizeButton"
+            },
+            {
+              "declaration": "Public Sub NormalizeSelection()",
+              "kind": "Sub",
+              "line": 13,
+              "module": "Studio",
+              "name": "NormalizeSelection"
+            },
+            {
+              "declaration": "Public Function NativeAcceptance() As String",
+              "kind": "Function",
+              "line": 35,
+              "module": "Studio",
+              "name": "NativeAcceptance"
+            },
+            {
+              "declaration": "Public Function RibbonAcceptance() As Boolean",
+              "kind": "Function",
+              "line": 53,
+              "module": "Studio",
+              "name": "RibbonAcceptance"
+            },
+            {
+              "declaration": "Public Function BuildingBlockAcceptance() As String",
+              "kind": "Function",
+              "line": 62,
+              "module": "Studio",
+              "name": "BuildingBlockAcceptance"
+            },
+            {
+              "declaration": "Public Function NormalizationAcceptance() As String",
+              "kind": "Function",
+              "line": 70,
+              "module": "Studio",
+              "name": "NormalizationAcceptance"
+            },
+            {
+              "declaration": "Private Sub cmdClose_Click()",
+              "kind": "Sub",
+              "line": 3,
+              "module": "StudioForm",
+              "name": "cmdClose_Click"
+            },
+            {
+              "declaration": "Private Sub cmdNormalize_Click()",
+              "kind": "Sub",
+              "line": 6,
+              "module": "StudioForm",
+              "name": "cmdNormalize_Click"
+            }
+          ],
+          "vba_compiled": false,
+          "word_executed": false
+        }
+      }
+    },
+    {
+      "wall_ms": 3.809,
+      "response": {
+        "duration_ms": 1.131,
+        "result": {
+          "coverage": "lexical symbols, XML syntax, duplicate ribbon IDs and unresolved callback warnings; not full VBA or RibbonX validation",
+          "diagnostics": [],
+          "symbols": [
+            {
+              "declaration": "Public Function PlatformReport() As String",
+              "kind": "Function",
+              "line": 3,
+              "module": "PlatformProbe",
+              "name": "PlatformReport"
+            },
+            {
+              "declaration": "Public Sub OnRibbonLoad(ByVal ribbon As IRibbonUI)",
+              "kind": "Sub",
+              "line": 4,
+              "module": "Studio",
+              "name": "OnRibbonLoad"
+            },
+            {
+              "declaration": "Public Sub ShowStudio(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 7,
+              "module": "Studio",
+              "name": "ShowStudio"
+            },
+            {
+              "declaration": "Public Sub NormalizeButton(ByVal control As IRibbonControl)",
+              "kind": "Sub",
+              "line": 10,
+              "module": "Studio",
+              "name": "NormalizeButton"
+            },
+            {
+              "declaration": "Public Sub NormalizeSelection()",
+              "kind": "Sub",
+              "line": 13,
+              "module": "Studio",
+              "name": "NormalizeSelection"
+            },
+            {
+              "declaration": "Public Function NativeAcceptance() As String",
+              "kind": "Function",
+              "line": 35,
+              "module": "Studio",
+              "name": "NativeAcceptance"
+            },
+            {
+              "declaration": "Public Function RibbonAcceptance() As Boolean",
+              "kind": "Function",
+              "line": 53,
+              "module": "Studio",
+              "name": "RibbonAcceptance"
+            },
+            {
+              "declaration": "Public Function BuildingBlockAcceptance() As String",
+              "kind": "Function",
+              "line": 62,
+              "module": "Studio",
+              "name": "BuildingBlockAcceptance"
+            },
+            {
+              "declaration": "Public Function NormalizationAcceptance() As String",
+              "kind": "Function",
+              "line": 70,
+              "module": "Studio",
+              "name": "NormalizationAcceptance"
+            },
+            {
+              "declaration": "Private Sub cmdClose_Click()",
+              "kind": "Sub",
+              "line": 3,
+              "module": "StudioForm",
+              "name": "cmdClose_Click"
+            },
+            {
+              "declaration": "Private Sub cmdNormalize_Click()",
+              "kind": "Sub",
+              "line": 6,
+              "module": "StudioForm",
+              "name": "cmdNormalize_Click"
+            }
+          ],
+          "vba_compiled": false,
+          "word_executed": false
+        }
+      }
+    }
+  ],
+  "stop": {
+    "result": {
+      "stopping": true
+    },
+    "duration_ms": 0.004
+  },
+  "word_executed": false
+}

@@ -1,0 +1,12 @@
+goos: linux
+goarch: amd64
+pkg: wordwright.local/internal/office
+cpu: INTEL(R) XEON(R) PLATINUM 8573C
+BenchmarkCompression-5   	      84	   2132789 ns/op	 143.01 MB/s	  677244 B/op	      76 allocs/op
+BenchmarkCompression-5   	      84	   2092049 ns/op	 145.79 MB/s	  677245 B/op	      76 allocs/op
+BenchmarkCompression-5   	      92	   1988728 ns/op	 153.36 MB/s	  676919 B/op	      76 allocs/op
+BenchmarkNewProject-5    	     225	    827303 ns/op	  478788 B/op	    1458 allocs/op
+BenchmarkNewProject-5    	     216	    803146 ns/op	  479679 B/op	    1458 allocs/op
+BenchmarkNewProject-5    	     211	    820669 ns/op	  478821 B/op	    1458 allocs/op
+PASS
+ok  	wordwright.local/internal/office	1.341s

@@ -1,0 +1,11 @@
+?   	wordwright.local/cmd/wordwright	[no test files]
+?   	wordwright.local/internal/inspect	[no test files]
+?   	wordwright.local/internal/localipc	[no test files]
+?   	wordwright.local/internal/native	[no test files]
+ok  	wordwright.local/internal/agent	1.045s
+ok  	wordwright.local/internal/compat	1.025s
+ok  	wordwright.local/internal/deploy	1.026s
+ok  	wordwright.local/internal/example	1.154s
+ok  	wordwright.local/internal/office	2.855s
+ok  	wordwright.local/internal/project	3.807s
+ok  	wordwright.local/internal/verify	1.034s

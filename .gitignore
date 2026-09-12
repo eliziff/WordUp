@@ -1,0 +1,28 @@
+# Build outputs
+/dist/
+/build/
+/bin/
+/example/dist/
+/example/reports/
+*.exe
+*.test
+*.prof
+coverage.out
+
+# Local editor and operating-system state
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Credentials and private input/workspaces
+.env
+.env.*
+!.env.example
+/private/
+/workspaces/
+ALR Macro*
+ALR-*/
+Wordwright-*-ALR-*
+
+# Keep the synthetic example baseline; do not blanket-ignore *.opc or *.dotm.

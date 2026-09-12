@@ -1,0 +1,8 @@
+{
+  "duration_ms": 0.011,
+  "error": {
+    "code": "native_runtime_unavailable",
+    "message": "linux has no Microsoft Word runtime; no test was executed"
+  },
+  "result": null
+}

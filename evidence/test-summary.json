@@ -1,0 +1,118 @@
+{
+  "named_top_level_tests_passed": 27,
+  "failed": 0,
+  "fuzzing_recorded_separately": true,
+  "native_word_executed": false,
+  "tests": [
+    {
+      "package": "wordwright.local/internal/compat",
+      "test": "TestBranchReview"
+    },
+    {
+      "package": "wordwright.local/internal/compat",
+      "test": "TestExpressions"
+    },
+    {
+      "package": "wordwright.local/internal/deploy",
+      "test": "TestDeploymentRefusesOfflineAndHashMismatch"
+    },
+    {
+      "package": "wordwright.local/internal/agent",
+      "test": "TestMCPHandshakeAndExplicitErrors"
+    },
+    {
+      "package": "wordwright.local/internal/deploy",
+      "test": "TestDeploymentBackupAndStaleTarget"
+    },
+    {
+      "package": "wordwright.local/internal/agent",
+      "test": "TestProtocolWriteReadHashGuard"
+    },
+    {
+      "package": "wordwright.local/internal/example",
+      "test": "TestIntegratedExampleBuild"
+    },
+    {
+      "package": "wordwright.local/internal/verify",
+      "test": "TestAssertions"
+    },
+    {
+      "package": "wordwright.local/internal/verify",
+      "test": "TestSuiteGuardAndEvidence"
+    },
+    {
+      "package": "wordwright.local/internal/office",
+      "test": "TestCompression"
+    },
+    {
+      "package": "wordwright.local/internal/project",
+      "test": "TestSourceBuildCacheAndTamper"
+    },
+    {
+      "package": "wordwright.local/internal/project",
+      "test": "TestGuardedWritesAndUnknownProperties"
+    },
+    {
+      "package": "wordwright.local/internal/office",
+      "test": "TestCompound"
+    },
+    {
+      "package": "wordwright.local/internal/office",
+      "test": "TestSpecimen"
+    },
+    {
+      "package": "wordwright.local/internal/office",
+      "test": "TestFormCreate"
+    },
+    {
+      "package": "wordwright.local/internal/office",
+      "test": "TestNewProject"
+    },
+    {
+      "package": "wordwright.local/internal/office",
+      "test": "TestFormUnicodeControl"
+    },
+    {
+      "package": "wordwright.local/internal/office",
+      "test": "TestFailedRewriteIsTransactional"
+    },
+    {
+      "package": "wordwright.local/internal/office",
+      "test": "TestCompressionRatio"
+    },
+    {
+      "package": "wordwright.local/internal/office",
+      "test": "TestCompressionWireBoundaries"
+    },
+    {
+      "package": "wordwright.local/internal/office",
+      "test": "TestMultiPageCreateEditRemove"
+    },
+    {
+      "package": "wordwright.local/internal/office",
+      "test": "TestSpecimenFormsEditable"
+    },
+    {
+      "package": "wordwright.local/internal/office",
+      "test": "TestFormFailedEditTransactional"
+    },
+    {
+      "package": "wordwright.local/internal/office",
+      "test": "TestFootnoteEmptyParagraphAndRelationships"
+    },
+    {
+      "package": "wordwright.local/internal/office",
+      "test": "TestBlankPackageHasDOCXContentType"
+    },
+    {
+      "package": "wordwright.local/internal/office",
+      "test": "TestPackageRefusesSymlinkEntries"
+    },
+    {
+      "package": "wordwright.local/internal/project",
+      "test": "TestSpecimenWorkspaceRoundTripAndControlledEdit"
+    }
+  ],
+  "packages_without_tests": 4,
+  "skipped_tests": 0
+}

@@ -1,0 +1,1251 @@
+{
+  "duration_ms": 0.035,
+  "result": {
+    "instructions": "# Wordwright source workspace\nUse the wordwright executable. No module imports, VBE typing, or Python setup.\n\n- Edit vba/*.bas, *.cls, and *.vba as ordinary UTF-8 files; module names and VB_Name must agree.\n- New .bas files become standard modules; new .cls files become classes; .vba files are UserForm code.\n- forms/\u003cname\u003e.json describes persistent native MSForms design, in points. Existing unsupported controls remain opaque.\n- package/ is the full original Open XML package, including RibbonX XML, embedded assets and native saved parts. Do not rewrite the ZIP by hand.\n- styles/recipe.json adds/patches native styles and numbering. content/recipe.json REPLACES the document body. building_blocks/recipe.json adds/updates saved parts.\n- build performs deterministic package and binary checks; it is not a VBA compiler.\n- native execution is local Microsoft Word, never an emulator. Authorize execution only for code the user intends to run. The private desktop is UI separation, NOT a security sandbox.\n- Use fresh native acceptance before deployment. Preserve fixture files and assert specific observable behavior; a passing self-test does not establish all other macros work.\n- Mac static checks and Windows native tests are not Mac execution evidence.\n- Raw XML, native object-model calls and arbitrary VBA stay available beyond the convenience recipes. Unsupported serialization must error rather than substitute an approximation.\n",
+    "native_operation_help": "Native operations on Windows: open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {\"object\":\"handle\"} to pass a retained object and {\"missing\":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.",
+    "tools": [
+      {
+        "name": "example",
+        "description": "Create and build an integrated editable native template: output.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "base64": {
+              "type": "string"
+            },
+            "expected_sha256": {
+              "type": "string"
+            },
+            "fresh": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "operation": {
+              "description": "Native operations on Windows: open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {\"object\":\"handle\"} to pass a retained object and {\"missing\":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.",
+              "type": "object"
+            },
+            "output": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "query": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "suite": {
+              "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile",
+              "type": "object"
+            },
+            "text": {
+              "type": "string"
+            },
+            "timeout_ms": {
+              "type": "integer"
+            },
+            "tolerance": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      {
+        "name": "selftest",
+        "description": "Generate own integration fixture and test it in actual local Word; saves assertions/failures. Requires --execute, optional output.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "base64": {
+              "type": "string"
+            },
+            "expected_sha256": {
+              "type": "string"
+            },
+            "fresh": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "operation": {
+              "description": "Native operations on Windows: open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {\"object\":\"handle\"} to pass a retained object and {\"missing\":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.",
+              "type": "object"
+            },
+            "output": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "query": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "suite": {
+              "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile",
+              "type": "object"
+            },
+            "text": {
+              "type": "string"
+            },
+            "timeout_ms": {
+              "type": "integer"
+            },
+            "tolerance": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      {
+        "name": "deploy",
+        "description": "Stage exact native-tested artifact path, acceptance reference, destination output. Automatically waits locally for Word to close; backup and stale-target guards.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "base64": {
+              "type": "string"
+            },
+            "expected_sha256": {
+              "type": "string"
+            },
+            "fresh": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "operation": {
+              "description": "Native operations on Windows: open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {\"object\":\"handle\"} to pass a retained object and {\"missing\":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.",
+              "type": "object"
+            },
+            "output": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "query": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "suite": {
+              "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile",
+              "type": "object"
+            },
+            "text": {
+              "type": "string"
+            },
+            "timeout_ms": {
+              "type": "integer"
+            },
+            "tolerance": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      {
+        "name": "activate",
+        "description": "Retry a durable activation plan path after an interrupted local worker. Never closes Word.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "base64": {
+              "type": "string"
+            },
+            "expected_sha256": {
+              "type": "string"
+            },
+            "fresh": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "operation": {
+              "description": "Native operations on Windows: open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {\"object\":\"handle\"} to pass a retained object and {\"missing\":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.",
+              "type": "object"
+            },
+            "output": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "query": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "suite": {
+              "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile",
+              "type": "object"
+            },
+            "text": {
+              "type": "string"
+            },
+            "timeout_ms": {
+              "type": "integer"
+            },
+            "tolerance": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      {
+        "name": "help",
+        "description": "Read source layout, operations and native ABI help.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "base64": {
+              "type": "string"
+            },
+            "expected_sha256": {
+              "type": "string"
+            },
+            "fresh": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "operation": {
+              "description": "Native operations on Windows: open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {\"object\":\"handle\"} to pass a retained object and {\"missing\":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.",
+              "type": "object"
+            },
+            "output": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "query": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "suite": {
+              "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile",
+              "type": "object"
+            },
+            "text": {
+              "type": "string"
+            },
+            "timeout_ms": {
+              "type": "integer"
+            },
+            "tolerance": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      {
+        "name": "doctor",
+        "description": "Detect local native Word. Does not execute or emulate it.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "base64": {
+              "type": "string"
+            },
+            "expected_sha256": {
+              "type": "string"
+            },
+            "fresh": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "operation": {
+              "description": "Native operations on Windows: open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {\"object\":\"handle\"} to pass a retained object and {\"missing\":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.",
+              "type": "object"
+            },
+            "output": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "query": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "suite": {
+              "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile",
+              "type": "object"
+            },
+            "text": {
+              "type": "string"
+            },
+            "timeout_ms": {
+              "type": "integer"
+            },
+            "tolerance": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      {
+        "name": "new",
+        "description": "Create a native source workspace: name,output.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "base64": {
+              "type": "string"
+            },
+            "expected_sha256": {
+              "type": "string"
+            },
+            "fresh": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "operation": {
+              "description": "Native operations on Windows: open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {\"object\":\"handle\"} to pass a retained object and {\"missing\":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.",
+              "type": "object"
+            },
+            "output": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "query": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "suite": {
+              "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile",
+              "type": "object"
+            },
+            "text": {
+              "type": "string"
+            },
+            "timeout_ms": {
+              "type": "integer"
+            },
+            "tolerance": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      {
+        "name": "import",
+        "description": "Import an actual DOCX/DOTM package: path,output.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "base64": {
+              "type": "string"
+            },
+            "expected_sha256": {
+              "type": "string"
+            },
+            "fresh": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "operation": {
+              "description": "Native operations on Windows: open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {\"object\":\"handle\"} to pass a retained object and {\"missing\":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.",
+              "type": "object"
+            },
+            "output": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "query": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "suite": {
+              "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile",
+              "type": "object"
+            },
+            "text": {
+              "type": "string"
+            },
+            "timeout_ms": {
+              "type": "integer"
+            },
+            "tolerance": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      {
+        "name": "inspect",
+        "description": "Inventory an artifact: path.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "base64": {
+              "type": "string"
+            },
+            "expected_sha256": {
+              "type": "string"
+            },
+            "fresh": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "operation": {
+              "description": "Native operations on Windows: open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {\"object\":\"handle\"} to pass a retained object and {\"missing\":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.",
+              "type": "object"
+            },
+            "output": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "query": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "suite": {
+              "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile",
+              "type": "object"
+            },
+            "text": {
+              "type": "string"
+            },
+            "timeout_ms": {
+              "type": "integer"
+            },
+            "tolerance": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      {
+        "name": "files",
+        "description": "List source files; limit bounds the response.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "base64": {
+              "type": "string"
+            },
+            "expected_sha256": {
+              "type": "string"
+            },
+            "fresh": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "operation": {
+              "description": "Native operations on Windows: open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {\"object\":\"handle\"} to pass a retained object and {\"missing\":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.",
+              "type": "object"
+            },
+            "output": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "query": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "suite": {
+              "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile",
+              "type": "object"
+            },
+            "text": {
+              "type": "string"
+            },
+            "timeout_ms": {
+              "type": "integer"
+            },
+            "tolerance": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      {
+        "name": "read",
+        "description": "Read workspace path and its optimistic concurrency hash.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "base64": {
+              "type": "string"
+            },
+            "expected_sha256": {
+              "type": "string"
+            },
+            "fresh": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "operation": {
+              "description": "Native operations on Windows: open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {\"object\":\"handle\"} to pass a retained object and {\"missing\":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.",
+              "type": "object"
+            },
+            "output": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "query": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "suite": {
+              "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile",
+              "type": "object"
+            },
+            "text": {
+              "type": "string"
+            },
+            "timeout_ms": {
+              "type": "integer"
+            },
+            "tolerance": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      {
+        "name": "write",
+        "description": "Write UTF-8 text or base64 to path; expected_sha256 protects existing edits.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "base64": {
+              "type": "string"
+            },
+            "expected_sha256": {
+              "type": "string"
+            },
+            "fresh": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "operation": {
+              "description": "Native operations on Windows: open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {\"object\":\"handle\"} to pass a retained object and {\"missing\":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.",
+              "type": "object"
+            },
+            "output": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "query": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "suite": {
+              "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile",
+              "type": "object"
+            },
+            "text": {
+              "type": "string"
+            },
+            "timeout_ms": {
+              "type": "integer"
+            },
+            "tolerance": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      {
+        "name": "search",
+        "description": "Literal case-insensitive source search: query,limit.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "base64": {
+              "type": "string"
+            },
+            "expected_sha256": {
+              "type": "string"
+            },
+            "fresh": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "operation": {
+              "description": "Native operations on Windows: open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {\"object\":\"handle\"} to pass a retained object and {\"missing\":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.",
+              "type": "object"
+            },
+            "output": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "query": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "suite": {
+              "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile",
+              "type": "object"
+            },
+            "text": {
+              "type": "string"
+            },
+            "timeout_ms": {
+              "type": "integer"
+            },
+            "tolerance": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      {
+        "name": "build",
+        "description": "Build a native DOTM; optional output. No VBA execution claim.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "base64": {
+              "type": "string"
+            },
+            "expected_sha256": {
+              "type": "string"
+            },
+            "fresh": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "operation": {
+              "description": "Native operations on Windows: open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {\"object\":\"handle\"} to pass a retained object and {\"missing\":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.",
+              "type": "object"
+            },
+            "output": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "query": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "suite": {
+              "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile",
+              "type": "object"
+            },
+            "text": {
+              "type": "string"
+            },
+            "timeout_ms": {
+              "type": "integer"
+            },
+            "tolerance": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      {
+        "name": "check",
+        "description": "Fast lexical/XML diagnostics, NOT full compilation.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "base64": {
+              "type": "string"
+            },
+            "expected_sha256": {
+              "type": "string"
+            },
+            "fresh": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "operation": {
+              "description": "Native operations on Windows: open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {\"object\":\"handle\"} to pass a retained object and {\"missing\":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.",
+              "type": "object"
+            },
+            "output": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "query": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "suite": {
+              "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile",
+              "type": "object"
+            },
+            "text": {
+              "type": "string"
+            },
+            "timeout_ms": {
+              "type": "integer"
+            },
+            "tolerance": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      {
+        "name": "compat",
+        "description": "Conservative conditional Windows/Mac portability review, NOT a Mac pass.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "base64": {
+              "type": "string"
+            },
+            "expected_sha256": {
+              "type": "string"
+            },
+            "fresh": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "operation": {
+              "description": "Native operations on Windows: open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {\"object\":\"handle\"} to pass a retained object and {\"missing\":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.",
+              "type": "object"
+            },
+            "output": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "query": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "suite": {
+              "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile",
+              "type": "object"
+            },
+            "text": {
+              "type": "string"
+            },
+            "timeout_ms": {
+              "type": "integer"
+            },
+            "tolerance": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      {
+        "name": "reference.document",
+        "description": "Read native styles and paragraph/property observations from path.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "base64": {
+              "type": "string"
+            },
+            "expected_sha256": {
+              "type": "string"
+            },
+            "fresh": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "operation": {
+              "description": "Native operations on Windows: open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {\"object\":\"handle\"} to pass a retained object and {\"missing\":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.",
+              "type": "object"
+            },
+            "output": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "query": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "suite": {
+              "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile",
+              "type": "object"
+            },
+            "text": {
+              "type": "string"
+            },
+            "timeout_ms": {
+              "type": "integer"
+            },
+            "tolerance": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      {
+        "name": "reference.image",
+        "description": "Return reference/screenshot image pixels to the vision-capable agent.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "base64": {
+              "type": "string"
+            },
+            "expected_sha256": {
+              "type": "string"
+            },
+            "fresh": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "operation": {
+              "description": "Native operations on Windows: open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {\"object\":\"handle\"} to pass a retained object and {\"missing\":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.",
+              "type": "object"
+            },
+            "output": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "query": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "suite": {
+              "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile",
+              "type": "object"
+            },
+            "text": {
+              "type": "string"
+            },
+            "timeout_ms": {
+              "type": "integer"
+            },
+            "tolerance": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      {
+        "name": "image.compare",
+        "description": "Exact-size pixel comparison: reference,path,tolerance,optional output difference image.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "base64": {
+              "type": "string"
+            },
+            "expected_sha256": {
+              "type": "string"
+            },
+            "fresh": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "operation": {
+              "description": "Native operations on Windows: open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {\"object\":\"handle\"} to pass a retained object and {\"missing\":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.",
+              "type": "object"
+            },
+            "output": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "query": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "suite": {
+              "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile",
+              "type": "object"
+            },
+            "text": {
+              "type": "string"
+            },
+            "timeout_ms": {
+              "type": "integer"
+            },
+            "tolerance": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      {
+        "name": "native.start",
+        "description": "Start owned local Word lazily; requires installed Word, not a VM.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "base64": {
+              "type": "string"
+            },
+            "expected_sha256": {
+              "type": "string"
+            },
+            "fresh": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "operation": {
+              "description": "Native operations on Windows: open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {\"object\":\"handle\"} to pass a retained object and {\"missing\":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.",
+              "type": "object"
+            },
+            "output": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "query": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "suite": {
+              "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile",
+              "type": "object"
+            },
+            "text": {
+              "type": "string"
+            },
+            "timeout_ms": {
+              "type": "integer"
+            },
+            "tolerance": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      {
+        "name": "native.call",
+        "description": "Raw native operation; see help. Persistent host. Macro execution requires launch --execute.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "base64": {
+              "type": "string"
+            },
+            "expected_sha256": {
+              "type": "string"
+            },
+            "fresh": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "operation": {
+              "description": "Native operations on Windows: open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {\"object\":\"handle\"} to pass a retained object and {\"missing\":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.",
+              "type": "object"
+            },
+            "output": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "query": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "suite": {
+              "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile",
+              "type": "object"
+            },
+            "text": {
+              "type": "string"
+            },
+            "timeout_ms": {
+              "type": "integer"
+            },
+            "tolerance": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      {
+        "name": "native.stop",
+        "description": "Close ONLY the app-owned Word and private desktop.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "base64": {
+              "type": "string"
+            },
+            "expected_sha256": {
+              "type": "string"
+            },
+            "fresh": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "operation": {
+              "description": "Native operations on Windows: open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {\"object\":\"handle\"} to pass a retained object and {\"missing\":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.",
+              "type": "object"
+            },
+            "output": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "query": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "suite": {
+              "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile",
+              "type": "object"
+            },
+            "text": {
+              "type": "string"
+            },
+            "timeout_ms": {
+              "type": "integer"
+            },
+            "tolerance": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      {
+        "name": "test",
+        "description": "Execute assertion suite against exact artifact path; fresh=true uses an independent process. Returns and saves truthful pass/fail/not_run evidence.",
+        "inputSchema": {
+          "additionalProperties": false,
+          "properties": {
+            "base64": {
+              "type": "string"
+            },
+            "expected_sha256": {
+              "type": "string"
+            },
+            "fresh": {
+              "type": "boolean"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "operation": {
+              "description": "Native operations on Windows: open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {\"object\":\"handle\"} to pass a retained object and {\"missing\":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.",
+              "type": "object"
+            },
+            "output": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "query": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "suite": {
+              "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile",
+              "type": "object"
+            },
+            "text": {
+              "type": "string"
+            },
+            "timeout_ms": {
+              "type": "integer"
+            },
+            "tolerance": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "version": "0.2.0",
+  "built_utc": "2026-09-12T08:32:54.104490+00:00",
+  "build_host": "Linux-6.18.35-x86_64-with-glibc2.41",
+  "go_version": "go version go1.23.2 linux/amd64",
+  "external_go_modules": [],
+  "production_source_lines_including_comments": 12160,
+  "source_lines_including_tests_comments": 13032,
+  "binaries": {
+    "wordwright-windows-arm64.exe": {
+      "bytes": 3915264,
+      "sha256": "3a1aeb228fa1693dc4304ce1c5465cf5cfbd29c5c23775c6f7ca80606e92e9d4"
+    },
+    "wordwright-macos-arm64": {
+      "bytes": 4329298,
+      "sha256": "d804f25a9431b398496dfe247cdffbdb8e032007c42f96abd10b3448d929668b"
+    },
+    "wordwright-windows-x64.exe": {
+      "bytes": 4131840,
+      "sha256": "0d1653d9ec13278c0c82cd6fb6c0feb2d390b30e103e7712c3d1305e17139bc1"
+    },
+    "wordwright-linux-amd64": {
+      "bytes": 4214936,
+      "sha256": "a99d98ac4314680f5a1d81bf719058b794f2726bdcde245f7c775cd3f1775313"
+    },
+    "wordwright-macos-x64": {
+      "bytes": 4446944,
+      "sha256": "68c97f541568fd324395156d05e6aaa0b6b6a064fc8c485ed4df39478d3d0a4d"
+    }
+  },
+  "actual_word_runs": 0,
+  "native_windows_backend": "cross-compiled; not executed",
+  "native_macos_backend": "cross-compiled; not executed",
+  "app_runtime_dependencies": "OS APIs; installed Microsoft Word for native execution; no separately installed language runtime"
+}

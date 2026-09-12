@@ -1,0 +1,11 @@
+* text=auto
+*.go text eol=lf
+*.s text eol=lf
+*.sh text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.jsonl text eol=lf
+*.opc binary
+*.dotm binary
+*.docx binary
+*.png binary

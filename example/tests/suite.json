@@ -1,0 +1,145 @@
+{
+  "schema": 1,
+  "name": "Native persisted template acceptance",
+  "platforms": [
+    "windows"
+  ],
+  "steps": [
+    {
+      "name": "Open exact artifact without repair",
+      "operation": {
+        "op": "open",
+        "as": "template",
+        "file": "$artifact"
+      },
+      "assert": [
+        {
+          "path": "/open_and_repair",
+          "kind": "equals",
+          "expected": false
+        }
+      ]
+    },
+    {
+      "name": "Run actual VBA and instantiate persistent nested form",
+      "operation": {
+        "op": "run",
+        "macro": "$project.Studio.NativeAcceptance"
+      },
+      "assert": [
+        {
+          "kind": "equals",
+          "expected": "WORDWRIGHT_NATIVE_OK"
+        }
+      ]
+    },
+    {
+      "name": "Verify real Ribbon initialization",
+      "operation": {
+        "op": "run",
+        "macro": "$project.Studio.RibbonAcceptance"
+      },
+      "assert": [
+        {
+          "kind": "equals",
+          "expected": true
+        }
+      ]
+    },
+    {
+      "name": "Observe native document contents",
+      "operation": {
+        "op": "get",
+        "target": "template",
+        "member": "Content",
+        "as": "body"
+      }
+    },
+    {
+      "name": "Check real document text",
+      "operation": {
+        "op": "get",
+        "target": "body",
+        "member": "Text"
+      },
+      "assert": [
+        {
+          "kind": "contains",
+          "expected": "Editorial Studio"
+        }
+      ]
+    },
+    {
+      "name": "Verify actual selection behavior and formatting preservation",
+      "operation": {
+        "op": "run",
+        "macro": "$project.Studio.NormalizationAcceptance"
+      },
+      "assert": [
+        {
+          "kind": "equals",
+          "expected": "SELECTION_OK"
+        }
+      ]
+    },
+    {
+      "name": "Create a document from the finished template",
+      "operation": {
+        "op": "new",
+        "as": "created",
+        "file": "$artifact"
+      }
+    },
+    {
+      "name": "Get inherited content controls",
+      "operation": {
+        "op": "get",
+        "target": "created",
+        "member": "ContentControls",
+        "as": "controls"
+      }
+    },
+    {
+      "name": "Assert author content control survived",
+      "operation": {
+        "op": "get",
+        "target": "controls",
+        "member": "Count"
+      },
+      "assert": [
+        {
+          "kind": "greater_than",
+          "expected": 0
+        }
+      ]
+    },
+    {
+      "name": "Insert actual saved building block",
+      "operation": {
+        "op": "run",
+        "macro": "$project.Studio.BuildingBlockAcceptance"
+      },
+      "assert": [
+        {
+          "kind": "equals",
+          "expected": "BUILDING_BLOCK_OK"
+        }
+      ]
+    },
+    {
+      "name": "Close generated document without altering the artifact",
+      "operation": {
+        "op": "unload",
+        "target": "created"
+      }
+    },
+    {
+      "name": "Release template revision for the next warm iteration",
+      "operation": {
+        "op": "unload",
+        "target": "template",
+        "file": "$artifact"
+      }
+    }
+  ]
+}

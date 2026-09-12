@@ -1,0 +1,85 @@
+{
+  "name": "StudioForm",
+  "mode": "replace",
+  "properties": {
+    "Caption": "Wordwright Studio",
+    "Height": 240,
+    "Width": 360
+  },
+  "controls": [
+    {
+      "name": "Pages",
+      "type": "MultiPage",
+      "properties": {
+        "Height": 170,
+        "Left": 12,
+        "Top": 12,
+        "Width": 330
+      },
+      "pages": [
+        {
+          "name": "Operations",
+          "type": "Page",
+          "properties": {
+            "Caption": "Text operations"
+          },
+          "controls": [
+            {
+              "name": "txtInput",
+              "type": "TextBox",
+              "properties": {
+                "Height": 28,
+                "Left": 12,
+                "Top": 12,
+                "Value": "Editable native control",
+                "Width": 270
+              }
+            },
+            {
+              "name": "cmdNormalize",
+              "type": "CommandButton",
+              "properties": {
+                "Caption": "Normalize selection",
+                "Height": 24,
+                "Left": 12,
+                "Top": 52,
+                "Width": 120
+              }
+            }
+          ]
+        },
+        {
+          "name": "Metadata",
+          "type": "Page",
+          "properties": {
+            "Caption": "Metadata"
+          },
+          "controls": [
+            {
+              "name": "lblNative",
+              "type": "Label",
+              "properties": {
+                "Caption": "This form is stored in the template.",
+                "Height": 36,
+                "Left": 12,
+                "Top": 12,
+                "Width": 270
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "cmdClose",
+      "type": "CommandButton",
+      "properties": {
+        "Caption": "Close",
+        "Height": 24,
+        "Left": 258,
+        "Top": 192,
+        "Width": 84
+      }
+    }
+  ]
+}

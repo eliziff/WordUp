@@ -1,0 +1,12 @@
+{
+  "files": {
+    "building_blocks/recipe.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "package/[Content_Types].xml": "96790264ef7773a15bf89caa490826a09c2ea6bac4dec2efcf23cf4a4c3cf9d8",
+    "package/_rels/.rels": "d6721b2a26391b72cad2577bf18319162ce374ede3b5c447134b1fe90b63d392",
+    "package/word/_rels/document.xml.rels": "6d73e86b49d721f94c71693d29d70ec0529422170c6a61c1456b2e91c9e94bdf",
+    "package/word/document.xml": "97719b4c91b8fc05f5e1d603c3acd366feb06e53d50ba4d2a5e4614c10bc028a",
+    "package/word/styles.xml": "d3b2317c2e39f0afa678d6071d715e1c946ab9cf5b1be675c8eaf7beecc9e1ad",
+    "styles/recipe.json": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+    "vba/ThisDocument.cls": "75d67483e1ce81092ff239830f704ab51970d0463f35955f09f2c1c2e95f4caa"
+  }
+}

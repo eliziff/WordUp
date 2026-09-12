@@ -1,0 +1,212 @@
+{
+  "exit_code": 1,
+  "output": {
+    "duration_ms": 13.683,
+    "error": {
+      "message": "suite does not target linux; it was not executed"
+    },
+    "result": {
+      "acceptance": {
+        "schema": 1,
+        "tool_version": "0.2.0",
+        "status": "not_run",
+        "artifact": "/mnt/data/Wordwright-0.2-native-unavailable-check/dist/WordwrightStudio.dotm",
+        "sha256": "9d982e5e757454e28e7a5d347bd5351d0bd0c45dc9c1e469750201b51025a9eb",
+        "suite_sha256": "0e2dd82883f7d69afdd8c10de285d3bb9af80fe7691cb9d22d9292ac4c4b6ecc",
+        "suite": {
+          "schema": 1,
+          "name": "Native persisted template acceptance",
+          "platforms": [
+            "windows"
+          ],
+          "steps": [
+            {
+              "name": "Open exact artifact without repair",
+              "operation": {
+                "op": "open",
+                "as": "template",
+                "file": "$artifact"
+              },
+              "assert": [
+                {
+                  "path": "/open_and_repair",
+                  "kind": "equals",
+                  "expected": false
+                }
+              ]
+            },
+            {
+              "name": "Run actual VBA and instantiate persistent nested form",
+              "operation": {
+                "op": "run",
+                "macro": "$project.Studio.NativeAcceptance"
+              },
+              "assert": [
+                {
+                  "kind": "equals",
+                  "expected": "WORDWRIGHT_NATIVE_OK"
+                }
+              ]
+            },
+            {
+              "name": "Verify real Ribbon initialization",
+              "operation": {
+                "op": "run",
+                "macro": "$project.Studio.RibbonAcceptance"
+              },
+              "assert": [
+                {
+                  "kind": "equals",
+                  "expected": true
+                }
+              ]
+            },
+            {
+              "name": "Observe native document contents",
+              "operation": {
+                "op": "get",
+                "target": "template",
+                "member": "Content",
+                "as": "body"
+              }
+            },
+            {
+              "name": "Check real document text",
+              "operation": {
+                "op": "get",
+                "target": "body",
+                "member": "Text"
+              },
+              "assert": [
+                {
+                  "kind": "contains",
+                  "expected": "Editorial Studio"
+                }
+              ]
+            },
+            {
+              "name": "Verify actual selection behavior and formatting preservation",
+              "operation": {
+                "op": "run",
+                "macro": "$project.Studio.NormalizationAcceptance"
+              },
+              "assert": [
+                {
+                  "kind": "equals",
+                  "expected": "SELECTION_OK"
+                }
+              ]
+            },
+            {
+              "name": "Create a document from the finished template",
+              "operation": {
+                "op": "new",
+                "as": "created",
+                "file": "$artifact"
+              }
+            },
+            {
+              "name": "Get inherited content controls",
+              "operation": {
+                "op": "get",
+                "target": "created",
+                "member": "ContentControls",
+                "as": "controls"
+              }
+            },
+            {
+              "name": "Assert author content control survived",
+              "operation": {
+                "op": "get",
+                "target": "controls",
+                "member": "Count"
+              },
+              "assert": [
+                {
+                  "kind": "greater_than",
+                  "expected": 0
+                }
+              ]
+            },
+            {
+              "name": "Insert actual saved building block",
+              "operation": {
+                "op": "run",
+                "macro": "$project.Studio.BuildingBlockAcceptance"
+              },
+              "assert": [
+                {
+                  "kind": "equals",
+                  "expected": "BUILDING_BLOCK_OK"
+                }
+              ]
+            },
+            {
+              "name": "Close generated document without altering the artifact",
+              "operation": {
+                "op": "unload",
+                "target": "created"
+              }
+            },
+            {
+              "name": "Release template revision for the next warm iteration",
+              "operation": {
+                "op": "unload",
+                "target": "template",
+                "file": "$artifact"
+              }
+            }
+          ]
+        },
+        "os": "linux",
+        "arch": "amd64",
+        "fresh_process": true,
+        "word_executed": false,
+        "mac_executed": false,
+        "vba_compiled": false,
+        "assertions": 0,
+        "started_utc": "2026-09-12T08:32:53.165092143Z",
+        "duration_ms": 0.092,
+        "observations": [],
+        "error": {
+          "message": "suite does not target linux; it was not executed"
+        }
+      },
+      "build": {
+        "schema": 2,
+        "tool_version": "0.2.0",
+        "artifact": "/mnt/data/Wordwright-0.2-native-unavailable-check/dist/WordwrightStudio.dotm",
+        "sha256": "9d982e5e757454e28e7a5d347bd5351d0bd0c45dc9c1e469750201b51025a9eb",
+        "source_fingerprint": "c0a2d201ff6950e3b36d7f0d2bab54709d2ff00900cabb1203cba5afcb1490ad",
+        "bytes": 10106,
+        "byte_identical_to_baseline": false,
+        "cached": false,
+        "modules": 4,
+        "forms": 1,
+        "modified_parts": [
+          "[Content_Types].xml",
+          "_rels/.rels",
+          "customUI/customUI14.xml",
+          "word/_rels/document.xml.rels",
+          "word/document.xml",
+          "word/footnotes.xml",
+          "word/glossary/_rels/document.xml.rels",
+          "word/glossary/document.xml",
+          "word/styles.xml",
+          "word/vbaProject.bin",
+          "word/ww-footer.xml",
+          "word/ww-header.xml"
+        ],
+        "duration_ms": 7.528,
+        "package_validated": true,
+        "vba_compiled": false,
+        "word_executed": false,
+        "mac_executed": false,
+        "warnings": [
+          "VBA binary serialization passed source reparse; only the native Word runtime can establish compilation and behavior."
+        ]
+      },
+      "workspace": "/mnt/data/Wordwright-0.2-native-unavailable-check"
+    }
+  }
+}

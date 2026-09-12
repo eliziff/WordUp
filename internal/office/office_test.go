@@ -1,0 +1,411 @@
+package office
+
+import (
+	"archive/zip"
+	"bytes"
+	"crypto/rand"
+	"io"
+	"os"
+	"strings"
+	"testing"
+)
+
+func TestCompression(t *testing.T) {
+	for _, n := range []int{0, 1, 64, 3640, 4095, 4096, 4097, 10000, 65536} {
+		for _, random := range []bool{false, true} {
+			b := bytes.Repeat([]byte("This is a repeated VBA line.\r\n"), n/29+1)[:n]
+			if random {
+				rand.Read(b)
+			}
+			c := Compress(b)
+			d, e := Decompress(c)
+			if e != nil || len(d) < len(b) || !bytes.Equal(b, d[:len(b)]) || !bytes.Equal(d[len(b):], make([]byte, len(d)-len(b))) {
+				t.Fatalf("n=%d random=%v: %v (%d bytes)", n, random, e, len(d))
+			}
+		}
+	}
+}
+func TestCompound(t *testing.T) {
+	c := NewCompound()
+	for _, n := range []int{0, 1, 63, 64, 65, 4095, 4096, 4097, 65536, 9 << 20} {
+		b := make([]byte, n)
+		rand.Read(b)
+		if e := c.Set("VBA/"+strings.Repeat("x", n%23+1)+string(rune('A'+n%26)), b); e != nil {
+			t.Fatal(e)
+		}
+	}
+	b, e := c.Bytes()
+	if e != nil {
+		t.Fatal(e)
+	}
+	d, e := ReadCompound(b)
+	if e != nil {
+		t.Fatal(e)
+	}
+	for p, x := range c.Entries {
+		if x.Kind == 2 {
+			y, e := d.Stream(p)
+			if e != nil || !bytes.Equal(x.Data, y) {
+				t.Fatalf("%s mismatch: %v", p, e)
+			}
+		}
+	}
+}
+func specimen(t *testing.T) *VBA {
+	t.Helper()
+	p := os.Getenv("WORDWRIGHT_SPECIMEN")
+	if p == "" {
+		t.Skip("private specimen path not set")
+	}
+	z, e := zip.OpenReader(p)
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer z.Close()
+	for _, f := range z.File {
+		if f.Name == "word/vbaProject.bin" {
+			r, e := f.Open()
+			if e != nil {
+				t.Fatal(e)
+			}
+			b, e := io.ReadAll(r)
+			r.Close()
+			if e != nil {
+				t.Fatal(e)
+			}
+			v, e := ReadVBA(b)
+			if e != nil {
+				t.Fatal(e)
+			}
+			return v
+		}
+	}
+	t.Fatal("no vba")
+	return nil
+}
+func TestSpecimen(t *testing.T) {
+	v := specimen(t)
+	t.Logf("%s %d modules", v.Name, len(v.Modules))
+	for _, m := range v.Modules {
+		if m.Kind == "form" {
+			f, e := ReadForm(v.CFB, m.Name, v.Codepage)
+			if e != nil {
+				t.Errorf("%s: %v", m.Name, e)
+				continue
+			}
+			t.Logf("%s: %v", m.Name, f.ControlNames())
+			s, e := f.Streams()
+			if e != nil {
+				t.Fatal(e)
+			}
+			for p, b := range s {
+				orig, e := v.CFB.Stream(m.Name + "/" + p)
+				if e == nil && !bytes.Equal(orig, b) {
+					t.Errorf("unchanged form stream differs %s/%s", m.Name, p)
+				}
+			}
+		}
+	}
+	b, e := v.Rewrite(v.Modules, nil)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if _, e = ReadVBA(b); e != nil {
+		t.Fatal(e)
+	}
+}
+func TestFormCreate(t *testing.T) {
+	f, e := NewForm("TestForm", 1252)
+	if e != nil {
+		t.Fatal(e)
+	}
+	types := []string{"Label", "CommandButton", "TextBox", "ListBox", "ComboBox", "CheckBox", "OptionButton", "ToggleButton", "Image", "SpinButton", "ScrollBar", "TabStrip", "Frame"}
+	d := Design{Name: "TestForm", Properties: map[string]any{"Caption": "Unicode résumé", "Width": 420., "Height": 300.}}
+	for _, k := range types {
+		d.Controls = append(d.Controls, ControlDesign{Name: "ctl" + k, Type: k, Properties: map[string]any{"Left": 10., "Top": 20., "Width": 100., "Height": 25.}})
+	}
+	if e = f.Apply(d); e != nil {
+		t.Fatal(e)
+	}
+	s, e := f.Streams()
+	if e != nil {
+		t.Fatal(e)
+	}
+	c := NewCompound()
+	for p, b := range s {
+		c.Set("TestForm/"+p, b)
+	}
+	g, e := ReadForm(c, "TestForm", 1252)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if len(g.ControlNames()) != len(types) {
+		t.Fatal("control count")
+	}
+}
+func TestNewProject(t *testing.T) {
+	v := NewVBA("Example")
+	m := []Module{{Name: "ThisDocument", Kind: "document", Source: "Attribute VB_Name = \"ThisDocument\"\n"}, {Name: "Main", Kind: "standard", Source: "Option Explicit\nPublic Function Answer() As Long\nAnswer=42\nEnd Function\n"}}
+	b, e := v.Rewrite(m, nil)
+	if e != nil {
+		t.Fatal(e)
+	}
+	w, e := ReadVBA(b)
+	if e != nil {
+		t.Fatal(e)
+	}
+	w.Modules = append(w.Modules, Module{Name: "Other", Kind: "standard", Source: "Public Sub Hello()\nEnd Sub\n"})
+	if _, e = w.Rewrite(w.Modules, nil); e != nil {
+		t.Fatal(e)
+	}
+}
+func FuzzDecompress(f *testing.F) {
+	f.Add([]byte{1})
+	f.Add(Compress([]byte("Hello\n")))
+	f.Fuzz(func(t *testing.T, b []byte) { Decompress(b) })
+}
+
+func TestFormUnicodeControl(t *testing.T) {
+	f, e := NewForm("UnicodeForm", 1252)
+	if e != nil {
+		t.Fatal(e)
+	}
+	d := Design{Name: "UnicodeForm", Controls: []ControlDesign{{Name: "Label1", Type: "Label", Properties: map[string]any{"Caption": "標題 — résumé"}}}}
+	if e = f.Apply(d); e != nil {
+		t.Fatal(e)
+	}
+	streams, e := f.Streams()
+	if e != nil {
+		t.Fatal(e)
+	}
+	c := NewCompound()
+	for p, b := range streams {
+		if e = c.Set("UnicodeForm/"+p, b); e != nil {
+			t.Fatal(e)
+		}
+	}
+	g, e := ReadForm(c, "UnicodeForm", 1252)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if got := g.Design().Controls[0].Properties["Caption"]; got != "標題 — résumé" {
+		t.Fatalf("caption=%v", got)
+	}
+	if e = f.Apply(Design{Name: "UnicodeForm", Properties: map[string]any{"Caption": "標題"}}); e == nil {
+		t.Fatal("unrepresentable VBFrame caption silently accepted")
+	}
+}
+func TestFailedRewriteIsTransactional(t *testing.T) {
+	v := NewVBA("Trial")
+	before, _ := v.CFB.Bytes()
+	_, e := v.Rewrite([]Module{{Name: "A", Kind: "standard", Source: "Option Explicit"}, {Name: "BAD-NAME", Kind: "class"}}, nil)
+	if e == nil {
+		t.Fatal("expected invalid identifier")
+	}
+	after, _ := v.CFB.Bytes()
+	if !bytes.Equal(before, after) {
+		t.Fatal("failed build mutated baseline")
+	}
+}
+func TestCompressionRatio(t *testing.T) {
+	b := bytes.Repeat([]byte("Public Function Answer() As Long\r\nAnswer = 42\r\nEnd Function\r\n"), 1000)
+	c := Compress(b)
+	if len(c) > len(b)/5 {
+		t.Fatalf("poor compression %d/%d", len(c), len(b))
+	}
+}
+func BenchmarkCompression(b *testing.B) {
+	src := bytes.Repeat([]byte("Public Function Answer() As Long\r\nAnswer = 42\r\nEnd Function\r\n"), 5000)
+	b.SetBytes(int64(len(src)))
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		Compress(src)
+	}
+}
+func BenchmarkNewProject(b *testing.B) {
+	mods := []Module{{Name: "ThisDocument", Kind: "document", Source: "Option Explicit\n"}, {Name: "Main", Kind: "standard", Source: strings.Repeat("' source line\n", 1000)}}
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		if _, e := NewVBA("Bench").Rewrite(mods, nil); e != nil {
+			b.Fatal(e)
+		}
+	}
+}
+
+// This deliberately examines each wire chunk separately: a self-roundtrip
+// alone would miss a writer+reader that share the same boundary error.
+func TestCompressionWireBoundaries(t *testing.T) {
+	for _, n := range []int{3641, 4095, 4096, 8191, 12287} {
+		raw := make([]byte, n)
+		rand.Read(raw)
+		wire := Compress(raw)
+		for p := 1; p < len(wire); {
+			total := int(U16(wire, p)&4095) + 3
+			if p+total > len(wire) {
+				t.Fatal("chunk exceeds container")
+			}
+			chunk, err := Decompress(append([]byte{1}, wire[p:p+total]...))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if p+total < len(wire) && len(chunk) != 4096 {
+				t.Fatalf("short interior chunk: %d", len(chunk))
+			}
+			p += total
+		}
+	}
+}
+
+func TestMultiPageCreateEditRemove(t *testing.T) {
+	f, e := NewForm("Editor", 1252)
+	if e != nil {
+		t.Fatal(e)
+	}
+	d := Design{Name: "Editor", Controls: []ControlDesign{{Name: "Tabs", Type: "MultiPage", Pages: []ControlDesign{
+		{Name: "One", Type: "Page", Properties: map[string]any{"Caption": "Résumé"}, Controls: []ControlDesign{{Name: "Text1", Type: "TextBox", Properties: map[string]any{"MultiLine": true, "EnterKeyBehavior": true}}}},
+		{Name: "Two", Type: "Page", Controls: []ControlDesign{{Name: "OK", Type: "CommandButton"}}},
+	}}}}
+	if e = f.Apply(d); e != nil {
+		t.Fatal(e)
+	}
+	c := NewCompound()
+	if e = f.WriteBack(c); e != nil {
+		t.Fatal(e)
+	}
+	for p, x := range c.Entries {
+		if x.Kind == 1 && p != "Editor" {
+			if bytes.Equal(x.Raw[80:96], make([]byte, 16)) {
+				t.Fatalf("container CLSID absent %s", p)
+			}
+		}
+	}
+	g, e := ReadForm(c, "Editor", 1252)
+	if e != nil {
+		t.Fatal(e)
+	}
+	exp := g.Design()
+	if len(exp.Controls) != 1 || len(exp.Controls[0].Pages) != 2 {
+		t.Fatalf("bad exported pages: %+v", exp)
+	}
+	exp.Controls[0].Pages = append(exp.Controls[0].Pages, ControlDesign{Name: "Three", Type: "Page", Properties: map[string]any{"Caption": "中文"}})
+	if e = g.Apply(exp); e != nil {
+		t.Fatal(e)
+	}
+	if e = g.WriteBack(c); e != nil {
+		t.Fatal(e)
+	}
+	before := len(c.Entries)
+	g, e = ReadForm(c, "Editor", 1252)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = g.Apply(Design{Name: "Editor", Controls: []ControlDesign{{Name: "Tabs", Type: "MultiPage", Remove: []string{"One"}}}}); e != nil {
+		t.Fatal(e)
+	}
+	if e = g.WriteBack(c); e != nil {
+		t.Fatal(e)
+	}
+	if len(c.Entries) >= before {
+		t.Fatal("deleted page storage survived")
+	}
+	g, e = ReadForm(c, "Editor", 1252)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if len(g.Design().Controls[0].Pages) != 2 {
+		t.Fatal("wrong surviving page count")
+	}
+}
+func TestSpecimenFormsEditable(t *testing.T) {
+	v := specimen(t)
+	for _, m := range v.Modules {
+		if m.Kind != "form" {
+			continue
+		}
+		f, e := ReadForm(v.CFB, m.Name, v.Codepage)
+		if e != nil {
+			t.Fatal(e)
+		}
+		d := f.Design()
+		d.Properties["Caption"] = "Verified binary edit"
+		if e = f.Apply(d); e != nil {
+			t.Fatalf("%s: %v", m.Name, e)
+		}
+		c := v.CFB.Clone()
+		if e = f.WriteBack(c); e != nil {
+			t.Fatalf("%s: %v", m.Name, e)
+		}
+		g, e := ReadForm(c, m.Name, v.Codepage)
+		if e != nil {
+			t.Fatal(e)
+		}
+		if g.Design().Properties["Caption"] != "Verified binary edit" {
+			t.Fatal("caption edit missing")
+		}
+	}
+}
+func TestFormFailedEditTransactional(t *testing.T) {
+	f, _ := NewForm("F", 1252)
+	before, _ := f.Streams()
+	err := f.Apply(Design{Name: "F", Controls: []ControlDesign{{Name: "New", Type: "Label"}, {Name: "Bad", Type: "MissingType"}}})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	after, _ := f.Streams()
+	if !sameStreams(before, after) {
+		t.Fatal("failed edit mutated form")
+	}
+}
+
+func TestFootnoteEmptyParagraphAndRelationships(t *testing.T) {
+	p := BlankPackage()
+	recipe := ContentRecipe{Blocks: []Block{{Inlines: []Inline{{Text: "Body"}, {Footnote: []Block{{Type: "xml", XML: "<w:p/>"}, {Inlines: []Inline{{Text: "Source", URL: "https://example.test/citation"}}}}}}}}}
+	if e := Compose(p, recipe, nil); e != nil {
+		t.Fatal(e)
+	}
+	if e := p.Validate(); e != nil {
+		t.Fatal(e)
+	}
+	for _, x := range []string{"<w:footnoteRef/>", "<w:hyperlink"} {
+		if !strings.Contains(string(p.Files["word/footnotes.xml"]), x) {
+			t.Fatalf("missing footnote structure %s", x)
+		}
+	}
+	if !strings.Contains(string(p.Files["word/_rels/footnotes.xml.rels"]), "https://example.test/citation") {
+		t.Fatal("link relationship attached to wrong part")
+	}
+}
+func TestBlankPackageHasDOCXContentType(t *testing.T) {
+	p := BlankPackage()
+	if !strings.Contains(string(p.Files["[Content_Types].xml"]), "wordprocessingml.document.main+xml") {
+		t.Fatal("seed.docx has wrong package content type")
+	}
+}
+func TestPackageRefusesSymlinkEntries(t *testing.T) {
+	var b bytes.Buffer
+	z := zip.NewWriter(&b)
+	h := &zip.FileHeader{Name: "word/document.xml", Method: zip.Store}
+	h.SetMode(os.ModeSymlink | 0777)
+	w, e := z.CreateHeader(h)
+	if e != nil {
+		t.Fatal(e)
+	}
+	w.Write([]byte("../../target"))
+	z.Close()
+	if _, e = ReadPackage(b.Bytes()); e == nil {
+		t.Fatal("accepted symlink ZIP entry")
+	}
+}
+func FuzzCompound(f *testing.F) {
+	c := NewCompound()
+	c.Set("test", []byte("hi"))
+	b, _ := c.Bytes()
+	f.Add(b)
+	f.Add([]byte("not-cfb"))
+	f.Fuzz(func(t *testing.T, b []byte) {
+		if len(b) > 1<<20 {
+			return
+		}
+		_, _ = ReadCompound(b)
+	})
+}

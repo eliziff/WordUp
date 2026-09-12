@@ -1,0 +1,13 @@
+[
+  {
+    "name": "Studio Editorial Note",
+    "gallery": "autoTxt",
+    "category": "Wordwright",
+    "blocks": [
+      {
+        "text": "Editorial note: replace with a reusable observation.",
+        "style": "StudioNote"
+      }
+    ]
+  }
+]

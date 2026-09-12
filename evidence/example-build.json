@@ -1,0 +1,37 @@
+{
+  "duration_ms": 13.147,
+  "result": {
+    "schema": 2,
+    "tool_version": "0.2.0",
+    "artifact": "/mnt/data/Wordwright-0.2-Studio/dist/WordwrightStudio.dotm",
+    "sha256": "9d982e5e757454e28e7a5d347bd5351d0bd0c45dc9c1e469750201b51025a9eb",
+    "source_fingerprint": "c0a2d201ff6950e3b36d7f0d2bab54709d2ff00900cabb1203cba5afcb1490ad",
+    "bytes": 10106,
+    "byte_identical_to_baseline": false,
+    "cached": false,
+    "modules": 4,
+    "forms": 1,
+    "modified_parts": [
+      "[Content_Types].xml",
+      "_rels/.rels",
+      "customUI/customUI14.xml",
+      "word/_rels/document.xml.rels",
+      "word/document.xml",
+      "word/footnotes.xml",
+      "word/glossary/_rels/document.xml.rels",
+      "word/glossary/document.xml",
+      "word/styles.xml",
+      "word/vbaProject.bin",
+      "word/ww-footer.xml",
+      "word/ww-header.xml"
+    ],
+    "duration_ms": 7.536,
+    "package_validated": true,
+    "vba_compiled": false,
+    "word_executed": false,
+    "mac_executed": false,
+    "warnings": [
+      "VBA binary serialization passed source reparse; only the native Word runtime can establish compilation and behavior."
+    ]
+  }
+}

@@ -1,0 +1,178 @@
+{"Time":"2026-09-12T08:31:45.898965226Z","Action":"start","Package":"wordwright.local/cmd/wordwright"}
+{"Time":"2026-09-12T08:31:45.899020224Z","Action":"output","Package":"wordwright.local/cmd/wordwright","Output":"?   \twordwright.local/cmd/wordwright\t[no test files]\n"}
+{"Time":"2026-09-12T08:31:45.899026173Z","Action":"skip","Package":"wordwright.local/cmd/wordwright","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.005571564Z","Action":"start","Package":"wordwright.local/internal/agent"}
+{"Time":"2026-09-12T08:31:46.00569244Z","Action":"start","Package":"wordwright.local/internal/compat"}
+{"Time":"2026-09-12T08:31:46.005721768Z","Action":"start","Package":"wordwright.local/internal/deploy"}
+{"Time":"2026-09-12T08:31:46.007769829Z","Action":"run","Package":"wordwright.local/internal/compat","Test":"TestBranchReview"}
+{"Time":"2026-09-12T08:31:46.007800968Z","Action":"output","Package":"wordwright.local/internal/compat","Test":"TestBranchReview","Output":"=== RUN   TestBranchReview\n"}
+{"Time":"2026-09-12T08:31:46.007972585Z","Action":"output","Package":"wordwright.local/internal/compat","Test":"TestBranchReview","Output":"--- PASS: TestBranchReview (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.007979065Z","Action":"pass","Package":"wordwright.local/internal/compat","Test":"TestBranchReview","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.007985624Z","Action":"run","Package":"wordwright.local/internal/compat","Test":"TestExpressions"}
+{"Time":"2026-09-12T08:31:46.007988622Z","Action":"output","Package":"wordwright.local/internal/compat","Test":"TestExpressions","Output":"=== RUN   TestExpressions\n"}
+{"Time":"2026-09-12T08:31:46.00799279Z","Action":"output","Package":"wordwright.local/internal/compat","Test":"TestExpressions","Output":"--- PASS: TestExpressions (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.007995936Z","Action":"pass","Package":"wordwright.local/internal/compat","Test":"TestExpressions","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.007998809Z","Action":"output","Package":"wordwright.local/internal/compat","Output":"PASS\n"}
+{"Time":"2026-09-12T08:31:46.009081785Z","Action":"run","Package":"wordwright.local/internal/agent","Test":"TestMCPHandshakeAndExplicitErrors"}
+{"Time":"2026-09-12T08:31:46.009095221Z","Action":"output","Package":"wordwright.local/internal/agent","Test":"TestMCPHandshakeAndExplicitErrors","Output":"=== RUN   TestMCPHandshakeAndExplicitErrors\n"}
+{"Time":"2026-09-12T08:31:46.0091283Z","Action":"output","Package":"wordwright.local/internal/compat","Output":"ok  \twordwright.local/internal/compat\t0.003s\n"}
+{"Time":"2026-09-12T08:31:46.009104356Z","Action":"run","Package":"wordwright.local/internal/deploy","Test":"TestDeploymentRefusesOfflineAndHashMismatch"}
+{"Time":"2026-09-12T08:31:46.009161301Z","Action":"output","Package":"wordwright.local/internal/deploy","Test":"TestDeploymentRefusesOfflineAndHashMismatch","Output":"=== RUN   TestDeploymentRefusesOfflineAndHashMismatch\n"}
+{"Time":"2026-09-12T08:31:46.009196415Z","Action":"pass","Package":"wordwright.local/internal/compat","Elapsed":0.004}
+{"Time":"2026-09-12T08:31:46.009828812Z","Action":"output","Package":"wordwright.local/internal/deploy","Test":"TestDeploymentRefusesOfflineAndHashMismatch","Output":"--- PASS: TestDeploymentRefusesOfflineAndHashMismatch (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.009880024Z","Action":"pass","Package":"wordwright.local/internal/deploy","Test":"TestDeploymentRefusesOfflineAndHashMismatch","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.009903818Z","Action":"run","Package":"wordwright.local/internal/deploy","Test":"TestDeploymentBackupAndStaleTarget"}
+{"Time":"2026-09-12T08:31:46.009907762Z","Action":"output","Package":"wordwright.local/internal/deploy","Test":"TestDeploymentBackupAndStaleTarget","Output":"=== RUN   TestDeploymentBackupAndStaleTarget\n"}
+{"Time":"2026-09-12T08:31:46.010723401Z","Action":"output","Package":"wordwright.local/internal/agent","Test":"TestMCPHandshakeAndExplicitErrors","Output":"--- PASS: TestMCPHandshakeAndExplicitErrors (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.010741023Z","Action":"pass","Package":"wordwright.local/internal/agent","Test":"TestMCPHandshakeAndExplicitErrors","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.010752804Z","Action":"run","Package":"wordwright.local/internal/agent","Test":"TestProtocolWriteReadHashGuard"}
+{"Time":"2026-09-12T08:31:46.010757164Z","Action":"output","Package":"wordwright.local/internal/agent","Test":"TestProtocolWriteReadHashGuard","Output":"=== RUN   TestProtocolWriteReadHashGuard\n"}
+{"Time":"2026-09-12T08:31:46.014704315Z","Action":"output","Package":"wordwright.local/internal/deploy","Test":"TestDeploymentBackupAndStaleTarget","Output":"--- PASS: TestDeploymentBackupAndStaleTarget (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.014764591Z","Action":"pass","Package":"wordwright.local/internal/deploy","Test":"TestDeploymentBackupAndStaleTarget","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.014781778Z","Action":"output","Package":"wordwright.local/internal/deploy","Output":"PASS\n"}
+{"Time":"2026-09-12T08:31:46.01484701Z","Action":"output","Package":"wordwright.local/internal/agent","Test":"TestProtocolWriteReadHashGuard","Output":"--- PASS: TestProtocolWriteReadHashGuard (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.014852793Z","Action":"pass","Package":"wordwright.local/internal/agent","Test":"TestProtocolWriteReadHashGuard","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.014856339Z","Action":"output","Package":"wordwright.local/internal/agent","Output":"PASS\n"}
+{"Time":"2026-09-12T08:31:46.015310215Z","Action":"output","Package":"wordwright.local/internal/agent","Output":"ok  \twordwright.local/internal/agent\t0.009s\n"}
+{"Time":"2026-09-12T08:31:46.015347159Z","Action":"pass","Package":"wordwright.local/internal/agent","Elapsed":0.01}
+{"Time":"2026-09-12T08:31:46.015854889Z","Action":"output","Package":"wordwright.local/internal/deploy","Output":"ok  \twordwright.local/internal/deploy\t0.010s\n"}
+{"Time":"2026-09-12T08:31:46.015864604Z","Action":"pass","Package":"wordwright.local/internal/deploy","Elapsed":0.01}
+{"Time":"2026-09-12T08:31:46.037256094Z","Action":"start","Package":"wordwright.local/internal/example"}
+{"Time":"2026-09-12T08:31:46.037382236Z","Action":"start","Package":"wordwright.local/internal/inspect"}
+{"Time":"2026-09-12T08:31:46.037411266Z","Action":"output","Package":"wordwright.local/internal/inspect","Output":"?   \twordwright.local/internal/inspect\t[no test files]\n"}
+{"Time":"2026-09-12T08:31:46.037417509Z","Action":"skip","Package":"wordwright.local/internal/inspect","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.037748525Z","Action":"start","Package":"wordwright.local/internal/localipc"}
+{"Time":"2026-09-12T08:31:46.037772109Z","Action":"output","Package":"wordwright.local/internal/localipc","Output":"?   \twordwright.local/internal/localipc\t[no test files]\n"}
+{"Time":"2026-09-12T08:31:46.037779903Z","Action":"skip","Package":"wordwright.local/internal/localipc","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.037933915Z","Action":"start","Package":"wordwright.local/internal/native"}
+{"Time":"2026-09-12T08:31:46.037956842Z","Action":"output","Package":"wordwright.local/internal/native","Output":"?   \twordwright.local/internal/native\t[no test files]\n"}
+{"Time":"2026-09-12T08:31:46.037963389Z","Action":"skip","Package":"wordwright.local/internal/native","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.0406917Z","Action":"run","Package":"wordwright.local/internal/example","Test":"TestIntegratedExampleBuild"}
+{"Time":"2026-09-12T08:31:46.040714273Z","Action":"output","Package":"wordwright.local/internal/example","Test":"TestIntegratedExampleBuild","Output":"=== RUN   TestIntegratedExampleBuild\n"}
+{"Time":"2026-09-12T08:31:46.068701397Z","Action":"output","Package":"wordwright.local/internal/example","Test":"TestIntegratedExampleBuild","Output":"--- PASS: TestIntegratedExampleBuild (0.03s)\n"}
+{"Time":"2026-09-12T08:31:46.068730878Z","Action":"pass","Package":"wordwright.local/internal/example","Test":"TestIntegratedExampleBuild","Elapsed":0.03}
+{"Time":"2026-09-12T08:31:46.068738059Z","Action":"output","Package":"wordwright.local/internal/example","Output":"PASS\n"}
+{"Time":"2026-09-12T08:31:46.075054229Z","Action":"output","Package":"wordwright.local/internal/example","Output":"ok  \twordwright.local/internal/example\t0.038s\n"}
+{"Time":"2026-09-12T08:31:46.075084568Z","Action":"pass","Package":"wordwright.local/internal/example","Elapsed":0.038}
+{"Time":"2026-09-12T08:31:46.221715732Z","Action":"start","Package":"wordwright.local/internal/office"}
+{"Time":"2026-09-12T08:31:46.221852398Z","Action":"start","Package":"wordwright.local/internal/project"}
+{"Time":"2026-09-12T08:31:46.22255236Z","Action":"start","Package":"wordwright.local/internal/verify"}
+{"Time":"2026-09-12T08:31:46.223272993Z","Action":"run","Package":"wordwright.local/internal/office","Test":"TestCompression"}
+{"Time":"2026-09-12T08:31:46.223292003Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestCompression","Output":"=== RUN   TestCompression\n"}
+{"Time":"2026-09-12T08:31:46.223413629Z","Action":"run","Package":"wordwright.local/internal/project","Test":"TestSourceBuildCacheAndTamper"}
+{"Time":"2026-09-12T08:31:46.223418782Z","Action":"output","Package":"wordwright.local/internal/project","Test":"TestSourceBuildCacheAndTamper","Output":"=== RUN   TestSourceBuildCacheAndTamper\n"}
+{"Time":"2026-09-12T08:31:46.223984341Z","Action":"run","Package":"wordwright.local/internal/verify","Test":"TestAssertions"}
+{"Time":"2026-09-12T08:31:46.223994067Z","Action":"output","Package":"wordwright.local/internal/verify","Test":"TestAssertions","Output":"=== RUN   TestAssertions\n"}
+{"Time":"2026-09-12T08:31:46.224149214Z","Action":"output","Package":"wordwright.local/internal/verify","Test":"TestAssertions","Output":"--- PASS: TestAssertions (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.224153971Z","Action":"pass","Package":"wordwright.local/internal/verify","Test":"TestAssertions","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.224160286Z","Action":"run","Package":"wordwright.local/internal/verify","Test":"TestSuiteGuardAndEvidence"}
+{"Time":"2026-09-12T08:31:46.224163341Z","Action":"output","Package":"wordwright.local/internal/verify","Test":"TestSuiteGuardAndEvidence","Output":"=== RUN   TestSuiteGuardAndEvidence\n"}
+{"Time":"2026-09-12T08:31:46.226999999Z","Action":"output","Package":"wordwright.local/internal/verify","Test":"TestSuiteGuardAndEvidence","Output":"--- PASS: TestSuiteGuardAndEvidence (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.227021084Z","Action":"pass","Package":"wordwright.local/internal/verify","Test":"TestSuiteGuardAndEvidence","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.227121082Z","Action":"output","Package":"wordwright.local/internal/verify","Output":"PASS\n"}
+{"Time":"2026-09-12T08:31:46.227420026Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestCompression","Output":"--- PASS: TestCompression (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.227432333Z","Action":"pass","Package":"wordwright.local/internal/office","Test":"TestCompression","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.227437464Z","Action":"run","Package":"wordwright.local/internal/office","Test":"TestCompound"}
+{"Time":"2026-09-12T08:31:46.227440946Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestCompound","Output":"=== RUN   TestCompound\n"}
+{"Time":"2026-09-12T08:31:46.228182597Z","Action":"output","Package":"wordwright.local/internal/verify","Output":"ok  \twordwright.local/internal/verify\t0.006s\n"}
+{"Time":"2026-09-12T08:31:46.228203811Z","Action":"pass","Package":"wordwright.local/internal/verify","Elapsed":0.006}
+{"Time":"2026-09-12T08:31:46.236273109Z","Action":"output","Package":"wordwright.local/internal/project","Test":"TestSourceBuildCacheAndTamper","Output":"--- PASS: TestSourceBuildCacheAndTamper (0.01s)\n"}
+{"Time":"2026-09-12T08:31:46.236295895Z","Action":"pass","Package":"wordwright.local/internal/project","Test":"TestSourceBuildCacheAndTamper","Elapsed":0.01}
+{"Time":"2026-09-12T08:31:46.236305156Z","Action":"run","Package":"wordwright.local/internal/project","Test":"TestGuardedWritesAndUnknownProperties"}
+{"Time":"2026-09-12T08:31:46.236308559Z","Action":"output","Package":"wordwright.local/internal/project","Test":"TestGuardedWritesAndUnknownProperties","Output":"=== RUN   TestGuardedWritesAndUnknownProperties\n"}
+{"Time":"2026-09-12T08:31:46.239922614Z","Action":"output","Package":"wordwright.local/internal/project","Test":"TestGuardedWritesAndUnknownProperties","Output":"--- PASS: TestGuardedWritesAndUnknownProperties (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.239941574Z","Action":"pass","Package":"wordwright.local/internal/project","Test":"TestGuardedWritesAndUnknownProperties","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.23994716Z","Action":"run","Package":"wordwright.local/internal/project","Test":"TestSpecimenWorkspaceRoundTripAndControlledEdit"}
+{"Time":"2026-09-12T08:31:46.239950609Z","Action":"output","Package":"wordwright.local/internal/project","Test":"TestSpecimenWorkspaceRoundTripAndControlledEdit","Output":"=== RUN   TestSpecimenWorkspaceRoundTripAndControlledEdit\n"}
+{"Time":"2026-09-12T08:31:46.395688742Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestCompound","Output":"--- PASS: TestCompound (0.17s)\n"}
+{"Time":"2026-09-12T08:31:46.39573331Z","Action":"pass","Package":"wordwright.local/internal/office","Test":"TestCompound","Elapsed":0.17}
+{"Time":"2026-09-12T08:31:46.395742072Z","Action":"run","Package":"wordwright.local/internal/office","Test":"TestSpecimen"}
+{"Time":"2026-09-12T08:31:46.395745567Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestSpecimen","Output":"=== RUN   TestSpecimen\n"}
+{"Time":"2026-09-12T08:31:46.417479439Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestSpecimen","Output":"    office_test.go:88: ALR_V1 15 modules\n"}
+{"Time":"2026-09-12T08:31:46.417666405Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestSpecimen","Output":"    office_test.go:96: frmALRSetup: [Chk_ALR_setpagesizeandmargins Chk_AddTabAfterFootnoteNumber Chk_BoldorUnderlineToItalics Chk_DeItalicizer Chk_DeSuperScript Chk_DetectAndStyleAbstract Chk_FixHeadings Chk_FixParagraphIndents Chk_FixQuotesAndPunctuation Chk_FixToc Chk_HighlightForManualReview Chk_Italicizer Chk_JustifyFootnotes Chk_NoBoldShortforms Chk_NormalizeStylesToLawrevArtText_ExcludingTablesAndCaptions Chk_RemoveEmptySpacingParagraphs Chk_SetupALRHeadersAndFooters_Smart Chk_StyleBlockquotes Chk_StyleFootnotesInText Chk_StyleTitleAndAuthor Label1 Label2 LabelCol1 cmdDeselectAll cmdRun cmdSelectAll]\n"}
+{"Time":"2026-09-12T08:31:46.417723905Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestSpecimen","Output":"    office_test.go:96: frmPermaReplace: [Label1 btnCopyURLs btnLoadCSV btnProcess lstCSVPreview]\n"}
+{"Time":"2026-09-12T08:31:46.417855838Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestSpecimen","Output":"    office_test.go:96: frmSuggestBot: [Chk_CollapseNumberRangeSpaces Chk_ExpandJudgeAbbreviations Chk_FixJournalNames Chk_IbidConverter Chk_JournalNameFormatting Chk_MovePunctInsideFootnoteMarker Chk_ReplaceBracketedParasWithNormalParas Chk_ReplaceHyphenWithEnDash Chk_SectionAbbreviationFixer Chk_ShortenPinpointRanges ExperimentalLabel PageMainTools PageNicheTools cmdDeselectAllSuggesterMain cmdDeselectAllSuggesterNiche cmdRunSuggester cmdSelectAllSuggesterMain mpTabs]\n"}
+{"Time":"2026-09-12T08:31:46.417906715Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestSpecimen","Output":"    office_test.go:96: frmSupraTools: [Opt_AutoAddSupraCrossReferences Opt_FixSupraNotesNums Opt_SupraChecker cmdRunSupraTools]\n"}
+{"Time":"2026-09-12T08:31:46.443379866Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestSpecimen","Output":"--- PASS: TestSpecimen (0.05s)\n"}
+{"Time":"2026-09-12T08:31:46.44341243Z","Action":"pass","Package":"wordwright.local/internal/office","Test":"TestSpecimen","Elapsed":0.05}
+{"Time":"2026-09-12T08:31:46.443418548Z","Action":"run","Package":"wordwright.local/internal/office","Test":"TestFormCreate"}
+{"Time":"2026-09-12T08:31:46.443421352Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestFormCreate","Output":"=== RUN   TestFormCreate\n"}
+{"Time":"2026-09-12T08:31:46.443430138Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestFormCreate","Output":"--- PASS: TestFormCreate (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.443432659Z","Action":"pass","Package":"wordwright.local/internal/office","Test":"TestFormCreate","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.443434854Z","Action":"run","Package":"wordwright.local/internal/office","Test":"TestNewProject"}
+{"Time":"2026-09-12T08:31:46.443436594Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestNewProject","Output":"=== RUN   TestNewProject\n"}
+{"Time":"2026-09-12T08:31:46.44362628Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestNewProject","Output":"--- PASS: TestNewProject (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.443635811Z","Action":"pass","Package":"wordwright.local/internal/office","Test":"TestNewProject","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.443640113Z","Action":"run","Package":"wordwright.local/internal/office","Test":"TestFormUnicodeControl"}
+{"Time":"2026-09-12T08:31:46.443643167Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestFormUnicodeControl","Output":"=== RUN   TestFormUnicodeControl\n"}
+{"Time":"2026-09-12T08:31:46.44378326Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestFormUnicodeControl","Output":"--- PASS: TestFormUnicodeControl (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.443788957Z","Action":"pass","Package":"wordwright.local/internal/office","Test":"TestFormUnicodeControl","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.443792791Z","Action":"run","Package":"wordwright.local/internal/office","Test":"TestFailedRewriteIsTransactional"}
+{"Time":"2026-09-12T08:31:46.443795901Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestFailedRewriteIsTransactional","Output":"=== RUN   TestFailedRewriteIsTransactional\n"}
+{"Time":"2026-09-12T08:31:46.443925266Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestFailedRewriteIsTransactional","Output":"--- PASS: TestFailedRewriteIsTransactional (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.443941672Z","Action":"pass","Package":"wordwright.local/internal/office","Test":"TestFailedRewriteIsTransactional","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.443946756Z","Action":"run","Package":"wordwright.local/internal/office","Test":"TestCompressionRatio"}
+{"Time":"2026-09-12T08:31:46.443950171Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestCompressionRatio","Output":"=== RUN   TestCompressionRatio\n"}
+{"Time":"2026-09-12T08:31:46.447974849Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestCompressionRatio","Output":"--- PASS: TestCompressionRatio (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.447998741Z","Action":"pass","Package":"wordwright.local/internal/office","Test":"TestCompressionRatio","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.448005002Z","Action":"run","Package":"wordwright.local/internal/office","Test":"TestCompressionWireBoundaries"}
+{"Time":"2026-09-12T08:31:46.448008504Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestCompressionWireBoundaries","Output":"=== RUN   TestCompressionWireBoundaries\n"}
+{"Time":"2026-09-12T08:31:46.448013832Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestCompressionWireBoundaries","Output":"--- PASS: TestCompressionWireBoundaries (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.448017289Z","Action":"pass","Package":"wordwright.local/internal/office","Test":"TestCompressionWireBoundaries","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.448021065Z","Action":"run","Package":"wordwright.local/internal/office","Test":"TestMultiPageCreateEditRemove"}
+{"Time":"2026-09-12T08:31:46.448024013Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestMultiPageCreateEditRemove","Output":"=== RUN   TestMultiPageCreateEditRemove\n"}
+{"Time":"2026-09-12T08:31:46.448028024Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestMultiPageCreateEditRemove","Output":"--- PASS: TestMultiPageCreateEditRemove (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.448036488Z","Action":"pass","Package":"wordwright.local/internal/office","Test":"TestMultiPageCreateEditRemove","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.448039858Z","Action":"run","Package":"wordwright.local/internal/office","Test":"TestSpecimenFormsEditable"}
+{"Time":"2026-09-12T08:31:46.448042441Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestSpecimenFormsEditable","Output":"=== RUN   TestSpecimenFormsEditable\n"}
+{"Time":"2026-09-12T08:31:46.490105905Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestSpecimenFormsEditable","Output":"--- PASS: TestSpecimenFormsEditable (0.04s)\n"}
+{"Time":"2026-09-12T08:31:46.490135684Z","Action":"pass","Package":"wordwright.local/internal/office","Test":"TestSpecimenFormsEditable","Elapsed":0.04}
+{"Time":"2026-09-12T08:31:46.490143314Z","Action":"run","Package":"wordwright.local/internal/office","Test":"TestFormFailedEditTransactional"}
+{"Time":"2026-09-12T08:31:46.490147766Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestFormFailedEditTransactional","Output":"=== RUN   TestFormFailedEditTransactional\n"}
+{"Time":"2026-09-12T08:31:46.490157898Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestFormFailedEditTransactional","Output":"--- PASS: TestFormFailedEditTransactional (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.49016702Z","Action":"pass","Package":"wordwright.local/internal/office","Test":"TestFormFailedEditTransactional","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.490171148Z","Action":"run","Package":"wordwright.local/internal/office","Test":"TestFootnoteEmptyParagraphAndRelationships"}
+{"Time":"2026-09-12T08:31:46.490173956Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestFootnoteEmptyParagraphAndRelationships","Output":"=== RUN   TestFootnoteEmptyParagraphAndRelationships\n"}
+{"Time":"2026-09-12T08:31:46.490955124Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestFootnoteEmptyParagraphAndRelationships","Output":"--- PASS: TestFootnoteEmptyParagraphAndRelationships (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.490971431Z","Action":"pass","Package":"wordwright.local/internal/office","Test":"TestFootnoteEmptyParagraphAndRelationships","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.490977613Z","Action":"run","Package":"wordwright.local/internal/office","Test":"TestBlankPackageHasDOCXContentType"}
+{"Time":"2026-09-12T08:31:46.490980735Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestBlankPackageHasDOCXContentType","Output":"=== RUN   TestBlankPackageHasDOCXContentType\n"}
+{"Time":"2026-09-12T08:31:46.491101524Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestBlankPackageHasDOCXContentType","Output":"--- PASS: TestBlankPackageHasDOCXContentType (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.491106559Z","Action":"pass","Package":"wordwright.local/internal/office","Test":"TestBlankPackageHasDOCXContentType","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.491110273Z","Action":"run","Package":"wordwright.local/internal/office","Test":"TestPackageRefusesSymlinkEntries"}
+{"Time":"2026-09-12T08:31:46.491113316Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestPackageRefusesSymlinkEntries","Output":"=== RUN   TestPackageRefusesSymlinkEntries\n"}
+{"Time":"2026-09-12T08:31:46.491147257Z","Action":"output","Package":"wordwright.local/internal/office","Test":"TestPackageRefusesSymlinkEntries","Output":"--- PASS: TestPackageRefusesSymlinkEntries (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.49116932Z","Action":"pass","Package":"wordwright.local/internal/office","Test":"TestPackageRefusesSymlinkEntries","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.491173915Z","Action":"run","Package":"wordwright.local/internal/office","Test":"FuzzDecompress"}
+{"Time":"2026-09-12T08:31:46.491177338Z","Action":"output","Package":"wordwright.local/internal/office","Test":"FuzzDecompress","Output":"=== RUN   FuzzDecompress\n"}
+{"Time":"2026-09-12T08:31:46.491237013Z","Action":"run","Package":"wordwright.local/internal/office","Test":"FuzzDecompress/seed#0"}
+{"Time":"2026-09-12T08:31:46.491240813Z","Action":"output","Package":"wordwright.local/internal/office","Test":"FuzzDecompress/seed#0","Output":"=== RUN   FuzzDecompress/seed#0\n"}
+{"Time":"2026-09-12T08:31:46.491265615Z","Action":"output","Package":"wordwright.local/internal/office","Test":"FuzzDecompress/seed#0","Output":"--- PASS: FuzzDecompress/seed#0 (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.491269717Z","Action":"pass","Package":"wordwright.local/internal/office","Test":"FuzzDecompress/seed#0","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.491273859Z","Action":"run","Package":"wordwright.local/internal/office","Test":"FuzzDecompress/seed#1"}
+{"Time":"2026-09-12T08:31:46.491277112Z","Action":"output","Package":"wordwright.local/internal/office","Test":"FuzzDecompress/seed#1","Output":"=== RUN   FuzzDecompress/seed#1\n"}
+{"Time":"2026-09-12T08:31:46.491281778Z","Action":"output","Package":"wordwright.local/internal/office","Test":"FuzzDecompress/seed#1","Output":"--- PASS: FuzzDecompress/seed#1 (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.491284998Z","Action":"pass","Package":"wordwright.local/internal/office","Test":"FuzzDecompress/seed#1","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.491289483Z","Action":"output","Package":"wordwright.local/internal/office","Test":"FuzzDecompress","Output":"--- PASS: FuzzDecompress (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.491292613Z","Action":"pass","Package":"wordwright.local/internal/office","Test":"FuzzDecompress","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.491295614Z","Action":"run","Package":"wordwright.local/internal/office","Test":"FuzzCompound"}
+{"Time":"2026-09-12T08:31:46.491298307Z","Action":"output","Package":"wordwright.local/internal/office","Test":"FuzzCompound","Output":"=== RUN   FuzzCompound\n"}
+{"Time":"2026-09-12T08:31:46.491359241Z","Action":"run","Package":"wordwright.local/internal/office","Test":"FuzzCompound/seed#0"}
+{"Time":"2026-09-12T08:31:46.491363614Z","Action":"output","Package":"wordwright.local/internal/office","Test":"FuzzCompound/seed#0","Output":"=== RUN   FuzzCompound/seed#0\n"}
+{"Time":"2026-09-12T08:31:46.491390557Z","Action":"output","Package":"wordwright.local/internal/office","Test":"FuzzCompound/seed#0","Output":"--- PASS: FuzzCompound/seed#0 (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.491394726Z","Action":"pass","Package":"wordwright.local/internal/office","Test":"FuzzCompound/seed#0","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.491397798Z","Action":"run","Package":"wordwright.local/internal/office","Test":"FuzzCompound/seed#1"}
+{"Time":"2026-09-12T08:31:46.491401465Z","Action":"output","Package":"wordwright.local/internal/office","Test":"FuzzCompound/seed#1","Output":"=== RUN   FuzzCompound/seed#1\n"}
+{"Time":"2026-09-12T08:31:46.491406843Z","Action":"output","Package":"wordwright.local/internal/office","Test":"FuzzCompound/seed#1","Output":"--- PASS: FuzzCompound/seed#1 (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.491409917Z","Action":"pass","Package":"wordwright.local/internal/office","Test":"FuzzCompound/seed#1","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.491414048Z","Action":"output","Package":"wordwright.local/internal/office","Test":"FuzzCompound","Output":"--- PASS: FuzzCompound (0.00s)\n"}
+{"Time":"2026-09-12T08:31:46.491417645Z","Action":"pass","Package":"wordwright.local/internal/office","Test":"FuzzCompound","Elapsed":0}
+{"Time":"2026-09-12T08:31:46.491420436Z","Action":"output","Package":"wordwright.local/internal/office","Output":"PASS\n"}
+{"Time":"2026-09-12T08:31:46.497216842Z","Action":"output","Package":"wordwright.local/internal/office","Output":"ok  \twordwright.local/internal/office\t0.275s\n"}
+{"Time":"2026-09-12T08:31:46.497240337Z","Action":"pass","Package":"wordwright.local/internal/office","Elapsed":0.276}
+{"Time":"2026-09-12T08:31:46.55308428Z","Action":"output","Package":"wordwright.local/internal/project","Test":"TestSpecimenWorkspaceRoundTripAndControlledEdit","Output":"    workspace_test.go:182: 15 modules retained; 14 unedited sources and 26 form streams and document body unchanged; modified artifact 78740beefb5b865b77861b114f856344ee34176802319f08011d1061151b37fb\n"}
+{"Time":"2026-09-12T08:31:46.554239193Z","Action":"output","Package":"wordwright.local/internal/project","Test":"TestSpecimenWorkspaceRoundTripAndControlledEdit","Output":"--- PASS: TestSpecimenWorkspaceRoundTripAndControlledEdit (0.31s)\n"}
+{"Time":"2026-09-12T08:31:46.554248225Z","Action":"pass","Package":"wordwright.local/internal/project","Test":"TestSpecimenWorkspaceRoundTripAndControlledEdit","Elapsed":0.31}
+{"Time":"2026-09-12T08:31:46.554254877Z","Action":"output","Package":"wordwright.local/internal/project","Output":"PASS\n"}
+{"Time":"2026-09-12T08:31:46.556072427Z","Action":"output","Package":"wordwright.local/internal/project","Output":"ok  \twordwright.local/internal/project\t0.334s\n"}
+{"Time":"2026-09-12T08:31:46.556101643Z","Action":"pass","Package":"wordwright.local/internal/project","Elapsed":0.334}

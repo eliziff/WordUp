@@ -1,0 +1,11 @@
+{
+  "format": 2,
+  "name": "WordwrightStudio",
+  "source_name": "WordwrightStudio.dotm",
+  "source_sha256": "3e97ccb3135cf0950ab0c603b62ace89498cd355cf1ef67320491eda8587d67b",
+  "target": "windows+mac",
+  "components": {
+    "StudioForm": "form",
+    "ThisDocument": "document"
+  }
+}
