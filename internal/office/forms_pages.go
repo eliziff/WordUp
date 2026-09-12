@@ -145,12 +145,22 @@ func arrayStrings(b []byte, cp int) (out []string, err error) {
 func encodeStrings(a []string) []byte {
 	b := []byte{}
 	for _, s := range a {
-		raw := utf16bytes(s)
-		b = append(b, dword(uint32(len(raw)))...)
+		raw, size := formString(s)
+		b = append(b, dword(size)...)
 		b = append(b, raw...)
 		b = pad(b, 4)
 	}
 	return b
+}
+
+func formString(s string) ([]byte, uint32) {
+	for _, r := range s {
+		if r > 127 {
+			b := utf16bytes(s)
+			return b, uint32(len(b))
+		}
+	}
+	return []byte(s), uint32(len(s)) | 0x80000000
 }
 func pageStrings(l *formLevel, name string, cp int) ([]string, error) {
 	t, e := internalTabs(l)

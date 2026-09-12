@@ -1,5 +1,5 @@
-# Wordwright source workspace
-Use the wordwright executable. No module imports, VBE typing, or Python setup.
+# WordUp source workspace
+Use the wordup executable. No module imports, VBE typing, or Python setup.
 
 - Edit vba/*.bas, *.cls, and *.vba as ordinary UTF-8 files; module names and VB_Name must agree.
 - New .bas files become standard modules; new .cls files become classes; .vba files are UserForm code.

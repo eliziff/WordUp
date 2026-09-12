@@ -1,13 +1,13 @@
 package deploy
 
 import (
+	"github.com/eliziff/WordUp/internal/native"
+	"github.com/eliziff/WordUp/internal/office"
+	"github.com/eliziff/WordUp/internal/project"
+	"github.com/eliziff/WordUp/internal/verify"
 	"os"
 	"path/filepath"
 	"testing"
-	"wordwright.local/internal/native"
-	"wordwright.local/internal/office"
-	"wordwright.local/internal/project"
-	"wordwright.local/internal/verify"
 )
 
 // Synthetic evidence only tests deployment policy; it is never native evidence.
@@ -62,5 +62,49 @@ func TestDeploymentBackupAndStaleTarget(t *testing.T) {
 	expected, _ := os.ReadFile(a)
 	if string(b) != string(expected) || plan.State != "installed" {
 		t.Fatal("installation mismatch")
+	}
+}
+
+func TestInterruptedInstallAndRestore(t *testing.T) {
+	root, a, proof, _ := proofFixture(t)
+	target := filepath.Join(root, "installed.dotm")
+	if err := os.WriteFile(target, []byte("previous"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	file, p, err := Prepare(root, a, proof, target)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Simulate interruption between replacing the target and recording success.
+	if err = os.WriteFile(filepath.Join(filepath.Dir(file), "previous.dotm"), []byte("previous"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	data, _ := os.ReadFile(p.Candidate)
+	if err = os.WriteFile(target, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	p, err = Activate(file)
+	if err != nil || p.State != "installed" {
+		t.Fatalf("recover: %+v %v", p, err)
+	}
+	if err = os.WriteFile(target, []byte("user edit"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = Restore(file); err == nil {
+		t.Fatal("overwrote user edit")
+	}
+	if err = os.WriteFile(target, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	p, err = Restore(file)
+	if err != nil || p.State != "restored" {
+		t.Fatalf("restore: %+v %v", p, err)
+	}
+	got, _ := os.ReadFile(target)
+	if string(got) != "previous" {
+		t.Fatal("wrong restored bytes")
+	}
+	if _, err = Restore(file); err != nil {
+		t.Fatal("restore is not idempotent", err)
 	}
 }

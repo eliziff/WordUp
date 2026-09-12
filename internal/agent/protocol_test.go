@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"github.com/eliziff/WordUp/internal/project"
 	"strings"
 	"testing"
-	"wordwright.local/internal/project"
 )
 
 func TestMCPHandshakeAndExplicitErrors(t *testing.T) {

@@ -3,10 +3,13 @@
 package native
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"syscall"
+	"time"
 	"unsafe"
 )
 
@@ -33,12 +36,22 @@ func windowInventory(pid uint32) []any {
 	out := []any{}
 	for _, hwnd := range windowsFor(pid) {
 		v, _, _ := windowVisible.Call(hwnd)
-		out = append(out, map[string]any{"hwnd": uint64(hwnd), "pid": pid, "class": classOf(hwnd), "title": textOf(hwnd), "visible_on_private_desktop": v != 0})
+		node := map[string]any{"hwnd": uint64(hwnd), "pid": pid, "class": classOf(hwnd), "title": textOf(hwnd), "visible_on_private_desktop": v != 0}
+		if classOf(hwnd) == "OpusApp" {
+			q := windowEnum{pid: pid}
+			enumChildren.Call(hwnd, collectWindowsCallback, uintptr(unsafe.Pointer(&q)))
+			children := []any{}
+			for _, child := range q.windows {
+				children = append(children, map[string]any{"hwnd": uint64(child), "class": classOf(child), "title": textOf(child)})
+			}
+			node["children"] = children
+		}
+		out = append(out, node)
 	}
 	return out
 }
 func childrenOf(d dispatch) ([]variant, error) {
-	v, e := d.get("accChildCount")
+	v, e := d.invokeIDs("accChildCount", 2, nil, nil, nil, nil, []int32{-5001})
 	if e != nil {
 		return nil, e
 	}
@@ -108,8 +121,18 @@ func resolveAccessible(hwnd uintptr, path []any) (dispatch, error) {
 	}
 	return a, nil
 }
+
+var accessibilityIDs = map[string]int32{"accName": -5003, "accValue": -5004, "accDescription": -5005, "accRole": -5006, "accState": -5007, "accKeyboardShortcut": -5010, "accDefaultAction": -5013}
+
 func accProperty(a dispatch, name string, child int) (any, error) {
-	v, e := a.get(name, child)
+	id, known := accessibilityIDs[name]
+	var v variant
+	var e error
+	if known {
+		v, e = a.invokeIDs(name, 2, []any{child}, nil, nil, nil, []int32{id})
+	} else {
+		v, e = a.get(name, child)
+	}
 	if e != nil {
 		return nil, e
 	}
@@ -167,13 +190,199 @@ func accNode(a dispatch, child int, path []any, hwnd uintptr, depth int, budget 
 	}
 	return out
 }
+func findNamed(a dispatch, child int, path []any, hwnd uintptr, name string, role any, depth int, budget *int, matches *[]map[string]any) {
+	if *budget <= 0 || len(*matches) > 1 {
+		return
+	}
+	*budget--
+	actual, _ := accProperty(a, "accName", child)
+	if actual == name {
+		actualRole, _ := accProperty(a, "accRole", child)
+		if role == nil || fmt.Sprint(actualRole) == fmt.Sprint(role) {
+			n := 1
+			*matches = append(*matches, accNode(a, child, path, hwnd, 0, &n))
+		}
+	}
+	if child != 0 || depth == 0 {
+		return
+	}
+	entries, e := childrenOf(a)
+	if e != nil {
+		return
+	}
+	defer func() {
+		for i := range entries {
+			entries[i].clear()
+		}
+	}()
+	for i := range entries {
+		v := &entries[i]
+		if v.VT == 3 {
+			findNamed(a, int(int32(v.Value)), path, hwnd, name, role, 0, budget, matches)
+		} else if v.VT == 9 {
+			d, e := v.object()
+			if e != nil {
+				continue
+			}
+			c, e := d.query(&iidAccessible)
+			d.release()
+			if e != nil {
+				continue
+			}
+			p := append(append([]any(nil), path...), float64(i))
+			findNamed(c, 0, p, hwnd, name, role, depth-1, budget, matches)
+			c.release()
+		}
+		if *budget <= 0 || len(*matches) > 1 {
+			return
+		}
+	}
+}
+
 func uiOperation(pid uint32, directory string, execute bool, op Operation) (any, error) {
+	if wait, ok := op.Named["wait_ms"].(float64); ok {
+		if wait < 0 || wait > 10000 {
+			return nil, fmt.Errorf("UI wait_ms must be 0..10000")
+		}
+		named := map[string]any{}
+		for k, v := range op.Named {
+			if k != "wait_ms" {
+				named[k] = v
+			}
+		}
+		op.Named = named
+		deadline := time.Now().Add(time.Duration(wait) * time.Millisecond)
+		for {
+			r, e := uiOperation(pid, directory, execute, op)
+			f, ok := e.(*Fault)
+			if e == nil || !ok || f.Code != "ui_selector_not_unique" || time.Now().After(deadline) {
+				return r, e
+			}
+			if matches, ok := f.Details.([]map[string]any); !ok || len(matches) != 0 {
+				return r, e
+			}
+			pump()
+			time.Sleep(50 * time.Millisecond)
+		}
+	}
 	if op.Op == "ui.windows" {
 		return windowInventory(pid), nil
+	}
+	if op.Op == "ui.diagnostics" {
+		out := []any{}
+		for _, item := range windowInventory(pid) {
+			w := item.(map[string]any)
+			if w["visible_on_private_desktop"] != true {
+				continue
+			}
+			hwnd := w["hwnd"].(uint64)
+			if op.Named["trees"] != false {
+				tree, err := uiOperation(pid, directory, execute, Operation{Op: "ui.tree", HWND: hwnd, Depth: 4})
+				w["tree"] = tree
+				if err != nil {
+					w["tree_error"] = err.Error()
+				}
+			}
+			if op.File != "" {
+				if err := os.MkdirAll(op.File, 0700); err != nil {
+					return nil, err
+				}
+				path := filepath.Join(op.File, fmt.Sprintf("window-%d.png", hwnd))
+				if err := screenshot(uintptr(hwnd), path); err != nil {
+					w["capture_error"] = err.Error()
+				} else {
+					w["screenshot"] = path
+				}
+			}
+			out = append(out, w)
+		}
+		return map[string]any{"pid": pid, "windows": out}, nil
+	}
+	if name, ok := op.Named["name"].(string); ok && name != "" {
+		if execute {
+			if result, err, handled := uiaNamedInvoke(pid, op); handled {
+				return result, err
+			}
+		}
+		matches := []map[string]any{}
+		budget := 4000
+		search := func(hwnd uint64) {
+			a, e := accessibleRoot(uintptr(hwnd))
+			if e != nil {
+				return
+			}
+			defer a.release()
+			findNamed(a, 0, nil, uintptr(hwnd), name, op.Named["role"], 16, &budget, &matches)
+		}
+		scope, _ := op.Named["scope"].(string)
+		for _, item := range windowInventory(pid) {
+			w := item.(map[string]any)
+			if w["visible_on_private_desktop"] != true || (op.HWND != 0 && op.HWND != w["hwnd"]) {
+				continue
+			}
+			if title, ok := op.Named["window"].(string); ok && title != w["title"] {
+				continue
+			}
+			if scope == "ribbon" && w["class"] != "OpusApp" {
+				continue
+			}
+			if scope == "menu" && w["class"] != "NetUIHWND" && w["class"] != "MsoCommandBarPopup" && w["class"] != "Net UI Tool Window" {
+				continue
+			}
+			if scope == "form" && w["class"] != "ThunderDFrame" && w["class"] != "ThunderXFrame" {
+				continue
+			}
+			// Word exposes its Ribbon through child NetUI windows, separately
+			// from the main document's client accessibility tree.
+			before := len(matches)
+			if children, ok := w["children"].([]any); ok {
+				for _, child := range children {
+					c := child.(map[string]any)
+					if c["class"] != "NetUIHWND" {
+						continue
+					}
+					search(c["hwnd"].(uint64))
+				}
+			}
+			if len(matches) == before && scope != "ribbon" {
+				search(w["hwnd"].(uint64))
+			}
+		}
+		if budget <= 0 {
+			return nil, Fail("ui_search_budget", "Narrow the selector with target, window or scope; search did not establish uniqueness", nil)
+		}
+		if len(matches) != 1 {
+			return nil, Fail("ui_selector_not_unique", fmt.Sprintf("Expected one control named %q; found %d", name, len(matches)), matches)
+		}
+		if op.Op == "ui.find" {
+			return matches[0], nil
+		}
+		b, _ := json.Marshal(matches[0]["selector"])
+		var selector Operation
+		if err := json.Unmarshal(b, &selector); err != nil {
+			return nil, err
+		}
+		op.HWND, op.Args, op.Child = selector.HWND, selector.Args, selector.Child
+		op.Named = map[string]any{"expected_name": name}
 	}
 	hwnd := uintptr(op.HWND)
 	if hwnd == 0 || pidOf(hwnd) != pid {
 		return nil, Fail("window_not_owned", "UI operations require an exact window handle belonging to the app-owned Word process", nil)
+	}
+	if op.Op == "ui.context_menu" {
+		if !execute {
+			return nil, Fail("execution_not_authorized", "Context-menu interaction requires execute authority", nil)
+		}
+		q := windowEnum{pid: pid}
+		enumChildren.Call(hwnd, findDocumentCallback, uintptr(unsafe.Pointer(&q)))
+		if q.found != 0 {
+			hwnd = q.found
+		}
+		ok, _, err := user32.NewProc("PostMessageW").Call(hwnd, 0x7b, hwnd, ^uintptr(0))
+		if ok == 0 {
+			return nil, winError("PostMessageW(WM_CONTEXTMENU)", err)
+		}
+		return map[string]any{"posted": true, "hwnd": uint64(hwnd)}, nil
 	}
 	if op.Op == "ui.capture" {
 		file := op.File

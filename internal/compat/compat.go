@@ -3,10 +3,10 @@
 package compat
 
 import (
+	"github.com/eliziff/WordUp/internal/inspect"
+	"github.com/eliziff/WordUp/internal/project"
 	"regexp"
 	"strings"
-	"wordwright.local/internal/inspect"
-	"wordwright.local/internal/project"
 )
 
 type truth int

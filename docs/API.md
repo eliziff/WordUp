@@ -1,6 +1,6 @@
 # Agent API
 
-All commands are local. Use `wordwright -w WORKSPACE call METHOD @parameters.json` for one-shot operations and `rpc METHOD @parameters.json` for a previously started warm session. `serve` accepts newline-delimited `{id,method,params}` JSON. `mcp` is stdio JSON-RPC with initialization and tools/call. Stdout contains protocol data; errors are structured and command failure is nonzero.
+All commands are local. Use `wordup -w WORKSPACE call METHOD @parameters.json` for one-shot operations and `rpc METHOD @parameters.json` for a previously started warm session. `serve` accepts newline-delimited `{id,method,params}` JSON. `mcp` is stdio JSON-RPC with initialization and tools/call. Stdout contains protocol data; errors are structured and command failure is nonzero.
 
 ## Direct native object access (Windows)
 
@@ -76,7 +76,13 @@ The CLI `test` command uses a fresh process. Via agent `test`, set `fresh:true` 
 {"path":"dist/MyTemplate.dotm","reference":"reports/acceptance.json","output":"C:\\Templates\\MyTemplate.dotm"}
 ```
 
-Use authorized `call deploy @deployment.json`. The app checks the exact artifact/suite/observations, stages the bytes, backs up the old file and either activates or waits locally for Word to exit. An interrupted plan remains at the returned `plan` path. `call activate` with `path` equal to that plan retries it; no OS startup persistence is installed.
+Use authorized `call deploy '@deployment.json'`. The app checks the exact artifact/suite/observations, stages the bytes, backs up the old file and either activates or waits locally for Word to exit. Windows registers a current-user login command to resume pending activation, and removes it on completion. `call activate` with `path` equal to the returned plan retries it explicitly. `call restore` with that same `path` restores its previous template, refusing changed backups or newer target edits. Both require `--execute` and Word to be closed; neither closes user Word processes.
+
+## Compile and sign
+
+Authorized `call compile '{}'` builds the current workspace, compiles the complete project in Word, and signs the output. Optional `output` overrides its default path. It automatically creates or reuses a WordUp local certificate. `sign` instead takes an existing unsigned `path` and a new `output`. Advanced `signing` fields are `thumbprint`, `store_location`, `signtool` and `timestamp_url`; all are optional. Microsoft SignTool and the registered Office SIP remain prerequisites.
+
+The signing report distinguishes `signed`, `digest_verified` and certificate trust (`verified`, `trust_error`). A locally self-signed certificate does not automatically become trusted on someone else's computer. Compilation records its native observations in `reports/compile.json`. On failure, staged input and window diagnostics remain available at the report's paths; the prior output is preserved. Unchanged compile results are explicitly labeled `cached`; fresh acceptance is still required for deployment.
 
 ## Images and style references
 

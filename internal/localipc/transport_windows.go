@@ -57,10 +57,10 @@ func listen() (*listener, error) {
 	if _, e := rand.Read(b); e != nil {
 		return nil, e
 	}
-	return &listener{address: `\\.\pipe\Wordwright-` + hex.EncodeToString(b)}, nil
+	return &listener{address: `\\.\pipe\WordUp-` + hex.EncodeToString(b)}, nil
 }
 func validAddress(s string) bool {
-	return strings.HasPrefix(s, `\\.\pipe\Wordwright-`) && len(s) == len(`\\.\pipe\Wordwright-`)+32
+	return strings.HasPrefix(s, `\\.\pipe\WordUp-`) && len(s) == len(`\\.\pipe\WordUp-`)+32
 }
 func (l *listener) Accept() (io.ReadWriteCloser, error) {
 	token, e := syscall.OpenCurrentProcessToken()

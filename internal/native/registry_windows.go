@@ -102,5 +102,5 @@ func findWord() (string, error) {
 			}
 		}
 	}
-	return "", Fail("word_not_installed", "Install/activate Microsoft Word on this computer; Wordwright does not contain or emulate Microsoft's VBA runtime", nil)
+	return "", Fail("word_not_installed", "Install/activate Microsoft Word on this computer; WordUp does not contain or emulate Microsoft's VBA runtime", nil)
 }

@@ -2,7 +2,7 @@
   "name": "StudioForm",
   "mode": "replace",
   "properties": {
-    "Caption": "Wordwright Studio",
+    "Caption": "WordUp Studio",
     "Height": 240,
     "Width": 360
   },
@@ -31,7 +31,7 @@
                 "Height": 28,
                 "Left": 12,
                 "Top": 12,
-                "Value": "Editable native control",
+                "Value": "Editable native control — café",
                 "Width": 270
               }
             },

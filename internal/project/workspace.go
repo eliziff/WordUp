@@ -13,10 +13,10 @@ import (
 	"strings"
 	"time"
 
-	"wordwright.local/internal/office"
+	"github.com/eliziff/WordUp/internal/office"
 )
 
-const Version = "0.2.0"
+const Version = "0.3.0"
 
 type Manifest struct {
 	Format         int               `json:"format"`
@@ -582,14 +582,7 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 		if e != nil {
 			return nil, e
 		}
-		p.Files["word/vbaProject.bin"] = vb
-		if e = p.ContentType("word/vbaProject.bin", "application/vnd.ms-office.vbaProject"); e != nil {
-			return nil, e
-		}
-		if e = p.ContentType("word/document.xml", office.MainDOTM); e != nil {
-			return nil, e
-		}
-		if e = p.Relationship("word/document.xml", "rIdVBA", office.R+"/vbaProject", "vbaProject.bin", ""); e != nil {
+		if e = p.SetVBA(vb); e != nil {
 			return nil, e
 		}
 	}
@@ -720,8 +713,8 @@ func dropSignatures(p *office.Package) error {
 	return nil
 }
 
-const AgentInstructions = `# Wordwright source workspace
-Use the wordwright executable. No module imports, VBE typing, or Python setup.
+const AgentInstructions = `# WordUp source workspace
+Use the wordup executable. No module imports, VBE typing, or Python setup.
 
 - Edit vba/*.bas, *.cls, and *.vba as ordinary UTF-8 files; module names and VB_Name must agree.
 - New .bas files become standard modules; new .cls files become classes; .vba files are UserForm code.

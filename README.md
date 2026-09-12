@@ -1,8 +1,8 @@
-# Wordwright Local 0.2.0
+# WordUp 0.3.0
 
 A native, source-first Word template toolchain for coding agents. One executable; no Python, Node, browser runtime, cloud service, VM, module-import ritual, or separately configured test desktop.
 
-**Engineering preview.** The source/package/form core has been executed and tested on Linux against the supplied ALR template. Windows and Mac executables are real cross-compiled binaries. **The Windows Word backend and Mac Apple Events backend have NOT been executed against Microsoft Word in this build environment.** See `VALIDATION.md` and `docs/LIMITS.md`. Compiling the executable is not native Word acceptance. No edited sample is labeled Word-verified.
+**Windows engineering preview, verified in actual Microsoft Word.** Native acceptance covers whole-project VBA compilation, saved nested UserForms, Ribbon and context-menu callbacks, template hotkeys, editable document content, Quick Parts and real page rendering. Signed-template acceptance passed 17 assertions. Failure, runaway containment and login recovery have separate native tests. Mac execution remains unverified. See [current evidence](docs/VALIDATION-WINDOWS.md) and [remaining limits](docs/LIMITS.md); historical `VALIDATION.md` describes the original offline preview.
 
 ## Start with an agent
 
@@ -11,7 +11,7 @@ Unpack the matching binary and give a local coding agent its path, this README, 
 A useful instruction to the agent is in `AGENTS.md`. The app's `selftest` creates its own integrated example and tests it—no user-imported modules or hand-created fixtures required:
 
 ```powershell
-.\wordwright.exe --execute selftest
+.\wordup.exe --execute selftest
 ```
 
 That command deliberately returns a nonzero exit code and structured evidence on failure. It is the first native gate, not a proof of every future macro. The agent should run it and investigate the resulting logs itself rather than asking the user to do VBE work.
@@ -19,10 +19,10 @@ That command deliberately returns a nonzero exit code and structured evidence on
 For a real project:
 
 ```powershell
-.\wordwright.exe import "C:\Templates\MyTemplate.dotm" "C:\Work\MyTemplate"
-.\wordwright.exe -w "C:\Work\MyTemplate" --execute session start
-.\wordwright.exe -w "C:\Work\MyTemplate" rpc help '{}'
-.\wordwright.exe -w "C:\Work\MyTemplate" rpc build '{}'
+.\wordup.exe import "C:\Templates\MyTemplate.dotm" "C:\Work\MyTemplate"
+.\wordup.exe -w "C:\Work\MyTemplate" --execute session start
+.\wordup.exe -w "C:\Work\MyTemplate" rpc help '{}'
+.\wordup.exe -w "C:\Work\MyTemplate" rpc build '{}'
 ```
 
 `session start` creates a local app process from this same executable. The native Word host is lazy-started and stays warm. Windows uses a user-restricted named pipe; Mac/Linux use a local socket. No TCP listener, third-party service, or system service. `session stop` closes the owned worker, not the user's Word. An idle session exits after ten minutes.
@@ -30,13 +30,13 @@ For a real project:
 For reliable shell quoting, pass operation parameters as UTF-8 JSON files:
 
 ```powershell
-.\wordwright.exe -w "C:\Work\MyTemplate" rpc native.call @operation.json
+.\wordup.exe -w "C:\Work\MyTemplate" rpc native.call @operation.json
 ```
 
 An MCP client can instead launch:
 
 ```text
-wordwright.exe --workspace C:\Work\MyTemplate --execute mcp
+wordup.exe --workspace C:\Work\MyTemplate --execute mcp
 ```
 
 There is no global agent configuration installer. Clients that support stdio MCP can use that command; any terminal-capable coding agent can use the CLI and local session. Protocol revisions 2025-03-26, 2025-06-18 and 2025-11-25 are explicitly negotiated; newer capabilities are not silently claimed.
@@ -71,7 +71,7 @@ The same executable creates a private Win32 desktop on the user's own interactiv
 
 The `/a` startup switch avoids automatically loading the user's normal template and add-ins. An owned job object provides process-tree cleanup. Default file inspection disables macros. Authorized execution uses the owned process's documented AutomationSecurity property; no Trust Center or execution-policy registry changes are made. Group Policy and OS security remain authoritative.
 
-This removes the previous separate-machine/VM requirement from the implementation. **Coexistence with a live user Word session, modal-dialog handling, compiler selection, security behavior, and cleanup still need actual Windows acceptance.** The source includes the mechanisms; the Linux test results do not prove them.
+Native Windows tests exercised compilation, modal compiler diagnostics, independent Word-process survival and runaway cleanup. The owned job runs Below Normal with default limits of 50% CPU, 2048 MB memory, 16 processes and 30 seconds per operation. These limits apply to the WordUp-owned job, not to a shared template opened normally by its recipient.
 
 ## Broad capability without a fixed operation menu
 
@@ -86,10 +86,12 @@ The renderer obtains actual Word page `EnhMetaFileBits`, rasterizes it through W
 `test` uses an exact staged copy of an artifact and records its SHA-256, suite, results, assertion count, host metadata, and timing. A fresh test starts a separate owned Word host. It does not edit the source artifact. Empty assertions and unavailable runtimes cannot pass.
 
 ```powershell
-.\wordwright.exe -w "C:\Work\MyTemplate" --execute test "C:\Work\MyTemplate\dist\MyTemplate.dotm" "C:\Work\MyTemplate\tests\suite.json"
+.\wordup.exe -w "C:\Work\MyTemplate" --execute test "C:\Work\MyTemplate\dist\MyTemplate.dotm" "C:\Work\MyTemplate\tests\suite.json"
 ```
 
-`deploy` requires a passing, fresh, artifact-bound native acceptance record. It verifies the old installed file's hash, makes a backup, and atomically installs only when Word is closed. If Word is open, an app-owned local process waits for it to exit. It does not close the user's Word. **This preview does not register a startup task: if the OS shuts down while activation is pending, the agent must resume the durable plan through the app.** Do not claim guaranteed next-boot activation across an OS reboot.
+`deploy` requires a passing, fresh, artifact-bound native acceptance record. It verifies the old installed file's hash, makes a backup, and atomically installs only when Word is closed. If Word is open, an app-owned local process waits. Windows registers a current-user login command for pending activation and removes it on completion. The login script has been executed in a native integration test; an actual OS reboot was not performed. `call restore` with the activation plan's `path` restores the previous template while refusing newer user edits.
+
+`compile` builds, compiles in Word, and signs the output. It automatically creates a local non-exportable signing certificate or reuses an existing WordUp certificate. No personal certificate identity is built in. Windows SDK SignTool and Microsoft's registered Office SIP are currently prerequisites; automatic prerequisite installation is not implemented. A self-signed signature's integrity and publisher trust are reported separately. Failed compilation retains the candidate, compiler diagnostics and screenshots; it does not replace the working output.
 
 ## Mac stretch implementation
 
@@ -97,18 +99,18 @@ The same offline builder and conservative conditional-compilation/portability ch
 
 ## Measurements
 
-See `evidence/benchmarks.json` for twenty whole-process trials per scenario. In this Linux container, the 708 KB ALR template's changed-source build had a median of about 145 ms; cached ALR builds about 58 ms; the integrated example's cached build about 3 ms. These include launching the CLI. They are **not Word startup, execution or Windows benchmarks**. Native Word latency has not been measured.
+The complete signed Windows suite recorded 2.62 seconds warm and 4.58 seconds including startup, with 17 fresh assertions and visually checked Word, Ribbon and UserForm captures. Timing varies with machine load; a one-second full-suite target has not been achieved. See [measurement details](docs/PERFORMANCE.md). `evidence/benchmarks.json` retains the original offline Linux measurements.
 
 ## Developing the harness
 
 End users do not need Go. Building the source requires Go 1.23+:
 
 ```text
-go test ./...
-go test -race ./...
-go build -trimpath -ldflags="-s -w" -o wordwright ./cmd/wordwright
+go test ./internal/... ./cmd/...
+go test -race ./internal/... ./cmd/...
+go build -trimpath -ldflags="-s -w" -o wordup ./cmd/wordup
 ```
 
-There are no external Go modules. `go list -m all` contains only this module. `scripts/build.sh` reproduces the platform binaries. The private ALR specimen is excluded from the generic source package; setting `WORDWRIGHT_SPECIMEN` to its path enables the optional specimen tests.
+There are no external Go modules. `go list -m all` contains only this module. `scripts/build.sh` reproduces the platform binaries. The private ALR specimen is excluded from the generic source package; setting `WORDUP_SPECIMEN` to its path enables the optional specimen tests.
 
 Read `docs/API.md`, `docs/LIMITS.md`, `VALIDATION.md`, and the source. This preview is not signed or notarized. Do not circumvent OS security warnings or deploy an unverified candidate over a working template.

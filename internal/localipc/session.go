@@ -11,6 +11,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/eliziff/WordUp/internal/agent"
+	"github.com/eliziff/WordUp/internal/project"
+	"github.com/eliziff/WordUp/internal/verify"
 	"io"
 	"os"
 	"os/exec"
@@ -18,9 +21,6 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-	"wordwright.local/internal/agent"
-	"wordwright.local/internal/project"
-	"wordwright.local/internal/verify"
 )
 
 type Metadata struct {

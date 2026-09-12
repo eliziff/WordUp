@@ -17,13 +17,61 @@ import (
 )
 
 const (
-	W        = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
-	R        = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
-	RelNS    = "http://schemas.openxmlformats.org/package/2006/relationships"
-	CT       = "http://schemas.openxmlformats.org/package/2006/content-types"
-	MainDOTM = "application/vnd.ms-word.template.macroEnabledTemplate.main+xml"
-	MainDOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"
+	W             = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+	R             = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+	RelNS         = "http://schemas.openxmlformats.org/package/2006/relationships"
+	CT            = "http://schemas.openxmlformats.org/package/2006/content-types"
+	MainDOTM      = "application/vnd.ms-word.template.macroEnabledTemplate.main+xml"
+	MainDOCX      = "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"
+	VBAProjectRel = "http://schemas.microsoft.com/office/2006/relationships/vbaProject"
 )
+
+// SetVBA attaches the native project using Word's extension relationship, which
+// is not in the standard OOXML relationship namespace. Retain existing part IDs.
+func (p *Package) SetVBA(data []byte) error {
+	p.Files["word/vbaProject.bin"] = data
+	for part, typ := range map[string]string{"word/document.xml": MainDOTM, "word/vbaProject.bin": "application/vnd.ms-office.vbaProject"} {
+		if err := p.ContentType(part, typ); err != nil {
+			return err
+		}
+	}
+	id := "rIdVBA"
+	if b := p.Files[RelPart("word/document.xml")]; len(b) > 0 {
+		spans, err := XMLSpans(b)
+		if err != nil {
+			return err
+		}
+		for _, s := range spans {
+			if s.Name.Local == "Relationship" && (s.Attribute("", "Type") == VBAProjectRel || s.Attribute("", "Type") == R+"/vbaProject") {
+				id = s.Attribute("", "Id")
+				break
+			}
+		}
+	}
+	if err := p.Relationship("word/document.xml", id, VBAProjectRel, "vbaProject.bin", ""); err != nil {
+		return err
+	}
+	const supplemental = "http://schemas.microsoft.com/office/2006/relationships/wordVbaData"
+	if b := p.Files[RelPart("word/vbaProject.bin")]; len(b) > 0 {
+		spans, err := XMLSpans(b)
+		if err != nil {
+			return err
+		}
+		for _, s := range spans {
+			if s.Attribute("", "Type") == supplemental {
+				return nil
+			}
+		}
+	}
+	const part = "word/vbaData.xml"
+	if len(p.Files[part]) == 0 {
+		p.Files[part] = []byte(`<wne:vbaSuppData xmlns:wne="http://schemas.microsoft.com/office/word/2006/wordml"/>`)
+	}
+	if err := p.ContentType(part, "application/vnd.ms-word.vbaData+xml"); err != nil {
+		return err
+	}
+	return p.Relationship("word/vbaProject.bin", "rIdData", supplemental, "vbaData.xml", "")
+}
 
 type Package struct {
 	Original []byte

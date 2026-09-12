@@ -1122,7 +1122,7 @@ func AddBuildingBlocks(p *Package, blocks []BuildingBlock, asset func(string) ([
 		}
 		id := strings.ToUpper(Hash([]byte(block.Name))[:32])
 		guid := fmt.Sprintf("{%s-%s-%s-%s-%s}", id[:8], id[8:12], id[12:16], id[16:20], id[20:])
-		node := `<w:docPart><w:docPartPr><w:name w:val="` + Esc(block.Name) + `"/><w:description w:val="` + Esc(block.Description) + `"/><w:category><w:name w:val="` + Esc(cat) + `"/><w:gallery w:val="` + Esc(gallery) + `"/></w:category><w:types><w:type w:val="autoExp"/></w:types><w:behaviors><w:behavior w:val="content"/></w:behaviors><w:guid w:val="` + guid + `"/></w:docPartPr><w:docPartBody>` + body + `</w:docPartBody></w:docPart>`
+		node := `<w:docPart><w:docPartPr><w:name w:val="` + Esc(block.Name) + `"/><w:description w:val="` + Esc(block.Description) + `"/><w:category><w:name w:val="` + Esc(cat) + `"/><w:gallery w:val="` + Esc(gallery) + `"/></w:category><w:behaviors><w:behavior w:val="content"/></w:behaviors><w:guid w:val="` + guid + `"/></w:docPartPr><w:docPartBody>` + body + `</w:docPartBody></w:docPart>`
 		spans, e := XMLSpans(b)
 		if e != nil {
 			return e
@@ -1169,12 +1169,20 @@ func AddBuildingBlocks(p *Package, blocks []BuildingBlock, asset func(string) ([
 	}
 	// Glossary content uses its own relationships, including references to styles.
 	if p.Files["word/styles.xml"] != nil {
-		if e := p.Relationship(part, "wwStyles", R+"/styles", "../styles.xml", ""); e != nil {
+		p.Files["word/glossary/styles.xml"] = append([]byte(nil), p.Files["word/styles.xml"]...)
+		if e := p.ContentType("word/glossary/styles.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"); e != nil {
+			return e
+		}
+		if e := p.Relationship(part, "wwStyles", R+"/styles", "styles.xml", ""); e != nil {
 			return e
 		}
 	}
 	if p.Files["word/numbering.xml"] != nil {
-		if e := p.Relationship(part, "wwNumbering", R+"/numbering", "../numbering.xml", ""); e != nil {
+		p.Files["word/glossary/numbering.xml"] = append([]byte(nil), p.Files["word/numbering.xml"]...)
+		if e := p.ContentType("word/glossary/numbering.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"); e != nil {
+			return e
+		}
+		if e := p.Relationship(part, "wwNumbering", R+"/numbering", "numbering.xml", ""); e != nil {
 			return e
 		}
 	}

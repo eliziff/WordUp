@@ -13,9 +13,9 @@ import (
 	"strings"
 	"time"
 
-	"wordwright.local/internal/native"
-	"wordwright.local/internal/office"
-	"wordwright.local/internal/project"
+	"github.com/eliziff/WordUp/internal/native"
+	"github.com/eliziff/WordUp/internal/office"
+	"github.com/eliziff/WordUp/internal/project"
 )
 
 type Assertion struct {
@@ -38,12 +38,13 @@ type Suite struct {
 	RequireCompile bool     `json:"require_compile,omitempty"`
 }
 type Observation struct {
-	Name       string  `json:"name"`
-	Passed     bool    `json:"passed"`
-	Result     any     `json:"result,omitempty"`
-	Error      any     `json:"error,omitempty"`
-	Assertions int     `json:"assertions"`
-	DurationMS float64 `json:"duration_ms"`
+	Name        string  `json:"name"`
+	Passed      bool    `json:"passed"`
+	Result      any     `json:"result,omitempty"`
+	Error       any     `json:"error,omitempty"`
+	Assertions  int     `json:"assertions"`
+	DurationMS  float64 `json:"duration_ms"`
+	Diagnostics any     `json:"diagnostics,omitempty"`
 }
 type Report struct {
 	Schema       int            `json:"schema"`
@@ -206,7 +207,15 @@ func Run(ctx context.Context, artifact string, s Suite, existing native.Host, ex
 		return nil, e
 	}
 	r := &Report{Schema: 1, ToolVersion: project.Version, Status: "not_run", Artifact: abs, SHA256: office.Hash(b), SuiteSHA256: office.Hash(project.JSON(s)), Suite: s, OS: runtime.GOOS, Arch: runtime.GOARCH, FreshProcess: existing == nil, StartedUTC: started.UTC().Format(time.RFC3339Nano), Observations: []Observation{}}
+	h := existing
+	var initialCPU float64
 	finish := func(e error) (*Report, error) {
+		if h != nil {
+			r.Host = h.Info()
+			if total, ok := r.Host["job_cpu_ms"].(float64); ok {
+				r.Host["run_cpu_ms"] = total - initialCPU
+			}
+		}
 		r.DurationMS = float64(time.Since(started).Microseconds()) / 1000
 		r.Error = ErrorValue(e)
 		return r, e
@@ -233,7 +242,6 @@ func Run(ctx context.Context, artifact string, s Suite, existing native.Host, ex
 	if e = p.Validate(); e != nil {
 		return finish(e)
 	}
-	h := existing
 	if h == nil {
 		h, e = native.Start(ctx, native.Options{Execute: true})
 		if e != nil {
@@ -242,6 +250,9 @@ func Run(ctx context.Context, artifact string, s Suite, existing native.Host, ex
 		defer h.Close()
 	}
 	r.Host = h.Info()
+	if existing != nil {
+		initialCPU, _ = r.Host["job_cpu_ms"].(float64)
+	}
 	r.Status = "failed"
 	// Copy the exact bytes once; never let a concurrent source edit change the
 	// candidate between the report hash and Word's open call.
@@ -250,16 +261,21 @@ func Run(ctx context.Context, artifact string, s Suite, existing native.Host, ex
 		return finish(e)
 	}
 	defer removeCandidate(temp)
-	for _, step := range s.Steps {
+	output := filepath.Join(filepath.Dir(abs), "acceptance-assets", r.SHA256[:12])
+	replacements := map[string]string{"$artifact": temp, "$project": pProjectName(p), "$filename": filepath.Base(temp), "$output": output}
+	for stepIndex, step := range s.Steps {
 		t := time.Now()
 		op := step.Operation
-		op = expand(op, map[string]string{"$artifact": temp, "$project": pProjectName(p), "$filename": filepath.Base(temp)})
+		op = expand(op, replacements)
 		ms := step.TimeoutMS
 		if ms == 0 {
-			ms = 120000
+			ms = 30000
+		}
+		if op.TimeoutMS == 0 {
+			op.TimeoutMS = ms
 		}
 		sc, cancel := context.WithTimeout(ctx, time.Duration(ms)*time.Millisecond)
-		value, err := h.Call(sc, op)
+		value, err := observedCall(sc, h, op)
 		cancel()
 		ob := Observation{Name: step.Name, Result: value, Error: ErrorValue(err), DurationMS: float64(time.Since(t).Microseconds()) / 1000}
 		if err == nil {
@@ -281,6 +297,11 @@ func Run(ctx context.Context, artifact string, s Suite, existing native.Host, ex
 			}
 		}
 		ob.Passed = err == nil
+		if err != nil && runtime.GOOS == "windows" {
+			dc, stop := context.WithTimeout(context.Background(), 10*time.Second)
+			ob.Diagnostics, _ = h.Call(dc, native.Operation{Op: "ui.diagnostics", File: filepath.Join(output, fmt.Sprintf("failure-%02d", stepIndex+1))})
+			stop()
+		}
 		r.Observations = append(r.Observations, ob)
 		if err != nil {
 			return finish(fmt.Errorf("step %q: %w", step.Name, err))
@@ -294,6 +315,64 @@ func Run(ctx context.Context, artifact string, s Suite, existing native.Host, ex
 	}
 	r.Status = "passed"
 	return finish(nil)
+}
+
+func observedCall(ctx context.Context, h native.Host, op native.Operation) (any, error) {
+	if runtime.GOOS != "windows" || (op.Op != "run" && op.Op != "compile" && op.Op != "eval") {
+		return h.Call(ctx, op)
+	}
+	// Allow the observer a short diagnostic window before the independent
+	// parent watchdog terminates a stuck asynchronous operation.
+	v, e := h.Call(ctx, native.Operation{Op: "begin", TimeoutMS: min(1800000, op.TimeoutMS+12000), Steps: []native.Operation{op}})
+	if e != nil {
+		return nil, e
+	}
+	task := v.(map[string]any)["task"]
+	if waiter, ok := h.(interface {
+		WaitTask(context.Context, string) (any, error)
+	}); ok {
+		v, e = waiter.WaitTask(ctx, task.(string))
+		if ctx.Err() != nil {
+			return nil, native.Fail("native_step_timeout", "Native operation did not finish; inspect captured owned-window diagnostics", map[string]any{"task": task, "operation": op})
+		}
+		if e != nil {
+			return nil, e
+		}
+		_, _ = h.Call(ctx, native.Operation{Op: "forget", Value: task})
+		m := v.(map[string]any)
+		if m["error"] != nil {
+			b, _ := json.Marshal(m["error"])
+			var f native.Fault
+			_ = json.Unmarshal(b, &f)
+			return nil, &f
+		}
+		return m["result"], nil
+	}
+	tick := time.NewTicker(5 * time.Millisecond)
+	defer tick.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return nil, native.Fail("native_step_timeout", "Native operation did not finish; inspect captured owned-window diagnostics", map[string]any{"task": task, "operation": op})
+		case <-tick.C:
+			v, e = h.Call(ctx, native.Operation{Op: "poll", Value: task})
+			if e != nil {
+				return nil, e
+			}
+			m := v.(map[string]any)
+			if m["status"] != "completed" {
+				continue
+			}
+			_, _ = h.Call(ctx, native.Operation{Op: "forget", Value: task})
+			if m["error"] != nil {
+				b, _ := json.Marshal(m["error"])
+				var f native.Fault
+				_ = json.Unmarshal(b, &f)
+				return nil, &f
+			}
+			return m["result"], nil
+		}
+	}
 }
 func pProjectName(p *office.Package) string {
 	if b := p.Files["word/vbaProject.bin"]; b != nil {

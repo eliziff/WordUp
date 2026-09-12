@@ -5,12 +5,13 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
+	"github.com/eliziff/WordUp/internal/native"
+	"github.com/eliziff/WordUp/internal/office"
+	"github.com/eliziff/WordUp/internal/project"
 	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
-	"wordwright.local/internal/office"
-	"wordwright.local/internal/project"
 )
 
 type Symbol struct {
@@ -223,6 +224,18 @@ func Check(w *project.Workspace) (map[string]any, error) {
 		if !strings.Contains(strings.ToLower(n), "customui") {
 			continue
 		}
+		if len(spans) > 0 && spans[0].Name.Local == "customUI" {
+			validation, err := native.ValidateRibbon(b)
+			if err != nil {
+				diagnostics = append(diagnostics, map[string]any{"severity": "error", "file": n, "message": err.Error()})
+			} else if validation["valid"] != true {
+				severity := "error"
+				if validation["available"] == false {
+					severity = "warning"
+				}
+				diagnostics = append(diagnostics, map[string]any{"severity": severity, "file": n, "message": "Ribbon schema validation did not pass", "validation": validation})
+			}
+		}
 		ids := map[string]bool{}
 		for _, s := range spans {
 			for _, a := range s.Attr {
@@ -250,5 +263,5 @@ func Check(w *project.Workspace) (map[string]any, error) {
 		}
 		return symbols[i].Module < symbols[j].Module
 	})
-	return map[string]any{"symbols": symbols, "diagnostics": diagnostics, "vba_compiled": false, "word_executed": false, "coverage": "lexical symbols, XML syntax, duplicate ribbon IDs and unresolved callback warnings; not full VBA or RibbonX validation"}, nil
+	return map[string]any{"symbols": symbols, "diagnostics": diagnostics, "vba_compiled": false, "word_executed": false, "coverage": "lexical symbols, XML syntax, Windows RibbonX XSD validation, duplicate IDs and unresolved callback warnings; not a VBA compiler or complete callback/idMso checker"}, nil
 }

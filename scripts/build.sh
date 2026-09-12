@@ -7,5 +7,5 @@ for target in windows/amd64 windows/arm64 darwin/amd64 darwin/arm64 linux/amd64;
   [ "$name" != darwin ] || name=macos
   [ "$a" != amd64 ] || a=x64
   [ "$os" != windows ] || ext=.exe
-  GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o "dist/wordwright-$name-$a$ext" ./cmd/wordwright
+  GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o "dist/wordup-$name-$a$ext" ./cmd/wordup
 done

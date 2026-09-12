@@ -12,6 +12,7 @@ coverage.out
 # Local editor and operating-system state
 .DS_Store
 Thumbs.db
+desktop.ini
 .idea/
 .vscode/
 
@@ -21,8 +22,14 @@ Thumbs.db
 !.env.example
 /private/
 /workspaces/
+**/.wordwright/deploy/
 ALR Macro*
 ALR-*/
+WordUp-*-ALR-*
 Wordwright-*-ALR-*
 
 # Keep the synthetic example baseline; do not blanket-ignore *.opc or *.dotm.
+
+/reports/
+
+/reference/

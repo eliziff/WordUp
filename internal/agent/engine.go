@@ -6,6 +6,15 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"github.com/eliziff/WordUp/internal/compat"
+	"github.com/eliziff/WordUp/internal/deploy"
+	"github.com/eliziff/WordUp/internal/example"
+	"github.com/eliziff/WordUp/internal/inspect"
+	"github.com/eliziff/WordUp/internal/native"
+	"github.com/eliziff/WordUp/internal/office"
+	"github.com/eliziff/WordUp/internal/project"
+	"github.com/eliziff/WordUp/internal/signing"
+	"github.com/eliziff/WordUp/internal/verify"
 	"path/filepath"
 	"runtime"
 	"sort"
@@ -13,17 +22,10 @@ import (
 	"sync"
 	"time"
 	"unicode/utf8"
-	"wordwright.local/internal/compat"
-	"wordwright.local/internal/deploy"
-	"wordwright.local/internal/example"
-	"wordwright.local/internal/inspect"
-	"wordwright.local/internal/native"
-	"wordwright.local/internal/office"
-	"wordwright.local/internal/project"
-	"wordwright.local/internal/verify"
 )
 
 type Parameters struct {
+	Signing        signing.Options  `json:"signing,omitempty"`
 	Path           string           `json:"path,omitempty"`
 	Output         string           `json:"output,omitempty"`
 	Name           string           `json:"name,omitempty"`
@@ -38,13 +40,15 @@ type Parameters struct {
 	Tolerance      int              `json:"tolerance,omitempty"`
 	Fresh          bool             `json:"fresh,omitempty"`
 	Limit          int              `json:"limit,omitempty"`
+	NativeOptions  *native.Options  `json:"native_options,omitempty"`
 }
 type Engine struct {
-	Root    string
-	Execute bool
-	mu      sync.Mutex
-	fsMu    sync.Mutex
-	host    native.Host
+	Root          string
+	Execute       bool
+	mu            sync.Mutex
+	fsMu          sync.Mutex
+	host          native.Host
+	nativeOptions native.Options
 }
 
 func (e *Engine) Close() error {
@@ -61,7 +65,9 @@ func (e *Engine) Host(ctx context.Context) (native.Host, error) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	if e.host == nil {
-		h, err := native.Start(ctx, native.Options{Execute: e.Execute})
+		options := e.nativeOptions
+		options.Execute = e.Execute
+		h, err := native.Start(ctx, options)
 		if err != nil {
 			return nil, err
 		}
@@ -84,6 +90,22 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		defer e.fsMu.Unlock()
 	}
 	switch method {
+	case "sign", "signature.verify":
+		file, err := e.path(p.Path)
+		if err != nil {
+			return nil, err
+		}
+		if method == "signature.verify" {
+			return signing.Verify(ctx, file, p.Signing)
+		}
+		if !e.Execute {
+			return nil, fmt.Errorf("signing requires --execute authority")
+		}
+		output, err := e.path(p.Output)
+		if err != nil {
+			return nil, err
+		}
+		return signing.Sign(ctx, file, output, p.Signing)
 	case "deploy":
 		if !e.Execute {
 			return nil, fmt.Errorf("deployment requires --execute authority")
@@ -118,14 +140,17 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		if err = deploy.Spawn(planFile); err != nil {
 			return plan, err
 		}
-		return map[string]any{"plan": planFile, "activation": plan, "worker": "same local executable; waits for Word to exit; does not terminate Word", "resume": "Durable plan remains after OS shutdown. Run activation again through the app if the worker was interrupted before installation."}, nil
-	case "activate":
+		return map[string]any{"plan": planFile, "activation": plan, "worker": "same local executable; waits for Word to exit; does not terminate Word", "resume": "Windows registers a current-user login command to resume pending activation. Other platforms retain the plan for explicit activation."}, nil
+	case "activate", "restore":
 		if !e.Execute {
 			return nil, fmt.Errorf("activation requires --execute authority")
 		}
 		file, err := e.path(p.Path)
 		if err != nil {
 			return nil, err
+		}
+		if method == "restore" {
+			return deploy.Restore(file)
 		}
 		return deploy.Activate(file)
 	case "example":
@@ -157,7 +182,14 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		if runtime.GOOS == "darwin" {
 			suite = example.MacSuite()
 		}
-		report, err := verify.Run(ctx, build.Artifact, suite, nil, true)
+		var host native.Host
+		if !p.Fresh {
+			host, err = e.Host(ctx)
+			if err != nil {
+				return nil, err
+			}
+		}
+		report, err := verify.Run(ctx, build.Artifact, suite, host, true)
 		if report != nil {
 			if save := project.Write(out, "reports/acceptance.json", project.JSON(report), ""); save != nil {
 				return report, save
@@ -303,7 +335,7 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 			}
 		}
 		return map[string]any{"results": out, "total": total, "truncated": total > len(out)}, nil
-	case "build", "check", "compat":
+	case "build", "compile", "check", "compat":
 		w, err := project.Open(e.Root)
 		if err != nil {
 			return nil, err
@@ -321,8 +353,20 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 				return nil, err
 			}
 		}
+		if method == "compile" {
+			return e.compile(ctx, w, out, p.Signing)
+		}
 		return w.Build(out)
 	case "native.start":
+		if p.NativeOptions != nil {
+			e.mu.Lock()
+			if e.host != nil {
+				e.mu.Unlock()
+				return nil, fmt.Errorf("stop the existing native session before changing its limits")
+			}
+			e.nativeOptions = *p.NativeOptions
+			e.mu.Unlock()
+		}
 		h, err := e.Host(ctx)
 		if err != nil {
 			return nil, err
@@ -345,14 +389,21 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		}
 		ms := p.TimeoutMS
 		if ms <= 0 {
-			ms = 120000
+			ms = 30000
 		}
 		if ms > 1800000 {
 			return nil, fmt.Errorf("timeout exceeds 30 minute guard")
 		}
 		c, cancel := context.WithTimeout(ctx, time.Duration(ms)*time.Millisecond)
 		defer cancel()
-		return h.Call(c, p.Operation)
+		if p.Operation.TimeoutMS == 0 {
+			p.Operation.TimeoutMS = ms
+		}
+		result, err := h.Call(c, p.Operation)
+		if err != nil && h.Info()["closed"] == true {
+			_ = e.Close()
+		}
+		return result, err
 	case "test":
 		artifact, err := e.path(p.Path)
 		if err != nil {

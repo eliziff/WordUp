@@ -285,8 +285,8 @@ func (r *formRecord) bytes(cp int) ([]byte, error) {
 		b = pad(b, f.size)
 		n := r.values[f.name]
 		if f.kind == 's' {
-			raw := utf16bytes(r.strings[f.name])
-			n = int64(len(raw))
+			_, size := formString(r.strings[f.name])
+			n = int64(size)
 		}
 		switch f.size {
 		case 1:
@@ -304,7 +304,8 @@ func (r *formRecord) bytes(cp int) ([]byte, error) {
 		}
 		switch e.kind {
 		case 's':
-			b = append(b, utf16bytes(r.strings[e.name])...)
+			raw, _ := formString(r.strings[e.name])
+			b = append(b, raw...)
 			b = pad(b, 4)
 		case 'z':
 			x := r.extra[e.name]
@@ -339,6 +340,7 @@ func defaultControl(kind, name string) (*formRecord, error) {
 		_ = r.size("DisplayedSize", 180, 120)
 		_ = r.size("LogicalSize", 0, 0)
 		_ = r.set("NextAvailableID", 1)
+		_ = r.set("ShapeCookie", 0)
 		_ = r.set("BooleanProperties", 0x8004)
 		if kind == "MultiPage" {
 			_ = r.set("BooleanProperties", 0xc004)

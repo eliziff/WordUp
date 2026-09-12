@@ -20,7 +20,7 @@ import (
 	"time"
 	"unsafe"
 
-	"wordwright.local/internal/office"
+	"github.com/eliziff/WordUp/internal/office"
 )
 
 var kernel = syscall.NewLazyDLL("kernel32.dll")
@@ -74,6 +74,7 @@ type hostConfig struct {
 	WordPath string `json:"word_path"`
 }
 type localHost struct {
+	tasks        map[string]*taskCompletion
 	cfg          hostConfig
 	desktop, job uintptr
 	process      childProcess
@@ -89,6 +90,14 @@ type localHost struct {
 	info         map[string]any
 	logMu        sync.Mutex
 	logTail      []byte
+	termination  *Fault
+}
+
+type taskCompletion struct {
+	done      chan struct{}
+	result    any
+	err       error
+	completed bool
 }
 
 func randomID() string {
@@ -207,13 +216,22 @@ func spawnOnDesktop(exe string, args []string, desktop string, stdin, stdout, st
 }
 func Available() bool { _, e := findWord(); return e == nil }
 func Start(ctx context.Context, opt Options) (Host, error) {
+	if opt.MemoryLimitMB == 0 {
+		opt.MemoryLimitMB = 2048
+	}
+	if opt.CPUPercent == 0 {
+		opt.CPUPercent = 50
+	}
+	if opt.MemoryLimitMB < 256 || opt.MemoryLimitMB > 16384 || opt.CPUPercent < 1 || opt.CPUPercent > 100 {
+		return nil, fmt.Errorf("native limits require memory_limit_mb 256..16384 and cpu_percent 1..100")
+	}
 	word, e := findWord()
 	if e != nil {
 		return nil, e
 	}
 	base := opt.Directory
 	if base == "" {
-		base = filepath.Join(os.TempDir(), "Wordwright")
+		base = filepath.Join(os.TempDir(), "WordUp")
 	}
 	if e = os.MkdirAll(base, 0700); e != nil {
 		return nil, e
@@ -223,7 +241,7 @@ func Start(ctx context.Context, opt Options) (Host, error) {
 		return nil, e
 	}
 	opt.Directory = stage
-	h := &localHost{cfg: hostConfig{Options: opt, Desktop: "Wordwright-" + randomID(), Token: randomID(), WordPath: word}, pending: map[uint64]chan Response{}, closed: make(chan struct{}), info: map[string]any{}}
+	h := &localHost{cfg: hostConfig{Options: opt, Desktop: "WordUp-" + randomID(), Token: randomID(), WordPath: word}, pending: map[uint64]chan Response{}, tasks: map[string]*taskCompletion{}, closed: make(chan struct{}), info: map[string]any{}}
 	ok := false
 	defer func() {
 		if !ok {
@@ -242,10 +260,18 @@ func Start(ctx context.Context, opt Options) (Host, error) {
 	}
 	h.job = j
 	limits := extendedLimits{}
-	limits.Basic.Flags = 0x2000
+	limits.Basic.Flags = 0x2000 | 0x200 | 0x20 | 0x8 // kill-on-close, job memory, priority, process count
+	limits.Basic.ActiveProcessLimit = 16
+	limits.Basic.Priority = 0x4000 // BELOW_NORMAL_PRIORITY_CLASS
+	limits.JobMemory = uintptr(opt.MemoryLimitMB) << 20
 	r, _, er := setJob.Call(j, 9, uintptr(unsafe.Pointer(&limits)), unsafe.Sizeof(limits))
 	if r == 0 {
 		return nil, winError("SetInformationJobObject", er)
+	}
+	cpu := struct{ Flags, Rate uint32 }{5, uint32(opt.CPUPercent * 100)} // enable + hard cap
+	r, _, er = setJob.Call(j, 15, uintptr(unsafe.Pointer(&cpu)), unsafe.Sizeof(cpu))
+	if r == 0 {
+		return nil, winError("SetInformationJobObject(CPU)", er)
 	}
 	// This seed has no VBA, embedded objects or external relationships.
 	seed := office.BlankPackage()
@@ -287,6 +313,11 @@ func Start(ctx context.Context, opt Options) (Host, error) {
 	if e != nil {
 		return nil, e
 	}
+	// The parent must release its copies of the child's pipe ends immediately.
+	// Keeping them until the handshake returns hides worker EOF on startup failure.
+	inRead.Close()
+	outWrite.Close()
+	logWrite.Close()
 	go h.readResponses()
 	go func() {
 		buf := make([]byte, 4096)
@@ -316,6 +347,7 @@ func Start(ctx context.Context, opt Options) (Host, error) {
 		return nil, fmt.Errorf("worker returned invalid handshake")
 	}
 	h.info = m
+	h.info["limits"] = map[string]any{"memory_limit_mb": opt.MemoryLimitMB, "cpu_percent": opt.CPUPercent, "active_process_limit": 16, "default_operation_timeout_ms": 30000, "priority": "below_normal", "scope": "owned job including child processes"}
 	ok = true
 	return h, nil
 }
@@ -329,6 +361,15 @@ func (h *localHost) readResponses() {
 			return
 		}
 		h.mu.Lock()
+		if r.Task != "" {
+			if r.ID != 0 {
+				h.tasks[r.Task] = &taskCompletion{done: make(chan struct{})}
+			} else if task := h.tasks[r.Task]; task != nil && !task.completed {
+				task.result = r.Result
+				task.completed = true
+				close(task.done)
+			}
+		}
 		ch := h.pending[r.ID]
 		delete(h.pending, r.ID)
 		h.mu.Unlock()
@@ -340,7 +381,21 @@ func (h *localHost) readResponses() {
 	if e == nil {
 		e = io.EOF
 	}
-	h.breakPending(Fail("worker_exited", e.Error(), nil))
+	h.logMu.Lock()
+	tail := string(h.logTail)
+	h.logMu.Unlock()
+	err := Fail("worker_exited", e.Error(), map[string]any{"worker_log_tail": tail})
+	h.mu.Lock()
+	if h.termination == nil {
+		select {
+		case <-h.closed:
+		default:
+			h.termination = fault(err)
+		}
+	}
+	h.mu.Unlock()
+	h.breakPending(err)
+	h.Close()
 }
 func (h *localHost) breakPending(e error) {
 	h.mu.Lock()
@@ -353,8 +408,26 @@ func (h *localHost) breakPending(e error) {
 func (h *localHost) Call(ctx context.Context, op Operation) (any, error) {
 	select {
 	case <-h.closed:
+		h.mu.Lock()
+		reason := h.termination
+		h.mu.Unlock()
+		if reason != nil {
+			return nil, reason
+		}
 		return nil, Fail("session_closed", "native session has been closed", nil)
 	default:
+	}
+	if op.TimeoutMS < 0 || op.TimeoutMS > 1800000 {
+		return nil, fmt.Errorf("operation timeout_ms must be 0..1800000")
+	}
+	if op.Op != "hello" && op.Op != "poll" && op.Op != "forget" {
+		ms := op.TimeoutMS
+		if ms == 0 {
+			ms = 30000
+		}
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, time.Duration(ms)*time.Millisecond)
+		defer cancel()
 	}
 	id := h.sequence.Add(1)
 	ch := make(chan Response, 1)
@@ -387,6 +460,31 @@ func (h *localHost) Call(ctx context.Context, op Operation) (any, error) {
 		if r.Error != nil {
 			return nil, r.Error
 		}
+		if op.Op == "begin" {
+			if m, ok := r.Result.(map[string]any); ok {
+				if task, ok := m["task"].(string); ok {
+					ms := op.TimeoutMS
+					if ms == 0 && len(op.Steps) == 1 {
+						ms = op.Steps[0].TimeoutMS
+					}
+					if ms == 0 {
+						ms = 30000
+					}
+					go h.watchTask(task, time.Duration(ms)*time.Millisecond)
+				}
+			}
+		}
+		if op.Op == "forget" {
+			key, _ := op.Value.(string)
+			h.mu.Lock()
+			if task := h.tasks[key]; task != nil && !task.completed {
+				task.err = fmt.Errorf("task forgotten")
+				task.completed = true
+				close(task.done)
+			}
+			delete(h.tasks, key)
+			h.mu.Unlock()
+		}
 		return r.Result, nil
 	case <-ctx.Done():
 		h.Close()
@@ -398,10 +496,85 @@ func (h *localHost) Call(ctx context.Context, op Operation) (any, error) {
 		return nil, Fail("session_closed", "native session closed", nil)
 	}
 }
+
+func (h *localHost) watchTask(task string, limit time.Duration) {
+	h.mu.Lock()
+	completion := h.tasks[task]
+	h.mu.Unlock()
+	if completion == nil {
+		return
+	}
+	end := time.NewTimer(limit)
+	defer end.Stop()
+	select {
+	case <-completion.done:
+		return
+	case <-h.closed:
+		return
+	case <-end.C:
+		h.mu.Lock()
+		if completion.completed {
+			h.mu.Unlock()
+			return
+		}
+		h.termination = fault(Fail("macro_deadline", "The asynchronous task exceeded its wall-clock limit; only the owned Word job was terminated", map[string]any{"task": task, "timeout_ms": limit.Milliseconds()}))
+		h.mu.Unlock()
+		h.Close()
+		return
+	}
+}
+
+// WaitTask receives completion directly from the worker. A caller's deadline
+// leaves the independent watchdog and UI diagnostic lane alive.
+func (h *localHost) WaitTask(ctx context.Context, key string) (any, error) {
+	h.mu.Lock()
+	task := h.tasks[key]
+	h.mu.Unlock()
+	if task == nil {
+		return nil, fmt.Errorf("unknown task")
+	}
+	select {
+	case <-task.done:
+		return task.result, task.err
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case <-h.closed:
+		h.mu.Lock()
+		reason := h.termination
+		h.mu.Unlock()
+		if reason != nil {
+			return nil, reason
+		}
+		return nil, Fail("session_closed", "native session closed", nil)
+	}
+}
 func (h *localHost) Info() map[string]any {
+	h.mu.Lock()
+	defer h.mu.Unlock()
 	r := map[string]any{}
 	for k, v := range h.info {
 		r[k] = v
+	}
+	select {
+	case <-h.closed:
+		r["closed"] = true
+	default:
+		r["closed"] = false
+	}
+	if r["closed"] != true && h.job != 0 {
+		query := kernel.NewProc("QueryInformationJobObject")
+		var limits extendedLimits
+		if ok, _, _ := query.Call(h.job, 9, uintptr(unsafe.Pointer(&limits)), unsafe.Sizeof(limits), 0); ok != 0 {
+			r["job_peak_memory_bytes"] = uint64(limits.PeakJob)
+		}
+		var accounting struct {
+			User, Kernel, PeriodUser, PeriodKernel int64
+			Faults, Total, Active, Terminated      uint32
+		}
+		if ok, _, _ := query.Call(h.job, 1, uintptr(unsafe.Pointer(&accounting)), unsafe.Sizeof(accounting), 0); ok != 0 {
+			r["job_cpu_ms"] = float64(accounting.User+accounting.Kernel) / 10000
+			r["job_active_processes"] = accounting.Active
+		}
 	}
 	return r
 }
@@ -416,8 +589,11 @@ func (h *localHost) Close() error {
 			waitSingle.Call(uintptr(h.process.Process), 1500)
 		}
 		if h.job != 0 {
+			h.mu.Lock()
 			terminateJob.Call(h.job, 0)
 			closeHandle.Call(h.job)
+			h.job = 0
+			h.mu.Unlock()
 		}
 		if h.process.Process != 0 {
 			waitSingle.Call(uintptr(h.process.Process), 5000)

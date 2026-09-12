@@ -1,25 +1,33 @@
-// Wordwright is one executable. Native host subprocesses are this same image.
+// WordUp is one executable. Native host subprocesses are this same image.
 package main
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/eliziff/WordUp/internal/agent"
+	"github.com/eliziff/WordUp/internal/deploy"
+	"github.com/eliziff/WordUp/internal/localipc"
+	"github.com/eliziff/WordUp/internal/native"
+	"github.com/eliziff/WordUp/internal/project"
+	"github.com/eliziff/WordUp/internal/signing"
+	"github.com/eliziff/WordUp/internal/verify"
 	"io"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"strings"
 	"time"
-	"wordwright.local/internal/agent"
-	"wordwright.local/internal/deploy"
-	"wordwright.local/internal/localipc"
-	"wordwright.local/internal/native"
-	"wordwright.local/internal/project"
-	"wordwright.local/internal/verify"
 )
 
 func main() {
+	if len(os.Args) == 3 && os.Args[1] == "__verify_vba_digest" {
+		if err := signing.VerifyDigestWorker(os.Args[2]); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		return
+	}
 	if len(os.Args) > 1 && os.Args[1] == "__host" {
 		if e := native.HostMain(os.Args[2:]); e != nil {
 			fmt.Fprintln(os.Stderr, e)
@@ -179,7 +187,7 @@ func run(ctx context.Context, args []string) int {
 		if method == "example" && p.Output == "" {
 			err = fmt.Errorf("example OUTPUT_DIRECTORY required")
 		}
-	case "build":
+	case "build", "compile":
 		if len(rest) > 1 {
 			err = fmt.Errorf("build [OUTPUT] expected")
 		} else if len(rest) == 1 {
@@ -262,29 +270,31 @@ func run(ctx context.Context, args []string) int {
 	return 0
 }
 
-const usage = `Wordwright 0.2.0 — native local Word development toolchain
+const usage = `WordUp 0.3.0 — native local Word development toolchain
 
-  wordwright import SOURCE.dotm WORKSPACE
-  wordwright new ProjectName WORKSPACE
-  wordwright --workspace WORKSPACE build [OUTPUT.dotm]
-  wordwright --workspace WORKSPACE check
-  wordwright --workspace WORKSPACE compat
-  wordwright inspect ARTIFACT.dotm
-  wordwright --workspace WORKSPACE --execute test ARTIFACT.dotm [SUITE.json]
-  wordwright --workspace WORKSPACE --execute serve
-  wordwright --workspace WORKSPACE --execute mcp
-  wordwright --workspace WORKSPACE call METHOD @parameters.json
-  wordwright --workspace WORKSPACE --execute session start
-  wordwright --workspace WORKSPACE rpc METHOD @parameters.json
-  wordwright --workspace WORKSPACE session stop
-  wordwright doctor
-  wordwright --execute selftest [EVIDENCE_DIRECTORY]
-  wordwright example OUTPUT_DIRECTORY
+  wordup import SOURCE.dotm WORKSPACE
+  wordup new ProjectName WORKSPACE
+  wordup --workspace WORKSPACE build [OUTPUT.dotm]
+  wordup --workspace WORKSPACE --execute compile [OUTPUT.dotm]
+  wordup --workspace WORKSPACE check
+  wordup --workspace WORKSPACE compat
+  wordup inspect ARTIFACT.dotm
+  wordup --workspace WORKSPACE --execute test ARTIFACT.dotm [SUITE.json]
+  wordup --workspace WORKSPACE --execute serve
+  wordup --workspace WORKSPACE --execute mcp
+  wordup --workspace WORKSPACE call METHOD @parameters.json
+  wordup --workspace WORKSPACE --execute session start
+  wordup --workspace WORKSPACE rpc METHOD @parameters.json
+  wordup --workspace WORKSPACE session stop
+  wordup doctor
+  wordup --execute selftest [EVIDENCE_DIRECTORY]
+  wordup example OUTPUT_DIRECTORY
 
 serve: persistent newline JSON {"id":1,"method":"build","params":{}}.
 mcp: stdio MCP (2025-03-26 / 2025-06-18 / 2025-11-25 negotiation).
 Read AGENTS.md in the imported workspace; call help '{}' lists every tool.
-No Python, Node, cloud service, VM, module imports or registry setup.
+Core authoring needs no Python, Node, cloud service, VM or module imports.
+Automatic VBA signing requires Microsoft SignTool and the registered Office SIP.
 Native execution uses your installed Microsoft Word and respects OS policies.
 Private Windows desktop = UI separation, NOT a security sandbox.
 Build/check/compat are NOT VBA runtime tests. --execute grants native code

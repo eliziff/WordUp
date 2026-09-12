@@ -21,15 +21,39 @@
       ]
     },
     {
+      "name": "Compile the complete generated project",
+      "operation": {
+        "op": "compile",
+        "target": "template",
+        "member": "$project"
+      },
+      "assert": [
+        {
+          "path": "/vba_compiled",
+          "kind": "equals",
+          "expected": true
+        }
+      ]
+    },
+    {
+      "name": "Return from compiler to Word",
+      "operation": {
+        "op": "put",
+        "target": "app",
+        "member": "ShowVisualBasicEditor",
+        "value": false
+      }
+    },
+    {
       "name": "Run actual VBA and instantiate persistent nested form",
       "operation": {
         "op": "run",
-        "macro": "$project.Studio.NativeAcceptance"
+        "macro": "Studio.NativeAcceptance"
       },
       "assert": [
         {
           "kind": "equals",
-          "expected": "WORDWRIGHT_NATIVE_OK"
+          "expected": "WORDUP_NATIVE_OK"
         }
       ]
     },
@@ -37,7 +61,175 @@
       "name": "Verify real Ribbon initialization",
       "operation": {
         "op": "run",
-        "macro": "$project.Studio.RibbonAcceptance"
+        "macro": "Studio.RibbonAcceptance"
+      },
+      "assert": [
+        {
+          "kind": "equals",
+          "expected": true
+        }
+      ]
+    },
+    {
+      "name": "Execute arbitrary scratch VBA",
+      "operation": {
+        "op": "eval",
+        "value": "Evaluate = 6 * 7"
+      },
+      "assert": [
+        {
+          "path": "/result",
+          "kind": "equals",
+          "expected": 42
+        }
+      ]
+    },
+    {
+      "name": "Render the actual Word document",
+      "operation": {
+        "op": "render",
+        "target": "template",
+        "file": "$output/pages"
+      },
+      "assert": [
+        {
+          "path": "/page_count",
+          "kind": "greater_than",
+          "expected": 0
+        }
+      ]
+    },
+    {
+      "name": "Activate the custom Ribbon tab",
+      "operation": {
+        "op": "run",
+        "macro": "Studio.ActivateStudioRibbon"
+      }
+    },
+    {
+      "name": "Click the real Ribbon button",
+      "operation": {
+        "op": "ui.invoke",
+        "target": "template",
+        "named": {
+          "name": "Editorial Studio",
+          "role": 43,
+          "scope": "ribbon"
+        }
+      },
+      "assert": [
+        {
+          "path": "/executed",
+          "kind": "equals",
+          "expected": true
+        }
+      ]
+    },
+    {
+      "name": "Wait for the UserForm before capturing it",
+      "operation": {
+        "op": "ui.find",
+        "named": {
+          "name": "Close",
+          "role": 43,
+          "scope": "form",
+          "wait_ms": 2000,
+          "window": "WordUp Studio"
+        }
+      }
+    },
+    {
+      "name": "Capture Word and the persistent UserForm",
+      "operation": {
+        "op": "ui.diagnostics",
+        "named": {
+          "trees": false
+        },
+        "file": "$output/interface"
+      }
+    },
+    {
+      "name": "Click the real form Close button",
+      "operation": {
+        "op": "ui.invoke",
+        "named": {
+          "name": "Close",
+          "role": 43,
+          "scope": "form",
+          "window": "WordUp Studio"
+        }
+      },
+      "assert": [
+        {
+          "path": "/executed",
+          "kind": "equals",
+          "expected": true
+        }
+      ]
+    },
+    {
+      "name": "Observe the form event callback",
+      "operation": {
+        "op": "run",
+        "macro": "Studio.FormEventAcceptance"
+      },
+      "assert": [
+        {
+          "kind": "equals",
+          "expected": true
+        }
+      ]
+    },
+    {
+      "name": "Register and execute a template hotkey",
+      "operation": {
+        "op": "run",
+        "macro": "Studio.HotkeyAcceptance"
+      },
+      "assert": [
+        {
+          "kind": "equals",
+          "expected": true
+        }
+      ]
+    },
+    {
+      "name": "Prepare the context-menu selection",
+      "operation": {
+        "op": "run",
+        "macro": "Studio.ShowContextMenu"
+      }
+    },
+    {
+      "name": "Open the actual text context menu",
+      "operation": {
+        "op": "context_menu",
+        "target": "template"
+      }
+    },
+    {
+      "name": "Click the custom context-menu command",
+      "operation": {
+        "op": "ui.invoke",
+        "named": {
+          "name": "WordUp test command",
+          "scope": "menu",
+          "wait_ms": 2000
+        }
+      },
+      "assert": [
+        {
+          "path": "/executed",
+          "kind": "equals",
+          "expected": true
+        }
+      ]
+    },
+    {
+      "name": "Observe context-menu callback",
+      "operation": {
+        "op": "run",
+        "macro": "Studio.ContextAcceptance"
       },
       "assert": [
         {
@@ -66,19 +258,6 @@
         {
           "kind": "contains",
           "expected": "Editorial Studio"
-        }
-      ]
-    },
-    {
-      "name": "Verify actual selection behavior and formatting preservation",
-      "operation": {
-        "op": "run",
-        "macro": "$project.Studio.NormalizationAcceptance"
-      },
-      "assert": [
-        {
-          "kind": "equals",
-          "expected": "SELECTION_OK"
         }
       ]
     },
@@ -117,12 +296,28 @@
       "name": "Insert actual saved building block",
       "operation": {
         "op": "run",
-        "macro": "$project.Studio.BuildingBlockAcceptance"
+        "macro": "Studio.BuildingBlockAcceptance"
       },
       "assert": [
         {
           "kind": "equals",
           "expected": "BUILDING_BLOCK_OK"
+        }
+      ]
+    },
+    {
+      "name": "Verify actual selection behavior and formatting preservation",
+      "operation": {
+        "op": "run",
+        "args": [
+          true
+        ],
+        "macro": "Studio.NormalizationAcceptance"
+      },
+      "assert": [
+        {
+          "kind": "equals",
+          "expected": "SELECTION_OK"
         }
       ]
     },
@@ -141,5 +336,6 @@
         "file": "$artifact"
       }
     }
-  ]
+  ],
+  "require_compile": true
 }

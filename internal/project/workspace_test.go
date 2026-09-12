@@ -2,11 +2,11 @@ package project
 
 import (
 	"bytes"
+	"github.com/eliziff/WordUp/internal/office"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
-	"wordwright.local/internal/office"
 )
 
 func newWorkspace(t *testing.T) *Workspace {
@@ -84,7 +84,7 @@ func TestGuardedWritesAndUnknownProperties(t *testing.T) {
 	}
 }
 func TestSpecimenWorkspaceRoundTripAndControlledEdit(t *testing.T) {
-	src := os.Getenv("WORDWRIGHT_SPECIMEN")
+	src := os.Getenv("WORDUP_SPECIMEN")
 	if src == "" {
 		t.Skip("private specimen not provided")
 	}
@@ -126,7 +126,7 @@ func TestSpecimenWorkspaceRoundTripAndControlledEdit(t *testing.T) {
 	if chosen == "" {
 		t.Fatal("expected specimen Tester component")
 	}
-	if err = Write(root, chosen, append(files[chosen], []byte("\nPublic Function WordwrightProof() As Long\nWordwrightProof=42\nEnd Function\n")...), ""); err != nil {
+	if err = Write(root, chosen, append(files[chosen], []byte("\nPublic Function WordUpProof() As Long\nWordUpProof=42\nEnd Function\n")...), ""); err != nil {
 		t.Fatal(err)
 	}
 	r, err = w.Build("")

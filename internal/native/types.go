@@ -13,22 +13,25 @@ type Options struct {
 	Directory        string `json:"directory"`
 	Execute          bool   `json:"execute"`
 	StartupTimeoutMS int    `json:"startup_timeout_ms,omitempty"`
+	MemoryLimitMB    int    `json:"memory_limit_mb,omitempty"`
+	CPUPercent       int    `json:"cpu_percent,omitempty"`
 }
 type Operation struct {
-	Op     string         `json:"op"`
-	Target string         `json:"target,omitempty"`
-	Member string         `json:"member,omitempty"`
-	Args   []any          `json:"args,omitempty"`
-	Named  map[string]any `json:"named,omitempty"`
-	Value  any            `json:"value,omitempty"`
-	As     string         `json:"as,omitempty"`
-	File   string         `json:"file,omitempty"`
-	Macro  string         `json:"macro,omitempty"`
-	HWND   uint64         `json:"hwnd,omitempty"`
-	Child  int            `json:"child,omitempty"`
-	Depth  int            `json:"depth,omitempty"`
-	Format string         `json:"format,omitempty"`
-	Steps  []Operation    `json:"steps,omitempty"`
+	Op        string         `json:"op"`
+	Target    string         `json:"target,omitempty"`
+	Member    string         `json:"member,omitempty"`
+	Args      []any          `json:"args,omitempty"`
+	Named     map[string]any `json:"named,omitempty"`
+	Value     any            `json:"value,omitempty"`
+	As        string         `json:"as,omitempty"`
+	File      string         `json:"file,omitempty"`
+	Macro     string         `json:"macro,omitempty"`
+	HWND      uint64         `json:"hwnd,omitempty"`
+	Child     int            `json:"child,omitempty"`
+	Depth     int            `json:"depth,omitempty"`
+	Format    string         `json:"format,omitempty"`
+	Steps     []Operation    `json:"steps,omitempty"`
+	TimeoutMS int            `json:"timeout_ms,omitempty"`
 }
 type Fault struct {
 	Code    string `json:"code"`
@@ -42,6 +45,7 @@ func Fail(code, message string, details any) error {
 }
 
 type Response struct {
+	Task       string  `json:"task,omitempty"`
 	ID         uint64  `json:"id"`
 	Result     any     `json:"result,omitempty"`
 	Error      *Fault  `json:"error,omitempty"`

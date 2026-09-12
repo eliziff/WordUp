@@ -3,14 +3,14 @@ package inspect
 import (
 	"bytes"
 	"fmt"
+	"github.com/eliziff/WordUp/internal/office"
+	"github.com/eliziff/WordUp/internal/project"
 	"image"
 	_ "image/gif"
 	_ "image/jpeg"
 	"image/png"
 	"math"
 	"path/filepath"
-	"wordwright.local/internal/office"
-	"wordwright.local/internal/project"
 )
 
 type ImageComparison struct {

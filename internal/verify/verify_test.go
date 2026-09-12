@@ -3,11 +3,11 @@ package verify
 import (
 	"context"
 	"encoding/json"
+	"github.com/eliziff/WordUp/internal/native"
+	"github.com/eliziff/WordUp/internal/office"
 	"os"
 	"path/filepath"
 	"testing"
-	"wordwright.local/internal/native"
-	"wordwright.local/internal/office"
 )
 
 func TestAssertions(t *testing.T) {

@@ -366,6 +366,9 @@ func NewForm(name string, cp int) (*Form, error) {
 	_ = r.size("DisplayedSize", 360, 240)
 	_ = r.size("LogicalSize", 0, 0)
 	_ = r.set("BooleanProperties", nil)
+	// Word compares the designer's ShapeCookie with VBFrame.TypeInfoVer.
+	// A missing cookie defaults to zero and makes a newly saved form unloadable.
+	_ = r.set("ShapeCookie", 1)
 	return &Form{Name: name, Codepage: cp, CFB: NewCompound(), root: &formLevel{path: name, record: r, structural: true, classes: []byte{0, 0}}}, nil
 }
 func floatValue(m map[string]any, key string, def float64) (float64, error) {
@@ -555,7 +558,13 @@ func (f *Form) apply(d Design) error {
 		f.root = fresh.root
 		f.vbframe = ""
 	}
-	if e := applyRecord(f.root.record, d.Properties, "DisplayedSize"); e != nil {
+	canvas := map[string]any{}
+	for key, value := range d.Properties {
+		if key != "Caption" {
+			canvas[key] = value
+		}
+	}
+	if e := applyRecord(f.root.record, canvas, "DisplayedSize"); e != nil {
 		return e
 	}
 	if e := f.applyControls(f.root, d.Controls, d.Remove, f.Codepage); e != nil {
@@ -565,6 +574,10 @@ func (f *Form) apply(d Design) error {
 	if f.vbframe == "" {
 		f.vbframe = fmt.Sprintf("VERSION 5.00\r\nBegin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} %s\r\n   Caption = \"%s\"\r\n   ClientHeight = 4800\r\n   ClientLeft = 0\r\n   ClientTop = 0\r\n   ClientWidth = 7200\r\n   StartUpPosition = 1\r\n   TypeInfoVer = 1\r\nEnd\r\n", f.Name, f.Name)
 	}
+	version := regexp.MustCompile(`(?m)^\s*TypeInfoVer\s*=.*\r?$`)
+	f.vbframe = version.ReplaceAllStringFunc(f.vbframe, func(string) string {
+		return fmt.Sprintf("   TypeInfoVer = %d\r", f.root.record.values["ShapeCookie"])
+	})
 	for _, item := range []struct {
 		key, field string
 		scale      float64

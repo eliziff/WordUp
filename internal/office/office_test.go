@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"crypto/rand"
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -53,7 +54,7 @@ func TestCompound(t *testing.T) {
 }
 func specimen(t *testing.T) *VBA {
 	t.Helper()
-	p := os.Getenv("WORDWRIGHT_SPECIMEN")
+	p := os.Getenv("WORDUP_SPECIMEN")
 	if p == "" {
 		t.Skip("private specimen path not set")
 	}
@@ -379,6 +380,50 @@ func TestBlankPackageHasDOCXContentType(t *testing.T) {
 	p := BlankPackage()
 	if !strings.Contains(string(p.Files["[Content_Types].xml"]), "wordprocessingml.document.main+xml") {
 		t.Fatal("seed.docx has wrong package content type")
+	}
+}
+
+func TestWordInteroperabilityMetadata(t *testing.T) {
+	p := BlankPackage()
+	if e := p.SetVBA([]byte("binary fixture")); e != nil {
+		t.Fatal(e)
+	}
+	if !bytes.Contains(p.Files["word/_rels/document.xml.rels"], []byte(VBAProjectRel)) {
+		t.Fatal("Word requires the Microsoft VBA relationship namespace")
+	}
+	if len(p.Files["word/vbaData.xml"]) == 0 {
+		t.Fatal("missing supplemental VBA part")
+	}
+	if e := AddBuildingBlocks(p, []BuildingBlock{{Name: "Note", Blocks: []Block{{Text: "Reusable note"}}}}, nil); e != nil {
+		t.Fatal(e)
+	}
+	if bytes.Contains(p.Files["word/glossary/document.xml"], []byte("<w:types>")) {
+		t.Fatal("explicit types hide ordinary entries in Word's BuildingBlockEntries")
+	}
+	if bytes.Contains(p.Files["word/glossary/_rels/document.xml.rels"], []byte("../styles.xml")) {
+		t.Fatal("main and glossary documents must own separate style parts")
+	}
+	f, e := NewForm("TestForm", 1252)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = f.Apply(Design{Name: "TestForm", Mode: "replace", Controls: []ControlDesign{{Name: "Run", Type: "CommandButton"}}}); e != nil {
+		t.Fatal(e)
+	}
+	streams, e := f.Streams()
+	if e != nil {
+		t.Fatal(e)
+	}
+	expected := fmt.Sprintf("TypeInfoVer = %d", f.root.record.values["ShapeCookie"])
+	if !bytes.Contains(streams["\x03VBFrame"], []byte(expected)) {
+		t.Fatal("designer type information is out of sync")
+	}
+	for _, s := range []string{"Run", "Café — 文"} {
+		raw := encodeStrings([]string{s})
+		values, e := arrayStrings(raw, 1252)
+		if e != nil || len(values) != 1 || values[0] != s {
+			t.Fatalf("MSForms string roundtrip: %q %v", values, e)
+		}
 	}
 }
 func TestPackageRefusesSymlinkEntries(t *testing.T) {

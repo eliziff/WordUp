@@ -223,10 +223,11 @@ func NewVBA(name string) *VBA {
 	add(0x0c, nil)
 	add(0x3c, nil)
 	v.Prefix = prefix
-	v.AddReference("VBA", "{000204EF-0000-0000-C000-000000000046}", "4.2", "", "Visual Basic For Applications")
-	v.AddReference("Word", "{00020905-0000-0000-C000-000000000046}", "8.7", "", "Microsoft Word Object Library")
-	v.AddReference("Office", "{2DF8D04C-5BFA-101B-BDE5-00AA0044DE52}", "2.8", "", "Microsoft Office Object Library")
-	sum := sha256.Sum256([]byte("Wordwright project:" + name))
+	// VBA and Word are host references. Serializing invented registered-library
+	// versions creates broken references; native Word stores stdole and Office.
+	v.AddReference("stdole", "{00020430-0000-0000-C000-000000000046}", "2.0", "", "OLE Automation")
+	v.AddReference("Office", "{2DF8D04C-5BFA-101B-BDE5-00AA0044DE52}", "2.0", "", "Microsoft Office Object Library")
+	sum := sha256.Sum256([]byte("WordUp project:" + name))
 	id := strings.ToUpper(hex.EncodeToString(sum[:16]))
 	v.ProjectText = fmt.Sprintf("ID=\"{%s-%s-%s-%s-%s}\"\r\nName=\"%s\"\r\nHelpContextID=\"0\"\r\nVersionCompatible32=\"393222000\"\r\n\r\n[Host Extender Info]\r\n&H00000001={3832D640-CF90-11CF-8E43-00A0C911005A};VBE;&H00000000\r\n", id[:8], id[8:12], id[12:16], id[16:20], id[20:], name)
 	return v
@@ -275,7 +276,7 @@ func moduleRecords(m Module, cp int) ([]byte, error) {
 	return b, nil
 }
 func StableGUID(scope string) string {
-	sum := sha256.Sum256([]byte("Wordwright:" + scope))
+	sum := sha256.Sum256([]byte("WordUp:" + scope))
 	b := sum[:16]
 	b[6] = (b[6] & 15) | 0x50
 	b[8] = (b[8] & 63) | 0x80

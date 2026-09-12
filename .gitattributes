@@ -9,3 +9,6 @@
 *.dotm binary
 *.docx binary
 *.png binary
+
+# Preserve upstream schema formatting.
+internal/native/schemas/*.xsd -whitespace

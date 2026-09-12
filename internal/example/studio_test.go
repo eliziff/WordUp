@@ -1,12 +1,12 @@
 package example
 
 import (
+	"github.com/eliziff/WordUp/internal/office"
+	"github.com/eliziff/WordUp/internal/project"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
-	"wordwright.local/internal/office"
-	"wordwright.local/internal/project"
 )
 
 func TestIntegratedExampleBuild(t *testing.T) {

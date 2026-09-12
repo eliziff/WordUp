@@ -4,10 +4,10 @@ package deploy
 
 import (
 	"fmt"
+	"github.com/eliziff/WordUp/internal/darwinapi"
 	"runtime"
 	"strings"
 	"unsafe"
-	"wordwright.local/internal/darwinapi"
 )
 
 func WordRunning() (bool, error) {

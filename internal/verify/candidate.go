@@ -6,7 +6,7 @@ import (
 )
 
 func createCandidate(source string, b []byte) (string, error) {
-	d, e := os.MkdirTemp("", "wordwright-candidate-")
+	d, e := os.MkdirTemp("", "wordup-candidate-")
 	if e != nil {
 		return "", e
 	}

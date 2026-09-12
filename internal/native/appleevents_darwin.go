@@ -11,7 +11,7 @@ import (
 	"unicode/utf16"
 	"unsafe"
 
-	a "wordwright.local/internal/darwinapi"
+	a "github.com/eliziff/WordUp/internal/darwinapi"
 )
 
 // Carbon AEDesc is 16 bytes on 64-bit macOS. Apple owns the descriptor storage;

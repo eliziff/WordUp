@@ -16,7 +16,7 @@ import (
 	"sync"
 	"time"
 
-	"wordwright.local/internal/office"
+	"github.com/eliziff/WordUp/internal/office"
 )
 
 type scriptParameter struct {
@@ -154,7 +154,7 @@ func readDictionary(bundle string) (scriptDictionary, error) {
 		return d, e
 	}
 	if len(d.Commands) == 0 {
-		return d, Fail("mac_dictionary_unavailable", "No readable native scripting dictionary was found; Wordwright will not guess event codes", nil)
+		return d, Fail("mac_dictionary_unavailable", "No readable native scripting dictionary was found; WordUp will not guess event codes", nil)
 	}
 	return d, nil
 }
@@ -185,7 +185,7 @@ func Start(ctx context.Context, opt Options) (Host, error) {
 	}
 	base := opt.Directory
 	if base == "" {
-		base = filepath.Join(os.TempDir(), "Wordwright")
+		base = filepath.Join(os.TempDir(), "WordUp")
 	}
 	if e = os.MkdirAll(base, 0700); e != nil {
 		return nil, e

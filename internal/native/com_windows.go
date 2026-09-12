@@ -220,6 +220,12 @@ func (d dispatch) invoke(member string, flags uint16, pos []any, named map[strin
 	if e != nil {
 		return variant{}, e
 	}
+	return d.invokeIDs(member, flags, pos, named, objects, keys, ids)
+}
+
+// IAccessible has standardized DISPIDs: callers can bypass repeated remote
+// GetIDsOfNames without caching identities from mutable Word objects.
+func (d dispatch) invokeIDs(member string, flags uint16, pos []any, named map[string]any, objects map[string]dispatch, keys []string, ids []int32) (variant, error) {
 	args := make([]variant, 0, len(pos)+len(named))
 	namedIDs := []int32{}
 	cleanup := func() {

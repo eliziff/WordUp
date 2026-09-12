@@ -12,7 +12,7 @@ import (
 	"syscall"
 	"unsafe"
 
-	"wordwright.local/internal/office"
+	"github.com/eliziff/WordUp/internal/office"
 )
 
 var gdi = syscall.NewLazyDLL("gdi32.dll")
@@ -82,11 +82,11 @@ func (s *dibSurface) close() {
 }
 func (s *dibSurface) write(file string) error {
 	pixels := unsafe.Slice((*byte)(s.bits), s.width*s.height*4)
-	im := image.NewNRGBA(image.Rect(0, 0, s.width, s.height))
+	// Encode directly from the DIB after converting BGRA to RGBA in place.
+	// The surface is disposable: a second full-resolution pixel buffer is waste.
+	im := &image.NRGBA{Pix: pixels, Stride: s.width * 4, Rect: image.Rect(0, 0, s.width, s.height)}
 	for i := 0; i < len(pixels); i += 4 {
-		im.Pix[i] = pixels[i+2]
-		im.Pix[i+1] = pixels[i+1]
-		im.Pix[i+2] = pixels[i]
+		im.Pix[i], im.Pix[i+2] = pixels[i+2], pixels[i]
 		im.Pix[i+3] = 255
 	}
 	if e := os.MkdirAll(filepath.Dir(file), 0700); e != nil {
@@ -153,6 +153,13 @@ func renderEMF(data []byte, w, h int, file string) error {
 	return s.write(file)
 }
 func screenshot(hwnd uintptr, file string) error {
+	// GetWindowRect is DPI-virtualized for unaware callers, but PrintWindow
+	// paints physical pixels. Use the same coordinate space for both.
+	awareness := user32.NewProc("SetThreadDpiAwarenessContext")
+	previous, _, _ := awareness.Call(^uintptr(3)) // DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2
+	if previous != 0 {
+		defer awareness.Call(previous)
+	}
 	var r rect
 	ok, _, e := getWindowRect.Call(hwnd, uintptr(unsafe.Pointer(&r)))
 	if ok == 0 {
@@ -170,7 +177,11 @@ func screenshot(hwnd uintptr, file string) error {
 	return s.write(file)
 }
 func objectProperty(d dispatch, name string, args ...any) (dispatch, error) {
-	v, e := d.get(name, args...)
+	flags := uint16(2)
+	if name == "Item" {
+		flags = 1
+	}
+	v, e := d.invoke(name, flags, args, nil, nil)
 	if e != nil {
 		return dispatch{}, e
 	}

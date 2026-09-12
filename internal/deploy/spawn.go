@@ -1,16 +1,24 @@
 package deploy
 
 import (
+	"errors"
 	"fmt"
+	"github.com/eliziff/WordUp/internal/project"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"wordwright.local/internal/project"
 )
 
 func Spawn(plan string) error {
+	plan, e := filepath.Abs(plan)
+	if e != nil {
+		return e
+	}
 	exe, e := os.Executable()
 	if e != nil {
+		return e
+	}
+	if e = registerResume(plan, exe); e != nil {
 		return e
 	}
 	log, e := os.OpenFile(filepath.Join(filepath.Dir(plan), "activation.log"), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
@@ -27,6 +35,10 @@ func Spawn(plan string) error {
 	return cmd.Process.Release()
 }
 func RecordFailure(file string, err error) {
+	if errors.Is(err, ErrActivationBusy) || errors.Is(err, ErrWordRunning) {
+		return
+	}
+	_ = clearResume(file)
 	b, e := project.Read(filepath.Dir(file), filepath.Base(file))
 	if e != nil {
 		return

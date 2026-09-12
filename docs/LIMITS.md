@@ -2,25 +2,21 @@
 
 These are release gaps, not redefinitions of the requested product.
 
-| Requirement | Implementation | Evidence in this release |
-|---|---|---|
-| One local executable, no separately installed runtime | Go native binary; same image runs worker/session | Real PE/Mach-O/ELF binaries built. Linux executable exercised. Windows/Mac binaries not run. |
-| No separate configured desktop/VM | Windows private Win32 desktop and owned Word | Source and cross-build only; actual coexistence/cleanup not run. |
-| Editable VBA including new/deleted components | Direct MS-CFB/MS-OVBA writer and cache invalidation | Actual new projects, source edits and ALR round trips; not Word compilation. |
-| Persistent native forms | Binary MS-OFORMS common controls, Frame, MultiPage, Page, metadata | New forms plus read/edit checks on all four ALR forms; not instantiated in Word here. |
-| Arbitrary forms/custom ActiveX | Preserve unknown bytes; explicit unsupported-property errors; native object model remains available | NOT a universal binary designer for every third-party control. Registered third-party dependencies are not bundled. |
-| Ribbon | Preserve/edit native XML, relationships and callback lexical checks | Native parts built; actual Ribbon load test supplied but not executed. No complete Ribbon XSD/idMso/type checker. |
-| Native content/styles/saved parts | Typed recipes plus full raw XML access | Package/structure tests; no native render performed. Recipe coverage is not all OOXML. |
-| DOCX/picture to template | DOCX style/property observations, image delivery and pixel comparison | Model must infer design; no bundled model, OCR service or promise of exact font identification from pixels. |
-| Arbitrary native Word behavior | Raw Automation access and scratch native VBA | Real implementation, not an emulator; native behavior unverified. |
-| Native UI testing | Owned-window accessibility, actions, captures; async macro/UI lanes | Unexecuted. Not universal support for every owner-drawn control, drag gesture or file picker. No hidden global SendInput fallback. |
-| Native page rendering | Word Page.EnhMetaFileBits and Windows GDI | Compiled; not run. Not replaced with a web/LibreOffice renderer. |
-| Full VBA compile | Targeted native VBE Compile command, observed enabled-to-disabled transition | Not run. Policy/VBE restrictions can fail. Already-disabled command does not prove a fresh compile. |
-| Fast feedback | Native binary edits, artifact/source-hash cache, warm process, batches, local IPC | Offline CLI measurements only. No native Word latency data. |
-| Safe deployment | Exact artifact and suite binding, backup, old-target guard, deferred local activation | File/policy tests on Linux use labeled synthetic proof. Actual Windows install/locks not run. |
-| Next Word launch after OS reboot | Durable pending activation record | NO automatic login/startup resume in this preview. Not a fulfilled no-intervention reboot guarantee. |
-| Mac portable authoring | Native offline binary, conditional checks and runtime probe VBA | Checks tested; not proof of portable behavior. Some Mac compile constants are conservatively unknown without the runtime probe. |
-| Actual Mac execution | Direct Apple Events and installed SDEF dictionary | Cross-compiled prototype; not run. No native Mac UI/render/compile parity. |
+| Requirement | Current evidence and limits |
+|---|---|
+| Native Windows authoring and execution | Actual Word compile, VBA runtime, nested persisted forms, Ribbon callbacks, context menu, template hotkey, document contents and saved parts passed. These fixtures do not prove every possible macro. |
+| Forms and custom ActiveX | Common controls, Frame, MultiPage and Page are implemented. Unknown binary data is preserved; unsupported edits fail. Third-party controls and dependencies are not universally supported or bundled. |
+| Ribbon verification | Embedded 2007/2010 XSD validation on Windows, duplicate IDs and lexical callback checks, plus actual tested callbacks. Built-in idMso existence and all callback type signatures are not fully checked. |
+| Native page/UI appearance | Actual Word page renders and owned-window captures have been visually reviewed. Agents must inspect their own outputs; screenshot generation alone does not establish good layout. |
+| UI automation | Named selectors, bounded waits, MSAA/UI Automation and separate async macro/UI lanes. No universal owner-drawn gesture, drag or file-picker support. |
+| Error diagnostics | Scratch VBA error number/source/line, complete compiler observations, retained failed candidates and owned-window failure captures. Automatic full VBA call-stack/local-variable tracing is not implemented. |
+| Resource containment | Owned job limits and independent asynchronous watchdog tested, including survival of another Word instance. Limits do not apply when a recipient opens the DOTM normally. |
+| Fast iteration | Complete signed suite recorded 2.62 s warm with 17 assertions. Timing varies; the one-second target remains unmet. See PERFORMANCE.md. |
+| Signing | Automatic local certificate creation/reuse and strongest V3 digest verification tested. SignTool and registered Office SIP remain prerequisites; automatic prerequisite installation and automatic recipient trust are not provided. |
+| Delivery and restore | Exact fresh-artifact/suite checks, backups, stale-target protection, interrupted-replacement recovery and guarded restore tested. |
+| Login recovery | Current-user Windows login command was registered, executed and removed in a native delivery test. No actual OS reboot was performed. Windows Script Host must be available; policy may prevent execution. |
+| Document/image references | Raw XML and typed recipes plus document/image inspection. No embedded model, OCR service, universal resolved-style engine or font-identification guarantee. |
+| Mac stretch | Offline code and Apple Events prototype exist. Actual Mac Word execution and native UI/render/compile parity remain unverified/incomplete. |
 
 ## Security and environment
 

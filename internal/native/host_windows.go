@@ -16,7 +16,7 @@ import (
 	"time"
 	"unsafe"
 
-	"wordwright.local/internal/office"
+	"github.com/eliziff/WordUp/internal/office"
 )
 
 var enumDesktopWindows = user32.NewProc("EnumDesktopWindows")
@@ -113,12 +113,13 @@ func documentWindow(pid uint32) uintptr {
 }
 
 type wordHost struct {
-	cfg     hostConfig
-	process childProcess
-	app     dispatch
-	objects map[string]dispatch
-	staged  map[string]string
-	execute bool
+	cfg       hostConfig
+	process   childProcess
+	app       dispatch
+	objects   map[string]dispatch
+	staged    map[string]string
+	execute   bool
+	uiWindows sync.Map
 }
 
 func connectWord(cfg hostConfig) (*wordHost, error) {
@@ -154,37 +155,46 @@ func connectWord(cfg hostConfig) (*wordHost, error) {
 		if hwnd := documentWindow(p.PID); hwnd != 0 {
 			win, e := fromNativeWindow(hwnd, 0xfffffff0)
 			if e == nil {
+				// Word exposes Hwnd on Window, not Application. Verify the native
+				// window before extracting its Application object.
+				hv, windowErr := win.get("Hwnd")
+				if windowErr != nil {
+					win.release()
+					last = windowErr
+					continue
+				}
+				own := pidOf(uintptr(uint32(hv.Value)))
+				hv.clear()
+				if own != p.PID {
+					win.release()
+					return nil, Fail("word_ownership_mismatch", "Refusing to automate a Word window outside the app-owned process", nil)
+				}
 				v, e := win.get("Application")
 				win.release()
 				if e == nil {
 					app, e := v.object()
 					v.clear()
 					if e == nil {
-						hv, e := app.get("Hwnd")
-						if e == nil {
-							own := pidOf(uintptr(hv.Value))
-							hv.clear()
-							if own != p.PID {
-								app.release()
-								return nil, Fail("word_ownership_mismatch", "Refusing to automate a Word application outside the app-owned process", nil)
-							}
-							h.app = app
-							h.objects["app"] = app
-							if e = app.put("AutomationSecurity", 3); e != nil {
-								return nil, e
-							}
-							_ = app.put("DisplayAlerts", 0)
-							// Word stays visually active on the private desktop so real forms and
-							// pages can be painted. No SwitchDesktop or user-desktop input is used.
-							_ = app.put("Visible", true)
-							good = true
-							return h, nil
+						if e = app.put("AutomationSecurity", 3); e != nil {
+							app.release()
+							return nil, e
 						}
-						app.release()
+						h.app = app
+						h.objects["app"] = app
+						_ = app.put("DisplayAlerts", 0)
+						_ = app.put("Visible", true)
+						good = true
+						return h, nil
 					}
+					last = e
+				}
+				if e != nil {
+					last = e
 				}
 			}
-			last = e
+			if e != nil {
+				last = e
+			}
 		}
 		time.Sleep(40 * time.Millisecond)
 	}
@@ -395,6 +405,22 @@ func (h *wordHost) operation(op Operation) (any, error) {
 		if e != nil {
 			return nil, e
 		}
+		if op.Op != "addin" {
+			// Explicitly select the staged document. A private desktop need not
+			// activate a newly opened window as the interactive desktop would.
+			d := h.objects[name]
+			activated, err := d.call("Activate")
+			activated.clear()
+			if err != nil {
+				return nil, err
+			}
+			if win, err := objectProperty(d, "ActiveWindow"); err == nil {
+				if hwnd, err := scalarNumber(win, "Hwnd"); err == nil {
+					h.uiWindows.Store(name, uint64(hwnd))
+				}
+				win.release()
+			}
+		}
 		return map[string]any{"handle": r, "staged_path": target, "source_sha256": h.staged[strings.ToLower(target)], "macro_execution_authorized": h.execute, "open_and_repair": false}, nil
 	case "unload":
 		// Closing is explicit; never close a user's process/document. All objects
@@ -413,6 +439,7 @@ func (h *wordHost) operation(op Operation) (any, error) {
 		}
 		d.release()
 		delete(h.objects, op.Target)
+		h.uiWindows.Delete(op.Target)
 		if op.File != "" {
 			target := filepath.Join(h.cfg.Directory, filepath.Base(op.File))
 			delete(h.staged, strings.ToLower(target))
@@ -432,6 +459,21 @@ func (h *wordHost) operation(op Operation) (any, error) {
 		return h.result(&v, op.As)
 	case "eval":
 		return h.evaluate(op)
+	case "context_menu":
+		d, e := h.object(op.Target)
+		if e != nil {
+			return nil, e
+		}
+		w, e := objectProperty(d, "ActiveWindow")
+		if e != nil {
+			return nil, e
+		}
+		defer w.release()
+		hwnd, e := scalarNumber(w, "Hwnd")
+		if e != nil {
+			return nil, e
+		}
+		return uiOperation(h.process.PID, h.cfg.Directory, h.execute, Operation{Op: "ui.context_menu", HWND: uint64(hwnd)})
 	case "render":
 		return h.render(op)
 	case "compile":
@@ -563,7 +605,7 @@ func HostMain(args []string) error {
 	if e = json.Unmarshal(b, &cfg); e != nil {
 		return e
 	}
-	if len(cfg.Token) != 32 || !strings.HasPrefix(cfg.Desktop, "Wordwright-") || filepath.Clean(args[0]) != filepath.Join(cfg.Directory, "host.json") {
+	if len(cfg.Token) != 32 || !strings.HasPrefix(cfg.Desktop, "WordUp-") || filepath.Clean(args[0]) != filepath.Join(cfg.Directory, "host.json") {
 		return fmt.Errorf("invalid private-host configuration")
 	}
 	runtime.LockOSThread()
@@ -580,6 +622,9 @@ func HostMain(args []string) error {
 	}
 	h, e := connectWord(cfg)
 	if e != nil {
+		// Startup is the first request. Preserve the full fault, including owned
+		// window diagnostics, instead of reducing it to a stderr string and EOF.
+		_ = json.NewEncoder(os.Stdout).Encode(Response{ID: 1, Error: fault(e)})
 		return e
 	}
 	defer h.close()
@@ -601,8 +646,10 @@ func HostMain(args []string) error {
 		ms := float64(time.Since(start).Microseconds()) / 1000
 		if q.Task != "" {
 			tasksMu.Lock()
-			tasks[q.Task] = &asyncTask{Status: "completed", Result: r, Error: fault(e), DurationMS: ms}
+			completed := &asyncTask{Status: "completed", Result: r, Error: fault(e), DurationMS: ms}
+			tasks[q.Task] = completed
 			tasksMu.Unlock()
+			emit(Response{Task: q.Task, Result: completed})
 		} else {
 			emit(Response{ID: q.ID, Result: r, Error: fault(e), DurationMS: ms})
 		}
@@ -621,7 +668,16 @@ func HostMain(args []string) error {
 		for {
 			select {
 			case q := <-ui:
-				perform(q, func(op Operation) (any, error) { return uiOperation(h.process.PID, cfg.Directory, h.execute, op) })
+				perform(q, func(op Operation) (any, error) {
+					if op.Target != "" {
+						value, ok := h.uiWindows.Load(op.Target)
+						if !ok {
+							return nil, fmt.Errorf("unknown document window target %s", op.Target)
+						}
+						op.HWND = value.(uint64)
+					}
+					return uiOperation(h.process.PID, cfg.Directory, h.execute, op)
+				})
 			case <-ended:
 				return
 			case <-time.After(20 * time.Millisecond):
@@ -683,11 +739,19 @@ func HostMain(args []string) error {
 					continue
 				}
 				key := randomID()
+				if q.Operation.As != "" {
+					key = q.Operation.As
+					if len(key) > 128 || tasks[key] != nil {
+						tasksMu.Unlock()
+						emit(Response{ID: q.ID, Error: fault(fmt.Errorf("task name already exists or exceeds 128 characters"))})
+						continue
+					}
+				}
 				tasks[key] = &asyncTask{Status: "queued"}
 				tasksMu.Unlock()
 				item.Task = key
 				item.Operation = q.Operation.Steps[0]
-				emit(Response{ID: q.ID, Result: map[string]any{"task": key}})
+				emit(Response{ID: q.ID, Task: key, Result: map[string]any{"task": key}})
 			}
 			destination := work
 			if strings.HasPrefix(item.Operation.Op, "ui.") {

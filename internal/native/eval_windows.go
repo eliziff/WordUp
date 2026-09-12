@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"wordwright.local/internal/office"
+	"github.com/eliziff/WordUp/internal/office"
 )
 
 func (h *wordHost) evaluate(op Operation) (any, error) {
@@ -21,20 +21,15 @@ func (h *wordHost) evaluate(op Operation) (any, error) {
 	}
 	name := "WWEval" + randomID()[:16]
 	v := office.NewVBA(name)
-	source := "Attribute VB_Name = \"Evaluation\"\nOption Explicit\nPublic Function Evaluate() As Variant\n" + body + "\nEnd Function\n"
-	vb, e := v.Rewrite([]office.Module{{Name: "ThisDocument", Kind: "document", Source: officeDocumentSource}, {Name: "Evaluation", Kind: "standard", Source: source}}, nil)
+	module := "Evaluation" + randomID()[:16]
+	errorTag := randomID()
+	source := "Attribute VB_Name = \"" + module + "\"\nOption Explicit\nPublic Function Evaluate() As Variant\nOn Error GoTo WordUpEvalFailed\n" + body + "\nExit Function\nWordUpEvalFailed:\nEvaluate = Array(\"" + errorTag + "\", Err.Number, Err.Description, Err.Source, Erl)\nEnd Function\n"
+	vb, e := v.Rewrite([]office.Module{{Name: "ThisDocument", Kind: "document", Source: officeDocumentSource}, {Name: module, Kind: "standard", Source: source}}, nil)
 	if e != nil {
 		return nil, e
 	}
 	p := office.BlankPackage()
-	p.Files["word/vbaProject.bin"] = vb
-	if e = p.ContentType("word/document.xml", office.MainDOTM); e != nil {
-		return nil, e
-	}
-	if e = p.ContentType("word/vbaProject.bin", "application/vnd.ms-office.vbaProject"); e != nil {
-		return nil, e
-	}
-	if e = p.Relationship("word/document.xml", "rIdVBA", office.R+"/vbaProject", "vbaProject.bin", ""); e != nil {
+	if e = p.SetVBA(vb); e != nil {
 		return nil, e
 	}
 	data, e := p.Bytes()
@@ -58,7 +53,7 @@ func (h *wordHost) evaluate(op Operation) (any, error) {
 			delete(h.objects, name)
 		}
 	}()
-	value, e := h.app.invoke("Run", 1, []any{name + ".Evaluation.Evaluate"}, nil, h.objects)
+	value, e := h.app.invoke("Run", 1, []any{module + ".Evaluate"}, nil, h.objects)
 	if e != nil {
 		return nil, Fail("scratch_vba_failed", e.Error(), map[string]any{"generated_source": source, "scratch_sha256": office.Hash(data), "cause": fault(e)})
 	}
@@ -66,7 +61,11 @@ func (h *wordHost) evaluate(op Operation) (any, error) {
 	if e != nil {
 		return nil, e
 	}
-	return map[string]any{"result": result, "executor": "native Microsoft Word VBA", "generated_source": source, "scratch_sha256": office.Hash(data), "tested_artifact_modified": false}, nil
+	array, _ := result.(map[string]any)
+	if values, ok := array["array"].([]any); ok && len(values) == 5 && values[0] == errorTag {
+		return nil, Fail("scratch_vba_failed", fmt.Sprint(values[2]), map[string]any{"number": values[1], "source": values[3], "line": values[4], "generated_source": source, "scratch_sha256": office.Hash(data)})
+	}
+	return map[string]any{"result": result, "executor": "native Microsoft Word VBA", "generated_source": source, "scratch_sha256": office.Hash(data), "scratch_project_separate": true}, nil
 }
 
 const officeDocumentSource = `Attribute VB_Name = "ThisDocument"

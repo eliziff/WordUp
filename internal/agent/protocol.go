@@ -5,11 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/eliziff/WordUp/internal/project"
+	"github.com/eliziff/WordUp/internal/verify"
 	"io"
 	"strings"
 	"time"
-	"wordwright.local/internal/project"
-	"wordwright.local/internal/verify"
 )
 
 type Tool struct {
@@ -21,6 +21,11 @@ type Tool struct {
 func Tools() []Tool {
 	ds := [][2]string{{"example", "Create and build an integrated editable native template: output."}, {"selftest", "Generate own integration fixture and test it in actual local Word; saves assertions/failures. Requires --execute, optional output."}, {"deploy", "Stage exact native-tested artifact path, acceptance reference, destination output. Automatically waits locally for Word to close; backup and stale-target guards."}, {"activate", "Retry a durable activation plan path after an interrupted local worker. Never closes Word."}, {"help", "Read source layout, operations and native ABI help."}, {"doctor", "Detect local native Word. Does not execute or emulate it."}, {"new", "Create a native source workspace: name,output."}, {"import", "Import an actual DOCX/DOTM package: path,output."}, {"inspect", "Inventory an artifact: path."}, {"files", "List source files; limit bounds the response."}, {"read", "Read workspace path and its optimistic concurrency hash."}, {"write", "Write UTF-8 text or base64 to path; expected_sha256 protects existing edits."}, {"search", "Literal case-insensitive source search: query,limit."}, {"build", "Build a native DOTM; optional output. No VBA execution claim."}, {"check", "Fast lexical/XML diagnostics, NOT full compilation."}, {"compat", "Conservative conditional Windows/Mac portability review, NOT a Mac pass."}, {"reference.document", "Read native styles and paragraph/property observations from path."}, {"reference.image", "Return reference/screenshot image pixels to the vision-capable agent."}, {"image.compare", "Exact-size pixel comparison: reference,path,tolerance,optional output difference image."}, {"native.start", "Start owned local Word lazily; requires installed Word, not a VM."}, {"native.call", "Raw native operation; see help. Persistent host. Macro execution requires launch --execute."}, {"native.stop", "Close ONLY the app-owned Word and private desktop."}, {"test", "Execute assertion suite against exact artifact path; fresh=true uses an independent process. Returns and saves truthful pass/fail/not_run evidence."}}
 	props := map[string]any{}
+	ds = append(ds, [2]string{"restore", "Restore the previous template from an installed activation plan path; refuses newer user edits and waits for Word to be closed."})
+	ds = append(ds, [2]string{"compile", "Build, compile in real Word and automatically sign a DOTM. Creates a local non-exportable certificate once and reuses it; no certificate parameters needed. Requires --execute. Optional output; cached exact unchanged outputs return immediately."})
+	ds = append(ds, [2]string{"sign", "Sign an unsigned path to a NEW output DOTM using an automatically created or reused local certificate; optional advanced signing.thumbprint, signing.store_location, signing.signtool and signing.timestamp_url. Requires --execute, Windows SDK SignTool and registered Microsoft Office SIP. Creates legacy, agile and V3 signatures and verifies the strongest V3 digest; publisher trust is reported separately. Run native acceptance on the signed output before deployment."}, [2]string{"signature.verify", "Verify the newest VBA signature and certificate trust with Microsoft Office SIP: path, optional signing.signtool. Does not execute macros."})
+	props["signing"] = map[string]any{"type": "object", "properties": map[string]any{"thumbprint": map[string]any{"type": "string"}, "signtool": map[string]any{"type": "string"}, "timestamp_url": map[string]any{"type": "string"}, "store_location": map[string]any{"type": "string"}}, "additionalProperties": false}
+	props["native_options"] = map[string]any{"type": "object", "description": "native.start options: memory_limit_mb (default 2048), cpu_percent (default 50), startup_timeout_ms. Effective at host creation only."}
 	for _, key := range []string{"path", "output", "name", "text", "base64", "expected_sha256", "query", "reference"} {
 		props[key] = map[string]any{"type": "string"}
 	}
@@ -112,7 +117,7 @@ func Serve(ctx context.Context, e *Engine, in io.Reader, out io.Writer, mcp bool
 					version = "2025-11-25"
 				}
 				initialized = true
-				if err := emit(q.ID, map[string]any{"protocolVersion": version, "serverInfo": map[string]any{"name": "wordwright", "version": project.Version}, "capabilities": map[string]any{"tools": map[string]any{}}, "instructions": project.AgentInstructions}, nil, 0); err != nil {
+				if err := emit(q.ID, map[string]any{"protocolVersion": version, "serverInfo": map[string]any{"name": "wordup", "version": project.Version}, "capabilities": map[string]any{"tools": map[string]any{}}, "instructions": project.AgentInstructions}, nil, 0); err != nil {
 					return err
 				}
 				continue

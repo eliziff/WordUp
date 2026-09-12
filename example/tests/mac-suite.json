@@ -17,7 +17,7 @@
       "name": "Execute portable native VBA acceptance",
       "operation": {
         "op": "run",
-        "macro": "$project.Studio.NativeAcceptance"
+        "macro": "Studio.NativeAcceptance"
       }
     },
     {
@@ -30,7 +30,7 @@
       "assert": [
         {
           "kind": "contains",
-          "expected": "WORDWRIGHT_NATIVE_OK"
+          "expected": "WORDUP_NATIVE_OK"
         }
       ]
     }
