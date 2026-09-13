@@ -20,6 +20,10 @@ func OfficeTools(ctx context.Context, args ...string) (any, error) {
 		helper = filepath.Join(filepath.Dir(exe), "wordup-oletools", "wordup-oletools.exe")
 		args = args[1:]
 	}
+	if len(args) > 0 && args[0] == "vba.analyze" {
+		helper = filepath.Join(filepath.Dir(exe), "analysis", "WordUp.Analysis.exe")
+		args = append([]string{"analyze"}, args[1:]...)
+	}
 	if _, err = os.Stat(helper); err != nil {
 		return nil, Fail("office_tools_missing", "Bundled Office tools helper is missing; build tools/office-bridge/build.ps1 or use the complete distribution", nil)
 	}
