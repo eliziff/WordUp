@@ -7,12 +7,11 @@
     <RubberduckSource Condition="'$(RubberduckSource)' == ''">$(MSBuildThisFileDirectory)..\..\workspaces\reuse\rubberduck-engine</RubberduckSource>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="$(RubberduckSource)\Rubberduck.Parsing\Rubberduck.Parsing.csproj" />
+    <ProjectReference Include="WordUp.Analysis.csproj" />
     <PackageReference Include="Moq" Version="4.8.0" />
     <PackageReference Include="NUnit" Version="3.14.0" />
     <Reference Include="System.Web.Extensions" />
     <Compile Include="SemanticProof.cs" />
-    <Compile Include="SourceSnapshot.cs" />
     <Compile Include="$(RubberduckSource)\RubberduckTests\Mocks\Windows.cs" Link="Upstream\Windows.cs" />
     <!-- Test-only in-memory editor boundary. The actual parser, declaration
          resolver and reference resolver are unmodified upstream production code. -->

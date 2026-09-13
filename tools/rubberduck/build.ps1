@@ -22,11 +22,10 @@ $env:MSBuildEnableWorkloadResolver = 'false'
 $env:MSBuildSDKsPath = Join-Path $env:DOTNET_ROOT 'sdk/8.0.425/Sdks'
 if (!(Test-Path -LiteralPath $env:MSBuildSDKsPath)) { throw 'Install the pinned .NET SDK 8.0.425 or supply DotnetRoot.' }
 $overrides = Join-Path $PSScriptRoot 'Headless.targets'
-& $MSBuild (Join-Path $sourceRoot 'Rubberduck.Parsing/Rubberduck.Parsing.csproj') /restore /t:Build /p:Configuration=Release /p:RestoreSources=https://api.nuget.org/v3/index.json "/p:SolutionDir=$sourceRoot\" "/p:RestorePackagesPath=$([IO.Path]::GetFullPath($Packages))" "/p:CustomAfterMicrosoftCommonTargets=$overrides" /nologo /verbosity:minimal /warnasmessage:MSB4011
-if ($LASTEXITCODE -ne 0) { throw 'Upstream Rubberduck parser build failed.' }
+$project = if ($Proof) { 'SemanticProof.csproj' } else { 'WordUp.Analysis.csproj' }
+& $MSBuild (Join-Path $PSScriptRoot $project) /restore /t:Build /p:Configuration=Release /p:RestoreSources=https://api.nuget.org/v3/index.json "/p:SolutionDir=$sourceRoot\" "/p:RubberduckSource=$sourceRoot" "/p:RestorePackagesPath=$([IO.Path]::GetFullPath($Packages))" "/p:CustomAfterMicrosoftCommonTargets=$overrides" /nologo /verbosity:minimal /warnasmessage:MSB4011
+if ($LASTEXITCODE -ne 0) { throw 'Rubberduck workspace analysis build failed.' }
 if ($Proof) {
- & $MSBuild (Join-Path $PSScriptRoot 'SemanticProof.csproj') /restore /t:Build /p:Configuration=Release /p:RestoreSources=https://api.nuget.org/v3/index.json "/p:SolutionDir=$sourceRoot\" "/p:RubberduckSource=$sourceRoot" "/p:RestorePackagesPath=$([IO.Path]::GetFullPath($Packages))" "/p:CustomAfterMicrosoftCommonTargets=$overrides" /nologo /verbosity:minimal /warnasmessage:MSB4011
- if ($LASTEXITCODE -ne 0) { throw 'Semantic proof build failed.' }
  & (Join-Path $PSScriptRoot 'bin/Release/net462/SemanticProof.exe')
  if ($LASTEXITCODE -ne 0) { throw 'Semantic proof failed.' }
 }

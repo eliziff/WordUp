@@ -16,14 +16,31 @@ VBEditor, Resources, SettingsProvider and InternalApi assemblies. It leaves
 upstream tracked source untouched. `Headless.targets` skips add-in deployment
 and repository analyzers and uses Roslyn for satellite assemblies.
 
-The semantic proof links the upstream in-memory editor test fixtures and runs
-the real preprocessing/declaration/reference pipeline. It is not native Word
-execution, an installed add-in, or a production agent endpoint. Test-only
-Moq/NUnit dependencies must not be mistaken for shipped application dependencies.
+`WordUp.Analysis.csproj` builds the workspace adapter separately from test code.
+It supplies read-only module snapshots to the real preprocessing, declaration
+and reference pipeline. Hidden attributes retain their separate parser view and
+diagnostics map back to physical source lines. Unsupported editor operations
+throw; no editor or Word instance is created. Standard/class modules are supported;
+document/form metadata remains unfinished and is rejected explicitly.
 
-Remaining integration: production workspace/reference adapters, source/attribute
-coordinate mapping, installed type-library loading, inspection selection,
-incremental invalidation, bounded protocol results and packaging/license audit.
+The proof exercises both this adapter and upstream test-only editor fixtures,
+comparing declarations and reference locations for cross-module calls, invalid
+members, conditional code and property accessors. Moq/NUnit belong only to the
+proof project, not the analysis assembly. This is not native Word execution or
+an agent endpoint yet.
+
+Installed type-library reflection uses upstream `ComLibraryProvider` (no
+registration) and `ComProject`. References require matching GUID, version and
+name; unavailable references are retained as errors. Library bytes are hashed.
+Fresh resolver declarations prevent stale reference bindings between analyses.
+To exercise an installed Word library as well, set `WORDUP_TEST_WORD_TYPELIB`
+to its absolute `MSWORD.OLB` path before running the proof. That check resolves
+`Word.Document` and `Document.Name` twice and rejects a mismatched library identity.
+
+Remaining integration: workspace manifest/host/designer metadata, transitive
+library coverage, inspection selection, incremental invalidation, bounded protocol
+results and packaging/license audit. Type reflection inherits upstream's
+best-effort handling of individual library entries; it is not native compilation.
 Do not report deep `check` or full Rubberduck integration from this proof alone.
 
 Local SDK bootstrap used Microsoft's 8.0.425 win-x64 archive, verified against

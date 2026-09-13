@@ -80,6 +80,19 @@ namespace WordUp.Analysis {
     }
 
     internal static class SnapshotParser {
+        // Upstream adds a diagnostic listener without removing ANTLR's console
+        // listener. Keep exceptions authoritative, without duplicate stderr noise.
+        sealed class QuietTokenStreamParser : VBATokenStreamParser {
+            public QuietTokenStreamParser(IParsePassErrorListenerFactory errors) : base(errors, errors) { }
+            protected override Antlr4.Runtime.Tree.IParseTree Parse(Antlr4.Runtime.ITokenStream tokens,
+                Antlr4.Runtime.Atn.PredictionMode prediction, Antlr4.Runtime.IParserErrorListener errors) {
+                var parser = new Rubberduck.Parsing.Grammar.VBAParser(tokens);
+                parser.Interpreter.PredictionMode = prediction;
+                parser.RemoveErrorListeners();
+                parser.AddErrorListener(errors);
+                return parser.startRule();
+            }
+        }
         public static ModuleParser Create(IReadOnlyDictionary<QualifiedModuleName, SourceSnapshot> sources,
             double vbeVersion, Dictionary<string, Dictionary<string, short>> constants) {
             var settings = new SnapshotCompilationArguments(vbeVersion, constants);
@@ -89,7 +102,7 @@ namespace WordUp.Analysis {
             var preprocessor = new VBAPreprocessor(new VBAPreprocessorParser(preErrors, preErrors), cache);
             var errors = new MainParseErrorListenerFactory();
             var parser = new TokenStreamParserStringParserAdapterWithPreprocessing(
-                new SimpleVBAModuleTokenStreamProvider(), new VBATokenStreamParser(errors, errors), preprocessor);
+                new SimpleVBAModuleTokenStreamProvider(), new QuietTokenStreamParser(errors), preprocessor);
             var annotations = typeof(IAnnotation).Assembly.GetTypes()
                 .Where(t => typeof(IAnnotation).IsAssignableFrom(t) && !t.IsAbstract)
                 .Select(t => (IAnnotation)Activator.CreateInstance(t));

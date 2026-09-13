@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net462</TargetFramework>
+    <LangVersion>7.2</LangVersion>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <RubberduckSource Condition="'$(RubberduckSource)' == ''">$(MSBuildThisFileDirectory)..\..\workspaces\reuse\rubberduck-engine</RubberduckSource>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(RubberduckSource)\Rubberduck.Parsing\Rubberduck.Parsing.csproj" />
+    <Compile Include="SourceSnapshot.cs" />
+    <Compile Include="SnapshotEditor.cs" />
+    <Compile Include="SnapshotAnalysis.cs" />
+    <Compile Include="SnapshotReferences.cs" />
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>SemanticProof</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>
