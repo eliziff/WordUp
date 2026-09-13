@@ -12,6 +12,7 @@
     <Compile Include="SnapshotEditor.cs" />
     <Compile Include="SnapshotAnalysis.cs" />
     <Compile Include="SnapshotReferences.cs" />
+    <Compile Include="SnapshotInspections.cs" />
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
       <_Parameter1>SemanticProof</_Parameter1>
     </AssemblyAttribute>

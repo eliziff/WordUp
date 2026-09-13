@@ -64,8 +64,6 @@ class SemanticProof {
         var timer = Stopwatch.StartNew();
         // Concrete inspections are internal upstream; instantiate the pinned
         // implementation through its public IInspection contract, without mocks.
-        var type = typeof(Rubberduck.CodeAnalysis.Inspections.IInspection).Assembly.GetType(
-            "Rubberduck.CodeAnalysis.Inspections.Concrete.VariableNotUsedInspection", true);
         foreach (var used in new[]{false, true, false}) {
             var source = "Option Explicit\nPublic Function Answer() As Long\n Dim spare As Long\n Answer = " + (used ? "spare" : "42") + "\nEnd Function\n";
             var editor = new WordUp.Analysis.SnapshotEditor("workspace", "InspectionProof", new[]{
@@ -74,8 +72,7 @@ class SemanticProof {
             using (var state = WordUp.Analysis.SnapshotAnalysis.ResolveSourceOnly(editor,
                 new Dictionary<string,Dictionary<string,short>>{{"workspace",new Dictionary<string,short>()}},CancellationToken.None)) {
                 Require(!state.ModuleExceptions.Any(), "Inspection fixture failed to parse");
-                var inspection = (Rubberduck.CodeAnalysis.Inspections.IInspection)Activator.CreateInstance(type, state);
-                var findings = inspection.GetInspectionResults(CancellationToken.None).ToArray();
+                var findings = WordUp.Analysis.SnapshotInspections.Run("VariableNotUsedInspection", state, editor, CancellationToken.None);
                 Require(findings.Length == (used ? 0 : 1), "Unused variable inspection missed defect or retained stale result");
                 if (!used) {
                     Require(findings[0].Target.IdentifierName == "spare", "Inspection targeted wrong variable");
@@ -85,7 +82,26 @@ class SemanticProof {
                 }
             }
         }
-        return new {name="upstream unused-variable inspection: defect/fix/defect",duration_ms=timer.Elapsed.TotalMilliseconds};
+        foreach (var explicitOption in new[]{false,true}) {
+            var source = "Attribute VB_Name = \"Example\"\n" + (explicitOption ? "Option Explicit\n" : "") + "Public Sub Run()\nEnd Sub\n";
+            var snapshot = new WordUp.Analysis.SourceSnapshot("vba/Example.bas", System.Text.Encoding.UTF8.GetBytes(source));
+            var editor = new WordUp.Analysis.SnapshotEditor("workspace", "InspectionProof", new[]{("Example",ComponentType.StandardModule,snapshot)});
+            using (var state = WordUp.Analysis.SnapshotAnalysis.ResolveSourceOnly(editor,
+                new Dictionary<string,Dictionary<string,short>>{{"workspace",new Dictionary<string,short>()}},CancellationToken.None)) {
+                var findings = WordUp.Analysis.SnapshotInspections.Run("OptionExplicitInspection",state,editor,CancellationToken.None);
+                Require(findings.Length == (explicitOption ? 0 : 1), "Option Explicit inspection missed defect or correction");
+                if (!explicitOption) Require(snapshot.FileLine(findings[0].QualifiedSelection.Selection.StartLine) == 2, "Exported inspection location lost hidden attribute offset");
+                var mapped = WordUp.Analysis.SnapshotInspections.Diagnose("OptionExplicitInspection",state,editor,CancellationToken.None);
+                Require(mapped.Length == findings.Length, "Mapped inspection lost results");
+                if (!explicitOption) Require(mapped[0].Path == snapshot.Path && mapped[0].SHA256 == snapshot.SHA256 && mapped[0].Line == 2 && mapped[0].Column > 0,
+                    "Mapped diagnostic lost source identity or exported location");
+                try {
+                    WordUp.Analysis.SnapshotInspections.Run("OptionExplicitInspection",state,editor,new CancellationToken(true));
+                    throw new Exception("Cancelled inspection executed");
+                } catch (OperationCanceledException) { }
+            }
+        }
+        return new {name="upstream variable and Option Explicit inspections; mapped sources and cancellation",duration_ms=timer.Elapsed.TotalMilliseconds};
     }
     static object CheckWordLibrary(string path) {
         var timer = Stopwatch.StartNew();
