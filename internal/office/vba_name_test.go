@@ -17,3 +17,16 @@ func TestProjectComponentCollisionFailsBeforeWord(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestNewClassGetsNativeClassIdentity(t *testing.T) {
+	source := NewModuleSource(Module{Name: "ProofClass", Kind: "class", Source: "Option Explicit\n"}, "Proof")
+	for _, attribute := range []string{
+		`Attribute VB_Base = "0{FCFB3D2A-A0FA-1068-A738-08002B3371B5}"`,
+		"Attribute VB_TemplateDerived = False",
+		"Attribute VB_Customizable = False",
+	} {
+		if !strings.Contains(source, attribute) {
+			t.Fatalf("new class lacks %s", attribute)
+		}
+	}
+}

@@ -295,7 +295,7 @@ func NewModuleSource(m Module, project string) string {
 	case "document":
 		attrs = []string{`VB_Base = "0{00020906-0000-0000-C000-000000000046}"`, "VB_GlobalNameSpace = False", "VB_Creatable = False", "VB_PredeclaredId = True", "VB_Exposed = True", "VB_TemplateDerived = False", "VB_Customizable = True"}
 	case "class":
-		attrs = []string{"VB_GlobalNameSpace = False", "VB_Creatable = False", "VB_PredeclaredId = False", "VB_Exposed = False"}
+		attrs = []string{`VB_Base = "0{FCFB3D2A-A0FA-1068-A738-08002B3371B5}"`, "VB_GlobalNameSpace = False", "VB_Creatable = False", "VB_PredeclaredId = False", "VB_Exposed = False", "VB_TemplateDerived = False", "VB_Customizable = False"}
 	}
 	head := ""
 	for _, a := range attrs {

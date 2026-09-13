@@ -23,7 +23,7 @@ func TestNativeComponentCleanup(t *testing.T) {
 	if _, err := project.New("ComponentProof", root); err != nil {
 		t.Fatal(err)
 	}
-	for _, id := range []string{"operation.safe-edit", "document.style-converter", "structure.detect", "command.hotkey", "command.context-menu"} {
+	for _, id := range []string{"operation.safe-edit", "document.style-converter", "structure.detect", "ui.progress-cancel", "ui.ribbon-command", "command.hotkey", "command.context-menu"} {
 		if _, err := component.Add(root, id); err != nil {
 			t.Fatal(err)
 		}
@@ -32,6 +32,9 @@ func TestNativeComponentCleanup(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := project.Write(root, "vba/StructureProof.bas", []byte(structureProof), ""); err != nil {
+		t.Fatal(err)
+	}
+	if err := project.Write(root, "vba/ProofControl.cls", []byte(proofControl), ""); err != nil {
 		t.Fatal(err)
 	}
 	w, err := project.Open(root)
@@ -48,6 +51,7 @@ func TestNativeComponentCleanup(t *testing.T) {
 		{Name: "Failure, undo, cached styles and caller state", Operation: native.Operation{Op: "run", Macro: "Proof.Check"}, Assert: []verify.Assertion{{Kind: "equals", Expected: "PASS"}}},
 		{Name: "Hotkey caller context", Operation: native.Operation{Op: "run", Macro: "Proof.CheckHotkeys"}, Assert: []verify.Assertion{{Kind: "equals", Expected: "PASS"}}},
 		{Name: "Context menu ownership and repetition", Operation: native.Operation{Op: "run", Macro: "Proof.CheckMenus"}, Assert: []verify.Assertion{{Kind: "equals", Expected: "PASS"}}},
+		{Name: "Ribbon dispatch and cooperative cancellation", Operation: native.Operation{Op: "run", Macro: "Proof.CheckRibbonAndProgress"}, Assert: []verify.Assertion{{Kind: "equals", Expected: "PASS"}}},
 		{Name: "Structure counterexamples and cached style votes", Operation: native.Operation{Op: "run", Macro: "StructureProof.Check"}, Assert: []verify.Assertion{{Path: "/array/0", Kind: "equals", Expected: "PASS"}}},
 	}}
 	report, err := verify.Run(context.Background(), b.Artifact, suite, nil, true)
@@ -106,6 +110,22 @@ End Function
 
 const componentProof = `Attribute VB_Name = "Proof"
 Option Explicit
+Private WU_Dispatched As Boolean
+Public Sub WU_Command_proof_button()
+    WU_Dispatched = True
+End Sub
+Public Function CheckRibbonAndProgress() As String
+    Dim control As New ProofControl
+    WU_ResetProgress
+    If WU_CancelRequested Then Err.Raise 5, , "reset left cancellation requested"
+    WU_RequestCancel
+    If Not WU_CancelRequested Then Err.Raise 5, , "cancellation request was lost"
+    control.Id = "proof-button"
+    WU_Dispatched = False
+    WU_RibbonCommand control
+    If Not WU_Dispatched Then Err.Raise 5, , "Ribbon command was not dispatched"
+    CheckRibbonAndProgress = "PASS"
+End Function
 Public Function CheckMenus() As String
     Dim prior As Object, failure As String, stage As String
     On Error GoTo Failed
@@ -198,6 +218,16 @@ Public Function Check() As String
     Application.ScreenUpdating = True
     Check = "PASS"
 End Function
+`
+
+const proofControl = `Option Explicit
+Private WU_Id As String
+Public Property Get Id() As String
+    Id = WU_Id
+End Property
+Public Property Let Id(ByVal value As String)
+    WU_Id = value
+End Property
 `
 
 func TestNativeComponentCorpus(t *testing.T) {
