@@ -23,7 +23,7 @@ func TestNativeComponentCleanup(t *testing.T) {
 	if _, err := project.New("ComponentProof", root); err != nil {
 		t.Fatal(err)
 	}
-	for _, id := range []string{"operation.safe-edit", "document.style-converter", "structure.detect"} {
+	for _, id := range []string{"operation.safe-edit", "document.style-converter", "structure.detect", "command.hotkey"} {
 		if _, err := component.Add(root, id); err != nil {
 			t.Fatal(err)
 		}
@@ -46,6 +46,7 @@ func TestNativeComponentCleanup(t *testing.T) {
 		{Name: "Open", Operation: native.Operation{Op: "open", File: "$artifact", As: "doc"}},
 		{Name: "Compile", Operation: native.Operation{Op: "compile", Target: "doc", Member: "$project"}, Assert: []verify.Assertion{{Path: "/vba_compiled", Kind: "equals", Expected: true}}},
 		{Name: "Failure, undo, cached styles and caller state", Operation: native.Operation{Op: "run", Macro: "Proof.Check"}, Assert: []verify.Assertion{{Kind: "equals", Expected: "PASS"}}},
+		{Name: "Hotkey caller context", Operation: native.Operation{Op: "run", Macro: "Proof.CheckHotkeys"}, Assert: []verify.Assertion{{Kind: "equals", Expected: "PASS"}}},
 		{Name: "Structure counterexamples and cached style votes", Operation: native.Operation{Op: "run", Macro: "StructureProof.Check"}, Assert: []verify.Assertion{{Path: "/array/0", Kind: "equals", Expected: "PASS"}}},
 	}}
 	report, err := verify.Run(context.Background(), b.Artifact, suite, nil, true)
@@ -104,6 +105,31 @@ End Function
 
 const componentProof = `Attribute VB_Name = "Proof"
 Option Explicit
+Public Function CheckHotkeys() As String
+    Dim prior As Object, key As Long, failure As Long
+    Dim stage As String
+    On Error GoTo Failed
+    Set prior = Application.CustomizationContext
+    key = BuildKeyCode(wdKeyControl, wdKeyAlt, wdKeyF12)
+    stage = "register"
+    WU_RegisterHotkey key, "Proof.HotkeyTarget"
+    If Not (Application.CustomizationContext Is prior) Then Err.Raise 5, , "registration changed caller context"
+    stage = "remove"
+    WU_RemoveHotkey key
+    If Not (Application.CustomizationContext Is prior) Then Err.Raise 5, , "removal changed caller context"
+    On Error Resume Next
+    WU_RegisterHotkey -1, "Proof.HotkeyTarget"
+    failure = Err.Number
+    On Error GoTo 0
+    If failure = 0 Then Err.Raise 5, , "invalid hotkey did not fail"
+    If Not (Application.CustomizationContext Is prior) Then Err.Raise 5, , "failure changed caller context"
+    CheckHotkeys = "PASS"
+    Exit Function
+Failed:
+    CheckHotkeys = stage & ": " & CStr(Err.Number) & ": " & Err.Description
+End Function
+Public Sub HotkeyTarget()
+End Sub
 Public Sub FailAfterEdit()
     Dim updating As Boolean, opened As Boolean, number As Long, source As String, description As String
     On Error GoTo Failed

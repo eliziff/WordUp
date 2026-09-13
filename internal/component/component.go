@@ -61,6 +61,9 @@ func builtin() []Manifest {
 		vbaComponent("command.context-menu", "WordUpContextMenu", "WU_RegisterContextMenu", "Registers and removes a tagged context-menu command.", "context menus", contextMenuSource),
 		vbaComponent("document.style-converter", "WordUpStyleConverter", "WU_ConvertStyle", "Converts one paragraph style in a single safe edit.", "style conversion", styleConverterSource)}
 	for i := range items {
+		if items[i].ID == "command.hotkey" {
+			items[i].Version = "1.0.1"
+		}
 		items[i].Schema = 1
 		items[i].License = "MIT"
 		items[i].Provenance = "WordUp 0.4.0 bundled editable source"

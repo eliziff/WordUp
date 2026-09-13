@@ -64,12 +64,32 @@ End Sub
 const hotkeySource = `Attribute VB_Name = "WordUpHotkey"
 Option Explicit
 Public Sub WU_RegisterHotkey(ByVal keyCode As Long, ByVal macroName As String)
-    CustomizationContext = ThisDocument
-    KeyBindings.Add wdKeyCategoryMacro, macroName, keyCode
+    WU_ChangeHotkey keyCode, macroName, False
 End Sub
 Public Sub WU_RemoveHotkey(ByVal keyCode As Long)
-    CustomizationContext = ThisDocument
-    FindKey(keyCode).Disable
+    WU_ChangeHotkey keyCode, "", True
+End Sub
+Private Sub WU_ChangeHotkey(ByVal keyCode As Long, ByVal macroName As String, ByVal remove As Boolean)
+    Dim prior As Object, failure As Long, failureSource As String, failureText As String
+    Set prior = Application.CustomizationContext
+    On Error GoTo Failed
+    Application.CustomizationContext = ThisDocument
+    If remove Then
+        FindKey(keyCode).Clear
+    Else
+        KeyBindings.Add wdKeyCategoryMacro, macroName, keyCode
+    End If
+CleanUp:
+    On Error Resume Next
+    Err.Clear
+    Application.CustomizationContext = prior
+    If failure = 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Sub
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
 End Sub
 `
 
