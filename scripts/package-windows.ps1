@@ -11,7 +11,9 @@ $required = @('office-tools/WordUp.OfficeTools.exe','office-tools/OPENXML-LICENS
 foreach ($relative in $required) {
  if (!(Test-Path -LiteralPath (Join-Path $root ('bin/' + $relative)))) { throw "Missing $relative; build tools/office-bridge/build.ps1 and tools/oletools/build.ps1 first." }
 }
-$runtimeNotices = @('internal/vbaparse/ANTLR-LICENSE','internal/vbaparse/X-EXP-LICENSE','internal/structure/LICENSE','internal/structure/PDF-LICENSE','internal/office/XPATH-NOTICES')
+$analysisSource = Join-Path $root 'tools/rubberduck/bin/analysis/Release/net462'
+if (!(Test-Path -LiteralPath (Join-Path $analysisSource 'WordUp.Analysis.exe'))) { throw 'Missing analysis/WordUp.Analysis.exe; build tools/rubberduck/build.ps1 first.' }
+$runtimeNotices = @('internal/vbaparse/ANTLR-LICENSE','internal/vbaparse/X-EXP-LICENSE','internal/structure/LICENSE','internal/structure/PDF-LICENSE','internal/office/XPATH-NOTICES','docs/upstream/rubberduck/LICENSE')
 foreach ($relative in $runtimeNotices) {
  if (!(Test-Path -LiteralPath (Join-Path $root $relative))) { throw "Missing compiled dependency notice: $relative" }
 }
@@ -31,6 +33,7 @@ Copy-Item -LiteralPath $executablePath -Destination (Join-Path $destinationRoot 
 foreach ($folder in @('office-tools','wordup-oletools')) {
  Copy-Item -LiteralPath (Join-Path $root ('bin/' + $folder)) -Destination $destinationRoot -Recurse
 }
+Copy-Item -LiteralPath $analysisSource -Destination (Join-Path $destinationRoot 'analysis') -Recurse
 foreach ($file in @('LICENSE','LICENSE-MIT-ORIGINAL','THIRD-PARTY-NOTICES.md')) {
  Copy-Item -LiteralPath (Join-Path $root $file) -Destination $destinationRoot
 }
