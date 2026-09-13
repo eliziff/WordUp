@@ -8,10 +8,27 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/eliziff/WordUp/internal/office"
 )
 
 func TestRepeatedImportHasIdenticalFiles(t *testing.T) {
 	w := newWorkspace(t)
+	w.Manifest.Components["ExampleForm"] = "form"
+	design := office.Design{Name: "ExampleForm", Mode: "replace", Controls: []office.ControlDesign{
+		{Name: "Group", Type: "Frame", Controls: []office.ControlDesign{
+			{Name: "Run", Type: "CommandButton", Properties: map[string]any{"Caption": "Run", "Width": 72}},
+		}},
+	}}
+	for path, data := range map[string][]byte{
+		"project.json":           JSON(w.Manifest),
+		"forms/ExampleForm.json": JSON(design),
+		"vba/ExampleForm.vba":    []byte("Attribute VB_Name = \"ExampleForm\"\nOption Explicit\nPrivate Sub Run_Click()\nEnd Sub\n"),
+	} {
+		if err := Write(w.Root, path, data, ""); err != nil {
+			t.Fatal(err)
+		}
+	}
 	if err := Write(w.Root, "vba/Example.bas", []byte("Public Sub Example()\nEnd Sub\n"), ""); err != nil {
 		t.Fatal(err)
 	}
@@ -54,6 +71,27 @@ func TestRepeatedImportHasIdenticalFiles(t *testing.T) {
 	for name, data := range a {
 		if !bytes.Equal(data, b[name]) {
 			t.Errorf("Import churn: %s", name)
+		}
+	}
+	imported, err := Open(first)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rebuilt, err := imported.Build("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	third := filepath.Join(t.TempDir(), "reimport")
+	if _, err := Import(rebuilt.Artifact, third); err != nil {
+		t.Fatal(err)
+	}
+	c := files(third)
+	if len(a) != len(c) {
+		t.Fatal("No-op rebuild/reimport changed file inventory")
+	}
+	for name, data := range a {
+		if !bytes.Equal(data, c[name]) {
+			t.Errorf("No-op rebuild/reimport churn: %s", name)
 		}
 	}
 }
