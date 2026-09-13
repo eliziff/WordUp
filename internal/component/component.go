@@ -6,6 +6,7 @@ import (
 	"github.com/eliziff/WordUp/internal/office"
 	"github.com/eliziff/WordUp/internal/project"
 	"github.com/eliziff/WordUp/internal/structure"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"sort"
@@ -160,8 +161,11 @@ func install(root string, m Manifest) (Installed, error) {
 	// copies: no file in this path is allowed to replace an existing file.
 	seen := map[string]bool{}
 	for _, f := range m.Files {
+		if !fs.ValidPath(f.Path) || f.Path == "." || strings.ContainsAny(f.Path, `\:`) {
+			return Installed{}, fmt.Errorf("component %s requires a canonical relative file path: %q", id, f.Path)
+		}
 		key := strings.ToLower(filepath.ToSlash(f.Path))
-		if key == lockPath || strings.HasPrefix(key, ".wordwright/") || seen[key] {
+		if key == ".wordwright" || strings.HasPrefix(key, ".wordwright/") || key == ".git" || strings.HasPrefix(key, ".git/") || seen[key] {
 			return Installed{}, fmt.Errorf("component %s has reserved or duplicate path %s", id, f.Path)
 		}
 		seen[key] = true

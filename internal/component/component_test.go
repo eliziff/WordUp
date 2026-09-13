@@ -48,6 +48,24 @@ func TestInstallationRollsBackCompletedCopies(t *testing.T) {
 	}
 }
 
+func TestInstallationRejectsAliasedAndReservedPathsBeforeCopying(t *testing.T) {
+	for _, path := range []string{"./.wordwright/forged.json", "vba/../.wordwright/forged.json", `.wordwright\forged.json`, ".WORDWRIGHT/forged.json", ".git/config", ".GIT/hooks/pre-commit", "vba//Module.bas", "vba/./Module.bas", "vba/Module.bas:stream", "../outside.bas", "/absolute.bas", "."} {
+		t.Run(path, func(t *testing.T) {
+			root := t.TempDir()
+			m := Manifest{ID: "test", Version: "1", Files: []File{{Path: "vba/first.bas", Text: "first"}, {Path: path, Text: "unexpected"}}}
+			if _, err := install(root, m); err == nil {
+				t.Fatal("unsafe component path accepted")
+			}
+			if _, err := project.Read(root, "vba/first.bas"); !os.IsNotExist(err) {
+				t.Fatalf("preflight wrote source: %v", err)
+			}
+			if _, err := project.Read(root, lockPath); !os.IsNotExist(err) {
+				t.Fatalf("preflight wrote provenance: %v", err)
+			}
+		})
+	}
+}
+
 func TestSameVersionDifferentSourceIsNotIdempotent(t *testing.T) {
 	root := t.TempDir()
 	m := Manifest{ID: "test", Version: "1", Files: []File{{Path: "vba/first.bas", Text: "first"}}}
