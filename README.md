@@ -1,10 +1,18 @@
-# WordUp 0.3.0
+# WordUp 0.4.0
+
+Development builds now incorporate Rubberduck's GPL-3.0-or-later VBA grammar.
+See [infrastructure reuse and licensing](docs/INFRASTRUCTURE-REUSE.md).
+
+Local reference: [upstream Word/VBA and dependency documentation](docs/upstream/README.md),
+plus [reproduced Word behavior and documentation gaps](docs/WORD-OPERATIONS.md).
 
 A native, source-first Word template toolchain for coding agents. One executable; no Python, Node, browser runtime, cloud service, VM, module-import ritual, or separately configured test desktop.
 
 **Windows engineering preview, verified in actual Microsoft Word.** Native acceptance covers whole-project VBA compilation, saved nested UserForms, Ribbon and context-menu callbacks, template hotkeys, editable document content, Quick Parts and real page rendering. Signed-template acceptance passed 17 assertions. Failure, runaway containment and login recovery have separate native tests. Mac execution remains unverified. See [current evidence](docs/VALIDATION-WINDOWS.md) and [remaining limits](docs/LIMITS.md); historical `VALIDATION.md` describes the original offline preview.
 
 ## Start with an agent
+
+See [agent diagnostics](docs/DIAGNOSTICS.md) for live XML evidence, Immediate-style VBA evaluation, runtime errors, and the boundaries of those checks. Verification runs on an owned private desktop by default; displaying Word requires an explicit user request.
 
 Unpack the matching binary and give a local coding agent its path, this README, and the template or document you want changed. The agent can use an ordinary terminal; MCP is optional. Microsoft Word must already be installed and usable for actual VBA execution and Word rendering. The harness does not bundle Microsoft Office or change its activation, enterprise policy, or the user's Trust Center registry settings.
 
@@ -41,7 +49,11 @@ wordup.exe --workspace C:\Work\MyTemplate --execute mcp
 
 There is no global agent configuration installer. Clients that support stdio MCP can use that command; any terminal-capable coding agent can use the CLI and local session. Protocol revisions 2025-03-26, 2025-06-18 and 2025-11-25 are explicitly negotiated; newer capabilities are not silently claimed.
 
+For reference-driven template work, use the [WordUp template-builder agent skill](docs/skills/wordup-template-builder/SKILL.md). It defines the minimum style, conversion, UI and native-evidence workflow, with a reusable acceptance plan.
+
 ## Source format
+
+For legal-document projects, agents can reuse [Legal Structure Parser](https://github.com/eliziff/legal-structure-parser) and [Legal PDF Parser](https://github.com/eliziff/legal-pdf-parser). WordUp's generated agent instructions link to both. They are optional development tools; the executable and delivered templates do not require them. See [reuse guidance](docs/REUSE.md).
 
 ```text
 project.json                   Project metadata, component kinds, references
@@ -61,7 +73,7 @@ reports/                       Machine-readable build and acceptance results
 tests/suite.json               Native observable assertions
 ```
 
-The original file is not used as a scratchpad. The workspace preserves untouched package parts. A no-change ALR import/build was byte-identical. Source changes rebuild the native CFB/VBA project and compressed streams; they do not automate typing into VBE. Ordinary module/form source builds therefore do not require enabling VBIDE trust access.
+The original file is not used as a scratchpad. The workspace preserves untouched package parts. A no-change import/build of a development specimen was byte-identical. Source changes rebuild the native CFB/VBA project and compressed streams; they do not automate typing into VBE. Ordinary module/form source builds therefore do not require enabling VBIDE trust access.
 
 **`content/recipe.json` replaces the document body.** Do not introduce it when only styles or macros should change. For existing complex documents, edit their original XML surgically or use native Word operations on a test copy. A convenience recipe is not a full replacement for Word's object model.
 
@@ -111,6 +123,6 @@ go test -race ./internal/... ./cmd/...
 go build -trimpath -ldflags="-s -w" -o wordup ./cmd/wordup
 ```
 
-There are no external Go modules. `go list -m all` contains only this module. `scripts/build.sh` reproduces the platform binaries. The private ALR specimen is excluded from the generic source package; setting `WORDUP_SPECIMEN` to its path enables the optional specimen tests.
+The core uses the pinned ANTLR Go runtime and its transitive dependencies in `go.mod`/`go.sum`. `scripts/build.sh` builds the standalone platform executables; it does not package optional Windows helpers. Open XML SDK validation and FlaUI patterns require the `office-tools` bundle built by `tools/office-bridge/build.ps1`; independent binary inspection requires the `wordup-oletools` bundle built by `tools/oletools/build.ps1`. Keep those folders beside the executable in a complete Windows distribution. End users do not need Go or Python to use the packaged builds. Private development specimens are excluded from the generic source package; setting `WORDUP_SPECIMEN` to a specimen path enables the optional specimen tests.
 
 Read `docs/API.md`, `docs/LIMITS.md`, `VALIDATION.md`, and the source. This preview is not signed or notarized. Do not circumvent OS security warnings or deploy an unverified candidate over a working template.

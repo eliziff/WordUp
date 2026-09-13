@@ -16,7 +16,7 @@ import (
 	"github.com/eliziff/WordUp/internal/office"
 )
 
-const Version = "0.3.0"
+const Version = "0.4.0"
 
 type Manifest struct {
 	Format         int               `json:"format"`
@@ -39,6 +39,7 @@ type Index struct {
 	Files map[string]string `json:"files"`
 }
 type BuildReport struct {
+	ToolSHA256        string   `json:"tool_sha256"`
 	Schema            int      `json:"schema"`
 	ToolVersion       string   `json:"tool_version"`
 	Artifact          string   `json:"artifact"`
@@ -66,6 +67,8 @@ type Workspace struct {
 
 func JSON(v any) []byte { b, _ := json.MarshalIndent(v, "", "  "); return append(b, '\n') }
 func ReadJSON(b []byte, v any) error {
+	// Windows editors and PowerShell commonly prefix UTF-8 files with a BOM.
+	b = bytes.TrimPrefix(b, []byte{0xef, 0xbb, 0xbf})
 	d := json.NewDecoder(bytes.NewReader(b))
 	d.DisallowUnknownFields()
 	if e := d.Decode(v); e != nil {
@@ -442,7 +445,7 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 	// Cache hits still validate both the source snapshot and artifact bytes.
 	if b, e := Read(w.Root, "reports/build.json"); e == nil {
 		var prior BuildReport
-		if json.Unmarshal(b, &prior) == nil && prior.SourceFingerprint == finger && prior.Artifact == output {
+		if json.Unmarshal(b, &prior) == nil && prior.ToolVersion == Version && ExecutableSHA256() != "" && prior.ToolSHA256 == ExecutableSHA256() && prior.SourceFingerprint == finger && prior.Artifact == output {
 			if artifact, e := os.ReadFile(output); e == nil && office.Hash(artifact) == prior.SHA256 {
 				prior.Cached = true
 				prior.DurationMS = float64(time.Since(start).Microseconds()) / 1000
@@ -463,6 +466,9 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 		if strings.HasPrefix(n, "package/") {
 			p.Files[strings.TrimPrefix(n, "package/")] = b
 		}
+	}
+	if e = p.ConnectRibbons(); e != nil {
+		return nil, e
 	}
 	mods := []office.Module{}
 	formStreams := map[string]map[string][]byte{}
@@ -662,7 +668,7 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 	if e != nil {
 		return nil, e
 	}
-	report := &BuildReport{Schema: 2, ToolVersion: Version, Artifact: output, SHA256: office.Hash(result), SourceFingerprint: finger, Bytes: len(result), NoChange: bytes.Equal(result, w.Baseline.Original), Modules: len(mods), Forms: forms, ModifiedParts: modified, PackageValidated: true}
+	report := &BuildReport{Schema: 2, ToolVersion: Version, ToolSHA256: ExecutableSHA256(), Artifact: output, SHA256: office.Hash(result), SourceFingerprint: finger, Bytes: len(result), NoChange: bytes.Equal(result, w.Baseline.Original), Modules: len(mods), Forms: forms, ModifiedParts: modified, PackageValidated: true}
 	if changed {
 		report.Warnings = append(report.Warnings, "VBA binary serialization passed source reparse; only the native Word runtime can establish compilation and behavior.")
 	}
@@ -723,7 +729,15 @@ Use the wordup executable. No module imports, VBE typing, or Python setup.
 - styles/recipe.json adds/patches native styles and numbering. content/recipe.json REPLACES the document body. building_blocks/recipe.json adds/updates saved parts.
 - build performs deterministic package and binary checks; it is not a VBA compiler.
 - native execution is local Microsoft Word, never an emulator. Authorize execution only for code the user intends to run. The private desktop is UI separation, NOT a security sandbox.
+- Wrap each user-facing editing action in one Application.UndoRecord custom record. For bulk edits, save Application.ScreenUpdating, set it False, and restore the saved value in shared success/error cleanup. Always close an opened undo record; do not blindly restore True when a caller already disabled updates. Read-only actions need no undo record. Test that one undo restores the edited content and that failures restore application state. Capture WordOpenXML outside the editing action and its undo record: a native opening-layout test demonstrated that exporting it during the record disrupted undo grouping.
 - Use fresh native acceptance before deployment. Preserve fixture files and assert specific observable behavior; a passing self-test does not establish all other macros work.
+- Keep reusable acceptance steps in tests/suite.json and run the test tool with path and fresh=true. Do not build a separate driver script for normal UI workflows.
+- For Ribbon actions use ui.invoke with target=document and named:{scope:ribbon,name:caption,role:37 for tabs or 43 for buttons}. For form actions use named:{scope:form,name:caption,window:optional exact form title}. Names are exact; ambiguous selectors fail.
+- Follow actions with assertions on document text, formatting, fields or macro diagnostics. A successful action return alone proves no document behavior. Use ui.find with named.wait_ms for bounded control appearance waits. Duplicate names can be narrowed with named.ancestor (exact accessible container name), in addition to window, scope and role; uniqueness remains required. For a modal macro, begin one run with an as task name, handle its owned dialog, then poll that task with eventually_ms and assert both /status equals completed and /error absent. Completed alone is not success; absent requires an existing parent object.
+- Keep native tests lean too: use For Each for collection traversal when edits do not invalidate enumeration, and read unchanged Range.Text once before repeated checks. Repeated Paragraphs(i) lookups and full-story reads can dominate the feature under test. For destructive edits, preserve the required reverse order or stable ranges. Measure fixture setup and assertions separately from the editing operation before attributing suite time to the macro.
+- xml.snapshot records exact WordOpenXML without saving. Preserve this evidence, but do not assume repeated exports have identical run boundaries: Word pagination can change serialization without a macro. Use explicit behavior assertions; xml.compare is available when exact structure is the intended invariant.
+- Failed native suite steps automatically capture owned-window diagnostics and screenshots. Read the errors and images before changing code; do not ask the user to reproduce the failure manually.
 - Mac static checks and Windows native tests are not Mac execution evidence.
 - Raw XML, native object-model calls and arbitrary VBA stay available beyond the convenience recipes. Unsupported serialization must error rather than substitute an approximation.
+- For legal heading/numbering/footnote primitives, consult https://github.com/eliziff/legal-structure-parser. For PDF geometry, reading order and source witnesses, consult https://github.com/eliziff/legal-pdf-parser. These are optional reusable tools, not WordUp runtime dependencies. Prefer native Word evidence, preserve source offsets, and record revisions/licenses for adapted code.
 `

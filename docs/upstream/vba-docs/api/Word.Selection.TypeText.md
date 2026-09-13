@@ -1,0 +1,72 @@
+---
+title: Selection.TypeText method (Word)
+keywords: vbawd10.chm158663163
+f1_keywords:
+- vbawd10.chm158663163
+api_name:
+- Word.Selection.TypeText
+ms.assetid: fb8e58cc-0c49-0efa-d60a-8be6c3d4435c
+ms.date: 06/08/2017
+ms.localizationpriority: medium
+---
+
+
+# Selection.TypeText method (Word)
+
+Inserts the specified text.
+
+> [!IMPORTANT]
+> This method has changed. Using VBA Selection commands like `Selection.BoldRun` on user selection with Comments no longer applies bold formatting on user-selected text or `Selection.TypeText` command or on user selection with Comments no longer inserts text.
+
+## Syntax
+
+_expression_. `TypeText`( `_Text_` )
+
+_expression_ Required. A variable that represents a **[Selection](Word.Selection.md)** object.
+
+
+## Parameters
+
+
+
+|Name|Required/Optional|Data type|Description|
+|:-----|:-----|:-----|:-----|
+| _Text_|Required| **String**|The text to be inserted.|
+
+## Remarks
+
+If the **ReplaceSelection** property is **True**, the selection is replaced by the specified text. If **ReplaceSelection** is **False**, the specified text is inserted before the selection.
+
+
+## Example
+
+If Word is set so that typing replaces selected text, this example collapses the selection before inserting "Hello." This technique prevents existing document text from being replaced.
+
+
+```vb
+If Options.ReplaceSelection = True Then 
+ Selection.Collapse Direction:=wdCollapseStart 
+ Selection.TypeText Text:="Hello" 
+End If
+```
+
+This example inserts "Title" followed by a new paragraph.
+
+
+
+
+```vb
+Options.ReplaceSelection = False 
+With Selection 
+ .TypeText Text:="Title" 
+ .TypeParagraph 
+End With
+```
+
+
+## See also
+
+
+[Selection Object](Word.Selection.md)
+
+[!include[Support and feedback](~/includes/feedback-boilerplate.md)]

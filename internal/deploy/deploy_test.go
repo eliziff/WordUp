@@ -10,6 +10,9 @@ import (
 	"testing"
 )
 
+func wordClosed() (bool, error) { return false, nil }
+func clearNothing(string) error { return nil }
+
 // Synthetic evidence only tests deployment policy; it is never native evidence.
 func proofFixture(t *testing.T) (string, string, string, verify.Report) {
 	t.Helper()
@@ -46,11 +49,11 @@ func TestDeploymentBackupAndStaleTarget(t *testing.T) {
 		t.Fatal(e)
 	}
 	os.WriteFile(target, []byte("concurrent"), 0600)
-	if _, e = Activate(file); e == nil {
+	if _, e = activate(file, wordClosed, clearNothing); e == nil {
 		t.Fatal("overwrote concurrent change")
 	}
 	os.WriteFile(target, []byte("old"), 0600)
-	plan, e := Activate(file)
+	plan, e := activate(file, wordClosed, clearNothing)
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -83,20 +86,20 @@ func TestInterruptedInstallAndRestore(t *testing.T) {
 	if err = os.WriteFile(target, data, 0600); err != nil {
 		t.Fatal(err)
 	}
-	p, err = Activate(file)
+	p, err = activate(file, wordClosed, clearNothing)
 	if err != nil || p.State != "installed" {
 		t.Fatalf("recover: %+v %v", p, err)
 	}
 	if err = os.WriteFile(target, []byte("user edit"), 0600); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = Restore(file); err == nil {
+	if _, err = restore(file, wordClosed, clearNothing); err == nil {
 		t.Fatal("overwrote user edit")
 	}
 	if err = os.WriteFile(target, data, 0600); err != nil {
 		t.Fatal(err)
 	}
-	p, err = Restore(file)
+	p, err = restore(file, wordClosed, clearNothing)
 	if err != nil || p.State != "restored" {
 		t.Fatalf("restore: %+v %v", p, err)
 	}
@@ -104,7 +107,7 @@ func TestInterruptedInstallAndRestore(t *testing.T) {
 	if string(got) != "previous" {
 		t.Fatal("wrong restored bytes")
 	}
-	if _, err = Restore(file); err != nil {
+	if _, err = restore(file, wordClosed, clearNothing); err != nil {
 		t.Fatal("restore is not idempotent", err)
 	}
 }

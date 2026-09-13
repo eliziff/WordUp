@@ -2,6 +2,36 @@
 
 All commands are local. Use `wordup -w WORKSPACE call METHOD @parameters.json` for one-shot operations and `rpc METHOD @parameters.json` for a previously started warm session. `serve` accepts newline-delimited `{id,method,params}` JSON. `mcp` is stdio JSON-RPC with initialization and tools/call. Stdout contains protocol data; errors are structured and command failure is nonzero.
 
+## Exact-source XPath evidence
+
+`call xml.query @query.json` queries a UTF-8 XML file, or a selected DOCX/DOTM
+part, without starting Word. Prefixes bind to namespace URIs independently
+of the source document's prefixes:
+
+```json
+{"path":"manuscript.docx","part":"word/styles.xml","query":"//w:style[@w:styleId='Heading1']/w:rPr","namespaces":{"w":"http://schemas.openxmlformats.org/wordprocessingml/2006/main"},"limit":20}
+```
+
+Responses retain package/part hashes and original UTF-8 element byte offsets
+(`element_start`, `element_end`, exclusive end). Attribute/text matches locate
+their containing element. Previews above 1024 bytes become prefix/length/hash
+objects, not complete XML. `truncated` means more matches exist, not an exact
+total. Use `count(...)`, `boolean(...)` or `string(...)` for scalar evidence.
+No matches is an empty query, not a formatting pass. Properties are explicit
+XML, not resolved style, theme, numbering or Word layout properties.
+
+Native suites can query an earlier saved snapshot:
+
+```json
+{"name":"No explicit 24-point runs","operation":{"op":"xml.query","file":"$output/after.xml","member":"count(//w:rPr/w:sz[@w:val='48'])","named":{"namespaces":{"w":"http://schemas.openxmlformats.org/wordprocessingml/2006/main"}}},"assert":[{"kind":"equals","path":"/value","expected":0}]}
+```
+
+Query steps do not count as Word execution. `named` also accepts `part` and
+`limit`. Large assertion error values carry JSON byte counts and hashes;
+full actual values remain in observations and expected values in the suite.
+Full reports are still detailed: general bounded tool summaries and evidence
+attachment retrieval are not yet implemented.
+
 ## Direct native object access (Windows)
 
 Create `operation.json`:
@@ -91,3 +121,16 @@ The signing report distinguishes `signed`, `digest_verified` and certificate tru
 ## Mac native prototype
 
 Use `dictionary` to inspect the installed Word SDEF and the implemented operation surface. Native `get`, `put`, `invoke`, `run` and `ae.send` use actual Apple Events. Event/property codes are discovered from the installed dictionary, not guessed from Windows names. Mac UI/render/full-compile operations are unsupported and must not be silently rerouted to Windows or emulated. `compat` is advisory source review; only actual Mac Word evidence can verify Mac behavior.
+
+## Reusable structure evidence
+
+`call structure.source '{}'` returns the editable standalone `structure.detect` component and its contract. `call structure.inspect '@parameters.json'` accepts a document `path` and reads package evidence without Word: source-hashed paragraph locations, style ancestry, direct versus inherited outline levels, table/textbox containment and raw numbering definitions. `structure.resolve` adds generic candidate scoring, hierarchy, contradictions, and ambiguity while keeping the factual evidence intact; publication-specific role and style mapping remains separate. See [the detection boundary and reviewed upstream mechanisms](STRUCTURE-DETECTION.md).
+
+`component.list`, `component.get`, `component.add`, `component.status`, and `component.diff` expose the bundled editable components. Installation writes ordinary source and records its initial SHA-256 hashes in `.wordwright/components.json`; repeating an unchanged installation is idempotent, while an adapted or colliding file is never overwritten.
+
+`xml.verify` compares expected XML `reference` directly with actual XML `path`.
+No manifest, labels, duplicated text, or rationales are required. Copy starting
+Word XML and edit only intended differences to create the expectation.
+Comparison defaults to exact bytes; `comparison: "semantic"` explicitly selects
+namespace-aware equality without ignored content. Mismatch returns an error plus
+hashes and difference locations. This command reads XML; it does not execute Word.

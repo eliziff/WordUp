@@ -9,6 +9,23 @@ import (
 	"testing"
 )
 
+func TestReadJSONWindowsBOM(t *testing.T) {
+	for _, prefix := range []string{"", "\xef\xbb\xbf"} {
+		var value struct{ Name string }
+		if err := ReadJSON([]byte(prefix+`{"Name":"WordUp"}`), &value); err != nil || value.Name != "WordUp" {
+			t.Fatalf("UTF-8 input rejected: %v", err)
+		}
+		for _, invalid := range []string{`{"Unknown":true}`, `{"Name":"WordUp"} {}`, "\xef\xbb\xbf{}"} {
+			if prefix == "" && invalid == "\xef\xbb\xbf{}" {
+				continue
+			}
+			if err := ReadJSON([]byte(prefix+invalid), &value); err == nil {
+				t.Fatalf("strict parsing weakened for %q", prefix+invalid)
+			}
+		}
+	}
+}
+
 func newWorkspace(t *testing.T) *Workspace {
 	t.Helper()
 	root := filepath.Join(t.TempDir(), "work")
@@ -45,6 +62,25 @@ func TestSourceBuildCacheAndTamper(t *testing.T) {
 	r, err = w.Build("")
 	if err != nil || !r.Cached {
 		t.Fatalf("cache miss: %v", err)
+	}
+	r.ToolVersion = "older-writer"
+	if err = Write(w.Root, "reports/build.json", JSON(r), ""); err != nil {
+		t.Fatal(err)
+	}
+	r, err = w.Build("")
+	if err != nil || r.Cached || r.ToolVersion != Version {
+		t.Fatalf("reused old writer output: %+v %v", r, err)
+	}
+	if len(r.ToolSHA256) != 64 {
+		t.Fatal("missing executable identity", r.ToolSHA256)
+	}
+	r.ToolSHA256 = "different binary with the same version"
+	if err = Write(w.Root, "reports/build.json", JSON(r), ""); err != nil {
+		t.Fatal(err)
+	}
+	r, err = w.Build("")
+	if err != nil || r.Cached || r.ToolSHA256 != ExecutableSHA256() {
+		t.Fatalf("same-version writer cache survived: %+v %v", r, err)
 	}
 	if err = os.WriteFile(r.Artifact, []byte("tampered"), 0600); err != nil {
 		t.Fatal(err)

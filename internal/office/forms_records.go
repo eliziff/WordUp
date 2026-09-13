@@ -205,7 +205,7 @@ func (r *formRecord) set(name string, value any) error {
 		} else {
 			n, err := number(value)
 			if err != nil {
-				return err
+				return fmt.Errorf("%s: %w", name, err)
 			}
 			lower, upper := int64(0), int64(1)<<(f.size*8)
 			if f.kind == 'i' {

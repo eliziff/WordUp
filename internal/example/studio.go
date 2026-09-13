@@ -65,12 +65,27 @@ func WindowsSuite() verify.Suite {
 		{Name: "Verify real Ribbon initialization", Operation: native.Operation{Op: "run", Macro: "Studio.RibbonAcceptance"}, Assert: []verify.Assertion{{Kind: "equals", Expected: true}}},
 		{Name: "Execute arbitrary scratch VBA", Operation: native.Operation{Op: "eval", Value: "Evaluate = 6 * 7"}, Assert: []verify.Assertion{{Path: "/result", Kind: "equals", Expected: 42}}},
 		{Name: "Render the actual Word document", Operation: native.Operation{Op: "render", Target: "template", File: "$output/pages"}, Assert: []verify.Assertion{{Path: "/page_count", Kind: "greater_than", Expected: 0}}},
-		{Name: "Activate the custom Ribbon tab", Operation: native.Operation{Op: "run", Macro: "Studio.ActivateStudioRibbon"}},
-		{Name: "Click the real Ribbon button", Operation: native.Operation{Op: "ui.invoke", Target: "template", Named: map[string]any{"name": "Editorial Studio", "scope": "ribbon", "role": 43}}, Assert: []verify.Assertion{{Path: "/executed", Kind: "equals", Expected: true}}},
+		{Name: "Close the template editor before testing an attached template", Operation: native.Operation{Op: "unload", Target: "template"}},
+		{Name: "Create a disposable document for the modeless form", Operation: native.Operation{Op: "new", File: "$artifact", As: "formDocument"}},
+		{Name: "Click the actual custom Ribbon tab", Operation: native.Operation{Op: "ui.invoke", Target: "formDocument", Named: map[string]any{"name": "WordUp", "scope": "ribbon", "role": 37, "wait_ms": 2000}}},
+		{Name: "Click the real Ribbon button", Operation: native.Operation{Op: "ui.invoke", Target: "formDocument", Named: map[string]any{"name": "Editorial Studio", "scope": "ribbon", "role": 43}}, Assert: []verify.Assertion{{Path: "/executed", Kind: "equals", Expected: true}}},
 		{Name: "Wait for the UserForm before capturing it", Operation: native.Operation{Op: "ui.find", Named: map[string]any{"name": "Close", "window": "WordUp Studio", "scope": "form", "role": 43, "wait_ms": 2000}}},
 		{Name: "Capture Word and the persistent UserForm", Operation: native.Operation{Op: "ui.diagnostics", File: "$output/interface", Named: map[string]any{"trees": false}}},
+		{Name: "Change the selection after the modeless form opens", Operation: native.Operation{Op: "eval", Value: `ActiveDocument.Content.Text = "LEFT  untouched|alpha  beta   gamma|RIGHT  untouched"
+ActiveDocument.Range(16, 35).Font.Bold = True
+ActiveDocument.Range(16, 35).Select
+Evaluate = True`}},
+		{Name: "Click the nested form editing button", Operation: native.Operation{Op: "ui.invoke", Named: map[string]any{"name": "Normalize selection", "window": "WordUp Studio", "scope": "form", "role": 43}}},
+		{Name: "Assert callback output, formatting and caller state", Operation: native.Operation{Op: "eval", Value: `Evaluate = Array(ActiveDocument.Content.Text, ActiveDocument.Range(16, 21).Font.Bold, Application.ScreenUpdating, Application.UndoRecord.CustomRecordLevel)`}, Assert: []verify.Assertion{{Path: "/result/array/0", Kind: "equals", Expected: "LEFT  untouched|alpha beta gamma|RIGHT  untouched\r"}, {Path: "/result/array/1", Kind: "equals", Expected: -1}, {Path: "/result/array/2", Kind: "equals", Expected: true}, {Path: "/result/array/3", Kind: "equals", Expected: 0}}},
+		{Name: "Retain exact XML after the form edit", Operation: native.Operation{Op: "xml.snapshot", Target: "formDocument", File: "$output/form-edit.xml"}, Assert: []verify.Assertion{{Path: "/normalized", Kind: "equals", Expected: false}}},
+		{Name: "Undo the complete form action once", Operation: native.Operation{Op: "eval", Value: `Dim restored As Boolean
+restored = ActiveDocument.Undo
+Evaluate = restored And ActiveDocument.Content.Text = "LEFT  untouched|alpha  beta   gamma|RIGHT  untouched" & vbCr And ActiveDocument.Range(16, 35).Font.Bold = True
+Application.ScreenUpdating = True`}, Assert: []verify.Assertion{{Path: "/result", Kind: "equals", Expected: true}}},
 		{Name: "Click the real form Close button", Operation: native.Operation{Op: "ui.invoke", Named: map[string]any{"name": "Close", "window": "WordUp Studio", "scope": "form", "role": 43}}, Assert: []verify.Assertion{{Path: "/executed", Kind: "equals", Expected: true}}},
 		{Name: "Observe the form event callback", Operation: native.Operation{Op: "run", Macro: "Studio.FormEventAcceptance"}, Assert: []verify.Assertion{{Kind: "equals", Expected: true}}},
+		{Name: "Discard the form test document", Operation: native.Operation{Op: "unload", Target: "formDocument"}},
+		{Name: "Reopen the artifact for independent content checks", Operation: native.Operation{Op: "open", File: "$artifact", As: "template"}},
 		{Name: "Register and execute a template hotkey", Operation: native.Operation{Op: "run", Macro: "Studio.HotkeyAcceptance"}, Assert: []verify.Assertion{{Kind: "equals", Expected: true}}},
 		{Name: "Prepare the context-menu selection", Operation: native.Operation{Op: "run", Macro: "Studio.ShowContextMenu"}},
 		{Name: "Open the actual text context menu", Operation: native.Operation{Op: "context_menu", Target: "template"}},
@@ -106,13 +121,8 @@ Option Explicit
 Public RibbonInitialized As Boolean
 Public FormClosed As Boolean
 Public CommandInvocations As Long
-Private StudioRibbon As IRibbonUI
 Public Sub OnRibbonLoad(ByVal ribbon As IRibbonUI)
     RibbonInitialized = True
-    Set StudioRibbon = ribbon
-End Sub
-Public Sub ActivateStudioRibbon()
-    StudioRibbon.ActivateTab "wwStudio"
 End Sub
 Public Function FormEventAcceptance() As Boolean
     FormEventAcceptance = FormClosed
@@ -147,8 +157,15 @@ Public Sub NormalizeButton(ByVal control As IRibbonControl)
 End Sub
 Public Sub NormalizeSelection()
     Dim scope As Range, beforeLength As Long, afterLength As Long
+    Dim updating As Boolean, undoStarted As Boolean
+    Dim failure As Long, failureSource As String, failureDescription As String
     Set scope = Selection.Range.Duplicate
     If scope.Start = scope.End Then Err.Raise vbObjectError + 700, "WordUp", "Select the text to normalize."
+    updating = Application.ScreenUpdating
+    On Error GoTo Failed
+    Application.UndoRecord.StartCustomRecord "Normalize selection"
+    undoStarted = True
+    Application.ScreenUpdating = False
     Do
         beforeLength = scope.End - scope.Start
         With scope.Find
@@ -166,6 +183,16 @@ Public Sub NormalizeSelection()
         End With
         afterLength = scope.End - scope.Start
     Loop While afterLength < beforeLength
+Cleanup:
+    On Error Resume Next
+    If undoStarted Then Application.UndoRecord.EndCustomRecord
+    Application.ScreenUpdating = updating
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureDescription
+    Exit Sub
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureDescription = Err.Description
+    Resume Cleanup
 End Sub
 Public Function NativeAcceptance() As String
     Dim f As StudioForm, d As Document
@@ -226,7 +253,8 @@ Failed:
     BuildingBlockAcceptance = context & Err.Description
 End Function
 Public Function NormalizationAcceptance(Optional ByVal reuseDocument As Boolean = False) As String
-    Dim d As Document, r As Range
+    Dim d As Document, r As Range, updating As Boolean
+    updating = Application.ScreenUpdating
     If reuseDocument Then
         Set d = ActiveDocument
     Else
@@ -237,15 +265,35 @@ Public Function NormalizationAcceptance(Optional ByVal reuseDocument As Boolean 
     Set r = d.Range(16, 35)
     r.Font.Bold = True
     r.Select
+    Application.ScreenUpdating = False
     NormalizeSelection
+    If Application.ScreenUpdating Then Err.Raise vbObjectError + 714, "WordUp", "Caller screen-updating state was not preserved."
+    Application.ScreenUpdating = updating
     If d.Content.Text <> "LEFT  untouched|alpha beta gamma|RIGHT  untouched" & vbCr Then Err.Raise vbObjectError + 710, "WordUp", "Selection scope or normalization is wrong."
     If d.Range(16, 21).Font.Bold <> True Then Err.Raise vbObjectError + 711, "WordUp", "Formatting was lost."
+    ' A rejected edit must also close its undo record and restore caller state.
+    Dim rejected As Long
+    d.Content.Text = "protected  text"
+    d.Content.Select
+    d.Protect Type:=wdAllowOnlyReading, NoReset:=True
+    Application.ScreenUpdating = False
+    On Error Resume Next
+    NormalizeSelection
+    rejected = Err.Number
+    Err.Clear
+    On Error GoTo Failed
+    d.Unprotect
+    If rejected = 0 Or rejected = vbObjectError + 700 Then Err.Raise vbObjectError + 715, "WordUp", "Protected edit did not exercise the editing failure path."
+    If d.Content.Text <> "protected  text" & vbCr Then Err.Raise vbObjectError + 717, "WordUp", "Rejected edit changed protected text."
+    If Application.ScreenUpdating Or Application.UndoRecord.CustomRecordLevel <> 0 Then Err.Raise vbObjectError + 716, "WordUp", "Failed edit left application state changed."
+    Application.ScreenUpdating = updating
     If Not reuseDocument Then d.Close SaveChanges:=wdDoNotSaveChanges
     NormalizationAcceptance = "SELECTION_OK"
     Exit Function
 Failed:
     Dim n As Long, msg As String
     n = Err.Number: msg = Err.Description
+    Application.ScreenUpdating = updating
     If Not reuseDocument Then d.Close SaveChanges:=wdDoNotSaveChanges
     Err.Raise n, "WordUp", msg
 End Function

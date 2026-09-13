@@ -1,0 +1,43 @@
+---
+title: Range.PasteAppendTable method (Word)
+keywords: vbawd10.chm157155742
+f1_keywords:
+- vbawd10.chm157155742
+api_name:
+- Word.Range.PasteAppendTable
+ms.assetid: dc3b9914-b0d6-aa85-a357-a96475680caf
+ms.date: 06/08/2017
+ms.localizationpriority: medium
+---
+
+
+# Range.PasteAppendTable method (Word)
+
+Merges pasted cells into an existing table by inserting the pasted rows between the selected rows. No cells are overwritten.
+
+
+## Syntax
+
+_expression_. `PasteAppendTable`
+
+_expression_ Required. A variable that represents a **[Range](Word.Range.md)** object.
+
+
+## Example
+
+This example pastes table cells by inserting rows into the current table at the insertion point. This example assumes that the Clipboard contains a collection of table cells.
+
+
+```vb
+Sub PasteAppend 
+ Selection.PasteAppendTable 
+End Sub
+```
+
+
+## See also
+
+
+[Range Object](Word.Range.md)
+
+[!include[Support and feedback](~/includes/feedback-boilerplate.md)]

@@ -1,0 +1,46 @@
+---
+title: Conflicts.RejectAll method (Word)
+keywords: vbawd10.chm174391398
+f1_keywords:
+- vbawd10.chm174391398
+api_name:
+- Word.Conflicts.RejectAll
+ms.assetid: bd3779d6-8cba-9cf8-d8ec-a9952e3918ad
+ms.date: 06/08/2017
+ms.localizationpriority: medium
+---
+
+
+# Conflicts.RejectAll method (Word)
+
+Rejects all of the user's changes and retains the server copy of the document.
+
+
+## Syntax
+
+_expression_. `RejectAll`
+
+ _expression_ An expression that returns a [Conflicts](./Word.Conflicts.md) object.
+
+
+## Return value
+
+Nothing
+
+
+## Example
+
+The following code example rejects all the user's changes and retains the server copy of the active document.
+
+
+```vb
+ActiveDocument.CoAuthoring.Conflicts.RejectAll
+```
+
+
+## See also
+
+
+[Conflicts Object](Word.Conflicts.md)
+
+[!include[Support and feedback](~/includes/feedback-boilerplate.md)]

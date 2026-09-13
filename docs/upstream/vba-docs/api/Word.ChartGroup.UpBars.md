@@ -1,0 +1,54 @@
+---
+title: ChartGroup.UpBars property (Word)
+keywords: vbawd10.chm263454751
+f1_keywords:
+- vbawd10.chm263454751
+api_name:
+- Word.ChartGroup.UpBars
+ms.assetid: 8581ad5f-94a1-0e12-3880-14ce2a7e9f03
+ms.date: 06/08/2017
+ms.localizationpriority: medium
+---
+
+
+# ChartGroup.UpBars property (Word)
+
+Returns the up bars on a line chart. Read-only **[UpBars](Word.UpBars.md)**.
+
+
+## Syntax
+
+_expression_.**UpBars**
+
+_expression_ A variable that represents a **[ChartGroup](Word.ChartGroup.md)** object.
+
+
+## Remarks
+
+This property applies only to line charts.
+
+
+## Example
+
+The following example enables up and down bars for chart group one of the first chart in the active document, and then sets their colors. You should run the example on a 2D line chart that contains two series that cross each other at one or more data points.
+
+
+```vb
+With ActiveDocument.InlineShapes(1) 
+ If .HasChart Then 
+ With .Chart.ChartGroups(1) 
+ .HasUpDownBars = True 
+ .DownBars.Interior.ColorIndex = 3 
+ .UpBars.Interior.ColorIndex = 5 
+ End With 
+ End If 
+End With
+```
+
+
+## See also
+
+
+[ChartGroup Object](Word.ChartGroup.md)
+
+[!include[Support and feedback](~/includes/feedback-boilerplate.md)]

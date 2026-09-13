@@ -96,3 +96,32 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE
+
+## Rubberduck grammar and Go parser dependencies
+
+The integrated VBA grammar is adapted from [Rubberduck](https://github.com/rubberduck-vba/Rubberduck), observed commit `fae50adab188126a5e7d2a1cefc3328cc18af482`. Original grammar and predicate inputs, attribution, and GPL-3.0-or-later terms are retained in `internal/vbaparse/grammar`; regeneration is documented in `internal/vbaparse/README.md`. The combined distribution uses the root GPL license; the original MIT notice is retained in LICENSE-MIT-ORIGINAL.
+
+ANTLR Go runtime 4.13.1 retains its BSD notice in `internal/vbaparse/ANTLR-LICENSE`. The pinned golang.org/x/exp dependency retains its BSD notice in `internal/vbaparse/X-EXP-LICENSE`. Exact Go versions/checksums are in go.mod/go.sum.
+
+## XPath evidence queries
+
+`xml.query` uses antchfx/xmlquery 1.5.1 and antchfx/xpath 1.3.6 (MIT).
+Their exact upstream notices and the transitive groupcache, x/net and x/text
+license/patent texts are retained in `internal/office/XPATH-NOTICES` and included
+by the Windows packaging script. Dependency checksums are in go.sum.
+
+## RibbonX callback metadata
+
+Adapted Office RibbonX Editor material retains Fernando Andreu's MIT notice in `internal/office/RIBBONX-LICENSE`, in addition to the Microsoft schema notice above.
+
+## Optional OfficeTools helper
+
+The helper uses Microsoft Open XML SDK and Framework 3.3.0 (MIT), FlaUI Core/UIA3 4.0.0 (MIT), Interop.UIAutomationClient 10.19041.0, and System.Management 5.0.0. Exact targets are listed in tools/office-bridge/build.ps1. Package nuspec metadata and package-provided license/notice files are copied beside the bundled DLLs. Open XML SDK's upstream v3.3.0 license is vendored at `tools/office-bridge/OPENXML-LICENSE` and copied into the helper bundle because the NuGet packages supply a license expression rather than the full text. Source: https://github.com/dotnet/Open-XML-SDK/blob/v3.3.0/LICENSE.
+
+This inventory does not establish that all optional binary bundles are release-ready. In particular, the oletools/PyInstaller transitive bundle, its licenses, reproducible dependency pins, and corresponding source delivery still require a release audit.
+
+### Legal Structure Parser marker adaptation
+
+`internal/structure/WordUpStructure.bas` adapts journal label recognition from legal-structure `src/journal.rs`, revision f73bcd5d66575c0504e97fc2c3b95bf5589377e5. Copyright (c) 2026 legal-structure contributors. MIT license: `internal/structure/LICENSE`. The remaining Word adapter code collects native evidence; it does not include the full upstream inference engine.
+
+`internal/structure/ladder.go` and marker interpretation adapt Legal PDF Parser support primitives at e1b060bdf9b92b9f6295bfc1e7933bd5a446af22. See `internal/structure/PDF-LICENSE` and `UPSTREAM.md` for license and adaptation scope.

@@ -1,0 +1,351 @@
+# Power Query in an Excel workbook
+
+How Excel stores Get and Transform queries, and what pyOpenVBA writes.
+
+Every statement below was measured, not read off a specification. Two
+oracles were used, and each fact says which one settled it:
+
+* **Live Excel**, through `pyvbaharness`: build a workbook, open it, ask
+  the object model what it sees, and have the mashup engine evaluate a
+  query. This is what says a written package works.
+* **Microsoft's own packaging assemblies**, which ship beside Excel in
+  `ADDINS\Microsoft Power Query for Excel Integrated\bin`. Loading
+  `Microsoft.Mashup.Client.Packaging.dll` in PowerShell and calling
+  `PackageMetadataSerializer`, `QueriesMetadataSerializer` and
+  `SerializedMetadataEntry` gives the exact bytes Excel's own code would
+  write for a given input. This is what settled the encodings, and the
+  golden values in `tests/test_powerquery_metadata.py` came out of it.
+
+---
+
+## Where it lives
+
+The whole project sits in one custom XML part, `customXml/itemN.xml`,
+written in UTF-16 with a byte-order mark:
+
+```xml
+<?xml version="1.0" encoding="utf-16"?>
+<DataMashup xmlns="http://schemas.microsoft.com/DataMashup">BASE64</DataMashup>
+```
+
+The element sometimes carries an `sqmid` attribute, so the wrapper is
+kept as it was found.
+
+A workbook that has never held a query needs four more things before the
+part means anything, and pyOpenVBA writes all of them:
+
+| Part | What it carries |
+| --- | --- |
+| `customXml/itemPropsN.xml` | `ds:datastoreItem` with a schema reference to the DataMashup namespace |
+| `customXml/_rels/itemN.xml.rels` | the item's pointer at its properties |
+| `[Content_Types].xml` | an Override for the properties part; the item itself rides the `xml` Default |
+| `xl/_rels/workbook.xml.rels` | a `customXml` relationship to the item |
+
+Nothing else is needed for queries that only hold a connection (measured
+against workbooks Excel wrote, and against a workbook built here from
+one that had no Power Query at all).
+
+---
+
+## The blob
+
+Five pieces, each after the first behind a length:
+
+```
+u32 version (0)
+u32 length + the OPC package
+u32 length + the permission list (XML)
+u32 length + the metadata section
+u32 length + the permission bindings
+```
+
+Measured with live Excel, by emptying one piece at a time:
+
+* **The permission list is required.** Empty it and Excel opens the
+  workbook with an error instead of its queries.
+* **The metadata's content package is required.** Cut the metadata short
+  of it and the same thing happens.
+* **The bindings are not required.** They hold a signature protected by
+  the Windows data-protection API, tied to the machine that wrote them.
+  Excel opens and refreshes a workbook whose bindings are empty, so
+  pyOpenVBA drops them when it changes the package: a signature that no
+  longer covers what it signs is worse than none.
+
+**Excel does not rewrite the blob when it saves a workbook it did not
+edit.** A blob written here comes back byte for byte after Excel opens
+and saves the file. So the writer aims at Excel's own bytes, not
+merely at bytes Excel tolerates.
+
+### The package
+
+An OPC ZIP with three parts, in this order: `Config/Package.xml`,
+`[Content_Types].xml`, `Formulas/Section1.m`.
+
+Excel writes it with settings of its own, and pyOpenVBA reproduces them:
+
+* raw deflate at **level 6** with the default memory level. Level 6 is
+  the only level that explains every entry measured: a 1075-byte section
+  rules out 7 and above, and a 73 KB one rules out 5 and below.
+* general-purpose flag `0x0002`, version made by 45, version needed 20.
+* a 28-byte Open Packaging growth hint (`0xA220`) on every local header
+  and none in the central directory.
+
+Rebuilding each fixture's package from its parts gives back Excel's
+bytes exactly (`tests/test_powerquery_package.py`).
+
+### Formulas/Section1.m
+
+```
+section Section1;<CRLF><CRLF>
+[ Description = "what it does" ]<CRLF>     (only when there is one)
+shared Name = <expression>;<CRLF><CRLF>
+...
+shared Last = <expression>;                (no newline at the end)
+```
+
+CRLF throughout. A name that is not a plain identifier is written
+`#"Like This"`.
+
+### The metadata section
+
+```
+u32 version (0)
+u32 length + the XML (UTF-8, with a byte-order mark)
+u32 length + a content package (an empty ZIP, 22 bytes)
+```
+
+The XML is a `LocalPackageMetadataFile` listing one `Item` per formula:
+
+```xml
+<Item>
+  <ItemLocation><ItemType>Formula</ItemType>
+    <ItemPath>Section1/Order%20Lines</ItemPath></ItemLocation>
+  <StableEntries><Entry Type="IsPrivate" Value="l0" /></StableEntries>
+</Item>
+```
+
+* The first item is `AllFormulas`, with an empty path. It carries what
+  belongs to the whole document: the query groups, and the switches for
+  relationship and type detection.
+* **A query is an item with at least one entry.** An item whose
+  `StableEntries` is empty is a step. This was measured: a `shared`
+  member added with an entry-less item left Excel showing three queries,
+  and any single entry was enough to make the fourth appear.
+* **A member with no item is worse than useless.** Excel fails to open
+  the queries at all ("the index is out of bounds"), so the two halves
+  are always written together.
+* Steps come from the **top-level** `let` bindings, one item each,
+  immediately after the query's own item. A nested `let` contributes
+  nothing, an expression that is not a `let` gets no steps, and a
+  function gets none either.
+* Item paths are percent-encoded by .NET's `Uri.EscapeDataString` rules:
+  `A-Za-z0-9-._~!'()*` survive, everything else becomes `%XX` over UTF-8.
+
+### Entry values
+
+The first character is the type, from Microsoft's `SerializedMetadataEntry`:
+
+| Prefix | Type | Example |
+| --- | --- | --- |
+| `l` | 64-bit integer | `l0`, `l-7` |
+| `f` | double, .NET's `G15` | `f1.5`, `f0.333333333333333`, `f1E+20` |
+| `s` | text | `sConnectionOnly` |
+| `c` | GUID | `c1111...` |
+| `d` | timestamp | `d2026-09-05T13:45:12.2500000Z` |
+
+Excel writes `QueryID` as a text entry, not a GUID one, and pyOpenVBA
+does the same.
+
+What a new query carries, exactly as Excel writes it: `IsPrivate` 0,
+`FillEnabled` 0, `FillObjectType` `ConnectionOnly`,
+`FillToDataModelEnabled` 0, `QueryID`, and `ResultType` `Function` when
+the expression is a function.
+
+`ResultType` is Excel's record of what a query *evaluated* to, not of how
+it is written: Excel marks `each _ + 1`, `(x) => x` and
+`let F = (x) => x in F` alike. The last cannot be told from the text
+without running the query, so pyOpenVBA answers the syntactic question
+and lets Excel correct the entry on its next refresh.
+
+### Query groups
+
+The folders in the Queries pane live in one entry on the `AllFormulas`
+item, and the value is **not JSON**. It is Microsoft's own binary
+serialization, base64-encoded:
+
+```
+u32 count
+per group:
+  u32 0
+  16 bytes  Guid Id (.NET layout)
+  string    Name          (7-bit-encoded length, UTF-8)
+  string    Description   (never null; Excel writes "")
+  u8        has parent, then 16 bytes Guid ParentId when set
+  i32       Order
+```
+
+A query joins a group through its own `QueryGroupID` entry.
+
+pyOpenVBA's writer is byte-identical to
+`QueriesMetadataSerializer.SerializeQueryGroups` over 60 randomized
+cases. Excel parses the value with the same reader: given a deliberately
+corrupt one, it threw out of
+`QueryGroupMetadataSet.Deserialize(BinarySerializationReader)` and could
+not open the queries, while the valid one written here survived Excel's
+own edit of the workbook untouched.
+
+---
+
+## Loading a query onto a sheet
+
+The metadata says where a query loads, and **saying it changes nothing**:
+a connection-only query marked `FillEnabled = 1`, `FillObjectType = Table`
+opened in Excel, refreshed, and produced no table at all. Excel loads a
+query only when the workbook also carries the objects that do it:
+
+* a connection in `xl/connections.xml` through
+  `Provider=Microsoft.Mashup.OleDb.1` with `Location=<query>` and
+  `command="SELECT * FROM [<query>]"`,
+* `xl/queryTables/queryTableN.xml` bound to that connection,
+* `xl/tables/tableN.xml` with `tableType="queryTable"`,
+* the sheet's `tableParts` entry and relationship, a header row, and a
+  hidden `ExternalData_N` defined name.
+
+`load_to_sheet()` writes all of it. The column names have to be supplied,
+because working them out means evaluating the query and only the mashup
+engine can do that; Excel reconciles them with the real result and fills
+the rows on the first refresh.
+
+`unload()` takes every piece back out. One rule there is easy to get
+wrong: **a connections part holding no connections is one Excel refuses**,
+so removing the last connection removes the part, its content type and
+its relationship as well.
+
+The hidden name has three rules of its own, and each was learned the
+hard way:
+
+* **`localSheetId` is the zero-based position of the sheet the name
+  belongs to** among the workbook's sheets, not a constant, and it has to
+  agree with the sheet the reference names. Written as 0 it was right
+  only while the table landed on the first sheet; anywhere else Excel
+  refuses to open the workbook, which a one-sheet file cannot show.
+* **A sheet name inside a reference is quoted unless it is a plain
+  identifier**, and an apostrophe within it is doubled: `It's` is spelled
+  `'It''s'`. A single apostrophe closes the quoting early and the
+  reference names something else. A name opening with a digit is quoted
+  too, since unquoted it reads as part of a cell reference.
+* **A sheet name is stored XML-escaped**, so `A & B` sits in the file as
+  `A &amp; B`. Reading the stored form as if it were the name meant that
+  asking for the sheet by the name it actually has found nothing.
+  Attribute values are decoded on the way in and escaped again on the way
+  out.
+
+### Refresh control
+
+The boxes in Excel's Connection Properties dialog belong to that
+connection too, and to the query table beside it. Where each one is
+written was measured by toggling it through Excel's object model and
+diffing the file:
+
+| Dialog | Written as |
+| --- | --- |
+| Enable background refresh | `connection/@background`, mirrored as `queryTable/@backgroundRefresh="0"` when off |
+| Refresh every N minutes | `connection/@interval` |
+| Refresh data when opening the file | `connection/@refreshOnLoad`, mirrored on the query table |
+| Remove data before saving | `queryTable/@removeDataOnSave`, with `connection/@saveData` dropped |
+| Refresh this connection on Refresh All | `x15:connection/@excludeFromRefreshAll` inside the connection's `extLst`, under the extension uri `{DE250136-89BD-433C-8126-D09CA5730AF9}` |
+| Enable refresh | `queryTable/@disableRefresh` |
+
+Every one of them is absent by default and absent means off, so turning a
+setting off is written by taking the attribute away. Two of them are not
+where the dialog's wording suggests. The one about removing data reads
+from the query table, not from the connection's `saveData`, which is why
+setting `saveData` alone left Excel still reporting that data would be
+kept. And staying out of Refresh All is stored the other way round, as an
+exclusion.
+
+**The dialog's own wiring is not a rule about the file.** Excel greys
+"Remove data ... before saving the workbook" out until "Refresh data when
+opening the file" is ticked, which makes `removeDataOnSave` without
+`refreshOnLoad` look like a state only a writer outside Excel could
+produce. It is not. Three measurements say so:
+
+* Excel's object model sets `QueryTable.SaveData = False` with
+  refresh-on-open off and raises nothing, reading the property back as
+  `False`.
+* Excel writes the pair itself. Tick refresh-on-open, tick remove-data,
+  then untick refresh-on-open, and Excel saves `removeDataOnSave="1"`
+  with no `refreshOnLoad` on either part.
+* Excel opens a workbook pyOpenVBA wrote that way, reports the setting
+  correctly, and saves it back with the attribute intact.
+
+So `keep_data = False` on its own is a state Excel keeps. The dialog
+renders it as a ticked box greyed out beneath an unticked one, because
+unticking the parent disables the child without clearing it. The
+practical effect is a query whose rows are dropped on save and never
+fetched again on their own, so the table opens empty until someone
+refreshes it.
+
+`query.refresh` gives these as `background`, `interval_minutes`,
+`on_open`, `keep_data`, `in_refresh_all` and `enabled`. The live gate
+sets all six from Python and has Excel's object model read them back.
+
+**"Enable Fast Data Load" is not covered.** Excel's object model does not
+expose it, so there was no way to watch Excel write it, and the rest of
+this file exists because nothing here is written on a guess.
+
+---
+
+## Workbooks another tool wrote
+
+Excel is not the only writer of `.xlsx`, and the parts it produces are
+one legal spelling among several. Three assumptions here came from
+reading only Excel's output, and each one broke on openpyxl's:
+
+* **Attribute order carries no meaning.** Excel opens a relationship with
+  `Id`, openpyxl closes with it. Matching in a fixed order found nothing,
+  so a sheet looked as though it had no part behind it and loading to it
+  failed outright.
+* **An empty element may be written closed.** `<definedNames />` is the
+  same element as `<definedNames></definedNames>`. Appending a second
+  block beside it left two in the workbook, which Excel refuses.
+* **A namespace prefix is declared where it is used.** Excel puts
+  `xmlns:r` on every worksheet; openpyxl puts it on a worksheet that
+  needs one, and a sheet with no table does not. Adding a `tablePart`
+  that used the prefix made the part not well formed.
+
+Loading a query onto a sheet of a workbook openpyxl wrote works, and
+Excel opens and refreshes the result.
+
+**The other direction does not, and cannot be fixed here.** openpyxl
+rebuilds the package from the parts it models and drops the rest, custom
+XML included, so saving a workbook through it removes the Power Query
+package and the queries with it. Nothing signals this: the file opens and
+simply has no queries. Put pyOpenVBA last in the pipeline, or carry the
+queries across with `pull_queries()` and `push_queries()`.
+
+## `[trash]` parts
+
+Excel's own file recovery leaves the parts it threw out under
+`[trash]/NNNN.dat`, beside the real ones. An OPC part name cannot open a
+segment with a bracket, and Excel holds itself to that when reading: the
+same workbook opens before such an entry is added and fails to open at
+all after, measured both ways.
+
+The container preserves every entry as it arrived, which would hand back
+a file that stays broken, so `save()` drops these and warns. Nothing in
+the document depends on them: they carry no content type and no
+relationship points at them.
+
+## What Excel refuses
+
+* A query name containing a dot. `Queries.Add` rejects it with
+  `0x80070057`, so a workbook should not carry one either.
+
+## What is not covered
+
+* Loading to the data model. The connection for it is a different shape,
+  and the model itself is a separate store.
+* Evaluating M. Nothing here runs a query; that is the engine's job.
+* Credentials and privacy levels beyond the permission list, which is
+  written as Excel writes it for a workbook whose queries hold none.

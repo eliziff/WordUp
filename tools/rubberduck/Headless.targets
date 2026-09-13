@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <GenerateSatelliteAssembliesForCore>true</GenerateSatelliteAssembliesForCore>
+  </PropertyGroup>
+  <!-- The parser uses upstream production code. Only add-in build tooling is
+       excluded: deployment tasks and repository-specific style analyzers. -->
+  <Target Name="EnsureMetaProjectsBuild" />
+  <Target Name="WordUpRemoveRepositoryAnalyzers" BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <Analyzer Remove="@(Analyzer)" />
+    </ItemGroup>
+  </Target>
+</Project>

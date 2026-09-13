@@ -1,0 +1,46 @@
+---
+title: PageSetup.BookFoldRevPrinting property (Word)
+keywords: vbawd10.chm158401736
+f1_keywords:
+- vbawd10.chm158401736
+api_name:
+- Word.PageSetup.BookFoldRevPrinting
+ms.assetid: 3d6db95a-1c2d-424f-f704-ed7d1c05895c
+ms.date: 06/08/2017
+ms.localizationpriority: medium
+---
+
+
+# PageSetup.BookFoldRevPrinting property (Word)
+
+ **True** for Microsoft Word to reverse the printing order for book fold printing of bidirectional or Asian language documents. Read/write **Boolean**.
+
+
+## Syntax
+
+_expression_. `BookFoldRevPrinting`
+
+ _expression_ An expression that returns a **[PageSetup](Word.PageSetup.md)** object.
+
+
+## Example
+
+This example switches from left-to-right book printing to right-to-left book printing for a bidirectional or Asian language document that will print in sixteen-page increments.
+
+
+```vb
+Sub BookletRev() 
+ With PageSetup 
+ .BookFoldRevPrinting = True 
+ .BookFoldPrintingSheets = 16 
+ End With 
+End Sub
+```
+
+
+## See also
+
+
+[PageSetup Object](Word.PageSetup.md)
+
+[!include[Support and feedback](~/includes/feedback-boilerplate.md)]

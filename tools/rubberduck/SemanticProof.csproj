@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net462</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <LangVersion>7.2</LangVersion>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <RubberduckSource Condition="'$(RubberduckSource)' == ''">$(MSBuildThisFileDirectory)..\..\workspaces\reuse\rubberduck-engine</RubberduckSource>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(RubberduckSource)\Rubberduck.Parsing\Rubberduck.Parsing.csproj" />
+    <PackageReference Include="Moq" Version="4.8.0" />
+    <PackageReference Include="NUnit" Version="3.14.0" />
+    <Reference Include="System.Web.Extensions" />
+    <Compile Include="SemanticProof.cs" />
+    <Compile Include="$(RubberduckSource)\RubberduckTests\Mocks\Windows.cs" Link="Upstream\Windows.cs" />
+    <!-- Test-only in-memory editor boundary. The actual parser, declaration
+         resolver and reference resolver are unmodified upstream production code. -->
+    <Compile Include="$(RubberduckSource)\RubberduckTests\Mocks\MockParser.cs" Link="Upstream\MockParser.cs" />
+    <Compile Include="$(RubberduckSource)\RubberduckTests\Mocks\MockVbeBuilder.cs" Link="Upstream\MockVbeBuilder.cs" />
+    <Compile Include="$(RubberduckSource)\RubberduckTests\Mocks\MockProjectBuilder.cs" Link="Upstream\MockProjectBuilder.cs" />
+    <Compile Include="$(RubberduckSource)\RubberduckTests\Mocks\MockUserFormBuilder.cs" Link="Upstream\MockUserFormBuilder.cs" />
+    <Compile Include="$(RubberduckSource)\RubberduckTests\Mocks\MockVbeEvents.cs" Link="Upstream\MockVbeEvents.cs" />
+    <Compile Include="$(RubberduckSource)\RubberduckTests\Mocks\MockExtentions.cs" Link="Upstream\MockExtentions.cs" />
+    <Compile Include="$(RubberduckSource)\RubberduckTests\Mocks\MockFileSystem.cs" Link="Upstream\MockFileSystem.cs" />
+    <Compile Include="$(RubberduckSource)\RubberduckTests\Mocks\StaticCachingComDeserializerDecorator.cs" Link="Upstream\StaticCachingComDeserializerDecorator.cs" />
+  </ItemGroup>
+</Project>

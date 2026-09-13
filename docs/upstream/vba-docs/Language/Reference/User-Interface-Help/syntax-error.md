@@ -1,0 +1,37 @@
+---
+title: Syntax error
+keywords: vblr6.chm1011279
+f1_keywords:
+- vblr6.chm1011279
+ms.assetid: ca84aa92-e41a-1167-ab66-032ab9626005
+ms.date: 06/08/2017
+ms.localizationpriority: medium
+---
+
+
+# Syntax error
+
+Visual Basic can't determine what action to take. This error has the following causes and solutions:
+
+
+
+- A [keyword](../../Glossary/vbe-glossary.md#keyword) or [argument](../../Glossary/vbe-glossary.md#argument) is misspelled.
+    
+    Keywords and the names of [named arguments](../../Glossary/vbe-glossary.md#named-argument) must exactly match those specified in their syntax specifications. Check online Help, and then correct the spelling.
+    
+- Punctuation is incorrect. For example, when you omit optional arguments positionally, you must substitute a comma (**,**) as a placeholder for the omitted argument.
+    
+- A [procedure](../../Glossary/vbe-glossary.md#procedure) isn't defined.
+    
+    Check the spelling of the procedure name.
+    
+- You tried to specify both **Optional** and **ParamArray** in the same procedure declaration. A **ParamArray** argument can't be **Optional**. Choose one and delete the other.
+    
+- You tried to define an event procedure with an **Optional** or **ParamArray** parameter. Remove the **Optional** or **ParamArray** keyword from the parameter specification.
+    
+- You tried to use a named argument in a **RaiseEvent** statement. Events don't support named arguments.
+    
+
+For additional information, select the item in question and press F1 (in Windows) or HELP (on the Macintosh).
+
+[!include[Support and feedback](~/includes/feedback-boilerplate.md)]

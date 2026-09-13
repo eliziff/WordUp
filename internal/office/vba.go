@@ -370,6 +370,9 @@ func (v *VBA) Rewrite(modules []Module, forms map[string]map[string][]byte) ([]b
 		if !ValidIdentifier(m.Name) {
 			return nil, fmt.Errorf("invalid VBA identifier %q", m.Name)
 		}
+		if strings.EqualFold(m.Name, v.Name) {
+			return nil, fmt.Errorf("component %q conflicts with VBA project name %q; rename the component or project before building", m.Name, v.Name)
+		}
 		key := strings.ToLower(m.Name)
 		if seen[key] {
 			return nil, fmt.Errorf("duplicate component %q", m.Name)

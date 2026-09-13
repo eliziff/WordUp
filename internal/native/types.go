@@ -4,12 +4,14 @@ package native
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"runtime"
 	"time"
 )
 
 type Options struct {
+	Visible          bool   `json:"visible,omitempty"`
 	Directory        string `json:"directory"`
 	Execute          bool   `json:"execute"`
 	StartupTimeoutMS int    `json:"startup_timeout_ms,omitempty"`
@@ -74,8 +76,12 @@ func fault(e error) *Fault {
 	if e == nil {
 		return nil
 	}
-	if f, ok := e.(*Fault); ok {
-		return f
+	var f *Fault
+	if errors.As(e, &f) {
+		if e == f {
+			return f
+		}
+		return &Fault{Code: f.Code, Message: e.Error(), Details: f.Details}
 	}
 	return &Fault{Code: "native_error", Message: e.Error()}
 }

@@ -1,0 +1,46 @@
+---
+title: Document.SnapToGrid property (Word)
+keywords: vbawd10.chm158007596
+f1_keywords:
+- vbawd10.chm158007596
+api_name:
+- Word.Document.SnapToGrid
+ms.assetid: 7aa03a0d-65f2-725b-37fe-8a421fb1e9f7
+ms.date: 06/08/2017
+ms.localizationpriority: medium
+---
+
+
+# Document.SnapToGrid property (Word)
+
+ **True** if AutoShapes or East Asian characters are automatically aligned with an invisible grid when they are drawn, moved, or resized in the specified document. Read/write **Boolean**.
+
+
+## Syntax
+
+_expression_. `SnapToGrid`
+
+_expression_ A variable that represents a **[Document](Word.Document.md)** object.
+
+
+## Remarks
+
+You can temporarily override this setting by pressing ALT while drawing, moving, or resizing an AutoShape.
+
+
+## Example
+
+This example sets Microsoft Word to automatically align East Asian characters with the invisible grid in the current document.
+
+
+```vb
+ActiveDocument.SnapToGrid = True
+```
+
+
+## See also
+
+
+[Document Object](Word.Document.md)
+
+[!include[Support and feedback](~/includes/feedback-boilerplate.md)]

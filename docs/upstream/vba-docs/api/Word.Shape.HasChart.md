@@ -1,0 +1,36 @@
+---
+title: Shape.HasChart property (Word)
+keywords: vbawd10.chm161480852
+f1_keywords:
+- vbawd10.chm161480852
+api_name:
+- Word.Shape.HasChart
+ms.assetid: 5fd4bc0b-153a-f30b-dd81-81a4b348770c
+ms.date: 06/08/2017
+ms.localizationpriority: medium
+---
+
+
+# Shape.HasChart property (Word)
+
+ **True** if the specified shape has a chart. Read-only.
+
+
+## Syntax
+
+_expression_. `HasChart`
+
+ _expression_ An expression that returns a [Shape](./Word.Shape.md) object.
+
+
+## Remarks
+
+This property always returns false for OLE charts. For OLE charts, use `InlineShape.OLEFormat.ProgID` and check for the following possible values: "Excel.Chart.8", "MSGraph.Chart.8", "Excel.Sheet.8", "Excel.Chart.5", "MSGraph.Chart.5", or "Excel.Sheet.5".
+
+
+## See also
+
+
+[Shape Object](Word.Shape.md)
+
+[!include[Support and feedback](~/includes/feedback-boilerplate.md)]

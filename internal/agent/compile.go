@@ -48,7 +48,7 @@ func (e *Engine) compile(ctx context.Context, w *project.Workspace, output strin
 		if cached.Signing != nil && cached.Signing.Certificate != nil {
 			expires, _ = time.Parse(time.RFC3339Nano, cached.Signing.Certificate.Expires)
 		}
-		if cacheErr == nil && time.Now().Before(expires) && cached.Error == nil && cached.Build != nil && cached.Build.ToolVersion == project.Version && cached.Signing != nil && cached.Signing.Signed && cached.Signing.DigestVerified && cached.Build.VBACompiled && cached.Build.Artifact == output && cached.Build.SourceFingerprint == fingerprint {
+		if cacheErr == nil && time.Now().Before(expires) && cached.Error == nil && cached.Build != nil && cached.Build.ToolVersion == project.Version && project.ExecutableSHA256() != "" && cached.Build.ToolSHA256 == project.ExecutableSHA256() && cached.Signing != nil && cached.Signing.Signed && cached.Signing.DigestVerified && cached.Build.VBACompiled && cached.Build.Artifact == output && cached.Build.SourceFingerprint == fingerprint {
 			if artifact, err := os.ReadFile(output); err == nil && office.Hash(artifact) == cached.Build.SHA256 && cached.Signing.SHA256 == cached.Build.SHA256 {
 				cached.Cached = true
 				cached.DurationMS = float64(time.Since(start).Microseconds()) / 1000

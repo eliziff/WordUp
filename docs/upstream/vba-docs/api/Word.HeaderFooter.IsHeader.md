@@ -1,0 +1,51 @@
+---
+title: HeaderFooter.IsHeader property (Word)
+keywords: vbawd10.chm159711235
+f1_keywords:
+- vbawd10.chm159711235
+api_name:
+- Word.HeaderFooter.IsHeader
+ms.assetid: 66c098ed-d0d6-cf58-e26a-b031bc7a6cab
+ms.date: 06/08/2017
+ms.localizationpriority: medium
+---
+
+
+# HeaderFooter.IsHeader property (Word)
+
+ **True** if the specified **HeaderFooter** object is a header. Read-only **Boolean**.
+
+
+## Syntax
+
+_expression_. `IsHeader`
+
+ _expression_ An expression that returns a '[HeaderFooter](Word.HeaderFooter.md)' object.
+
+
+## Example
+
+This example selects the footer and adds a page number.
+
+
+```vb
+With ActiveDocument.ActiveWindow.ActivePane.View 
+ .Type = wdPrintView 
+ .SeekView = wdSeekCurrentPageHeader 
+End With 
+ 
+If Selection.HeaderFooter.IsHeader = True Then 
+ ActiveDocument.ActiveWindow.ActivePane.View _ 
+ .SeekView = wdSeekCurrentPageFooter 
+End If 
+ 
+Selection.HeaderFooter.PageNumbers.Add
+```
+
+
+## See also
+
+
+[HeaderFooter Object](Word.HeaderFooter.md)
+
+[!include[Support and feedback](~/includes/feedback-boilerplate.md)]

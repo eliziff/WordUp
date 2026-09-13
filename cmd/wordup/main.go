@@ -270,7 +270,7 @@ func run(ctx context.Context, args []string) int {
 	return 0
 }
 
-const usage = `WordUp 0.3.0 — native local Word development toolchain
+const usage = `WordUp ` + project.Version + ` — native local Word development toolchain
 
   wordup import SOURCE.dotm WORKSPACE
   wordup new ProjectName WORKSPACE

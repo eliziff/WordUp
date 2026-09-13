@@ -1122,7 +1122,7 @@ func AddBuildingBlocks(p *Package, blocks []BuildingBlock, asset func(string) ([
 		}
 		id := strings.ToUpper(Hash([]byte(block.Name))[:32])
 		guid := fmt.Sprintf("{%s-%s-%s-%s-%s}", id[:8], id[8:12], id[12:16], id[16:20], id[20:])
-		node := `<w:docPart><w:docPartPr><w:name w:val="` + Esc(block.Name) + `"/><w:description w:val="` + Esc(block.Description) + `"/><w:category><w:name w:val="` + Esc(cat) + `"/><w:gallery w:val="` + Esc(gallery) + `"/></w:category><w:behaviors><w:behavior w:val="content"/></w:behaviors><w:guid w:val="` + guid + `"/></w:docPartPr><w:docPartBody>` + body + `</w:docPartBody></w:docPart>`
+		node := `<w:docPart><w:docPartPr><w:name w:val="` + Esc(block.Name) + `"/><w:category><w:name w:val="` + Esc(cat) + `"/><w:gallery w:val="` + Esc(gallery) + `"/></w:category><w:behaviors><w:behavior w:val="content"/></w:behaviors><w:description w:val="` + Esc(block.Description) + `"/><w:guid w:val="` + guid + `"/></w:docPartPr><w:docPartBody>` + body + `</w:docPartBody></w:docPart>`
 		spans, e := XMLSpans(b)
 		if e != nil {
 			return e

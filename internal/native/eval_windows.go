@@ -11,7 +11,7 @@ import (
 	"github.com/eliziff/WordUp/internal/office"
 )
 
-func (h *wordHost) evaluate(op Operation) (any, error) {
+func (h *wordHost) evaluate(op Operation) (out any, resultErr error) {
 	if !h.execute {
 		return nil, Fail("execution_not_authorized", "Scratch VBA execution requires the execute capability", nil)
 	}
@@ -23,7 +23,7 @@ func (h *wordHost) evaluate(op Operation) (any, error) {
 	v := office.NewVBA(name)
 	module := "Evaluation" + randomID()[:16]
 	errorTag := randomID()
-	source := "Attribute VB_Name = \"" + module + "\"\nOption Explicit\nPublic Function Evaluate() As Variant\nOn Error GoTo WordUpEvalFailed\n" + body + "\nExit Function\nWordUpEvalFailed:\nEvaluate = Array(\"" + errorTag + "\", Err.Number, Err.Description, Err.Source, Erl)\nEnd Function\n"
+	source, numbering := evaluationSource(module, errorTag, body)
 	vb, e := v.Rewrite([]office.Module{{Name: "ThisDocument", Kind: "document", Source: officeDocumentSource}, {Name: module, Kind: "standard", Source: source}}, nil)
 	if e != nil {
 		return nil, e
@@ -47,11 +47,7 @@ func (h *wordHost) evaluate(op Operation) (any, error) {
 		return nil, e
 	}
 	defer func() {
-		if addin, ok := h.objects[name]; ok {
-			_ = addin.put("Installed", false)
-			addin.release()
-			delete(h.objects, name)
-		}
+		resultErr = evaluationCleanupError(resultErr, h.uninstallEvaluation(name, path), path)
 	}()
 	value, e := h.app.invoke("Run", 1, []any{module + ".Evaluate"}, nil, h.objects)
 	if e != nil {
@@ -63,7 +59,9 @@ func (h *wordHost) evaluate(op Operation) (any, error) {
 	}
 	array, _ := result.(map[string]any)
 	if values, ok := array["array"].([]any); ok && len(values) == 5 && values[0] == errorTag {
-		return nil, Fail("scratch_vba_failed", fmt.Sprint(values[2]), map[string]any{"number": values[1], "source": values[3], "line": values[4], "generated_source": source, "scratch_sha256": office.Hash(data)})
+		details := map[string]any{"number": values[1], "source": values[3], "line": values[4], "generated_source": source, "scratch_sha256": office.Hash(data)}
+		evaluationLineDetails(details, body, numbering, values[4])
+		return nil, Fail("scratch_vba_failed", fmt.Sprint(values[2]), details)
 	}
 	return map[string]any{"result": result, "executor": "native Microsoft Word VBA", "generated_source": source, "scratch_sha256": office.Hash(data), "scratch_project_separate": true}, nil
 }
@@ -141,7 +139,7 @@ func (h *wordHost) compileMenu(op Operation) (any, error) {
 	after, _ := enabled.value(0)
 	enabled.clear()
 	if after != false {
-		return nil, Fail("compile_not_confirmed", "Native Compile did not reach a clean disabled state; inspect the owned VBE diagnostics", nil)
+		return nil, Fail("compile_not_confirmed", "Native Compile did not reach a clean disabled state; inspect the native VBE selection and owned UI diagnostics", compilerSelection(vbe))
 	}
 	return map[string]any{"vba_compiled": true, "project": name, "verification": "target-matched native VBE Compile command executed and became disabled", "vbproject_access_enabled": false}, nil
 }

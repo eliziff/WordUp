@@ -1,5 +1,7 @@
 # Agent operating contract
 
+Choose proportionate evidence of the user's intended outcome. When an expected artifact is useful, mechanically copy the starting Word XML and edit only the intended differences; compare it directly with XML captured after the operation in Word. Do not retype unchanged text, create annotation sidecars, or require per-paragraph explanations. Ordinary assertions may suffice for smaller changes. Test reusable behavior beyond its development example and investigate mismatches rather than automatically updating expectations. See [expected XML](docs/EXPECTED-RESULTS.md).
+
 You are controlling a local executable called WordUp. Complete the user's Word template work yourself; do not ask them to import modules, open VBE, configure a VM, or run/debug your tests manually.
 
 1. Locate the supplied executable, run `version`, `help`, and `doctor`. Read README.md and docs/LIMITS.md. Native execution requires already-installed Word. Do not assert native success from these probes.
@@ -13,6 +15,8 @@ You are controlling a local executable called WordUp. Complete the user's Word t
 9. Deploy through the app only after relevant tests pass. Keep backups and stale-target guards. Windows pending activation registers automatic login recovery; the recovery command has been tested, but an actual reboot has not. Use restore with an installed activation plan to recover its previous template without overwriting newer user edits.
 10. Report real gaps. Current Windows evidence is in docs/VALIDATION-WINDOWS.md; Mac execution remains unverified. Native-host diagnostics are work for the agent, not a reason to invent a pass. A passing fixture establishes its tested behaviors, not every possible template or third-party control.
 
+Authoring default: wrap each user-facing editing action in one `Application.UndoRecord` custom record. Disable `Application.ScreenUpdating` for bulk edits, remembering its previous value. Shared success/error cleanup must close any opened undo record and restore the previous screen-updating value. Read-only actions need no undo record. Verify one-step undo and state restoration after failures. Capture WordOpenXML outside the editing action and its undo record: a native opening-layout test demonstrated that exporting it during the record disrupted undo grouping.
+
 Quick workflow (replace paths and use @JSON files to avoid shell escaping):
 
     wordup import ORIGINAL.dotm WORKSPACE
@@ -25,3 +29,5 @@ Quick workflow (replace paths and use @JSON files to avoid shell escaping):
     wordup -w WORKSPACE session stop
 
 No user-provided API keys or external service accounts are needed by this harness. A coding/vision agent is external to the harness, and Microsoft Word is not redistributed inside it.
+
+For footnote/endnote revision tests, inspect the relevant story or note Range.Revisions. Do not assume Document.Revisions includes those edits: an actual Supra regression showed it did not. Range.Text can include tracked deletions; verify final text by accepting revisions in the disposable story (and undo that test-only acceptance separately), or inspect the revision-aware XML. Do not blindly remove the last character of a Footnote.Range: remove a trailing paragraph mark only when one is actually present.

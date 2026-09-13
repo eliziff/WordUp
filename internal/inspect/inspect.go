@@ -8,6 +8,7 @@ import (
 	"github.com/eliziff/WordUp/internal/native"
 	"github.com/eliziff/WordUp/internal/office"
 	"github.com/eliziff/WordUp/internal/project"
+	"github.com/eliziff/WordUp/internal/vbaparse"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -139,6 +140,9 @@ func TextObservations(p *office.Package) ([]map[string]any, error) {
 		style := ""
 		props := ""
 		runs := []map[string]any{}
+		references := []map[string]any{}
+		nestedEnd := 0
+		propertiesEnd := 0
 		for _, x := range spans[index+1:] {
 			if x.Start >= s.End {
 				break
@@ -146,11 +150,19 @@ func TextObservations(p *office.Package) ([]map[string]any, error) {
 			if x.Start <= s.Start || x.End >= s.End {
 				continue
 			}
+			if x.Start < nestedEnd || x.Name.Space != office.W {
+				continue
+			}
+			if x.Name.Local == "p" {
+				nestedEnd = x.End
+				continue
+			}
 			if x.Name.Local == "pStyle" {
 				style = x.Attribute(office.W, "val")
 			}
 			if x.Name.Local == "pPr" {
 				props = string(b[x.Start:x.End])
+				propertiesEnd = x.End
 			}
 			if x.Name.Local == "t" {
 				var tmp struct {
@@ -164,8 +176,25 @@ func TextObservations(p *office.Package) ([]map[string]any, error) {
 			if x.Name.Local == "rPr" {
 				runs = append(runs, map[string]any{"xml": string(b[x.Start:x.End])})
 			}
+			if x.Start < propertiesEnd {
+				continue
+			}
+			switch x.Name.Local {
+			case "tab":
+				text.WriteByte('\t')
+			case "br", "cr":
+				text.WriteByte('\n')
+			case "footnoteReference", "endnoteReference", "commentReference":
+				references = append(references, map[string]any{"kind": x.Name.Local, "id": x.Attribute(office.W, "id"), "xml_start": x.Start})
+			}
 		}
-		out = append(out, map[string]any{"text": text.String(), "style_id": style, "paragraph_properties_xml": props, "run_properties": runs})
+		out = append(out, map[string]any{
+			"text": text.String(), "style_id": style, "paragraph_properties_xml": props, "run_properties": runs,
+			"source_part": "word/document.xml", "xml_start": s.Start, "xml_end": s.End,
+			"xml_path":     fmt.Sprintf("(//w:p)[%d]", len(out)+1),
+			"paragraph_id": s.Attribute("http://schemas.microsoft.com/office/word/2010/wordml", "paraId"),
+			"references":   references,
+		})
 		if len(out) > 10000 {
 			return nil, fmt.Errorf("paragraph observation budget exceeded")
 		}
@@ -187,11 +216,17 @@ func StyleReference(file string) (map[string]any, error) {
 		return nil, e
 	}
 	out["paragraph_observations"] = text
+	out["xml_namespaces"] = map[string]string{"w": office.W}
+	out["locator_units"] = "xml_start/xml_end are zero-based UTF-8 byte offsets in source_part, end exclusive; xml_path uses xml_namespaces and includes nested paragraphs, not Word document paragraph indexes"
 	out["source_sha256"] = office.Hash(b)
 	out["effective_layout_verified"] = false
 	return out, nil
 }
 func Check(w *project.Workspace) (map[string]any, error) {
+	return CheckWithConstants(w, nil)
+}
+
+func CheckWithConstants(w *project.Workspace, constants map[string]any) (map[string]any, error) {
 	files, e := w.SourceFiles()
 	if e != nil {
 		return nil, e
@@ -199,8 +234,21 @@ func Check(w *project.Workspace) (map[string]any, error) {
 	symbols := []Symbol{}
 	byName := map[string]bool{}
 	diagnostics := []map[string]any{}
+	parsedModules, skippedModules := 0, 0
 	for n, b := range files {
 		if strings.HasPrefix(n, "vba/") {
+			{
+				result, err := vbaparse.ParseWithConstants(string(b), constants)
+				if err != nil {
+					skippedModules++
+					diagnostics = append(diagnostics, map[string]any{"severity": "error", "file": n, "message": err.Error()})
+				} else {
+					parsedModules++
+					for _, d := range result["diagnostics"].([]vbaparse.Diagnostic) {
+						diagnostics = append(diagnostics, map[string]any{"severity": "error", "file": n, "line": d.Line, "column": d.Column, "message": d.Message, "engine": "Rubberduck"})
+					}
+				}
+			}
 			name := strings.TrimSuffix(filepath.Base(n), filepath.Ext(n))
 			s := Symbols(name, string(b))
 			symbols = append(symbols, s...)
@@ -221,7 +269,8 @@ func Check(w *project.Workspace) (map[string]any, error) {
 			diagnostics = append(diagnostics, map[string]any{"severity": "error", "file": n, "message": e.Error()})
 			continue
 		}
-		if !strings.Contains(strings.ToLower(n), "customui") {
+		if len(spans) == 0 || spans[0].Name.Local != "customUI" ||
+			(spans[0].Name.Space != "http://schemas.microsoft.com/office/2009/07/customui" && spans[0].Name.Space != "http://schemas.microsoft.com/office/2006/01/customui") {
 			continue
 		}
 		if len(spans) > 0 && spans[0].Name.Local == "customUI" {
@@ -238,20 +287,30 @@ func Check(w *project.Workspace) (map[string]any, error) {
 		}
 		ids := map[string]bool{}
 		for _, s := range spans {
+			if s.Name.Space != spans[0].Name.Space {
+				continue
+			}
 			for _, a := range s.Attr {
+				if a.Name.Space != "" {
+					continue
+				}
 				if a.Name.Local == "id" {
 					if ids[a.Value] {
 						diagnostics = append(diagnostics, map[string]any{"severity": "error", "file": n, "message": "duplicate Ribbon id " + a.Value})
 					}
 					ids[a.Value] = true
 				}
-				if strings.HasPrefix(a.Name.Local, "get") || strings.HasPrefix(a.Name.Local, "on") {
+				if strings.HasPrefix(a.Name.Local, "get") || strings.HasPrefix(a.Name.Local, "on") || a.Name.Local == "loadImage" {
 					cb := strings.ToLower(a.Value)
 					if i := strings.LastIndex(cb, "."); i >= 0 {
 						cb = cb[i+1:]
 					}
 					if !byName[cb] {
-						diagnostics = append(diagnostics, map[string]any{"severity": "warning", "file": n, "message": "callback not lexically found: " + a.Value + "; dynamic/external routing needs native verification"})
+						diagnostic := map[string]any{"severity": "warning", "file": n, "message": "callback not lexically found: " + a.Value + "; dynamic/external routing needs native verification", "callback": a.Value, "control": s.Name.Local, "control_id": s.Attribute("", "id"), "attribute": a.Name.Local, "xml_start": s.Start}
+						if declaration, known := office.RibbonCallbackDeclaration(s.Name.Local, a.Name.Local, a.Value); known {
+							diagnostic["expected_declaration"] = declaration
+						}
+						diagnostics = append(diagnostics, diagnostic)
 					}
 				}
 			}
@@ -263,5 +322,5 @@ func Check(w *project.Workspace) (map[string]any, error) {
 		}
 		return symbols[i].Module < symbols[j].Module
 	})
-	return map[string]any{"symbols": symbols, "diagnostics": diagnostics, "vba_compiled": false, "word_executed": false, "coverage": "lexical symbols, XML syntax, Windows RibbonX XSD validation, duplicate IDs and unresolved callback warnings; not a VBA compiler or complete callback/idMso checker"}, nil
+	return map[string]any{"symbols": symbols, "diagnostics": diagnostics, "compilation_constants": constants, "syntax_modules_parsed": parsedModules, "syntax_modules_skipped": skippedModules, "vba_compiled": false, "word_executed": false, "coverage": "Rubberduck VBA syntax with conditional preprocessing, lexical symbols, XML syntax, Windows RibbonX XSD validation, duplicate IDs and unresolved callback warnings; not a VBA compiler or complete callback/idMso checker"}, nil
 }

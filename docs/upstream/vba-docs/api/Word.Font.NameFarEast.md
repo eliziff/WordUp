@@ -1,0 +1,46 @@
+---
+title: Font.NameFarEast property (Word)
+keywords: vbawd10.chm156369052
+f1_keywords:
+- vbawd10.chm156369052
+api_name:
+- Word.Font.NameFarEast
+ms.assetid: 8df21c3e-5f50-37ca-cde9-27f5b0551f8e
+ms.date: 06/08/2017
+ms.localizationpriority: medium
+---
+
+
+# Font.NameFarEast property (Word)
+
+Returns or sets an East Asian font name. Read/write **String**.
+
+
+## Syntax
+
+_expression_. `NameFarEast`
+
+ _expression_ An expression that returns a **[Font](Word.Font.md)** object.
+
+
+## Remarks
+
+In the U.S. English version of Microsoft Word, the default value of this property is Times New Roman. This is the recommended way to return or set the font for Asian text in a document created in an Asian version of Word.
+
+
+## Example
+
+This example displays the East Asian font name that's applied to the selection.
+
+
+```vb
+MsgBox Selection.Font.NameFarEast
+```
+
+
+## See also
+
+
+[Font Object](Word.Font.md)
+
+[!include[Support and feedback](~/includes/feedback-boilerplate.md)]

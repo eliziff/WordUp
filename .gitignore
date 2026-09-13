@@ -33,3 +33,10 @@ Wordwright-*-ALR-*
 /reports/
 
 /reference/
+/tools/office-bridge/packages/
+/tools/oletools/.venv/
+/vbaparse.test.exe
+/VBALexer.interp
+/VBALexer.tokens
+/VBAParser.interp
+/VBAParser.tokens

@@ -127,7 +127,9 @@ func (d dispatch) ids(names []string) ([]int32, error) {
 	}
 	runtime.KeepAlive(pointers)
 	if failed(hr) {
-		return nil, Fail("unknown_member", fmt.Sprintf("%s: HRESULT 0x%08X", names[0], uint32(hr)), nil)
+		fault := automationFailure(names[0], "COM member lookup failed", "", "", hr, exceptInfo{}, 0)
+		fault.Details.(map[string]any)["operation"] = "GetIDsOfNames"
+		return nil, fault
 	}
 	return ids, nil
 }
@@ -145,6 +147,8 @@ func makeVariant(value any, objects map[string]dispatch) (variant, error) {
 		return variant{VT: 8, Value: uint64(b)}, e
 	case int:
 		return makeVariant(float64(v), objects)
+	case *int32:
+		return variant{VT: 0x4003, Value: uint64(uintptr(unsafe.Pointer(v)))}, nil
 	case int64:
 		return variant{VT: 20, Value: uint64(v)}, nil
 	case float64:
@@ -226,6 +230,7 @@ func (d dispatch) invoke(member string, flags uint16, pos []any, named map[strin
 // IAccessible has standardized DISPIDs: callers can bypass repeated remote
 // GetIDsOfNames without caching identities from mutable Word objects.
 func (d dispatch) invokeIDs(member string, flags uint16, pos []any, named map[string]any, objects map[string]dispatch, keys []string, ids []int32) (variant, error) {
+	defer runtime.KeepAlive(pos) // Retain internal ByRef argument storage through Invoke.
 	args := make([]variant, 0, len(pos)+len(named))
 	namedIDs := []int32{}
 	cleanup := func() {
@@ -284,20 +289,43 @@ func (d dispatch) invokeIDs(member string, flags uint16, pos []any, named map[st
 	}
 	source, sourceErr := bstrText(ex.Source)
 	message, messageErr := bstrText(ex.Description)
+	helpFile, helpErr := bstrText(ex.HelpFile)
 	for _, p := range []uintptr{ex.Source, ex.Description, ex.HelpFile} {
 		if p != 0 {
 			sysFree.Call(p)
 		}
 	}
-	if sourceErr != nil || messageErr != nil {
+	if sourceErr != nil || messageErr != nil || helpErr != nil {
 		result.clear()
 		return variant{}, fmt.Errorf("COM exception text exceeded response budget (HRESULT 0x%08X)", uint32(hr))
 	}
 	if failed(hr) {
 		result.clear()
-		return variant{}, Fail("word_automation_error", fmt.Sprintf("%s: %s (HRESULT 0x%08X)", member, message, uint32(hr)), map[string]any{"member": member, "hresult": fmt.Sprintf("0x%08X", uint32(hr)), "source": source, "word_error": ex.Scode, "argument_index_reversed": argError})
+		return variant{}, automationFailure(member, message, source, helpFile, hr, ex, argError)
 	}
 	return result, nil
+}
+
+func automationFailure(member, message, source, helpFile string, hr uintptr, ex exceptInfo, argError uint32) *Fault {
+	details := map[string]any{"member": member, "hresult": fmt.Sprintf("0x%08X", uint32(hr)), "source": source, "word_error": ex.Scode, "exception_code": ex.Code}
+	if uint32(hr) == 0x80020005 || uint32(hr) == 0x80020004 {
+		details["argument_index_reversed"] = argError
+	}
+	if helpFile != "" {
+		details["help_file"] = helpFile
+	}
+	if ex.HelpContext != 0 {
+		details["help_context"] = ex.HelpContext
+	}
+	code := "word_automation_error"
+	switch uint32(hr) {
+	case 0x80020006, 0x80020003: // DISP_E_UNKNOWNNAME, DISP_E_MEMBERNOTFOUND
+		code = "unknown_member"
+	case 0x80010001, 0x8001010A: // RPC_E_CALL_REJECTED, RPC_E_SERVERCALL_RETRYLATER
+		code = "word_busy"
+		details["hint"] = "Word rejected the COM call. Inspect owned dialogs and VBA execution state before retrying; the member may exist."
+	}
+	return &Fault{Code: code, Message: fmt.Sprintf("%s: %s (HRESULT 0x%08X)", member, message, uint32(hr)), Details: details}
 }
 func (d dispatch) get(name string, args ...any) (variant, error) {
 	return d.invoke(name, 2, args, nil, nil)
@@ -451,4 +479,22 @@ func (v *variant) arrayValue(depth int) (any, error) {
 		}
 	}
 	return map[string]any{"array": out, "bounds": shape, "element_vartype": base, "order": "first-dimension-fastest"}, nil
+}
+
+func marshalDispatch(d dispatch) (uintptr, error) {
+	var stream uintptr
+	hr, _, _ := ole32.NewProc("CoMarshalInterThreadInterfaceInStream").Call(uintptr(unsafe.Pointer(&iidDispatch)), d.ptr, uintptr(unsafe.Pointer(&stream)))
+	if failed(hr) {
+		return 0, Fail("com_marshal_failed", fmt.Sprintf("CoMarshalInterThreadInterfaceInStream HRESULT 0x%08X", uint32(hr)), nil)
+	}
+	return stream, nil
+}
+
+func unmarshalDispatch(stream uintptr) (dispatch, error) {
+	var ptr uintptr
+	hr, _, _ := ole32.NewProc("CoGetInterfaceAndReleaseStream").Call(stream, uintptr(unsafe.Pointer(&iidDispatch)), uintptr(unsafe.Pointer(&ptr)))
+	if failed(hr) {
+		return dispatch{}, Fail("com_unmarshal_failed", fmt.Sprintf("CoGetInterfaceAndReleaseStream HRESULT 0x%08X", uint32(hr)), nil)
+	}
+	return dispatch{ptr}, nil
 }

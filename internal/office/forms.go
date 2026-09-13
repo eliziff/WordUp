@@ -2,6 +2,7 @@ package office
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"math"
 	"regexp"
@@ -427,6 +428,16 @@ func applyRecord(r *formRecord, p map[string]any, size string) error {
 				return e
 			}
 			continue
+		case "TextAlign":
+			if e := r.applyFont(map[string]any{"TextAlign": v}); e != nil {
+				return e
+			}
+			continue
+		case "PictureBase64":
+			if e := r.applyPicture(v); e != nil {
+				return e
+			}
+			continue
 		case "Enabled", "Locked", "MultiLine", "WordWrap", "AutoSize", "TabKeyBehavior", "EnterKeyBehavior":
 			bits := map[string]uint{"Enabled": 1, "Locked": 2, "MultiLine": 31, "WordWrap": 23, "AutoSize": 28, "TabKeyBehavior": 22, "EnterKeyBehavior": 20}
 			flag, ok := v.(bool)
@@ -497,6 +508,17 @@ func (r *formRecord) applyFont(m map[string]any) error {
 		switch k {
 		case "Name":
 			e = f.set("FontName", v)
+		case "TextAlign":
+			// MSForms uses left/center/right = 1/2/3; MS-OFORMS
+			// ParagraphAlign stores PFA_LEFT/RIGHT/CENTER = 1/2/3.
+			var n float64
+			n, e = floatValue(m, k, 1)
+			if e == nil {
+				if n != 1 && n != 2 && n != 3 {
+					return fmt.Errorf("TextAlign must be 1 (left), 2 (center), or 3 (right)")
+				}
+				e = f.set("ParagraphAlign", map[int]int{1: 1, 2: 3, 3: 2}[int(n)])
+			}
 		case "Size":
 			var n float64
 			n, e = floatValue(m, k, 8.25)
@@ -532,6 +554,11 @@ func (r *formRecord) applyFont(m map[string]any) error {
 	return nil
 }
 func (f *Form) Apply(d Design) error {
+	if d.Mode != "replace" {
+		original := f.Design()
+		d.Properties = changedFormProperties(d.Properties, original.Properties)
+		d.Controls = changedFormControls(d.Controls, original.Controls)
+	}
 	work := *f
 	work.root = cloneLevel(f.root)
 	if e := work.apply(d); e != nil {
@@ -542,6 +569,38 @@ func (f *Form) Apply(d Design) error {
 	}
 	*f = work
 	return nil
+}
+
+// Imported designs include observed properties that must not be rewritten when
+// unchanged. Compare their JSON values so decoded numbers and native integers agree.
+func changedFormProperties(wanted, original map[string]any) map[string]any {
+	out := map[string]any{}
+	for key, value := range wanted {
+		before, exists := original[key]
+		a, ea := json.Marshal(value)
+		b, eb := json.Marshal(before)
+		if exists && ea == nil && eb == nil && string(a) == string(b) {
+			continue
+		}
+		out[key] = value
+	}
+	return out
+}
+
+func changedFormControls(wanted, original []ControlDesign) []ControlDesign {
+	byName := map[string]ControlDesign{}
+	for _, c := range original {
+		byName[strings.ToLower(c.Name)] = c
+	}
+	out := append([]ControlDesign(nil), wanted...)
+	for i, c := range out {
+		if before, ok := byName[strings.ToLower(c.Name)]; ok {
+			out[i].Properties = changedFormProperties(c.Properties, before.Properties)
+			out[i].Controls = changedFormControls(c.Controls, before.Controls)
+			out[i].Pages = changedFormControls(c.Pages, before.Pages)
+		}
+	}
+	return out
 }
 func (f *Form) apply(d Design) error {
 	if d.Name != f.Name {
@@ -698,8 +757,27 @@ func (f *Form) applyControls(l *formLevel, designs []ControlDesign, remove []str
 		}
 		for _, k := range []string{"TabIndex", "Tag", "ControlTipText", "ControlSource", "RowSource"} {
 			if x, ok := p[k]; ok {
+				oldIndex := ctl.site.values["TabIndex"]
 				if e = ctl.site.set(k, x); e != nil {
 					return e
+				}
+				if k == "TabIndex" {
+					index := ctl.site.values[k]
+					if index < 0 || index >= int64(len(l.controls)) {
+						return fmt.Errorf("%s: TabIndex must be within its container", d.Name)
+					}
+					for _, sibling := range l.controls {
+						if sibling == ctl {
+							continue
+						}
+						at := sibling.site.values[k]
+						if index < oldIndex && at >= index && at < oldIndex {
+							_ = sibling.site.set(k, at+1)
+						}
+						if index > oldIndex && at > oldIndex && at <= index {
+							_ = sibling.site.set(k, at-1)
+						}
+					}
 				}
 			}
 		}

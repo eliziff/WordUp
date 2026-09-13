@@ -1,0 +1,479 @@
+# Access VBA p-code reverse-engineering
+
+> **Historical document.** This file predates the read-only pivot. It
+> still references write-path APIs (`AccessFile.replace_text`,
+> `AccessFile.save`, etc.) that no longer exist; the production class
+> is now `pyopenvba.access_read.AccessReader` and is read-only. The
+> reverse-engineering notes below remain useful for understanding the
+> on-disk format. See `docs/msaccess_lessons_learned.md` for why the
+> write path was removed.
+
+This document accretes findings from the multi-session effort to fully
+understand the `.accdb` VBA storage format so that pyOpenVBA can perform
+structural writes (add/rename/remove modules, change source) on Access
+databases without invoking Office COM.
+
+## Goal
+
+Pure-Python, dependency-free, bidirectional read/write parity for VBA
+inside `.accdb` files, matching what `pyopenvba.excel`, `pyopenvba.word`
+and `pyopenvba.powerpoint` already deliver for OOXML containers.
+
+## What is already shipped (read + same-length plaintext write)
+
+* `AccessFile` reads OVBA-compressed module source via the LVAL-page
+  chain walker (`_lval_segments`, `_read_lval_chain`,
+  `_find_ovba_signature_offsets`). Parity with the COM oracle is
+  verified on the canonical fixture.
+* `AccessFile.replace_text` performs same-length, in-place plaintext
+  patches against the authoritative `E3 00 00 00 <u16 len> <ascii>`
+  comment-row table and `B9 00 <u16 len> <ascii> <12B trailer>`
+  literal-row table. Verified end-to-end against the live VBA editor.
+* `AccessFile.save` writes the in-memory mutated bytes back to disk.
+
+## What is NOT yet supported (the open problem)
+
+Structural changes:
+
+* add module
+* remove module
+* rename module
+* arbitrary-length source change (length-mismatched source replacement)
+
+Each of those requires Access's symbol/name table, p-code table, OVBA
+catalog and (for length changes) the per-page B-tree of the LVAL store
+to be rewritten consistently. None of those tables are documented.
+
+We confirmed earlier in the project that the per-module OVBA blob is a
+**passive cache** -- Access reads its compiled p-code from a separate,
+authoritative byte region. Force-recompile attempts (zero OVBA + zero
+per-module compile-cache 4-tuple) did NOT cause Access to recompile
+from OVBA. The p-code tables are therefore the real target.
+
+## Storage layout (current understanding)
+
+Each `.accdb` that contains a VBA project stores the full project state
+in a single long-value (LVAL) record. The record's payload is structured
+as a concatenation of:
+
+1. **Plaintext PROJECT file** -- the same line-based format Excel/Word/
+   PowerPoint ship in their CFB `PROJECT` stream:
+   ```
+   ID="{<guid>}"
+   Module=<head module name>
+   Name="<project name>"
+   HelpContextID="0"
+   VersionCompatible32="393222000"
+   CMG="..."
+   DPB="..."
+   GC="..."
+
+   [Host Extender Info]
+   &H00000001={3832D640-CF90-11CF-8E43-00A0C911005A};VBE;&H00000000
+
+   [Workspace]
+   <ModuleName>=38, 38, 4512, 1443, Z
+   ```
+2. **Binary catalog / symbol-table region.** Undocumented. This is the
+   primary target of the RE corpus diff work.
+3. **One MS-OVBA-compressed stream per module**, beginning with the
+   canonical
+   `Attribute VB_Name = "<name>"\r\nOption Compare Database\r\n<body>`.
+4. **Plaintext source-row tables** -- `B9 00 <u16 len> <ascii> <12B
+   trailer>` for string literals, `E3 00 00 00 <u16 len> <ascii>` for
+   comments. These are the bytes `AccessFile.replace_text` already
+   mutates.
+
+The LVAL record is stored across one or more LVAL pages (page type
+`0x01`, tag `LVAL` at +4). Each LVAL page may hold chunks of multiple
+distinct long-value records, indexed by a per-row slot table that
+begins at page offset 14. The continuation pointer for a given chunk
+is a `(page, slot)` tuple stored at the tail of the row, NOT a single
+page-level next-pointer in the page header. **This row format is not
+yet decoded** -- it is the first blocker for any multi-page chain
+reassembly.
+
+## Phased plan
+
+### Phase 1 -- corpus + tooling (DONE this session)
+
+* `tests/live_access_test/_corpus_generate.ps1` -- COM-driven corpus
+  generator. Produces `baseline_empty.accdb`, `baseline_empty_proj.accdb`
+  and 25 minimal samples (IDs 010..051) covering: empty StdModule with
+  varying names, empty ClassModule, single empty Sub, single statements
+  (MsgBox/Dim/Let/comment), basic If/For. Output lives in
+  `tests/live_access_test/re_corpus/` (gitignored).
+* `scripts/_diff_accdb.py` -- page-aware byte diff with page-type
+  tagging.
+* `scripts/access_re_chain.py` -- locates the project-VBA LVAL head
+  page by the `ID="{` plaintext fingerprint, extracts the head-page
+  payload slice, splits it into known section types and dumps it.
+
+### Phase 2 -- LVAL row format (DONE 2026-05)
+
+Reverse-engineered the per-row layout so the multi-page chain can be
+walked deterministically and module discovery works on arbitrary
+.accdb files (verified on all 25 corpus samples + canonical fixture).
+
+LVAL page layout (4 KiB pages):
+
+* `[0]`        `page_type = 0x01`
+* `[4:8]`      `'LVAL'` tag
+* `[12:14]`    u16 LE slot count `N`
+* `[14:14+2N]` u16 LE slot table. Top nibble `0xD` = tombstone; else
+  the low 12 bits are the row's byte offset within the page.
+* Rows grow downward from `PAGE_SIZE`. A row ends at the smallest
+  higher non-tombstone slot offset, or `PAGE_SIZE` for the top row.
+
+Long-value chunk continuation prefix (present only on chained rows):
+
+* `row[0]`   u8 next_slot
+* `row[1:4]` u24 LE next_page
+* `row[4:]`  chunk payload
+* Terminator: `(next_slot, next_page) == (0, 0)`.
+
+A long-value that fits in one chunk is stored standalone -- the row IS
+the payload, with NO continuation prefix. Standalone vs chain-head is
+not encoded in the row itself; the working heuristic is "treat
+`row[1:4]` as a page number; if it's in range AND points to another
+LVAL page, walk it as a chain, otherwise treat as standalone."
+
+Implementation: `pyopenvba.access.AccessFile.iter_vba_modules` walks
+every non-tombstone LVAL row, scans for MS-OVBA stream signatures
+(`0x01` followed by a u16 LE chunk header with sig bits `0b011`),
+and accepts any candidate that decompresses to a stream beginning
+with `Attribute VB_Name = "..."`.
+
+### Phase 3 -- symbol/catalog table (DONE 2026-05)
+
+**Finding: there is no Access-specific symbol-table format. The
+"binary catalog" is just an MS-OVBA `dir` stream (MS-OVBA section
+2.3.4.2) OVBA-compressed in a single LVAL row.**
+
+In every corpus sample examined, exactly one LVAL row OVBA-decompresses
+to bytes starting with the PROJECTSYSKIND record header
+`01 00 04 00 00 00`. That row contains the full standard dir-stream
+TLV record sequence:
+
+* PROJECTSYSKIND / PROJECTLCID / PROJECTLCIDINVOKE / PROJECTCODEPAGE
+* PROJECTNAME (`baseline_empty_proj` in the empty-project corpus)
+* PROJECTVERSION (special-cased: no real size field; 10-byte payload)
+* PROJECTREFERENCES -- `stdole` plus `DAO` (ACEDAO.DLL) are standard
+* PROJECTMODULES blocks: MODULENAME / MODULENAMEUNICODE /
+  MODULESTREAMNAME (a mangled obfuscated identifier; Access does not
+  use it as a real stream name since there is no CFB) /
+  MODULEDOCSTRING / MODULEOFFSET / MODULETYPE
+  (0x0021 = procedural, 0x0022 = class) / MODULEREADONLY /
+  MODULEPRIVATE / module terminator 0x002B
+* Dir-stream terminator 0x0010
+
+The catalog row's slot index is **not** stable across files (010..015
+put it at (68, 1); class-module sample 020 places it at (68, 2)). We
+locate it by content -- decompress every LVAL row and accept the one
+whose decompressed prefix is `01 00 04 00 00 00`.
+
+Production wiring (`AccessFile.read_project_info`) reuses
+`pyopenvba.vba.parse_dir_stream` directly (same parser that drives the
+Excel/Word/PowerPoint paths). `vba_module_names()` now prefers the
+catalog's authoritative ordered list when available, falling back to
+the OVBA-scan path only if the catalog row cannot be located.
+
+Deliverable: DONE. Byte-precise documentation lives in MS-OVBA
+section 2.3.4.2; the parser in `pyopenvba/vba.py:parse_dir_stream`
+handles all currently observed records. Reference-record decoding
+(beyond the standard `registered` kind) and write-back (catalog
+mutation when modules are added/removed/renamed) are still pending and
+fall under Phase 5.
+
+### Phase 4 -- p-code opcode field guide
+
+**Status (May 2026): row location SOLVED; opcode decoding IN PROGRESS.**
+
+The compiled VBA bytecode lives in LVAL rows whose payload starts with
+the 4-byte magic `72 55 40 00` ('rU@\0'). Every Access database with VBA
+enabled carries 2-3 such rows; exactly one of them is the
+**module-active** row that Access executes. The deterministic structural
+discriminator is the 12-byte prefix
+
+    72 55 40 00 00 00 00 00 00 00 40 00
+
+i.e. byte at offset 10 is `0x40` for active and `0x00` for stale /
+bootstrap rows. Verified across the 15-sample corpus.
+
+Production API:
+
+* `AccessFile.read_module_pcode_stream() -> AccessVBAPCodeStream`
+* `AccessFile.iter_pcode_streams() -> tuple[AccessVBAPCodeStream, ...]`
+* `AccessVBAPCodeStream(page, slot, raw)` dataclass
+* `AccessFile.find_interned_strings() -> tuple[AccessVBAInternedString, ...]`
+  -- deterministic content-based scan of the project intern table
+* `AccessVBAInternedString(page, slot, offset, value)` dataclass
+
+Slot location is NOT stable -- 030 stores the active row at (68, 0);
+040..051 store it at (68, 1). Locate by content only.
+
+Established structural facts (locked in by
+`tests/test_access.py::test_pcode_*`):
+
+* Active-row 12-byte prefix discriminator (one match per database).
+* Corpus baseline row lengths (drift detection).
+* Same length for `Sub A() / End Sub`, `Dim x As Integer`,
+  `Dim x As Long`, `' a comment` (all 269 bytes) -- a fixed-size
+  skeleton with slotted declarations.
+* `Dim x As Integer` vs `Dim x As Long` differ at exactly offset
+  `0x8C` (1 byte: the per-type token: Integer=`0x6E`, Long=`0x53`).
+* Byte at offset `0x98` = local-vars table size in bytes (0x00 with
+  no `Dim`, 0x08 with a single declared scalar local of any type).
+* Comments are NOT in p-code: sample 030 (empty Sub) is byte-for-byte
+  identical to sample 049 (`' a comment` body). Comment text lives in
+  the separate plaintext `E3 00 00 00 <len> <ascii>` rows.
+* **Procedure names are NOT in p-code.** `Sub A()`, `Sub B()`, and
+  `Sub AB()` (different letters AND different name lengths) all
+  produce *byte-for-byte identical* 269-byte p-code streams.
+  Procedure names live in the project catalog / dir-stream and are
+  referenced from bytecode purely by slot id.
+* **Module names are NOT in p-code.** All empty standard modules
+  (`M`, `AB`, `ABC`, `Mod1`, `Module1`, `ThisIsALongModuleName`)
+  produce identical 126-byte p-code streams.
+
+This triad -- comments, procedure names, module names, plus the
+separately-interned string literals -- means the compiled p-code is
+**fully anonymised**: it contains opcodes and slot references but no
+user-authored text. All identifiers live in the catalog / symbol
+tables and can be patched independently of the bytecode.
+
+Decoded opcodes (deterministic; all asserted by regression tests):
+
+| Mnemonic           | Bytes              | Operand                    | Source evidence            |
+| ------------------ | ------------------ | -------------------------- | -------------------------- |
+| ProcOpen / ProcEnd | `67 02`            | -                          | brackets every Sub body    |
+| ProcTrailer        | `7B 02 <u32 LE>`   | proc cookie (length-rel.)  | exactly 1 per active row   |
+| Push i16 imm       | `ED 05 <i16 LE>`   | integer literal LE         | sample 048 `x = 42`        |
+| Push i16 (True)    | `ED 05 FF FF`      | -1 (canonical True)        | sample 050 `If True Then`  |
+| Push small imm     | `77 06`            | embedded                   | sample 047 `x = 7`         |
+| Store local        | `B1 02 <i32 LE>`   | FBP offset (1st local=-8)  | samples 047, 048           |
+| Load local         | `9F 02 <i32 LE>`   | FBP offset                 | sample 051 (`i` in For)    |
+| For-Init           | `71 06`            | -                          | sample 051                 |
+| For-Step / Next    | `73 06`            | -                          | sample 051                 |
+| BranchIfFalse      | `C7 02 <u32 LE>`   | forward jump target        | sample 050 `If True Then`  |
+| LoadAddress local  | `F1 01 <i32 LE>`   | FBP-relative slot addr     | sample 040 (MsgBox arg)    |
+| Call-block open    | `67 02 4C 00 00 00`| -                          | sample 040 (MsgBox call)   |
+| Call dispatch      | `<u16 stmt#> 49 06 <i32 LE>`| 1-based stmt index + FBP-rel target | samples 040, 043 |
+| ProcEnd close      | `67 02 00 00 00 00`| -                          | every Sub body             |
+
+Pending: full opcode table covering Sub/End Sub, Dim of complex
+types, If/Then, For/Next, function call dispatch, variable references,
+local-vars table layout, and the relationship between the active row,
+the 156-byte stub row, and the ~114-byte project bootstrap row.
+
+### Phase 4b -- string-literal intern table (decoded)
+
+VBA string literals are **not** stored inline in the p-code. They live
+in a separate per-project intern table, in one of the database's LVAL
+rows alongside the reference / module-metadata blob.
+
+Record format (locked by regression tests on corpus samples 040, 041,
+042, 043):
+
+```
+0B               -- literal tag (1 byte)
+<u32 LE>         -- byte-count of the UTF-16-LE payload
+<UTF-16-LE>      -- the string value, no NUL terminator
+```
+
+Examples observed on disk:
+
+* `"hello"` -> `0B 0A 00 00 00 68 00 65 00 6C 00 6C 00 6F 00`
+* `"world"` -> `0B 0A 00 00 00 77 00 6F 00 72 00 6C 00 64 00`
+* 55-char literal -> `0B 6E 00 00 00 <110 bytes UTF-16-LE>`
+
+Comments are *not* in this table (sample 049's `' a comment` exists
+only as plain ASCII in a separate `E3 00`-tagged source-text row).
+
+Production API: `AccessFile.find_interned_strings()` performs a
+deterministic content-based scan -- it locates literal records by
+their structural `0B <u32> <UTF-16-LE>` shape, with no hard-coded
+row coordinates.
+
+### Phase 4c -- ProcTrailer block layout (decoded)
+
+Every Sub body ends with a fixed-shape trailer block immediately
+following the `67 02 00 00 00 00` ProcEnd. The structure is:
+
+```
+7B 02 <u32 LE cookie>            -- ProcTrailer; cookie reproducible
+                                    for identical bytecode, content-
+                                    dependent (full algorithm pending).
+00 00 00 00 00 00                -- six zero bytes
+08 00                            -- fixed sentinel
+<u16 LE frame_size>              -- = max FBP-relative local offset
+<u16 LE body_size>               -- bytes from ProcOpen to ProcEnd
+```
+
+Frame-size observations:
+
+* empty Sub (no locals) -> `00 00`
+* `Dim x As Integer` (one scalar) -> `08 00`
+* MsgBox 4-slot arg frame -> `C0 00`
+
+Cookie observations (deterministic for identical bytecode):
+
+* Body-identical samples 030 / 044 / 049 -> cookie `0x6E`
+* `MsgBox "hello"` (040) -> cookie `0x30`; `MsgBox "world"` (041) ->
+  cookie `0xA995`. The cookie changes with literal content even
+  though the bytecode between ProcOpen and ProcEnd does NOT (see
+  `test_pcode_call_dispatch_is_literal_independent`). The exact
+  cookie algorithm is the remaining Phase 4 unknown.
+
+### Phase 4d -- standard VBA module stream coexists (decoded)
+
+In every Access database we inspected, the **same** LVAL row that
+carries the OVBA-compressed source ALSO carries -- at an earlier
+in-row offset -- the standard Office VBA module stream's
+``PerformanceCache`` region, identified by the well-known
+``0xCAFE`` magic word.
+
+This region is the **canonical portable VBA7 p-code** as documented
+in [MS-OVBA] section 2.3.4.3 and consumed by public disassemblers
+such as [bontchev/pcodedmp](https://github.com/bontchev/pcodedmp).
+Its layout (decompressed):
+
+```
+<binary metadata, declaration/indirect/object tables>
+...
+0xCAFE                           -- magic
+<u16 numLines>
+<numLines * 12-byte line records>
+<per-line p-code bytes>          -- 264-opcode VBA7 instruction set
+```
+
+Each per-line p-code instruction is a u16 (low 10 bits = opcode,
+upper 6 = opType flags), then 0-3 operand words depending on the
+mnemonic. The full opcode table (264 mnemonics: ``Ld``, ``LitStr``,
+``ArgsCall``, ``FuncDefn``, ``EndSub`` ...) is the VBA7 spec.
+
+**This is NOT the same as the ``rU@``-prefixed bytecode** that
+:meth:`AccessFile.read_module_pcode_stream` returns. The two forms
+coexist in different LVAL rows:
+
+* ``rU@`` row -- Access-specific cached/execodes form. Access uses
+  this at runtime; modifying it breaks execution. Phase 4a-4c above
+  reverse-engineered this form.
+* CAFE-magic row -- standard portable VBA7 p-code. Runs on any
+  Office host that supports VBA7. Production API:
+  :meth:`AccessFile.find_module_streams` returns the raw bytes plus
+  CAFE offset.
+
+Locked by `test_module_stream_contains_cafe_magic` (all 10
+single-Sub corpus samples 040-049) and
+`test_module_stream_is_distinct_from_rU_pcode_stream`.
+
+**Strategic implication**: the standard VBA module stream is a
+well-documented format with a public disassembler. Production work
+can build on top of `find_module_streams()` immediately (full VBA
+disassembly, structural source replacement) without further
+reverse-engineering the ``rU@`` form -- as long as we also keep
+``rU@`` in sync (or force Access to recompile from source on next
+open).
+
+### Phase 4e -- dependency-free VBA7 disassembler (SHIPPED)
+
+`pyopenvba.vba_pcode` ships a **pure-Python, dependency-free**
+disassembler for the canonical CAFE-magic VBA7 p-code. It contains
+the full 264-entry VBA7 opcode table (factual data; clean
+re-implementation -- no GPL'd source code reused from `pcodedmp` or
+any other project) plus a streaming line/instruction parser.
+
+Encoding note: every Access database produced by the modern Office
+toolchain uses **VBA7 64-bit encoding** -- raw opcode index ==
+canonical table index, with no remap. This is the disassembler's
+default (`is_64bit=True`). Pass `is_64bit=False` for VBA6 or 32-bit
+VBA7 hosts; the +1/+2/+3 remap above raw opcode 173 will be applied.
+
+The disassembler walks:
+
+```
+CAFE word -> 2 reserved -> u16 numLines ->
+numLines * 12-byte line records
+    (4 skip, u16 line_length, 2 skip, u32 line_offset) ->
+10 reserved -> p-code region
+```
+
+Records with `line_offset == 0xFFFFFFFF` are source-only lines
+(`Attribute VB_Name = ...`, `Option Compare Database`, blank lines)
+with no compiled bytecode -- the disassembler emits an empty
+`PCodeLine` for these so output indices line up with source order.
+
+Production API:
+
+* `AccessFile.disassemble_module(name, *, is_64bit=True) -> DisassembledModule`
+  -- end-to-end disassembly of a named module.
+* `pyopenvba.vba_pcode.disassemble_module_stream(raw_bytes, *, is_64bit=True)`
+  -- low-level entry point if you already have the carrier-row bytes.
+* `DisassembledModule(cafe_offset, num_lines, lines)`,
+  `PCodeLine(line_no, start_offset, byte_length, instructions)`,
+  `PCodeInstruction(offset, raw_word, opcode, op_type, mnemonic,
+   operands, payload)`.
+
+Verified mnemonic recovery on the RE corpus:
+
+| Sample | Source                       | Decoded p-code                                                                      |
+|--------|------------------------------|-------------------------------------------------------------------------------------|
+| 030    | `Sub A() : End Sub`          | `FuncDefn func_0x0 ; EndSub`                                                        |
+| 040    | `Sub A() : MsgBox "hello"`   | `FuncDefn func_0x0 ; LitStr "hello" ; ArgsCall (op_type=0x10, argc=1) ; EndSub`     |
+| 044    | `Sub A() : Dim x As Integer` | `FuncDefn func_0x0 ; Dim ; VarDefn var_0x58 ; EndSub`                               |
+
+Locked by `test_disassemble_empty_sub_yields_funcdefn_and_endsub`,
+`test_disassemble_msgbox_recovers_litstr_and_argscall`,
+`test_disassemble_dim_recovers_dim_and_vardefn`, and
+`test_disassemble_module_raises_for_unknown_name`.
+
+**Not yet resolved (v1 scope)**: identifier-table resolution. The
+opaque `name_id` / `var_id` / `func_id` operands carry a u16 / u32
+slot id into the project's identifier table, which in Access lives
+in a separate LVAL row not yet located by content scan. Without it,
+disassembly emits placeholders like `name_0x22c` instead of the
+human name (`MsgBox`). Mnemonic-level disassembly is fully usable
+without it.
+
+Tooling: `scripts/access_re_disasm_smoke.py` -- corpus-wide
+sanity-check of the disassembler output.
+
+Tooling: `scripts/access_re_dump_68_1.py`,
+`scripts/access_re_compare_pcode_headers.py`,
+`scripts/access_re_list_pcode_rows.py`,
+`scripts/access_re_pcode_diff.py` (pairwise side-by-side diff).
+
+### Phase 5 -- structural write primitives
+
+Implement and test, in dependency order:
+
+1. `set_module_source(name, src)` for length-matched source (already
+   works via `replace_text`; promote to a public API once Phase 4 lets
+   us regenerate the matching p-code).
+2. `set_module_source(name, src)` for length-mismatched source --
+   requires Phase 2 (B-tree rebalance) + Phase 4 (p-code regeneration).
+3. `add_module(name, kind, src)` -- catalog insert + new p-code emit.
+4. `rename_module(old, new)` -- catalog patch only.
+5. `remove_module(name)` -- catalog delete + LVAL free.
+
+Each capability ships with COM-oracle regression tests in
+`tests/test_access.py` and a freshly baked fixture.
+
+## Reference assets
+
+* Canonical fixture: `tests/live_access_test/New Microsoft Access Database.accdb`.
+* RE corpus baselines & samples: `tests/live_access_test/re_corpus/`
+  (regenerable via `_corpus_generate.ps1`).
+* COM oracle: `tests/live_access_test/_oracle.ps1`.
+* COM mutator (for ground-truth before/after pairs):
+  `tests/live_access_test/_com_mutate.ps1`.
+* Chain locator: `scripts/access_re_chain.py`.
+* Page-aware byte diff: `scripts/_diff_accdb.py`.
+
+## Repo-memory notes
+
+Working notes that should NOT be repeated in this doc live in
+`/memories/repo/access-vba-storage.md` (general format) and will live
+in `/memories/repo/access-vba-pcode-re.md` (per-opcode findings) once
+Phase 4 starts.

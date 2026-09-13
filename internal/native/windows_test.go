@@ -7,9 +7,42 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"syscall"
 	"testing"
 	"unsafe"
 )
+
+func TestCloseRetainsCleanupFailure(t *testing.T) {
+	directory := t.TempDir()
+	path := filepath.Join(directory, "locked.dotm")
+	if err := os.WriteFile(path, []byte("lock test"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	name, err := syscall.UTF16PtrFromString(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	handle, err := syscall.CreateFile(name, syscall.GENERIC_READ, syscall.FILE_SHARE_READ, nil, syscall.OPEN_EXISTING, 0, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer syscall.CloseHandle(handle)
+	h := &localHost{closed: make(chan struct{})}
+	h.cfg.Directory = directory
+	first := h.Close()
+	if first == nil {
+		t.Fatal("locked workspace cleanup was reported successful")
+	}
+	if f, ok := first.(*Fault); !ok || f.Code != "workspace_cleanup_failed" || f.Details.(map[string]any)["directory"] != directory {
+		t.Fatal("cleanup failure omitted classification or retained path", first)
+	}
+	if second := h.Close(); second == nil || second.Error() != first.Error() {
+		t.Fatalf("repeated Close lost its failure: first=%v second=%v", first, second)
+	}
+	if _, err := os.Stat(path); err != nil {
+		t.Fatal("locked evidence was not retained", err)
+	}
+}
 
 func TestScreenshotPixelChannels(t *testing.T) {
 	s, e := newSurface(2, 1)

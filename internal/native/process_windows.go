@@ -8,6 +8,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -53,6 +54,10 @@ type jobLimits struct {
 	Priority, Scheduling uint32
 }
 type ioCounters struct{ ReadOps, WriteOps, OtherOps, ReadBytes, WriteBytes, OtherBytes uint64 }
+type jobAccounting struct {
+	User, Kernel, PeriodUser, PeriodKernel int64
+	Faults, Total, Active, Terminated      uint32
+}
 type extendedLimits struct {
 	Basic                                          jobLimits
 	IO                                             ioCounters
@@ -87,10 +92,12 @@ type localHost struct {
 	sequence     atomic.Uint64
 	closed       chan struct{}
 	once         sync.Once
+	closeErr     error
 	info         map[string]any
 	logMu        sync.Mutex
 	logTail      []byte
 	termination  *Fault
+	wordExit     *Fault
 }
 
 type taskCompletion struct {
@@ -186,7 +193,7 @@ func spawnOnDesktop(exe string, args []string, desktop string, stdin, stdout, st
 	var pi syscall.ProcessInformation
 	// A process is put in the job before its first instruction, eliminating the
 	// launch/timeout race that can leave a stray Word process behind.
-	r, _, e = createProcess.Call(uintptr(unsafe.Pointer(ep)), uintptr(unsafe.Pointer(command)), 0, 0, 1, 0x00080000|0x00000004|0x08000000, 0, 0, uintptr(unsafe.Pointer(&si)), uintptr(unsafe.Pointer(&pi)))
+	r, _, e = createProcess.Call(uintptr(unsafe.Pointer(ep)), uintptr(unsafe.Pointer(command)), 0, 0, 1, 0x00080000|0x00000004|0x08000000|0x4000, 0, 0, uintptr(unsafe.Pointer(&si)), uintptr(unsafe.Pointer(&pi)))
 	runtime.KeepAlive(storage)
 	runtime.KeepAlive(handles)
 	runtime.KeepAlive(command)
@@ -216,6 +223,7 @@ func spawnOnDesktop(exe string, args []string, desktop string, stdin, stdout, st
 }
 func Available() bool { _, e := findWord(); return e == nil }
 func Start(ctx context.Context, opt Options) (Host, error) {
+	started := time.Now()
 	if opt.MemoryLimitMB == 0 {
 		opt.MemoryLimitMB = 2048
 	}
@@ -248,12 +256,16 @@ func Start(ctx context.Context, opt Options) (Host, error) {
 			h.Close()
 		}
 	}()
-	dn, _ := utf(h.cfg.Desktop)
-	hd, _, er := createDesktop.Call(uintptr(unsafe.Pointer(dn)), 0, 0, 0, 0x000F01FF, 0)
-	if hd == 0 {
-		return nil, winError("CreateDesktopW", er)
+	if opt.Visible {
+		h.cfg.Desktop = "Default"
+	} else {
+		dn, _ := utf(h.cfg.Desktop)
+		hd, _, er := createDesktop.Call(uintptr(unsafe.Pointer(dn)), 0, 0, 0, 0x000F01FF, 0)
+		if hd == 0 {
+			return nil, winError("CreateDesktopW", er)
+		}
+		h.desktop = hd
 	}
-	h.desktop = hd
 	j, _, er := createJob.Call(0, 0)
 	if j == 0 {
 		return nil, winError("CreateJobObjectW", er)
@@ -309,10 +321,12 @@ func Start(ctx context.Context, opt Options) (Host, error) {
 	if e != nil {
 		return nil, e
 	}
+	spawnStarted := time.Now()
 	h.process, e = spawnOnDesktop(exe, []string{"__host", configPath}, "WinSta0\\"+h.cfg.Desktop, inRead, outWrite, logWrite, h.job)
 	if e != nil {
 		return nil, e
 	}
+	spawnFinished := time.Now()
 	// The parent must release its copies of the child's pipe ends immediately.
 	// Keeping them until the handshake returns hides worker EOF on startup failure.
 	inRead.Close()
@@ -347,7 +361,18 @@ func Start(ctx context.Context, opt Options) (Host, error) {
 		return nil, fmt.Errorf("worker returned invalid handshake")
 	}
 	h.info = m
+	h.info["worker_pid"] = h.process.PID
+	h.info["startup_timing_ms"] = map[string]float64{"total": float64(time.Since(started).Microseconds()) / 1000, "prepare": float64(spawnStarted.Sub(started).Microseconds()) / 1000, "spawn_host": float64(spawnFinished.Sub(spawnStarted).Microseconds()) / 1000, "handshake": float64(time.Since(spawnFinished).Microseconds()) / 1000}
 	h.info["limits"] = map[string]any{"memory_limit_mb": opt.MemoryLimitMB, "cpu_percent": opt.CPUPercent, "active_process_limit": 16, "default_operation_timeout_ms": 30000, "priority": "below_normal", "scope": "owned job including child processes"}
+	h.info["word_alive"] = true
+	h.info["word_exit_monitor"] = false
+	if wordPID, ok := m["pid"].(float64); ok {
+		process, _, _ := kernel.NewProc("OpenProcess").Call(0x101000, 0, uintptr(uint32(wordPID)))
+		if process != 0 {
+			h.info["word_exit_monitor"] = true
+			go h.observeWordExit(process, uint32(wordPID))
+		}
+	}
 	ok = true
 	return h, nil
 }
@@ -384,7 +409,15 @@ func (h *localHost) readResponses() {
 	h.logMu.Lock()
 	tail := string(h.logTail)
 	h.logMu.Unlock()
-	err := Fail("worker_exited", e.Error(), map[string]any{"worker_log_tail": tail})
+	details := map[string]any{"worker_pid": h.process.PID, "worker_log_tail": tail}
+	var exitCode uint32
+	if syscall.GetExitCodeProcess(h.process.Process, &exitCode) == nil {
+		details["worker_running"] = exitCode == 259 // STILL_ACTIVE
+		if exitCode != 259 {
+			details["worker_exit_code"] = exitCode
+		}
+	}
+	err := Fail("worker_exited", e.Error(), details)
 	h.mu.Lock()
 	if h.termination == nil {
 		select {
@@ -405,7 +438,40 @@ func (h *localHost) breakPending(e error) {
 		delete(h.pending, id)
 	}
 }
+
+func (h *localHost) observeWordExit(process uintptr, pid uint32) {
+	defer closeHandle.Call(process)
+	waitSingle.Call(process, 0xffffffff)
+	var code uint32
+	kernel.NewProc("GetExitCodeProcess").Call(process, uintptr(unsafe.Pointer(&code)))
+	h.mu.Lock()
+	h.info["word_alive"] = false
+	h.info["word_exit_code"] = code
+	select {
+	case <-h.closed:
+		h.mu.Unlock()
+		return
+	default:
+	}
+	f := fault(Fail("word_process_exited", fmt.Sprintf("Owned Word process %d exited with code 0x%08X", pid, code), map[string]any{"pid": pid, "exit_code": code}))
+	h.wordExit = f
+	for _, task := range h.tasks {
+		if !task.completed {
+			task.err = f
+			task.completed = true
+			close(task.done)
+		}
+	}
+	h.mu.Unlock()
+	h.breakPending(f)
+}
 func (h *localHost) Call(ctx context.Context, op Operation) (any, error) {
+	h.mu.Lock()
+	wordExit := h.wordExit
+	h.mu.Unlock()
+	if wordExit != nil && !strings.HasPrefix(op.Op, "ui.") {
+		return nil, wordExit
+	}
 	select {
 	case <-h.closed:
 		h.mu.Lock()
@@ -416,6 +482,9 @@ func (h *localHost) Call(ctx context.Context, op Operation) (any, error) {
 		}
 		return nil, Fail("session_closed", "native session has been closed", nil)
 	default:
+	}
+	if op.Op == "process.dump" {
+		return h.dumpProcess(op)
 	}
 	if op.TimeoutMS < 0 || op.TimeoutMS > 1800000 {
 		return nil, fmt.Errorf("operation timeout_ms must be 0..1800000")
@@ -567,10 +636,7 @@ func (h *localHost) Info() map[string]any {
 		if ok, _, _ := query.Call(h.job, 9, uintptr(unsafe.Pointer(&limits)), unsafe.Sizeof(limits), 0); ok != 0 {
 			r["job_peak_memory_bytes"] = uint64(limits.PeakJob)
 		}
-		var accounting struct {
-			User, Kernel, PeriodUser, PeriodKernel int64
-			Faults, Total, Active, Terminated      uint32
-		}
+		var accounting jobAccounting
 		if ok, _, _ := query.Call(h.job, 1, uintptr(unsafe.Pointer(&accounting)), unsafe.Sizeof(accounting), 0); ok != 0 {
 			r["job_cpu_ms"] = float64(accounting.User+accounting.Kernel) / 10000
 			r["job_active_processes"] = accounting.Active
@@ -581,6 +647,7 @@ func (h *localHost) Info() map[string]any {
 func (h *localHost) Close() error {
 	var cleanupError error
 	h.once.Do(func() {
+		defer func() { h.closeErr = cleanupError }()
 		close(h.closed)
 		if h.input != nil {
 			h.input.Close()
@@ -591,6 +658,26 @@ func (h *localHost) Close() error {
 		if h.job != 0 {
 			h.mu.Lock()
 			terminateJob.Call(h.job, 0)
+			// Job termination is asynchronous. The worker exiting does not prove
+			// Word has released the template files it opened.
+			query := kernel.NewProc("QueryInformationJobObject")
+			deadline := time.Now().Add(5 * time.Second)
+			for {
+				var accounting jobAccounting
+				ok, _, err := query.Call(h.job, 1, uintptr(unsafe.Pointer(&accounting)), unsafe.Sizeof(accounting), 0)
+				if ok == 0 {
+					cleanupError = fmt.Errorf("query owned job during cleanup: %w", err)
+					break
+				}
+				if accounting.Active == 0 {
+					break
+				}
+				if time.Now().After(deadline) {
+					cleanupError = Fail("owned_job_exit_timeout", "Owned processes did not exit before workspace cleanup", map[string]any{"active_processes": accounting.Active, "directory": h.cfg.Directory})
+					break
+				}
+				time.Sleep(10 * time.Millisecond)
+			}
 			closeHandle.Call(h.job)
 			h.job = 0
 			h.mu.Unlock()
@@ -609,11 +696,21 @@ func (h *localHost) Close() error {
 			closeDesktop.Call(h.desktop)
 		}
 		h.breakPending(Fail("session_closed", "native session closed", nil))
-		if h.cfg.Directory != "" {
-			cleanupError = os.RemoveAll(h.cfg.Directory)
+		if h.cfg.Directory != "" && cleanupError == nil {
+			deadline := time.Now().Add(time.Second)
+			for {
+				cleanupError = os.RemoveAll(h.cfg.Directory)
+				if !errors.Is(cleanupError, syscall.Errno(32)) || time.Now().After(deadline) {
+					break
+				}
+				time.Sleep(25 * time.Millisecond)
+			}
+			if cleanupError != nil {
+				cleanupError = Fail("workspace_cleanup_failed", "Owned workspace could not be removed after process shutdown", map[string]any{"directory": h.cfg.Directory, "cause": cleanupError.Error()})
+			}
 		}
 	})
-	return cleanupError
+	return h.closeErr
 }
 
 var _ = time.Second

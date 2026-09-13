@@ -52,4 +52,4 @@ local session before opening its workspace with the new executable.
 
 ## Current status (0.3.0)
 
-The starting gaps above describe the imported preview. Windows native compilation, forms, Ribbon, rendering, containment and latency now have real evidence. Login recovery and guarded restore have native delivery evidence. See VALIDATION-WINDOWS.md and LIMITS.md for current coverage and remaining gaps. Optional human pointing/feedback, improved ALR headings and Mac parity remain future work.
+The starting gaps above describe the imported preview. Windows native compilation, forms, Ribbon, rendering, containment and latency now have real evidence. Login recovery and guarded restore have native delivery evidence. See VALIDATION-WINDOWS.md and LIMITS.md for current coverage and remaining gaps. Optional human pointing/feedback, improved manuscript heading recovery and Mac parity remain future work.

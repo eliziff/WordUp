@@ -1,0 +1,2 @@
+https://github.com/rubberduck-vba/Rubberduck
+next commit observed: fae50adab188126a5e7d2a1cefc3328cc18af482

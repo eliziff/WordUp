@@ -3,10 +3,12 @@
 package native
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"syscall"
 	"time"
@@ -33,11 +35,19 @@ func accessibleRoot(hwnd uintptr) (dispatch, error) {
 	return dispatch{p}, nil
 }
 func windowInventory(pid uint32) []any {
+	return scopedWindowInventory(pid, "")
+}
+
+func scopedWindowInventory(pid uint32, windowClass string) []any {
 	out := []any{}
 	for _, hwnd := range windowsFor(pid) {
+		class := classOf(hwnd)
+		if windowClass != "" && class != windowClass {
+			continue
+		}
 		v, _, _ := windowVisible.Call(hwnd)
-		node := map[string]any{"hwnd": uint64(hwnd), "pid": pid, "class": classOf(hwnd), "title": textOf(hwnd), "visible_on_private_desktop": v != 0}
-		if classOf(hwnd) == "OpusApp" {
+		node := map[string]any{"hwnd": uint64(hwnd), "pid": pid, "class": class, "title": textOf(hwnd), "visible_on_private_desktop": v != 0}
+		if class == "OpusApp" || class == "ThunderDFrame" || class == "ThunderXFrame" {
 			q := windowEnum{pid: pid}
 			enumChildren.Call(hwnd, collectWindowsCallback, uintptr(unsafe.Pointer(&q)))
 			children := []any{}
@@ -146,6 +156,11 @@ func accNode(a dispatch, child int, path []any, hwnd uintptr, depth int, budget 
 		v, e := accProperty(a, p.member, child)
 		if e == nil && v != nil {
 			out[p.key] = v
+		} else if e != nil {
+			if out["property_errors"] == nil {
+				out["property_errors"] = map[string]string{}
+			}
+			out["property_errors"].(map[string]string)[p.key] = e.Error()
 		}
 	}
 	if child != 0 || depth <= 0 || *budget <= 0 {
@@ -190,13 +205,17 @@ func accNode(a dispatch, child int, path []any, hwnd uintptr, depth int, budget 
 	}
 	return out
 }
-func findNamed(a dispatch, child int, path []any, hwnd uintptr, name string, role any, depth int, budget *int, matches *[]map[string]any) {
+func findNamed(a dispatch, child int, path []any, hwnd uintptr, name string, role any, ancestor string, depth int, budget *int, matches *[]map[string]any) {
 	if *budget <= 0 || len(*matches) > 1 {
 		return
 	}
 	*budget--
 	actual, _ := accProperty(a, "accName", child)
-	if actual == name {
+	inside := ancestor == ""
+	if actual == ancestor {
+		ancestor = ""
+	}
+	if inside && actual == name {
 		actualRole, _ := accProperty(a, "accRole", child)
 		if role == nil || fmt.Sprint(actualRole) == fmt.Sprint(role) {
 			n := 1
@@ -218,7 +237,7 @@ func findNamed(a dispatch, child int, path []any, hwnd uintptr, name string, rol
 	for i := range entries {
 		v := &entries[i]
 		if v.VT == 3 {
-			findNamed(a, int(int32(v.Value)), path, hwnd, name, role, 0, budget, matches)
+			findNamed(a, int(int32(v.Value)), path, hwnd, name, role, ancestor, 0, budget, matches)
 		} else if v.VT == 9 {
 			d, e := v.object()
 			if e != nil {
@@ -230,7 +249,7 @@ func findNamed(a dispatch, child int, path []any, hwnd uintptr, name string, rol
 				continue
 			}
 			p := append(append([]any(nil), path...), float64(i))
-			findNamed(c, 0, p, hwnd, name, role, depth-1, budget, matches)
+			findNamed(c, 0, p, hwnd, name, role, ancestor, depth-1, budget, matches)
 			c.release()
 		}
 		if *budget <= 0 || len(*matches) > 1 {
@@ -240,6 +259,67 @@ func findNamed(a dispatch, child int, path []any, hwnd uintptr, name string, rol
 }
 
 func uiOperation(pid uint32, directory string, execute bool, op Operation) (any, error) {
+	searchStarted := time.Now()
+	var searchMS float64
+	if op.Op == "ui.patterns" {
+		if op.HWND == 0 || pidOf(uintptr(op.HWND)) != pid {
+			return nil, Fail("window_not_owned", "Supply an owned window handle", nil)
+		}
+		action := op.Member
+		if action == "" {
+			action = "inspect"
+		}
+		if action != "inspect" && !execute {
+			return nil, Fail("execution_not_authorized", "Changing a control pattern requires execute authority", nil)
+		}
+		name, _ := op.Named["name"].(string)
+		controlType, _ := op.Named["control_type"].(string)
+		selectorStarted := time.Now()
+		rootHandles := []string{}
+		if op.Named["scope"] == "ribbon" && name != "" && op.Named["role"] == nil {
+			// Find window roots cheaply; let UIA establish control uniqueness once.
+			q := windowEnum{pid: pid}
+			enumChildren.Call(uintptr(op.HWND), collectWindowsCallback, uintptr(unsafe.Pointer(&q)))
+			roots := []uint64{}
+			for _, child := range q.windows {
+				if classOf(child) == "NetUIHWND" {
+					roots = append(roots, uint64(child))
+				}
+			}
+			for _, root := range ribbonWindowRoots(roots) {
+				rootHandles = append(rootHandles, fmt.Sprint(root))
+			}
+			if len(rootHandles) == 0 {
+				return nil, Fail("ui_selector_not_found", "No owned Ribbon hosts found", map[string]any{"selector": op.Named, "hwnd": op.HWND})
+			}
+		} else if op.Named["scope"] == "ribbon" && name != "" {
+			found, err := uiOperation(pid, directory, execute, Operation{Op: "ui.find", HWND: op.HWND, Named: map[string]any{"name": name, "scope": "ribbon", "role": op.Named["role"]}})
+			if err != nil {
+				return nil, err
+			}
+			selected := found.(map[string]any)
+			b, err := json.Marshal(selected["selector"])
+			if err != nil {
+				return nil, err
+			}
+			var locator Operation
+			if err = json.Unmarshal(b, &locator); err != nil {
+				return nil, err
+			}
+			op.HWND = locator.HWND
+		}
+		selectorMS := float64(time.Since(selectorStarted).Microseconds()) / 1000
+		if len(rootHandles) == 0 {
+			rootHandles = append(rootHandles, fmt.Sprint(op.HWND))
+		}
+		result, err := OfficeTools(context.Background(), "patterns", fmt.Sprint(pid), strings.Join(rootHandles, ","), name, action, controlType)
+		if details, ok := result.(map[string]any); ok {
+			details["selector_ms"] = selectorMS
+			details["pattern_root_hwnd"] = op.HWND
+			details["pattern_root_handles"] = rootHandles
+		}
+		return result, err
+	}
 	if wait, ok := op.Named["wait_ms"].(float64); ok {
 		if wait < 0 || wait > 10000 {
 			return nil, fmt.Errorf("UI wait_ms must be 0..10000")
@@ -252,13 +332,16 @@ func uiOperation(pid uint32, directory string, execute bool, op Operation) (any,
 		}
 		op.Named = named
 		deadline := time.Now().Add(time.Duration(wait) * time.Millisecond)
+		attempts := 0
 		for {
+			attempts++
 			r, e := uiOperation(pid, directory, execute, op)
 			f, ok := e.(*Fault)
-			if e == nil || !ok || f.Code != "ui_selector_not_unique" || time.Now().After(deadline) {
-				return r, e
-			}
-			if matches, ok := f.Details.([]map[string]any); !ok || len(matches) != 0 {
+			if e == nil || !ok || f.Code != "ui_selector_not_found" || time.Now().After(deadline) {
+				if result, ok := r.(map[string]any); ok {
+					result["attempts"] = attempts
+					result["wait_and_action_ms"] = float64(time.Since(searchStarted).Microseconds()) / 1000
+				}
 				return r, e
 			}
 			pump()
@@ -270,17 +353,40 @@ func uiOperation(pid uint32, directory string, execute bool, op Operation) (any,
 	}
 	if op.Op == "ui.diagnostics" {
 		out := []any{}
-		for _, item := range windowInventory(pid) {
+		dialogs := []any{}
+		title, _ := op.Named["window"].(string)
+		windowClass, _ := op.Named["window_class"].(string)
+		matched := false
+		inventoryClass := ""
+		if windowClass == "#32770" {
+			inventoryClass = windowClass
+		}
+		for _, item := range scopedWindowInventory(pid, inventoryClass) {
 			w := item.(map[string]any)
 			if w["visible_on_private_desktop"] != true {
 				continue
 			}
 			hwnd := w["hwnd"].(uint64)
-			if op.Named["trees"] != false {
+			selected := (op.HWND == 0 || op.HWND == hwnd) && (title == "" || title == w["title"]) && (windowClass == "" || windowClass == w["class"])
+			matched = matched || selected
+			// Targeted visual inspection avoids traversing every open document.
+			// Retain owned modal dialogs even when another window was selected.
+			if !selected && w["class"] != "#32770" {
+				continue
+			}
+			if op.Named["trees"] != false || w["class"] == "#32770" {
 				tree, err := uiOperation(pid, directory, execute, Operation{Op: "ui.tree", HWND: hwnd, Depth: 4})
 				w["tree"] = tree
 				if err != nil {
 					w["tree_error"] = err.Error()
+				}
+				if w["class"] == "#32770" {
+					summary := dialogSummary(tree)
+					summary["hwnd"], summary["title"] = hwnd, w["title"]
+					dialogs = append(dialogs, summary)
+				}
+				if op.Named["trees"] == false {
+					delete(w, "tree")
 				}
 			}
 			if op.File != "" {
@@ -296,23 +402,49 @@ func uiOperation(pid uint32, directory string, execute bool, op Operation) (any,
 			}
 			out = append(out, w)
 		}
-		return map[string]any{"pid": pid, "windows": out}, nil
+		if !matched && (op.HWND != 0 || title != "" || windowClass != "") {
+			return nil, Fail("diagnostic_window_not_found", "Requested visible owned window was not found", map[string]any{"hwnd": op.HWND, "window": title, "window_class": windowClass, "dialogs": dialogs})
+		}
+		return map[string]any{"pid": pid, "windows": out, "dialogs": dialogs, "session_logs": sessionLogs(directory)}, nil
 	}
 	if name, ok := op.Named["name"].(string); ok && name != "" {
-		if execute {
+		var messagePattern *regexp.Regexp
+		if pattern, exists := op.Named["message_pattern"]; exists {
+			text, ok := pattern.(string)
+			if !ok || text == "" || op.Named["scope"] != "dialog" {
+				return nil, fmt.Errorf("message_pattern requires a nonempty regular expression and scope=dialog")
+			}
+			var err error
+			messagePattern, err = regexp.Compile(text)
+			if err != nil {
+				return nil, fmt.Errorf("invalid dialog message_pattern: %w", err)
+			}
+		}
+		ancestor, _ := op.Named["ancestor"].(string)
+		if execute && ancestor == "" {
 			if result, err, handled := uiaNamedInvoke(pid, op); handled {
 				return result, err
 			}
 		}
 		matches := []map[string]any{}
+		unmatchedDialogs := []map[string]any{}
+		searches := []map[string]any{}
 		budget := 4000
 		search := func(hwnd uint64) {
+			started, before := time.Now(), budget
+			searched := map[string]any{"hwnd": hwnd}
+			defer func() {
+				searched["nodes_visited"] = before - budget
+				searched["duration_ms"] = float64(time.Since(started).Microseconds()) / 1000
+				searches = append(searches, searched)
+			}()
 			a, e := accessibleRoot(uintptr(hwnd))
 			if e != nil {
+				searched["error"] = e.Error()
 				return
 			}
 			defer a.release()
-			findNamed(a, 0, nil, uintptr(hwnd), name, op.Named["role"], 16, &budget, &matches)
+			findNamed(a, 0, nil, uintptr(hwnd), name, op.Named["role"], ancestor, 16, &budget, &matches)
 		}
 		scope, _ := op.Named["scope"].(string)
 		for _, item := range windowInventory(pid) {
@@ -322,6 +454,25 @@ func uiOperation(pid uint32, directory string, execute bool, op Operation) (any,
 			}
 			if title, ok := op.Named["window"].(string); ok && title != w["title"] {
 				continue
+			}
+			var matchedDialog map[string]any
+			if scope == "dialog" {
+				if w["class"] != "#32770" {
+					continue
+				}
+				if messagePattern != nil {
+					tree, err := uiOperation(pid, directory, execute, Operation{Op: "ui.tree", HWND: w["hwnd"].(uint64), Depth: 4})
+					if err != nil {
+						return nil, err
+					}
+					matchedDialog = dialogSummary(tree)
+					messages, _ := matchedDialog["messages"].([]string)
+					if !messagePattern.MatchString(strings.Join(messages, "\n")) {
+						matchedDialog["hwnd"], matchedDialog["title"] = w["hwnd"], w["title"]
+						unmatchedDialogs = append(unmatchedDialogs, matchedDialog)
+						continue
+					}
+				}
 			}
 			if scope == "ribbon" && w["class"] != "OpusApp" {
 				continue
@@ -336,23 +487,42 @@ func uiOperation(pid uint32, directory string, execute bool, op Operation) (any,
 			// from the main document's client accessibility tree.
 			before := len(matches)
 			if children, ok := w["children"].([]any); ok {
+				roots := []uint64{}
 				for _, child := range children {
 					c := child.(map[string]any)
 					if c["class"] != "NetUIHWND" {
 						continue
 					}
-					search(c["hwnd"].(uint64))
+					roots = append(roots, c["hwnd"].(uint64))
+				}
+				if scope == "ribbon" {
+					roots = ribbonWindowRoots(roots)
+				}
+				for _, root := range roots {
+					search(root)
 				}
 			}
 			if len(matches) == before && scope != "ribbon" {
 				search(w["hwnd"].(uint64))
 			}
+			if matchedDialog != nil {
+				for _, match := range matches[before:] {
+					match["dialog"] = matchedDialog
+				}
+			}
 		}
 		if budget <= 0 {
-			return nil, Fail("ui_search_budget", "Narrow the selector with target, window or scope; search did not establish uniqueness", nil)
+			return nil, Fail("ui_search_budget", "Narrow the selector with target, window or scope; search did not establish uniqueness", map[string]any{"selector": op.Named, "hwnd": op.HWND, "root_searches": searches})
+		}
+		if len(matches) == 0 {
+			details := map[string]any{"selector": op.Named, "hwnd": op.HWND, "matches": matches, "root_searches": searches}
+			if len(unmatchedDialogs) > 0 {
+				details["unmatched_dialogs"] = unmatchedDialogs
+			}
+			return nil, Fail("ui_selector_not_found", fmt.Sprintf("No control matched %q; inspect ui.tree or ui.diagnostics to check the name, role and scope", name), details)
 		}
 		if len(matches) != 1 {
-			return nil, Fail("ui_selector_not_unique", fmt.Sprintf("Expected one control named %q; found %d", name, len(matches)), matches)
+			return nil, Fail("ui_selector_not_unique", fmt.Sprintf("Multiple controls matched %q; narrow the selector using window, scope, role or ancestor", name), matches)
 		}
 		if op.Op == "ui.find" {
 			return matches[0], nil
@@ -363,11 +533,22 @@ func uiOperation(pid uint32, directory string, execute bool, op Operation) (any,
 			return nil, err
 		}
 		op.HWND, op.Args, op.Child = selector.HWND, selector.Args, selector.Child
-		op.Named = map[string]any{"expected_name": name}
+		op.Named = map[string]any{"expected_name": name, "matched_dialog": matches[0]["dialog"]}
+		searchMS = float64(time.Since(searchStarted).Microseconds()) / 1000
 	}
 	hwnd := uintptr(op.HWND)
 	if hwnd == 0 || pidOf(hwnd) != pid {
 		return nil, Fail("window_not_owned", "UI operations require an exact window handle belonging to the app-owned Word process", nil)
+	}
+	if op.Op == "ui.close" {
+		if !execute {
+			return nil, Fail("execution_not_authorized", "Closing an owned window requires execute authority", nil)
+		}
+		ok, _, err := user32.NewProc("PostMessageW").Call(hwnd, 0x10, 0, 0)
+		if ok == 0 {
+			return nil, winError("PostMessageW(WM_CLOSE)", err)
+		}
+		return map[string]any{"posted": true, "hwnd": op.HWND}, nil
 	}
 	if op.Op == "ui.context_menu" {
 		if !execute {
@@ -394,6 +575,7 @@ func uiOperation(pid uint32, directory string, execute bool, op Operation) (any,
 		}
 		return map[string]any{"file": file, "capture": "PrintWindow on the app-owned desktop", "hwnd": op.HWND}, nil
 	}
+	resolveStarted := time.Now()
 	a, e := resolveAccessible(hwnd, op.Args)
 	if e != nil {
 		return nil, e
@@ -420,7 +602,11 @@ func uiOperation(pid uint32, directory string, execute bool, op Operation) (any,
 		return nil, Fail("execution_not_authorized", "Native UI interaction requires explicit execute authorization", nil)
 	}
 	var v variant
+	resolveMS := float64(time.Since(resolveStarted).Microseconds()) / 1000
+	actionStarted := time.Now()
 	switch op.Op {
+	case "ui.click":
+		return physicalClick(pid, hwnd, a, op.Child)
 	case "ui.invoke":
 		v, e = a.call("accDoDefaultAction", op.Child)
 	case "ui.set_value":
@@ -442,5 +628,10 @@ func uiOperation(pid uint32, directory string, execute bool, op Operation) (any,
 	if e != nil {
 		return nil, e
 	}
-	return map[string]any{"executed": true, "backend": "native IAccessible", "hwnd": op.HWND}, nil
+	result := map[string]any{"executed": true, "backend": "native IAccessible", "hwnd": op.HWND,
+		"search_ms": searchMS, "resolve_ms": resolveMS, "action_ms": float64(time.Since(actionStarted).Microseconds()) / 1000}
+	if dialog := op.Named["matched_dialog"]; dialog != nil {
+		result["dialog"] = dialog
+	}
+	return result, nil
 }

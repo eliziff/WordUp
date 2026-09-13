@@ -42,7 +42,7 @@ func Prepare(root, artifact, report, target string) (string, *Plan, error) {
 		return "", nil, e
 	}
 	var r verify.Report
-	if e = project.ReadJSON(proof, &r); e != nil {
+	if e = verify.DecodeReport(proof, &r); e != nil {
 		return "", nil, e
 	}
 	if r.Status != "passed" || !r.WordExecuted || !r.FreshProcess || r.SHA256 != office.Hash(source) || r.Assertions < 1 || r.SuiteSHA256 != office.Hash(project.JSON(r.Suite)) {
@@ -100,6 +100,10 @@ func Prepare(root, artifact, report, target string) (string, *Plan, error) {
 	return file, p, nil
 }
 func Activate(file string) (*Plan, error) {
+	return activate(file, WordRunning, clearResume)
+}
+
+func activate(file string, wordRunning func() (bool, error), clear func(string) error) (*Plan, error) {
 	unlock, e := lockActivation(file)
 	if e != nil {
 		return nil, e
@@ -123,12 +127,12 @@ func Activate(file string) (*Plan, error) {
 	defer unlockTarget()
 	if p.State != "pending" {
 		if p.State == "installed" {
-			_ = clearResume(file)
+			_ = clear(file)
 			return p, nil
 		}
 		return p, fmt.Errorf("activation is not pending")
 	}
-	busy, e := WordRunning()
+	busy, e := wordRunning()
 	if e != nil {
 		return p, e
 	}
@@ -157,7 +161,7 @@ func Activate(file string) (*Plan, error) {
 			}
 			p.Backup = filepath.Join(filepath.Dir(file), "previous.dotm")
 		}
-		return installed(file, p)
+		return installed(file, p, clear)
 	}
 	if p.PriorSHA256 == "new-file" {
 		if !os.IsNotExist(e) {
@@ -176,16 +180,16 @@ func Activate(file string) (*Plan, error) {
 	if e = project.AtomicWrite(p.Target, source); e != nil {
 		return p, e
 	}
-	return installed(file, p)
+	return installed(file, p, clear)
 }
 
-func installed(file string, p *Plan) (*Plan, error) {
+func installed(file string, p *Plan, clear func(string) error) (*Plan, error) {
 	p.State = "installed"
 	p.Installed = time.Now().UTC().Format(time.RFC3339Nano)
 	if e := project.AtomicWrite(file, project.JSON(p)); e != nil {
 		return p, e
 	}
-	if e := clearResume(file); e != nil {
+	if e := clear(file); e != nil {
 		return p, e
 	}
 	return p, nil
@@ -193,6 +197,10 @@ func installed(file string, p *Plan) (*Plan, error) {
 
 // Restore preserves newer edits and keeps both the tested candidate and backup.
 func Restore(file string) (*Plan, error) {
+	return restore(file, WordRunning, clearResume)
+}
+
+func restore(file string, wordRunning func() (bool, error), clear func(string) error) (*Plan, error) {
 	unlock, err := lockActivation(file)
 	if err != nil {
 		return nil, err
@@ -217,7 +225,7 @@ func Restore(file string) (*Plan, error) {
 	if p.PriorSHA256 == "new-file" || p.Backup == "" {
 		return &p, fmt.Errorf("this installation has no previous template to restore")
 	}
-	busy, err := WordRunning()
+	busy, err := wordRunning()
 	if err != nil {
 		return &p, err
 	}
@@ -248,7 +256,7 @@ func Restore(file string) (*Plan, error) {
 	if err = project.AtomicWrite(file, project.JSON(p)); err != nil {
 		return &p, err
 	}
-	return &p, clearResume(file)
+	return &p, clear(file)
 }
 func Watch(ctx context.Context, file string) error {
 	ticker := time.NewTicker(500 * time.Millisecond)

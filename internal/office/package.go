@@ -287,6 +287,9 @@ func XMLSpans(b []byte) ([]XMLSpan, error) {
 			spans[i].CloseStart = start
 			spans[i].End = end
 		case xml.CharData:
+			if start == 0 && bytes.HasPrefix(v, []byte{0xef, 0xbb, 0xbf}) {
+				v = v[3:]
+			}
 			if len(stack) == 0 && strings.TrimSpace(string(v)) != "" {
 				return nil, fmt.Errorf("text outside XML root")
 			}
@@ -390,7 +393,7 @@ func (p *Package) HasSignatures() bool {
 }
 func (p *Package) Validate() error {
 	defaults, overrides := map[string]string{}, map[string]string{}
-	ct, e := XMLSpans(p.Files["[Content_Types].xml"])
+	ct, e := validationXMLSpans(p.Files["[Content_Types].xml"])
 	if e != nil {
 		return fmt.Errorf("content types: %w", e)
 	}
@@ -412,7 +415,7 @@ func (p *Package) Validate() error {
 			return fmt.Errorf("no content type for %s", name)
 		}
 		if strings.HasSuffix(name, ".xml") || strings.HasSuffix(name, ".rels") {
-			nodes, e := XMLSpans(b)
+			nodes, e := validationXMLSpans(b)
 			if e != nil {
 				return fmt.Errorf("%s: %w", name, e)
 			}

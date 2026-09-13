@@ -1,0 +1,49 @@
+---
+title: TextFrame.MarginTop property (Word)
+keywords: vbawd10.chm162660455
+f1_keywords:
+- vbawd10.chm162660455
+api_name:
+- Word.TextFrame.MarginTop
+ms.assetid: 0ad83d75-432e-fcf2-2ed2-8ddee8cfc901
+ms.date: 06/08/2017
+ms.localizationpriority: medium
+---
+
+
+# TextFrame.MarginTop property (Word)
+
+Returns or sets the distance (in [points](../language/glossary/vbe-glossary.md#point)) between the top of the text frame and the top of the inscribed rectangle of the shape that contains the text. Read/write **Single**.
+
+
+## Syntax
+
+_expression_.**MarginTop**
+
+ _expression_ An expression that returns a **[TextFrame](Word.TextFrame.md)** object.
+
+
+## Example
+
+This example adds a rectangle to myDocument, adds text to the rectangle, and then sets the margins for the text frame.
+
+
+```vb
+Set myDocument = ActiveDocument 
+With myDocument.Shapes.AddShape(msoShapeRectangle, _ 
+ 0, 0, 250, 140).TextFrame 
+ .TextRange.Text = "Here is some test text" 
+ .MarginBottom = 0 
+ .MarginLeft = 100 
+ .MarginRight = 0 
+ .MarginTop = 20 
+End With
+```
+
+
+## See also
+
+
+[TextFrame Object](Word.TextFrame.md)
+
+[!include[Support and feedback](~/includes/feedback-boilerplate.md)]

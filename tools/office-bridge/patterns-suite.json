@@ -1,0 +1,54 @@
+﻿{
+    "schema":  1,
+    "steps":  [
+                  {
+                      "operation":  {
+                                        "as":  "document",
+                                        "op":  "new",
+                                        "file":  "$artifact"
+                                    },
+                      "name":  "Create owned document"
+                  },
+                  {
+                      "operation":  {
+                                        "op":  "ui.patterns",
+                                        "target":  "document",
+                                        "member":  "expand",
+                                        "named":  {
+                                                      "name":  "Font Size",
+                                                      "control_type":  "ComboBox",
+                                                      "scope":  "ribbon"
+                                                  }
+                                    },
+                      "name":  "Expand Font Size",
+                      "assert":  [
+                                     {
+                                         "expected":  "Expanded",
+                                         "path":  "/expand_state",
+                                         "kind":  "equals"
+                                     }
+                                 ]
+                  },
+                  {
+                      "operation":  {
+                                        "op":  "ui.patterns",
+                                        "target":  "document",
+                                        "member":  "collapse",
+                                        "named":  {
+                                                      "name":  "Font Size",
+                                                      "control_type":  "ComboBox",
+                                                      "scope":  "ribbon"
+                                                  }
+                                    },
+                      "name":  "Collapse Font Size",
+                      "assert":  [
+                                     {
+                                         "expected":  "Collapsed",
+                                         "path":  "/expand_state",
+                                         "kind":  "equals"
+                                     }
+                                 ]
+                  }
+              ],
+    "name":  "Scoped Ribbon pattern action evidence"
+}

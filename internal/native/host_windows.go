@@ -113,13 +113,14 @@ func documentWindow(pid uint32) uintptr {
 }
 
 type wordHost struct {
-	cfg       hostConfig
-	process   childProcess
-	app       dispatch
-	objects   map[string]dispatch
-	staged    map[string]string
-	execute   bool
-	uiWindows sync.Map
+	cfg          hostConfig
+	process      childProcess
+	app          dispatch
+	objects      map[string]dispatch
+	staged       map[string]string
+	execute      bool
+	uiWindows    sync.Map
+	evalPrograms map[string]*evalProgram
 }
 
 func connectWord(cfg hostConfig) (*wordHost, error) {
@@ -183,6 +184,23 @@ func connectWord(cfg hostConfig) (*wordHost, error) {
 						h.objects["app"] = app
 						_ = app.put("DisplayAlerts", 0)
 						_ = app.put("Visible", true)
+						if cfg.Visible {
+							seedValue, err := app.get("ActiveDocument")
+							if err != nil {
+								return nil, err
+							}
+							seed, err := seedValue.object()
+							seedValue.clear()
+							if err != nil {
+								return nil, err
+							}
+							closed, err := seed.call("Close", 0)
+							closed.clear()
+							seed.release()
+							if err != nil {
+								return nil, err
+							}
+						}
 						good = true
 						return h, nil
 					}
@@ -303,6 +321,8 @@ func (h *wordHost) stage(source string) (string, error) {
 }
 func (h *wordHost) operation(op Operation) (any, error) {
 	switch op.Op {
+	case "profile":
+		return profileOperations(op.Steps, h.operation)
 	case "hello":
 		if op.Value != h.cfg.Token {
 			return nil, Fail("invalid_handshake", "worker handshake token mismatch", nil)
@@ -405,7 +425,13 @@ func (h *wordHost) operation(op Operation) (any, error) {
 		if e != nil {
 			return nil, e
 		}
+		opened := map[string]any{"handle": r, "staged_path": target, "source_sha256": h.staged[strings.ToLower(target)], "macro_execution_authorized": h.execute, "open_and_repair": false}
 		if op.Op != "addin" {
+			if mode, modeErr := scalarNumber(h.objects[name], "CompatibilityMode"); modeErr == nil {
+				opened["compatibility_mode"] = int(mode)
+			} else {
+				opened["compatibility_mode_error"] = fault(modeErr)
+			}
 			// Explicitly select the staged document. A private desktop need not
 			// activate a newly opened window as the interactive desktop would.
 			d := h.objects[name]
@@ -421,7 +447,7 @@ func (h *wordHost) operation(op Operation) (any, error) {
 				win.release()
 			}
 		}
-		return map[string]any{"handle": r, "staged_path": target, "source_sha256": h.staged[strings.ToLower(target)], "macro_execution_authorized": h.execute, "open_and_repair": false}, nil
+		return opened, nil
 	case "unload":
 		// Closing is explicit; never close a user's process/document. All objects
 		// available here belong to the separately owned application instance.
@@ -454,11 +480,27 @@ func (h *wordHost) operation(op Operation) (any, error) {
 		}
 		v, e := h.app.invoke("Run", 1, append([]any{op.Macro}, op.Args...), nil, h.objects)
 		if e != nil {
-			return nil, e
+			f := fault(e)
+			if details, ok := f.Details.(map[string]any); ok {
+				details["macro"] = op.Macro
+			}
+			return nil, f
 		}
 		return h.result(&v, op.As)
 	case "eval":
 		return h.evaluate(op)
+	case "vba.inspect", "vba.reset":
+		return inspectVBA(h.app, h.execute, op.Op == "vba.reset")
+	case "xml.snapshot":
+		return h.xmlSnapshot(op)
+	case "toc.inspect":
+		return h.inspectTOC(op)
+	case "eval.prepare":
+		return h.prepareEvaluation(op)
+	case "eval.execute":
+		return h.executeEvaluation(op)
+	case "eval.release":
+		return h.releaseEvaluation(op.Target)
 	case "context_menu":
 		d, e := h.object(op.Target)
 		if e != nil {
@@ -577,7 +619,7 @@ func (h *wordHost) compile(op Operation) (any, error) {
 	after, _ := enabled.value(0)
 	enabled.clear()
 	if after != false {
-		return nil, Fail("compile_not_confirmed", "Compile did not reach a disabled clean state; inspect the owned VBE/UI diagnostic", nil)
+		return nil, Fail("compile_not_confirmed", "Compile did not reach a disabled clean state; inspect the native VBE selection and owned UI diagnostics", compilerSelection(vbe))
 	}
 	return map[string]any{"vba_compiled": true, "verification": "target project selected; native Compile command executed; command became disabled"}, nil
 }
@@ -594,6 +636,7 @@ type queued struct {
 }
 
 func HostMain(args []string) error {
+	defer StopOfficeTools()
 	if len(args) != 1 {
 		return fmt.Errorf("private host expects exactly its generated configuration path")
 	}
@@ -605,7 +648,7 @@ func HostMain(args []string) error {
 	if e = json.Unmarshal(b, &cfg); e != nil {
 		return e
 	}
-	if len(cfg.Token) != 32 || !strings.HasPrefix(cfg.Desktop, "WordUp-") || filepath.Clean(args[0]) != filepath.Join(cfg.Directory, "host.json") {
+	if len(cfg.Token) != 32 || (!strings.HasPrefix(cfg.Desktop, "WordUp-") && !(cfg.Visible && cfg.Desktop == "Default")) || filepath.Clean(args[0]) != filepath.Join(cfg.Directory, "host.json") {
 		return fmt.Errorf("invalid private-host configuration")
 	}
 	runtime.LockOSThread()
@@ -632,9 +675,11 @@ func HostMain(args []string) error {
 	emit := func(r Response) { output.Lock(); defer output.Unlock(); _ = json.NewEncoder(os.Stdout).Encode(r) }
 	work := make(chan queued, 128)
 	ui := make(chan queued, 64)
+	uiAsync := make(chan queued, 64)
 	ended := make(chan struct{})
 	var tasksMu sync.Mutex
 	tasks := map[string]*asyncTask{}
+	workTasks := map[string]string{}
 	perform := func(q queued, fn func(Operation) (any, error)) {
 		start := time.Now()
 		if q.Task != "" {
@@ -648,27 +693,50 @@ func HostMain(args []string) error {
 			tasksMu.Lock()
 			completed := &asyncTask{Status: "completed", Result: r, Error: fault(e), DurationMS: ms}
 			tasks[q.Task] = completed
+			delete(workTasks, q.Task)
 			tasksMu.Unlock()
 			emit(Response{Task: q.Task, Result: completed})
 		} else {
 			emit(Response{ID: q.ID, Result: r, Error: fault(e), DurationMS: ms})
 		}
 	}
-	go func() {
+	inspectionStream, inspectionErr := marshalDispatch(h.app)
+	uiWorker := func(queue <-chan queued, stream uintptr) {
 		runtime.LockOSThread()
 		defer runtime.UnlockOSThread()
 		hr, _, _ := coInit.Call(0, 2)
 		if failed(hr) {
-			for q := range ui {
-				emit(Response{ID: q.ID, Error: fault(fmt.Errorf("UI CoInitializeEx failed"))})
+			if stream != 0 {
+				ole32.NewProc("CoReleaseMarshalData").Call(stream)
+				(dispatch{stream}).release()
+			}
+			for q := range queue {
+				perform(q, func(Operation) (any, error) { return nil, fmt.Errorf("UI CoInitializeEx failed") })
 			}
 			return
 		}
 		defer coUninit.Call()
+		var inspector dispatch
+		inspectErr := inspectionErr
+		if stream != 0 {
+			inspector, inspectErr = unmarshalDispatch(stream)
+			defer inspector.release()
+		}
+		uiTicker := time.NewTicker(20 * time.Millisecond)
+		defer uiTicker.Stop()
 		for {
 			select {
-			case q := <-ui:
+			case q := <-queue:
 				perform(q, func(op Operation) (any, error) {
+					if op.Op == "ui.vba.inspect" || op.Op == "ui.vba.reset" || op.Op == "ui.vba.stack" {
+						if inspectErr != nil {
+							return nil, inspectErr
+						}
+						if op.Op == "ui.vba.stack" {
+							return vbaStack(inspector, h.process.PID, cfg.Directory, h.execute)
+						}
+						return inspectVBA(inspector, h.execute, op.Op == "ui.vba.reset")
+					}
 					if op.Target != "" {
 						value, ok := h.uiWindows.Load(op.Target)
 						if !ok {
@@ -680,11 +748,14 @@ func HostMain(args []string) error {
 				})
 			case <-ended:
 				return
-			case <-time.After(20 * time.Millisecond):
+			case <-uiTicker.C:
 				pump()
 			}
 		}
-	}()
+	}
+	go uiWorker(ui, inspectionStream)
+	asyncUIStarted := false
+
 	go func() {
 		defer close(ended)
 		s := bufio.NewScanner(os.Stdin)
@@ -727,6 +798,18 @@ func HostMain(args []string) error {
 				continue
 			}
 			item := queued{Request: q}
+			if q.Operation.Op != "begin" && !strings.HasPrefix(q.Operation.Op, "ui.") {
+				tasksMu.Lock()
+				busy := map[string]string{}
+				for key, operation := range workTasks {
+					busy[key] = operation
+				}
+				tasksMu.Unlock()
+				if len(busy) != 0 {
+					emit(Response{ID: q.ID, Error: fault(Fail("word_task_pending", "Word's object-model lane has unfinished asynchronous work. Use UI operations to handle any owned dialog, then poll or wait for task completion before this call.", map[string]any{"tasks": busy, "requested_operation": q.Operation.Op, "request_executed": false}))})
+					continue
+				}
+			}
 			if q.Operation.Op == "begin" {
 				if len(q.Operation.Steps) != 1 {
 					emit(Response{ID: q.ID, Error: fault(fmt.Errorf("begin requires exactly one operation in steps"))})
@@ -748,6 +831,9 @@ func HostMain(args []string) error {
 					}
 				}
 				tasks[key] = &asyncTask{Status: "queued"}
+				if !strings.HasPrefix(q.Operation.Steps[0].Op, "ui.") {
+					workTasks[key] = q.Operation.Steps[0].Op
+				}
 				tasksMu.Unlock()
 				item.Task = key
 				item.Operation = q.Operation.Steps[0]
@@ -756,6 +842,15 @@ func HostMain(args []string) error {
 			destination := work
 			if strings.HasPrefix(item.Operation.Op, "ui.") {
 				destination = ui
+				if item.Task != "" && !strings.HasPrefix(item.Operation.Op, "ui.vba.") {
+					// A blocked accessibility action must not occupy the lane
+					// used to inspect and acknowledge its modal dialogs.
+					if !asyncUIStarted {
+						go uiWorker(uiAsync, 0)
+						asyncUIStarted = true
+					}
+					destination = uiAsync
+				}
 			}
 			select {
 			case destination <- item:

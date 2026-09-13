@@ -115,6 +115,27 @@ func TestSpecimen(t *testing.T) {
 		t.Fatal(e)
 	}
 }
+func TestFormTabOrderShiftsSiblings(t *testing.T) {
+	f, err := NewForm("TabOrder", 1252)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = f.Apply(Design{Name: "TabOrder", Controls: []ControlDesign{
+		{Name: "title", Type: "Label"}, {Name: "hint", Type: "Label"},
+		{Name: "first", Type: "CommandButton", Properties: map[string]any{"TabIndex": 0}},
+		{Name: "second", Type: "CommandButton", Properties: map[string]any{"TabIndex": 1}},
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := map[string]int64{"first": 0, "second": 1, "title": 2, "hint": 3}
+	for _, c := range f.Design().Controls {
+		if c.Properties["TabIndex"] != want[c.Name] {
+			t.Fatalf("%s TabIndex=%v want %d", c.Name, c.Properties["TabIndex"], want[c.Name])
+		}
+	}
+}
+
 func TestFormCreate(t *testing.T) {
 	f, e := NewForm("TestForm", 1252)
 	if e != nil {
@@ -329,8 +350,31 @@ func TestSpecimenFormsEditable(t *testing.T) {
 		}
 		d := f.Design()
 		d.Properties["Caption"] = "Verified binary edit"
+		minimal, e := ReadForm(v.CFB, m.Name, v.Codepage)
+		if e != nil {
+			t.Fatal(e)
+		}
+		if e = minimal.Apply(Design{Name: m.Name, Properties: map[string]any{"Caption": "Verified binary edit"}}); e != nil {
+			t.Fatal(e)
+		}
 		if e = f.Apply(d); e != nil {
 			t.Fatalf("%s: %v", m.Name, e)
+		}
+		fullStreams, e := f.Streams()
+		if e != nil {
+			t.Fatal(e)
+		}
+		minimalStreams, e := minimal.Streams()
+		if e != nil {
+			t.Fatal(e)
+		}
+		if len(fullStreams) != len(minimalStreams) {
+			t.Fatal("unchanged properties altered stream inventory")
+		}
+		for name, data := range fullStreams {
+			if !bytes.Equal(data, minimalStreams[name]) {
+				t.Fatalf("%s/%s: full design rewrote unchanged data", m.Name, name)
+			}
 		}
 		c := v.CFB.Clone()
 		if e = f.WriteBack(c); e != nil {
