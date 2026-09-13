@@ -74,3 +74,11 @@ fail instead of silently reading current source files. `test.compare` requires
 matching captured input hashes. Paths accessed by macro code outside these
 declared inputs are not frozen or isolated. Old reports cannot retroactively
 prove which external files were used; capture a new baseline.
+
+`test.freeze` takes a passing report `reference` and a new `output` directory.
+It copies the retained template, declared inputs, report and evidence without
+rewriting XML. Move that directory as a unit. Pass its `bundle.json` as the
+reference to `test.replay` or `test.compare`; loading verifies the copied hashes
+and resolves evidence paths while preserving the original suite hash. Existing
+destinations are refused. Bundles contain local evidence and may contain private
+documents or paths; freezing does not publish or sanitize them.

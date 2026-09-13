@@ -66,7 +66,29 @@ func TestNativeReplayInputIsolation(t *testing.T) {
 	if err := os.WriteFile(manuscript, []byte("original changed outside the test"), 0600); err != nil {
 		t.Fatal(err)
 	}
-	second, err := verify.RunWithInputs(ctx, first.ArtifactSnapshot, suite, h, true, first.InputSnapshots)
+	if err := verify.SaveReport(workspace, first); err != nil {
+		t.Fatal(err)
+	}
+	bundle := filepath.Join(root, "baseline")
+	if _, err := verify.Freeze(first.SavedReport, bundle); err != nil {
+		t.Fatal(err)
+	}
+	relocated := filepath.Join(root, "relocated-baseline")
+	if err := os.Rename(bundle, relocated); err != nil {
+		t.Fatal(err)
+	}
+	// Make the old evidence paths unavailable, proving no fallback to originals.
+	if err := os.Rename(first.EvidenceDirectory, first.EvidenceDirectory+"-retired"); err != nil {
+		t.Fatal(err)
+	}
+	frozen, _, err := verify.LoadReport(filepath.Join(relocated, "bundle.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if frozen.SuiteSHA256 != first.SuiteSHA256 {
+		t.Fatal("relocation rewrote logical suite")
+	}
+	second, err := verify.RunWithInputs(ctx, frozen.ArtifactSnapshot, frozen.Suite, h, true, frozen.InputSnapshots)
 	if err != nil {
 		t.Fatal(err)
 	}

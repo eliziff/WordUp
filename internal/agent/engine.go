@@ -238,19 +238,24 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 			}
 		}
 		return preview(ctx, e.Root, artifact, proof, document)
+	case "test.freeze":
+		reference, err := e.path(p.Reference)
+		if err != nil {
+			return nil, err
+		}
+		output, err := e.path(p.Output)
+		if err != nil {
+			return nil, err
+		}
+		return verify.Freeze(reference, output)
 	case "test.compare":
 		readReport := func(path string) (*verify.Report, error) {
 			file, err := e.path(path)
 			if err != nil {
 				return nil, err
 			}
-			b, err := project.Read(filepath.Dir(file), filepath.Base(file))
-			if err != nil {
-				return nil, err
-			}
-			var r verify.Report
-			err = verify.DecodeReport(b, &r)
-			return &r, err
+			r, _, err := verify.LoadReport(file)
+			return r, err
 		}
 		baseline, err := readReport(p.Reference)
 		if err != nil {
@@ -607,12 +612,8 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 			if err != nil {
 				return nil, err
 			}
-			b, err := project.Read(filepath.Dir(file), filepath.Base(file))
+			report, reportHash, err := verify.LoadReport(file)
 			if err != nil {
-				return nil, err
-			}
-			var report verify.Report
-			if err = verify.DecodeReport(b, &report); err != nil {
 				return nil, err
 			}
 			if err = report.Suite.Validate(); err != nil {
@@ -623,7 +624,7 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 				return nil, fmt.Errorf("baseline inputs were not captured; run a new test before replay")
 			}
 			replayInputs = report.InputSnapshots
-			replay = &verify.ReplaySource{ReportSHA256: office.Hash(b), ArtifactSHA256: report.SHA256, SuiteSHA256: report.SuiteSHA256}
+			replay = &verify.ReplaySource{ReportSHA256: reportHash, ArtifactSHA256: report.SHA256, SuiteSHA256: report.SuiteSHA256}
 			if p.Path == "" {
 				p.Path = report.Artifact
 				if report.ArtifactSnapshot != "" {
