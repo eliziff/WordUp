@@ -2,6 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
     <OutputType>Exe</OutputType>
+    <BaseOutputPath>bin\analysis\</BaseOutputPath>
     <LangVersion>7.2</LangVersion>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <RubberduckSource Condition="'$(RubberduckSource)' == ''">$(MSBuildThisFileDirectory)..\..\workspaces\reuse\rubberduck-engine</RubberduckSource>

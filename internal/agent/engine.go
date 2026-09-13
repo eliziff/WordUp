@@ -30,6 +30,7 @@ import (
 )
 
 type Parameters struct {
+	Paths                []string                `json:"paths,omitempty"`
 	Comparison           string                  `json:"comparison,omitempty"`
 	Part                 string                  `json:"part,omitempty"`
 	Namespaces           map[string]string       `json:"namespaces,omitempty"`
@@ -159,6 +160,12 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 			source = string(data)
 		}
 		return vbaparse.ParseWithConstants(source, p.CompilationConstants)
+	case "vba.analyze":
+		request, err := analysisRequest(e.Root, p.Paths)
+		if err != nil {
+			return nil, err
+		}
+		return native.OfficeTools(ctx, "vba.analyze", request)
 	case "xml.query":
 		full, err := e.path(p.Path)
 		if err != nil {

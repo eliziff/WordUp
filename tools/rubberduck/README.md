@@ -45,6 +45,13 @@ The proof starts the real executable and checks errors followed by successful
 analysis in the same process. Main application wiring, process-job containment,
 retrievable large results and release packaging remain unfinished.
 
+The agent operation `vba.analyze` accepts `paths` to selected workspace modules;
+WordUp reads their source directly. Place the isolated output from
+`bin/analysis/Release/net462` beside WordUp under `analysis/` to exercise the API.
+This output is separate from the proof's test dependencies. The API currently
+rejects document/form modules and reports external references as unresolved;
+it is not a replacement for native compilation or the full planned `check`.
+
 The proof runs the actual upstream unused-variable inspection on a defect,
 its correction, and the defect again, asserting the variable, module, line and
 resource description. This establishes that inspection path, not all inspections
