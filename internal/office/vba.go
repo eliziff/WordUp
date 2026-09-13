@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"regexp"
+	"sort"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -336,10 +337,27 @@ func (v *VBA) Rewrite(modules []Module, forms map[string]map[string][]byte) ([]b
 	}
 	seen := map[string]bool{}
 	old := map[string]Module{}
+	order := map[string]int{}
+	persisted := []Module{}
 	for _, m := range v.Modules {
 		if m.Stream != "" && len(m.Records) != 0 {
 			old[strings.ToLower(m.Name)] = m
+			order[strings.ToLower(m.Name)] = len(order)
+			persisted = append(persisted, m)
 		}
+	}
+	modules = append([]Module(nil), modules...)
+	sort.SliceStable(modules, func(i, j int) bool {
+		left, leftExists := order[strings.ToLower(modules[i].Name)]
+		right, rightExists := order[strings.ToLower(modules[j].Name)]
+		if leftExists != rightExists {
+			return leftExists
+		}
+		return leftExists && left < right
+	})
+	topologySame := len(modules) == len(persisted)
+	for i := range modules {
+		topologySame = topologySame && strings.EqualFold(modules[i].Name, persisted[i].Name) && modules[i].Kind == persisted[i].Kind
 	}
 	b := append([]byte(nil), v.Prefix...)
 	// Refresh the project name without reconstructing unrecognized reference data.
@@ -408,23 +426,26 @@ func (v *VBA) Rewrite(modules []Module, forms map[string]map[string][]byte) ([]b
 		if existed {
 			path = prior.Stream
 			records = append([]byte(nil), prior.Records...)
-			for p := 0; p+6 <= len(records); {
-				t, n := U16(records, p), int(U32(records, p+2))
-				if p+6+n > len(records) {
-					return nil, fmt.Errorf("bad preserved module record")
-				}
-				if t == 0x31 {
-					put32(records, p+6, 0)
-				}
-				p += 6 + n
+		}
+		unchanged := existed && Normalize(prior.Source) == src
+		if !unchanged {
+			compressed, compressErr := CompressExact(raw)
+			if compressErr != nil {
+				return nil, fmt.Errorf("%s: %w", m.Name, compressErr)
 			}
-		}
-		compressed, e := CompressExact(raw)
-		if e != nil {
-			return nil, fmt.Errorf("%s: %w", m.Name, e)
-		}
-		if e = v.CFB.Set(path, compressed); e != nil {
-			return nil, e
+			if existed && prior.Offset > 0 {
+				stream, streamErr := v.CFB.Stream(path)
+				if streamErr != nil {
+					return nil, fmt.Errorf("preserve %s performance cache prefix: %w", m.Name, streamErr)
+				}
+				if uint64(prior.Offset) > uint64(len(stream)) {
+					return nil, fmt.Errorf("preserve %s performance cache prefix: source offset outside stream", m.Name)
+				}
+				compressed = append(append([]byte(nil), stream[:prior.Offset]...), compressed...)
+			}
+			if e = v.CFB.Set(path, compressed); e != nil {
+				return nil, e
+			}
 		}
 		b = append(b, records...)
 		nm, _ := Encode(m.Name, v.Codepage)
@@ -471,12 +492,14 @@ func (v *VBA) Rewrite(modules []Module, forms map[string]map[string][]byte) ([]b
 		}
 	}
 	b = append(b, v.Suffix...)
-	directory, e := CompressExact(b)
-	if e != nil {
-		return nil, fmt.Errorf("VBA directory: %w", e)
-	}
-	if e = v.CFB.Set("VBA/dir", directory); e != nil {
-		return nil, e
+	if !topologySame {
+		directory, e := CompressExact(b)
+		if e != nil {
+			return nil, fmt.Errorf("VBA directory: %w", e)
+		}
+		if e = v.CFB.Set("VBA/dir", directory); e != nil {
+			return nil, e
+		}
 	}
 	_ = v.CFB.Set("VBA/_VBA_PROJECT", []byte{0xcc, 0x61, 0xff, 0xff, 0, 0, 0})
 	for p := range v.CFB.Entries {
@@ -485,7 +508,9 @@ func (v *VBA) Rewrite(modules []Module, forms map[string]map[string][]byte) ([]b
 		}
 	}
 	wm = append(wm, 0, 0)
-	_ = v.CFB.Set("PROJECTwm", wm)
+	if !topologySame {
+		_ = v.CFB.Set("PROJECTwm", wm)
+	}
 	lines := []string{}
 	inWorkspace := false
 	inserted := false
@@ -523,7 +548,9 @@ func (v *VBA) Rewrite(modules []Module, forms map[string]map[string][]byte) ([]b
 	if e != nil {
 		return nil, e
 	}
-	_ = v.CFB.Set("PROJECT", pt)
+	if !topologySame {
+		_ = v.CFB.Set("PROJECT", pt)
+	}
 	out, e := v.CFB.Bytes()
 	if e != nil {
 		return nil, e
@@ -533,7 +560,15 @@ func (v *VBA) Rewrite(modules []Module, forms map[string]map[string][]byte) ([]b
 		return nil, fmt.Errorf("self-parse of rebuilt VBA failed: %w", e)
 	}
 	if len(check.Modules) != len(modules) {
-		return nil, fmt.Errorf("module roundtrip mismatch")
+		got := make([]string, len(check.Modules))
+		want := make([]string, len(modules))
+		for i := range check.Modules {
+			got[i] = check.Modules[i].Name
+		}
+		for i := range modules {
+			want[i] = modules[i].Name
+		}
+		return nil, fmt.Errorf("module roundtrip mismatch: got %v, want %v", got, want)
 	}
 	for i, m := range modules {
 		if check.Modules[i].Source != expectedSources[m.Name] {

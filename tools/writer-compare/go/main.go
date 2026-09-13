@@ -32,17 +32,17 @@ func run() error {
 	}
 	var rows []map[string]any
 	for i, input := range os.Args[2:] {
-		workspace := filepath.Join(root, fmt.Sprint(i))
-		start := time.Now()
-		if _, err := project.Import(input, workspace); err != nil {
-			return err
-		}
-		importMS := float64(time.Since(start).Microseconds()) / 1000
-		w, err := project.Open(workspace)
-		if err != nil {
-			return err
-		}
-		for _, operation := range []string{"unchanged", "module-edit"} {
+		for _, operation := range []string{"unchanged", "module-edit", "class-add"} {
+			workspace := filepath.Join(root, fmt.Sprintf("%d-%s", i, operation))
+			start := time.Now()
+			if _, err := project.Import(input, workspace); err != nil {
+				return err
+			}
+			importMS := float64(time.Since(start).Microseconds()) / 1000
+			w, err := project.Open(workspace)
+			if err != nil {
+				return err
+			}
 			if operation == "module-edit" {
 				files, err := filepath.Glob(filepath.Join(workspace, "vba", "*"))
 				if err != nil || len(files) == 0 {
@@ -56,6 +56,12 @@ func run() error {
 				}
 				data = []byte(strings.TrimRight(string(data), "\r\n") + "\r\n' WordUp writer comparison\r\n")
 				if err := project.Write(workspace, filepath.ToSlash(rel), data, ""); err != nil {
+					return err
+				}
+			}
+			if operation == "class-add" {
+				body := "Option Explicit\nPrivate value As Long\nPublic Property Get Current() As Long\nCurrent = value\nEnd Property\nPublic Property Let Current(ByVal nextValue As Long)\nvalue = nextValue\nEnd Property\n"
+				if err := project.Write(workspace, "vba/WriterClass.cls", []byte(body), ""); err != nil {
 					return err
 				}
 			}

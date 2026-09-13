@@ -78,3 +78,45 @@ func TestNativeWriterFormOutputs(t *testing.T) {
 		t.Fatal("No candidate form properties tested")
 	}
 }
+
+func TestNativeWriterVBAOutputs(t *testing.T) {
+	path := os.Getenv("WORDUP_WRITER_REPORT")
+	if os.Getenv("WORDUP_NATIVE_TEST") != "1" || path == "" {
+		t.Skip("requires native opt-in and writer comparison report")
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var report struct {
+		Results []struct {
+			Engine, Operation, Status, Output string
+		}
+	}
+	if err := json.Unmarshal(data, &report); err != nil {
+		t.Fatal(err)
+	}
+	count := 0
+	for _, row := range report.Results {
+		if (row.Operation != "module-edit" && row.Operation != "class-add") || row.Status != "passed" {
+			continue
+		}
+		count++
+		name := row.Engine
+		if name == "" {
+			name = "pyOpenVBA"
+		}
+		t.Run(name+"/"+row.Operation, func(t *testing.T) {
+			suite := verify.Suite{Schema: 1, Name: "Writer VBA native compilation", RequireCompile: true, Steps: []verify.Step{
+				{Name: "Open", Operation: native.Operation{Op: "open", File: "$artifact", As: "doc"}},
+				{Name: "Compile", Operation: native.Operation{Op: "compile", Target: "doc", Member: "$project"}, Assert: []verify.Assertion{{Path: "/vba_compiled", Kind: "equals", Expected: true}}},
+			}}
+			if _, err := verify.Run(context.Background(), row.Output, suite, nil, true); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+	if count == 0 {
+		t.Fatal("No passing writer VBA outputs tested")
+	}
+}

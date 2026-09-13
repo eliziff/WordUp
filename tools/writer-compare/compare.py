@@ -86,7 +86,7 @@ def main():
         if not kernel.SetPriorityClass(kernel.GetCurrentProcess(), 0x4000):
             raise OSError("Cannot set BelowNormal priority")
     started = time.perf_counter()
-    from pyopenvba import WordFile
+    from pyopenvba import VBAModuleKind, WordFile, synthesize_class_header
     import_ms = (time.perf_counter() - started) * 1000
     args.output.mkdir(parents=True, exist_ok=False)
     results = []
@@ -97,7 +97,7 @@ def main():
         with WordFile(source) as document:
             original_modules = document.vba_modules()
             original_controls = form_snapshot(document)
-        for operation in ("unchanged", "module-edit", "module-lifecycle", "forms-read", "control-caption", "control-font"):
+        for operation in ("unchanged", "module-edit", "module-lifecycle", "class-add", "forms-read", "control-caption", "control-font"):
             samples = []
             row = {"input": str(source.resolve()), "source_sha256": original_hash, "operation": operation}
             try:
@@ -120,6 +120,12 @@ def main():
                             project.rename_module("WriterAdded", "WriterRenamed")
                             project.delete_module("WriterRemoved")
                             expected["WriterRenamed"] = added.replace('VB_Name = "WriterAdded"', 'VB_Name = "WriterRenamed"')
+                        if operation == "class-add":
+                            body = ("Option Explicit\r\nPrivate value As Long\r\n"
+                                    "Public Property Get Current() As Long\r\nCurrent = value\r\nEnd Property\r\n"
+                                    "Public Property Let Current(ByVal nextValue As Long)\r\nvalue = nextValue\r\nEnd Property\r\n")
+                            document.vba_project().add_module("WriterClass", body, kind=VBAModuleKind.other)
+                            expected["WriterClass"] = synthesize_class_header("WriterClass") + body
                         if operation == "forms-read":
                             row["forms"] = len(document.forms())
                         expected_controls = copy.deepcopy(original_controls)
@@ -159,7 +165,7 @@ def main():
                                             if original_streams.get(name) != output_streams.get(name))
                     row.update(output=str(output.resolve()), output_sha256=digest(output), changed_parts=changed,
                                changed_streams=stream_changes)
-                    mutation = operation in ("module-edit", "module-lifecycle", "control-caption", "control-font")
+                    mutation = operation in ("module-edit", "module-lifecycle", "class-add", "control-caption", "control-font")
                     allowed = {"word/vbaProject.bin"} if mutation else set()
                     if set(changed) - allowed:
                         raise AssertionError("Unexpected changed package parts: " + str(changed))
@@ -186,6 +192,11 @@ def main():
                 if build["operation"] == "module-edit":
                     target = sorted(expected)[0]
                     expected[target] = expected[target].rstrip("\r\n") + "\r\n' WordUp writer comparison\r\n"
+                if build["operation"] == "class-add":
+                    body = ("Option Explicit\r\nPrivate value As Long\r\n"
+                            "Public Property Get Current() As Long\r\nCurrent = value\r\nEnd Property\r\n"
+                            "Public Property Let Current(ByVal nextValue As Long)\r\nvalue = nextValue\r\nEnd Property\r\n")
+                    expected["WriterClass"] = synthesize_class_header("WriterClass") + body
                 with WordFile(output) as document:
                     normalize = lambda values: {key: value.replace("\r\n", "\n").rstrip("\n") for key, value in values.items()}
                     if normalize(document.vba_modules()) != normalize(expected):
@@ -197,7 +208,7 @@ def main():
                 before_streams, after_streams = streams(source), streams(output)
                 row.update(changed_parts=changed, changed_streams=sorted(name for name in set(before_streams) | set(after_streams)
                            if before_streams.get(name) != after_streams.get(name)))
-                allowed = {"word/vbaProject.bin"} if build["operation"] == "module-edit" else set()
+                allowed = {"word/vbaProject.bin"} if build["operation"] in ("module-edit", "class-add") else set()
                 if set(changed) - allowed:
                     raise AssertionError("Go output changed unrelated package parts")
                 row["status"] = "passed"
