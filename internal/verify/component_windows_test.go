@@ -23,7 +23,7 @@ func TestNativeComponentCleanup(t *testing.T) {
 	if _, err := project.New("ComponentProof", root); err != nil {
 		t.Fatal(err)
 	}
-	for _, id := range []string{"operation.safe-edit", "document.style-converter", "structure.detect", "command.hotkey"} {
+	for _, id := range []string{"operation.safe-edit", "document.style-converter", "structure.detect", "command.hotkey", "command.context-menu"} {
 		if _, err := component.Add(root, id); err != nil {
 			t.Fatal(err)
 		}
@@ -47,6 +47,7 @@ func TestNativeComponentCleanup(t *testing.T) {
 		{Name: "Compile", Operation: native.Operation{Op: "compile", Target: "doc", Member: "$project"}, Assert: []verify.Assertion{{Path: "/vba_compiled", Kind: "equals", Expected: true}}},
 		{Name: "Failure, undo, cached styles and caller state", Operation: native.Operation{Op: "run", Macro: "Proof.Check"}, Assert: []verify.Assertion{{Kind: "equals", Expected: "PASS"}}},
 		{Name: "Hotkey caller context", Operation: native.Operation{Op: "run", Macro: "Proof.CheckHotkeys"}, Assert: []verify.Assertion{{Kind: "equals", Expected: "PASS"}}},
+		{Name: "Context menu ownership and repetition", Operation: native.Operation{Op: "run", Macro: "Proof.CheckMenus"}, Assert: []verify.Assertion{{Kind: "equals", Expected: "PASS"}}},
 		{Name: "Structure counterexamples and cached style votes", Operation: native.Operation{Op: "run", Macro: "StructureProof.Check"}, Assert: []verify.Assertion{{Path: "/array/0", Kind: "equals", Expected: "PASS"}}},
 	}}
 	report, err := verify.Run(context.Background(), b.Artifact, suite, nil, true)
@@ -105,6 +106,30 @@ End Function
 
 const componentProof = `Attribute VB_Name = "Proof"
 Option Explicit
+Public Function CheckMenus() As String
+    Dim prior As Object, failure As String, stage As String
+    On Error GoTo Failed
+    Set prior = Application.CustomizationContext
+    stage = "register"
+    WU_RegisterContextMenu "First", "Proof.HotkeyTarget"
+    WU_RegisterContextMenu "Second", "Proof.HotkeyTarget"
+    If Not WU_ContextMenuRegistered("Second", "Proof.HotkeyTarget") Then Err.Raise 5, , "replacement menu wiring incorrect"
+    If Not (Application.CustomizationContext Is prior) Then Err.Raise 5, , "registration changed caller context"
+    stage = "remove"
+    WU_RemoveContextMenu
+    WU_RemoveContextMenu
+    If WU_ContextMenuRegistered Then Err.Raise 5, , "component retained removed menu"
+    If Not (Application.CustomizationContext Is prior) Then Err.Raise 5, , "removal changed caller context"
+    CheckMenus = "PASS"
+CleanUp:
+    On Error Resume Next
+    WU_RemoveContextMenu
+    If failure <> "" Then CheckMenus = failure
+    Exit Function
+Failed:
+    failure = stage & ": " & CStr(Err.Number) & ": " & Err.Description
+    Resume CleanUp
+End Function
 Public Function CheckHotkeys() As String
     Dim prior As Object, key As Long, failure As Long
     Dim stage As String

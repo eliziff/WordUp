@@ -96,17 +96,49 @@ End Sub
 const contextMenuSource = `Attribute VB_Name = "WordUpContextMenu"
 Option Explicit
 Private Const WU_TAG As String = "WordUp.Component.ContextMenu"
+Private WU_OwnedContextMenu As CommandBarButton
 Public Sub WU_RegisterContextMenu(ByVal caption As String, ByVal macroName As String)
-    Dim item As CommandBarButton
-    WU_RemoveContextMenu
-    Set item = CommandBars("Text").Controls.Add(Type:=msoControlButton, Temporary:=True)
-    item.Caption = caption: item.OnAction = macroName: item.Tag = WU_TAG
+    WU_ChangeContextMenu caption, macroName, False
 End Sub
 Public Sub WU_RemoveContextMenu()
-    Dim item As CommandBarControl
-    For Each item In CommandBars("Text").Controls
-        If item.Tag = WU_TAG Then item.Delete
-    Next item
+    WU_ChangeContextMenu "", "", True
+End Sub
+Public Function WU_ContextMenuRegistered(Optional ByVal expectedCaption As String = "", Optional ByVal expectedMacro As String = "") As Boolean
+    On Error Resume Next
+    WU_ContextMenuRegistered = Not (WU_OwnedContextMenu Is Nothing)
+    If WU_ContextMenuRegistered Then WU_ContextMenuRegistered = (WU_OwnedContextMenu.Tag = WU_TAG)
+    If WU_ContextMenuRegistered And expectedCaption <> "" Then WU_ContextMenuRegistered = (WU_OwnedContextMenu.Caption = expectedCaption)
+    If WU_ContextMenuRegistered And expectedMacro <> "" Then WU_ContextMenuRegistered = (WU_OwnedContextMenu.OnAction = expectedMacro)
+    On Error GoTo 0
+End Function
+Private Sub WU_ChangeContextMenu(ByVal caption As String, ByVal macroName As String, ByVal removeOnly As Boolean)
+    Dim prior As Object, item As CommandBarButton
+    Dim failure As Long, failureSource As String, failureText As String
+    Set prior = Application.CustomizationContext
+    On Error GoTo Failed
+    Application.CustomizationContext = ThisDocument
+    On Error Resume Next
+    WU_OwnedContextMenu.Delete
+    Set WU_OwnedContextMenu = Nothing
+    Err.Clear
+    On Error GoTo Failed
+    If Not removeOnly Then
+        Set item = CommandBars("Text").Controls.Add(Type:=msoControlButton, Temporary:=True)
+        item.Caption = caption: item.OnAction = macroName: item.Tag = WU_TAG
+        Set WU_OwnedContextMenu = item
+    End If
+CleanUp:
+    On Error Resume Next
+    If failure <> 0 Then Set WU_OwnedContextMenu = Nothing
+    Err.Clear
+    Application.CustomizationContext = prior
+    If failure = 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Sub
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
 End Sub
 `
 
