@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/eliziff/WordUp/internal/office"
 	"github.com/eliziff/WordUp/internal/project"
 )
 
@@ -32,7 +33,7 @@ func run() error {
 	}
 	var rows []map[string]any
 	for i, input := range os.Args[2:] {
-		for _, operation := range []string{"unchanged", "module-edit", "class-add"} {
+		for _, operation := range []string{"unchanged", "module-edit", "class-add", "control-caption", "control-font"} {
 			workspace := filepath.Join(root, fmt.Sprintf("%d-%s", i, operation))
 			start := time.Now()
 			if _, err := project.Import(input, workspace); err != nil {
@@ -65,6 +66,13 @@ func run() error {
 					return err
 				}
 			}
+			var control []string
+			if operation == "control-caption" || operation == "control-font" {
+				control, err = mutateForm(workspace, operation)
+				if err != nil {
+					return err
+				}
+			}
 			var samples []float64
 			var report *project.BuildReport
 			for repetition := 0; repetition < 7; repetition++ {
@@ -78,9 +86,13 @@ func run() error {
 			}
 			warm := append([]float64(nil), samples[1:]...)
 			sort.Float64s(warm)
-			rows = append(rows, map[string]any{"input": input, "operation": operation, "import_ms": importMS, "samples_ms": samples,
+			row := map[string]any{"input": input, "operation": operation, "import_ms": importMS, "samples_ms": samples,
 				"warm_median_ms": (warm[2] + warm[3]) / 2, "output": report.Artifact, "cached": report.Cached,
-				"native_word_executed": false, "scope": "workspace build timing; independent comparison required"})
+				"native_word_executed": false, "scope": "workspace build timing; independent comparison required"}
+			if control != nil {
+				row["control"] = control
+			}
+			rows = append(rows, row)
 		}
 	}
 	data, err := json.MarshalIndent(rows, "", "  ")
@@ -92,4 +104,73 @@ func run() error {
 	}
 	fmt.Println(string(data))
 	return nil
+}
+
+func mutateForm(root, operation string) ([]string, error) {
+	files, err := filepath.Glob(filepath.Join(root, "forms", "*.json"))
+	if err != nil {
+		return nil, err
+	}
+	sort.Strings(files)
+	type candidate struct {
+		form, path string
+		control    *office.ControlDesign
+	}
+	var choices []candidate
+	var visit func(string, string, []office.ControlDesign)
+	visit = func(form, parent string, controls []office.ControlDesign) {
+		for i := range controls {
+			control := &controls[i]
+			path := control.Name
+			if parent != "" {
+				path = parent + "/" + path
+			}
+			if control.Type == "Label" || control.Type == "CommandButton" {
+				choices = append(choices, candidate{form: form, path: path, control: control})
+			}
+			visit(form, path, control.Controls)
+			visit(form, path, control.Pages)
+		}
+	}
+	designs := map[string]*office.Design{}
+	for _, file := range files {
+		data, readErr := os.ReadFile(file)
+		if readErr != nil {
+			return nil, readErr
+		}
+		var design office.Design
+		if readErr = json.Unmarshal(data, &design); readErr != nil {
+			return nil, readErr
+		}
+		designs[file] = &design
+		visit(design.Name, "", design.Controls)
+	}
+	if len(choices) == 0 {
+		return nil, fmt.Errorf("precondition unmet: no supported caption control")
+	}
+	sort.Slice(choices, func(i, j int) bool {
+		return choices[i].form+"\x00"+choices[i].path < choices[j].form+"\x00"+choices[j].path
+	})
+	selected := choices[0]
+	if selected.control.Properties == nil {
+		selected.control.Properties = map[string]any{}
+	}
+	if operation == "control-caption" {
+		selected.control.Properties["Caption"] = "Writer comparison"
+	} else {
+		selected.control.Properties["Font"] = map[string]any{"Name": "Segoe UI", "Size": 12}
+	}
+	for file, design := range designs {
+		if design.Name == selected.form {
+			rel, relErr := filepath.Rel(root, file)
+			if relErr != nil {
+				return nil, relErr
+			}
+			if err := project.Write(root, filepath.ToSlash(rel), project.JSON(design), ""); err != nil {
+				return nil, err
+			}
+			break
+		}
+	}
+	return []string{selected.form, selected.control.Name}, nil
 }

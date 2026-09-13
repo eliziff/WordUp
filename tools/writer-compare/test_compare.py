@@ -3,10 +3,16 @@ import copy
 from types import SimpleNamespace as Object
 import unittest
 
-from compare import form_snapshot
+from compare import form_snapshot, require_form_snapshot
 
 
 class FormSnapshotTest(unittest.TestCase):
+    def test_mismatch_names_the_first_structural_identity(self):
+        expected = {("Form1", "Button1", (), 0): ("before",)}
+        actual = {("Form1", "Button1", (), 0): ("after",)}
+        with self.assertRaisesRegex(AssertionError, r"Form1.*Button1.*expected.*before.*got.*after"):
+            require_form_snapshot(actual, expected, "candidate")
+
     def test_unnamed_nested_records_keep_distinct_structural_identities(self):
         def unnamed():
             return Object(name="", kind="MSForms.Page", id=0, tab_index=None,

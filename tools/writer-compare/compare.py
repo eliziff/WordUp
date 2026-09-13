@@ -63,6 +63,17 @@ def form_snapshot(document):
     return result
 
 
+def require_form_snapshot(actual, expected, engine):
+    if actual == expected:
+        return
+    for key in sorted(set(actual) | set(expected), key=str):
+        if actual.get(key) != expected.get(key):
+            want = repr(expected.get(key))[:1000]
+            got = repr(actual.get(key))[:1000]
+            raise AssertionError(f"{engine} form mismatch at {key!r}: expected {want}; got {got}")
+    raise AssertionError(f"{engine} form snapshot differs")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--upstream", type=Path, required=True)
@@ -156,8 +167,7 @@ def main():
                         normalize = lambda values: {key: value.replace("\r\n", "\n").rstrip("\n") for key, value in values.items()}
                         if normalize(document.vba_modules()) != normalize(expected):
                             raise AssertionError("Module source preservation failed")
-                        if form_snapshot(document) != expected_controls:
-                            raise AssertionError("Form property, hierarchy, inventory or picture preservation failed")
+                        require_form_snapshot(form_snapshot(document), expected_controls, "pyOpenVBA")
                     output_parts = parts(output)
                     changed = sorted(name for name in set(original_parts) | set(output_parts) if original_parts.get(name) != output_parts.get(name))
                     output_streams = streams(output)
@@ -197,18 +207,27 @@ def main():
                             "Public Property Get Current() As Long\r\nCurrent = value\r\nEnd Property\r\n"
                             "Public Property Let Current(ByVal nextValue As Long)\r\nvalue = nextValue\r\nEnd Property\r\n")
                     expected["WriterClass"] = synthesize_class_header("WriterClass") + body
+                if build["operation"] in ("control-caption", "control-font"):
+                    selected = tuple(build["control"])
+                    snapshot_keys = [key for key in expected_controls if key[:2] == selected]
+                    if len(snapshot_keys) != 1:
+                        raise ValueError("Ambiguous Go form/control identity: " + str(selected))
+                    selected_properties = expected_controls[snapshot_keys[0]][3]
+                    if build["operation"] == "control-caption":
+                        selected_properties["Caption"] = "Writer comparison"
+                    else:
+                        selected_properties.update({"Font.FontName":"Segoe UI", "Font.FontHeight":240})
                 with WordFile(output) as document:
                     normalize = lambda values: {key: value.replace("\r\n", "\n").rstrip("\n") for key, value in values.items()}
                     if normalize(document.vba_modules()) != normalize(expected):
                         raise AssertionError("Go output source differs from intended edit")
-                    if form_snapshot(document) != expected_controls:
-                        raise AssertionError("Go output changed form properties, hierarchy, inventory or pictures")
+                    require_form_snapshot(form_snapshot(document), expected_controls, "Go")
                 before, after = parts(source), parts(output)
                 changed = sorted(name for name in set(before) | set(after) if before.get(name) != after.get(name))
                 before_streams, after_streams = streams(source), streams(output)
                 row.update(changed_parts=changed, changed_streams=sorted(name for name in set(before_streams) | set(after_streams)
                            if before_streams.get(name) != after_streams.get(name)))
-                allowed = {"word/vbaProject.bin"} if build["operation"] in ("module-edit", "class-add") else set()
+                allowed = {"word/vbaProject.bin"} if build["operation"] in ("module-edit", "class-add", "control-caption", "control-font") else set()
                 if set(changed) - allowed:
                     raise AssertionError("Go output changed unrelated package parts")
                 row["status"] = "passed"
