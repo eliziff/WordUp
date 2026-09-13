@@ -20,6 +20,7 @@ class SemanticProof {
                 ("Callee", "Option Explicit\nPublic Function AddOne(ByVal value As Long) As Long\n AddOne = value + 1\nEnd Function\n", ComponentType.StandardModule)
             };
             var results = new List<object>();
+            results.Add(CheckInspection());
             var wordLibrary = Environment.GetEnvironmentVariable("WORDUP_TEST_WORD_TYPELIB");
             if (!String.IsNullOrEmpty(wordLibrary)) results.Add(CheckWordLibrary(wordLibrary));
             results.Add(CheckSnapshotEditor(modules));
@@ -59,6 +60,33 @@ class SemanticProof {
         }
     }
     static void Require(bool condition, string message) { if (!condition) throw new Exception(message); }
+    static object CheckInspection() {
+        var timer = Stopwatch.StartNew();
+        // Concrete inspections are internal upstream; instantiate the pinned
+        // implementation through its public IInspection contract, without mocks.
+        var type = typeof(Rubberduck.CodeAnalysis.Inspections.IInspection).Assembly.GetType(
+            "Rubberduck.CodeAnalysis.Inspections.Concrete.VariableNotUsedInspection", true);
+        foreach (var used in new[]{false, true, false}) {
+            var source = "Option Explicit\nPublic Function Answer() As Long\n Dim spare As Long\n Answer = " + (used ? "spare" : "42") + "\nEnd Function\n";
+            var editor = new WordUp.Analysis.SnapshotEditor("workspace", "InspectionProof", new[]{
+                ("Example", ComponentType.StandardModule, new WordUp.Analysis.SourceSnapshot("vba/Example.bas", System.Text.Encoding.UTF8.GetBytes(source)))
+            });
+            using (var state = WordUp.Analysis.SnapshotAnalysis.ResolveSourceOnly(editor,
+                new Dictionary<string,Dictionary<string,short>>{{"workspace",new Dictionary<string,short>()}},CancellationToken.None)) {
+                Require(!state.ModuleExceptions.Any(), "Inspection fixture failed to parse");
+                var inspection = (Rubberduck.CodeAnalysis.Inspections.IInspection)Activator.CreateInstance(type, state);
+                var findings = inspection.GetInspectionResults(CancellationToken.None).ToArray();
+                Require(findings.Length == (used ? 0 : 1), "Unused variable inspection missed defect or retained stale result");
+                if (!used) {
+                    Require(findings[0].Target.IdentifierName == "spare", "Inspection targeted wrong variable");
+                    Require(findings[0].QualifiedSelection.QualifiedName.ComponentName == "Example", "Inspection targeted wrong module");
+                    Require(findings[0].QualifiedSelection.Selection.StartLine == 3, "Inspection location incorrect");
+                    Require(!String.IsNullOrEmpty(findings[0].Description), "Inspection resource description missing");
+                }
+            }
+        }
+        return new {name="upstream unused-variable inspection: defect/fix/defect",duration_ms=timer.Elapsed.TotalMilliseconds};
+    }
     static object CheckWordLibrary(string path) {
         var timer = Stopwatch.StartNew();
         var provider = new Rubberduck.Parsing.ComReflection.ComLibraryProvider();

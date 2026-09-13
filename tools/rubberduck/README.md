@@ -23,11 +23,22 @@ diagnostics map back to physical source lines. Unsupported editor operations
 throw; no editor or Word instance is created. Standard/class modules are supported;
 document/form metadata remains unfinished and is rejected explicitly.
 
+The build also includes upstream CodeAnalysis and its project dependencies.
+`Headless.targets` references the pinned SDK's .NET Framework-compatible
+`netstandard` facade for the Immutable dependency, without importing SDK task
+internals or changing upstream source. Keep this dependency in the analysis
+toolchain, not in generated templates.
+
 The proof exercises both this adapter and upstream test-only editor fixtures,
 comparing declarations and reference locations for cross-module calls, invalid
 members, conditional code and property accessors. Moq/NUnit belong only to the
 proof project, not the analysis assembly. This is not native Word execution or
 an agent endpoint yet.
+
+The proof runs the actual upstream unused-variable inspection on a defect,
+its correction, and the defect again, asserting the variable, module, line and
+resource description. This establishes that inspection path, not all inspections
+or incremental cache invalidation.
 
 Installed type-library reflection uses upstream `ComLibraryProvider` (no
 registration) and `ComProject`. References require matching GUID, version and

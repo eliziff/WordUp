@@ -1,4 +1,12 @@
 <Project>
+  <!-- Immutable 1.5 resolves to netstandard2.0. VS BuildTools without the
+       SDK ImportAfter tasks needs this existing framework-compatible facade. -->
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <Reference Include="netstandard">
+      <HintPath>$(MSBuildSDKsPath)\..\Microsoft\Microsoft.NET.Build.Extensions\net461\lib\netstandard.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
   <PropertyGroup>
     <GenerateSatelliteAssembliesForCore>true</GenerateSatelliteAssembliesForCore>
   </PropertyGroup>
