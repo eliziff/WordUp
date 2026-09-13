@@ -470,6 +470,14 @@ func TestWordInteroperabilityMetadata(t *testing.T) {
 		}
 	}
 }
+func TestTypeInfoVersionUpdatePreservesDesignerFormatting(t *testing.T) {
+	frame := "VERSION 5.00\r\n   TypeInfoVer     =   97   ' retained\r\nEnd\r\n"
+	want := "VERSION 5.00\r\n   TypeInfoVer     =   123   ' retained\r\nEnd\r\n"
+	if got := syncTypeInfoVersion(frame, 123); got != want {
+		t.Fatalf("designer formatting changed:\nwant %q\n got %q", want, got)
+	}
+}
+
 func TestPackageRefusesSymlinkEntries(t *testing.T) {
 	var b bytes.Buffer
 	z := zip.NewWriter(&b)

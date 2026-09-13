@@ -633,10 +633,7 @@ func (f *Form) apply(d Design) error {
 	if f.vbframe == "" {
 		f.vbframe = fmt.Sprintf("VERSION 5.00\r\nBegin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} %s\r\n   Caption = \"%s\"\r\n   ClientHeight = 4800\r\n   ClientLeft = 0\r\n   ClientTop = 0\r\n   ClientWidth = 7200\r\n   StartUpPosition = 1\r\n   TypeInfoVer = 1\r\nEnd\r\n", f.Name, f.Name)
 	}
-	version := regexp.MustCompile(`(?m)^\s*TypeInfoVer\s*=.*\r?$`)
-	f.vbframe = version.ReplaceAllStringFunc(f.vbframe, func(string) string {
-		return fmt.Sprintf("   TypeInfoVer = %d\r", f.root.record.values["ShapeCookie"])
-	})
+	f.vbframe = syncTypeInfoVersion(f.vbframe, f.root.record.values["ShapeCookie"])
 	for _, item := range []struct {
 		key, field string
 		scale      float64
@@ -667,6 +664,15 @@ func (f *Form) apply(d Design) error {
 		}
 	}
 	return nil
+}
+
+var typeInfoVersionLine = regexp.MustCompile(`(?m)^(\s*TypeInfoVer\s*=\s*)\d+([^\r\n]*)(\r?)$`)
+
+func syncTypeInfoVersion(frame string, value any) string {
+	return typeInfoVersionLine.ReplaceAllStringFunc(frame, func(line string) string {
+		parts := typeInfoVersionLine.FindStringSubmatch(line)
+		return parts[1] + fmt.Sprint(value) + parts[2] + parts[3]
+	})
 }
 func (f *Form) applyControls(l *formLevel, designs []ControlDesign, remove []string, cp int) error {
 	if l.kind == "MultiPage" || len(l.x) > 0 {
