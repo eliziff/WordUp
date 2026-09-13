@@ -84,16 +84,38 @@ func run() error {
 				}
 				samples = append(samples, float64(time.Since(start).Microseconds())/1000)
 			}
-			warm := append([]float64(nil), samples[1:]...)
-			sort.Float64s(warm)
-			row := map[string]any{"input": input, "operation": operation, "import_ms": importMS, "samples_ms": samples,
-				"warm_median_ms": (warm[2] + warm[3]) / 2, "output": report.Artifact, "cached": report.Cached,
+			// A stable output path exercises the actual incremental cache. The
+			// different-output samples above deliberately force full package writes.
+			var cachedSamples []float64
+			for repetition := 0; repetition < 7; repetition++ {
+				start = time.Now()
+				cachedReport, buildErr := w.Build(report.Artifact)
+				if buildErr != nil {
+					return buildErr
+				}
+				if !cachedReport.Cached {
+					return fmt.Errorf("expected cached build for %s", operation)
+				}
+				cachedSamples = append(cachedSamples, float64(time.Since(start).Microseconds())/1000)
+			}
+			warm := samples[1:]
+			row := map[string]any{"engine": "Go workspace", "input": input, "operation": operation, "import_ms": importMS, "samples_ms": samples,
+				"first_build_ms": samples[0], "cold_end_to_end_ms": importMS + samples[0],
+				"warm_median_ms": median(warm), "p95_ms": percentile(samples, 0.95),
+				"cached_samples_ms": cachedSamples, "cached_first_ms": cachedSamples[0],
+				"cached_warm_median_ms": median(cachedSamples[1:]), "cached_warm_p95_ms": percentile(cachedSamples[1:], 0.95),
+				"output": report.Artifact, "cached": report.Cached,
 				"native_word_executed": false, "scope": "workspace build timing; independent comparison required"}
 			if control != nil {
 				row["control"] = control
 			}
 			rows = append(rows, row)
 		}
+		direct, err := directRows(root, i, input)
+		if err != nil {
+			return err
+		}
+		rows = append(rows, direct...)
 	}
 	data, err := json.MarshalIndent(rows, "", "  ")
 	if err != nil {
@@ -104,6 +126,83 @@ func run() error {
 	}
 	fmt.Println(string(data))
 	return nil
+}
+
+func directRows(root string, inputIndex int, input string) ([]map[string]any, error) {
+	var rows []map[string]any
+	for _, operation := range []string{"module-edit", "class-add"} {
+		var samples []float64
+		var output string
+		for repetition := 0; repetition < 7; repetition++ {
+			output = filepath.Join(root, fmt.Sprintf("%d-direct-%s-%d.dotm", inputIndex, operation, repetition))
+			start := time.Now()
+			data, err := os.ReadFile(input)
+			if err != nil {
+				return nil, err
+			}
+			pkg, err := office.ReadPackage(data)
+			if err != nil {
+				return nil, err
+			}
+			vba, err := office.ReadVBA(pkg.Files["word/vbaProject.bin"])
+			if err != nil {
+				return nil, err
+			}
+			modules := append([]office.Module(nil), vba.Modules...)
+			sort.Slice(modules, func(i, j int) bool { return modules[i].Name < modules[j].Name })
+			switch operation {
+			case "module-edit":
+				modules[0].Source = strings.TrimRight(modules[0].Source, "\r\n") + "\r\n' WordUp writer comparison\r\n"
+			case "class-add":
+				modules = append(modules, office.Module{Name: "WriterClass", Kind: "class", Source: "Option Explicit\nPrivate value As Long\nPublic Property Get Current() As Long\nCurrent = value\nEnd Property\nPublic Property Let Current(ByVal nextValue As Long)\nvalue = nextValue\nEnd Property\n"})
+			}
+			project, err := vba.Rewrite(modules, nil)
+			if err != nil {
+				return nil, err
+			}
+			if err = pkg.SetVBA(project); err != nil {
+				return nil, err
+			}
+			result, err := pkg.Bytes()
+			if err != nil {
+				return nil, err
+			}
+			if err = os.WriteFile(output, result, 0600); err != nil {
+				return nil, err
+			}
+			samples = append(samples, float64(time.Since(start).Microseconds())/1000)
+		}
+		rows = append(rows, map[string]any{
+			"engine": "Go library", "input": input, "operation": operation, "output": output,
+			"samples_ms": samples, "first_operation_ms": samples[0], "warm_median_ms": median(samples[1:]),
+			"p95_ms": percentile(samples, 0.95), "native_word_executed": false,
+			"scope": "fresh package read, direct VBA mutation, package write",
+		})
+	}
+	return rows, nil
+}
+
+func median(values []float64) float64 {
+	ordered := append([]float64(nil), values...)
+	sort.Float64s(ordered)
+	middle := len(ordered) / 2
+	if len(ordered)%2 == 1 {
+		return ordered[middle]
+	}
+	return (ordered[middle-1] + ordered[middle]) / 2
+}
+
+func percentile(values []float64, fraction float64) float64 {
+	ordered := append([]float64(nil), values...)
+	sort.Float64s(ordered)
+	index := int(float64(len(ordered))*fraction+0.999999) - 1
+	if index < 0 {
+		index = 0
+	}
+	if index >= len(ordered) {
+		index = len(ordered) - 1
+	}
+	return ordered[index]
 }
 
 func mutateForm(root, operation string) ([]string, error) {

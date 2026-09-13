@@ -74,6 +74,11 @@ def require_form_snapshot(actual, expected, engine):
     raise AssertionError(f"{engine} form snapshot differs")
 
 
+def nearest_rank(values, fraction):
+    ordered = sorted(values)
+    return ordered[max(0, min(len(ordered) - 1, int(len(ordered) * fraction + 0.999999) - 1))]
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--upstream", type=Path, required=True)
@@ -110,7 +115,8 @@ def main():
             original_controls = form_snapshot(document)
         for operation in ("unchanged", "module-edit", "module-lifecycle", "class-add", "forms-read", "control-caption", "control-font"):
             samples = []
-            row = {"input": str(source.resolve()), "source_sha256": original_hash, "operation": operation}
+            verification_samples = []
+            row = {"engine": "pyOpenVBA library", "input": str(source.resolve()), "source_sha256": original_hash, "operation": operation}
             try:
                 for iteration in range(args.repetitions):
                     output = args.output / f"{index}-{operation}-{iteration}.dotm"
@@ -163,6 +169,7 @@ def main():
                             row["control"] = list(selected)
                         document.save(output)
                     samples.append((time.perf_counter() - start) * 1000)
+                    verify_start = time.perf_counter()
                     with WordFile(output) as document:
                         normalize = lambda values: {key: value.replace("\r\n", "\n").rstrip("\n") for key, value in values.items()}
                         if normalize(document.vba_modules()) != normalize(expected):
@@ -181,6 +188,7 @@ def main():
                         raise AssertionError("Unexpected changed package parts: " + str(changed))
                     if mutation and not changed:
                         raise AssertionError("Requested edit was not written")
+                    verification_samples.append((time.perf_counter() - verify_start) * 1000)
                 row["status"] = "passed"
             except Exception as error:
                 row.update(status="failed", error=f"{type(error).__name__}: {error}")
@@ -188,13 +196,18 @@ def main():
                 if digest(source) != original_hash:
                     raise AssertionError("Original input changed")
             if samples:
-                row.update(first_ms=samples[0], warm_median_ms=statistics.median(samples[1:]) if len(samples)>1 else None,
-                           p95_ms=sorted(samples)[min(len(samples)-1, int(len(samples)*0.95))], samples_ms=samples)
+                row.update(first_operation_ms=samples[0], cold_worker_ms=import_ms + samples[0],
+                           warm_median_ms=statistics.median(samples[1:]) if len(samples)>1 else None,
+                           p95_ms=nearest_rank(samples, 0.95), samples_ms=samples,
+                           verification_median_ms=statistics.median(verification_samples) if verification_samples else None,
+                           verification_p95_ms=nearest_rank(verification_samples, 0.95) if verification_samples else None,
+                           verification_samples_ms=verification_samples)
             results.append(row)
     if args.go_report:
         for build in json.loads(args.go_report.read_text(encoding="utf-8")):
             source, output = Path(build["input"]), Path(build["output"])
-            row = {"engine": "Go", "input": str(source.resolve()), "output": str(output.resolve()), "operation": build["operation"]}
+            row = dict(build)
+            row.update(input=str(source.resolve()), output=str(output.resolve()))
             try:
                 with WordFile(source) as document:
                     expected = document.vba_modules()

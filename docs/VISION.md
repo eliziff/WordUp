@@ -12,6 +12,23 @@ The agent must observe behavior and layout, iterate quickly, preserve unrelated
 content, and install a tested result for the next Word launch. Mac portability
 and actual Mac testing are a stretch goal.
 
+## Implementation doctrine
+
+The product goal, not an implementation language, is authoritative. WordUp must
+be highly portable, lightweight, performant, feature-rich and capable enough for
+agents to work fluently with real DOTM projects. Go, Python, C#, Rust, C, C++ or
+another implementation may be retained, combined, replaced or rewritten when
+evidence shows that doing so advances that goal.
+
+Capability and fidelity are gates. Among implementations that pass them,
+controlled cold and warm measurements decide: end-to-end latency, throughput,
+memory, distribution size, portability, operational reliability and maintenance
+cost. Profile before porting, replace measured bottlenecks rather than assuming
+a lower-level language is faster, and require the complete behavioral and
+preservation corpus to pass before a production cutover. Keep one production
+path once the evidence supports the choice; alternate engines belong as bounded
+oracles unless they provide a distinct required capability.
+
 ## Acceptance gates
 
 | Gate | Required proof |

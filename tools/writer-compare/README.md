@@ -5,6 +5,10 @@ Choose demonstrated capability first. If a more capable implementation is
 materially slower, eliminate redundant work and port measured bottlenecks to Go.
 Keep one production writer; alternative implementations may remain test oracles.
 
+The project-wide language and cutover rule is in `docs/VISION.md`. For the writer,
+apply that rule to the full persistence and native-behavior matrix, not timing in
+isolation.
+
 ## Git acceptance
 
 The editable workspace is the review/merge surface; DOTM is a built artifact.
@@ -25,8 +29,11 @@ separate assets and tests. Do not require agents to merge ZIP or binary VBA data
 `compare.py` measures upstream unchanged saves, module edits, module add/rename/delete,
 form reads, and control-caption/font edits. It records independent olefile stream hashes, package-part
 changes and module/property checks, retaining local outputs. `go/` measures the
-existing workspace build path; `--go-report` independently checks its outputs.
-These paths have different overhead: do not attribute timings to language alone.
+existing workspace build path and a direct Go-library lane for like-for-like
+module edits and class additions; `--go-report` independently checks its outputs.
+The report separates first operation, forced package rebuild, incremental cache,
+and independent verification timings. These paths have different overhead: do
+not attribute timings to language alone.
 All operations compare form properties, designer text, structural control paths/order,
 and hashes of parsed picture bytes. Structural paths retain unnamed nested records.
 These parsed checks do not establish preservation of every unknown binary field;
