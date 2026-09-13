@@ -35,6 +35,7 @@ type Parameters struct {
 	Part                 string                  `json:"part,omitempty"`
 	Namespaces           map[string]string       `json:"namespaces,omitempty"`
 	Component            string                  `json:"component,omitempty"`
+	Parameters           map[string]string       `json:"parameters,omitempty"`
 	Document             string                  `json:"document,omitempty"`
 	CompilationConstants map[string]any          `json:"compilation_constants,omitempty"`
 	XMLPolicy            office.XMLComparePolicy `json:"xml_policy,omitempty"`
@@ -137,9 +138,9 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 			if err != nil {
 				return nil, err
 			}
-			return component.AddBundle(e.Root, dir)
+			return component.AddBundleWith(e.Root, dir, p.Parameters)
 		}
-		return component.Add(e.Root, p.Component)
+		return component.AddWith(e.Root, p.Component, p.Parameters)
 	case "component.status":
 		return component.Status(e.Root, p.Component)
 	case "component.diff":
@@ -148,9 +149,9 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 			if err != nil {
 				return nil, err
 			}
-			return component.DiffBundle(e.Root, dir)
+			return component.DiffBundleWith(e.Root, dir, p.Parameters)
 		}
-		return component.Diff(e.Root, p.Component)
+		return component.DiffWith(e.Root, p.Component, p.Parameters)
 	case "binary.inspect":
 		full, err := e.path(p.Path)
 		if err != nil {

@@ -26,9 +26,9 @@ func Tools() []Tool {
 	ds = append(ds,
 		[2]string{"component.list", "List bundled editable template components and their capabilities."},
 		[2]string{"component.get", "Return one bundled component by component ID, or a local component.json bundle by path, without changing the workspace."},
-		[2]string{"component.add", "Vendor one bundled component ID or local component.json bundle path into the workspace with collision and modification protection."},
+		[2]string{"component.add", "Vendor one bundled component ID or local component.json bundle path into the workspace with typed parameters, collision checks and modification protection."},
 		[2]string{"component.status", "Report whether an installed component remains identical to its starting source: component."},
-		[2]string{"component.diff", "Return bundled source and installed status for an agent-controlled comparison; accepts bundled component ID or local bundle path and never overwrites edits."},
+		[2]string{"component.diff", "Compare installed source with the same parameterized bundled or local starting version; never overwrites edits."},
 	)
 	props := map[string]any{}
 	ds = append(ds, [2]string{"test.freeze", "Freeze passing native report reference into a new local output directory, including the retained artifact, declared inputs and run evidence. Returns a portable bundle.json reference accepted by test.replay and test.compare; verifies hashes on load. Existing destinations are never overwritten. XML is copied unchanged. Uncaptured external inputs are not made hermetic."})
@@ -64,6 +64,7 @@ func Tools() []Tool {
 		props[key] = map[string]any{"type": "string"}
 	}
 	props["component"] = map[string]any{"type": "string", "description": "Stable bundled component ID such as structure.detect."}
+	props["parameters"] = map[string]any{"type": "object", "additionalProperties": map[string]any{"type": "string"}, "description": "Declared component adaptation values. Currently module_prefix is a validated VBA identifier; undeclared values are rejected."}
 	for _, key := range []string{"timeout_ms", "tolerance", "limit"} {
 		props[key] = map[string]any{"type": "integer"}
 	}

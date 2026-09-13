@@ -2,7 +2,9 @@ package agent
 
 import (
 	"context"
+	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/eliziff/WordUp/internal/component"
@@ -26,5 +28,23 @@ func TestComponentAddAcceptsLocalBundleRelativeToWorkspace(t *testing.T) {
 	}
 	if result.(component.Installed).ID != manifest.ID {
 		t.Fatalf("wrong component installed: %#v", result)
+	}
+}
+
+func TestComponentParametersFlowThroughAgent(t *testing.T) {
+	root := t.TempDir()
+	engine := &Engine{Root: root}
+	result, err := engine.Call(context.Background(), "component.add", Parameters{
+		Component: "ui.progress-cancel", Parameters: map[string]string{"module_prefix": "Fast"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.(component.Installed).Parameters["module_prefix"] != "Fast" {
+		t.Fatalf("parameters not returned: %#v", result)
+	}
+	source, err := os.ReadFile(filepath.Join(root, "vba", "WordUpProgress.bas"))
+	if err != nil || !strings.Contains(string(source), "Fast_CancelRequested") {
+		t.Fatalf("parameterized source missing: %v", err)
 	}
 }

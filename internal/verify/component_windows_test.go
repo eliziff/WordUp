@@ -25,7 +25,13 @@ func TestNativeComponentCleanup(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, id := range []string{"operation.safe-edit", "document.style-converter", "structure.detect", "ui.form-shell", "ui.progress-cancel", "ui.ribbon-command", "command.hotkey", "command.context-menu"} {
-		if _, err := component.Add(root, id); err != nil {
+		var err error
+		if id == "ui.progress-cancel" {
+			_, err = component.AddWith(root, id, map[string]string{"module_prefix": "ProofProgress"})
+		} else {
+			_, err = component.Add(root, id)
+		}
+		if err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -126,10 +132,10 @@ Public Sub WU_Command_proof_button()
 End Sub
 Public Function CheckRibbonAndProgress() As String
     Dim control As New ProofControl
-    WU_ResetProgress
-    If WU_CancelRequested Then Err.Raise 5, , "reset left cancellation requested"
-    WU_RequestCancel
-    If Not WU_CancelRequested Then Err.Raise 5, , "cancellation request was lost"
+    ProofProgress_ResetProgress
+    If ProofProgress_CancelRequested Then Err.Raise 5, , "reset left cancellation requested"
+    ProofProgress_RequestCancel
+    If Not ProofProgress_CancelRequested Then Err.Raise 5, , "cancellation request was lost"
     control.Id = "proof-button"
     WU_Dispatched = False
     WU_RibbonCommand control

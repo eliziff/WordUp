@@ -5,6 +5,7 @@ import (
 	"github.com/eliziff/WordUp/internal/vbaparse"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -128,6 +129,64 @@ func TestAddTracksAndProtectsEditedComponent(t *testing.T) {
 	}
 	if _, err = Add(root, "structure.detect"); err == nil {
 		t.Fatal("edited component overwritten")
+	}
+}
+
+func TestAddAppliesOnlyDeclaredTypedParameters(t *testing.T) {
+	root := t.TempDir()
+	installed, err := AddWith(root, "operation.safe-edit", map[string]string{"module_prefix": "ACME"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	source, err := project.Read(root, "vba/WordUpSafeEdit.bas")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(source), "Public Sub ACME_BeginSafeEdit") || strings.Contains(string(source), "Public Sub WU_BeginSafeEdit") {
+		t.Fatal("module prefix was not applied to the VBA entry point")
+	}
+	if installed.Parameters["module_prefix"] != "ACME" {
+		t.Fatalf("parameters not recorded: %#v", installed.Parameters)
+	}
+	status, err := Status(root, installed.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	parameters, ok := status["parameters"].(map[string]string)
+	if !ok || parameters["module_prefix"] != "ACME" {
+		t.Fatalf("status parameters=%#v", status["parameters"])
+	}
+	difference, err := Diff(root, installed.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	files := difference["bundled_files"].(map[string]any)
+	starting := files["vba/WordUpSafeEdit.bas"].(map[string]any)["text"].(string)
+	if !strings.Contains(starting, "Public Sub ACME_BeginSafeEdit") {
+		t.Fatal("diff did not reuse installed parameter values")
+	}
+	if _, err = AddWith(root, installed.ID, map[string]string{"module_prefix": "ACME"}); err != nil {
+		t.Fatal("same parameterization is not idempotent:", err)
+	}
+	if _, err = AddWith(root, installed.ID, map[string]string{"module_prefix": "Other"}); err == nil {
+		t.Fatal("different parameterization was treated as idempotent")
+	}
+}
+
+func TestAddRejectsInvalidOrUndeclaredParametersBeforeWriting(t *testing.T) {
+	for name, values := range map[string]map[string]string{
+		"invalid identifier": {"module_prefix": "not-valid"},
+		"undeclared":         {"label": "Surprise"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			root := t.TempDir()
+			if _, err := AddWith(root, "ui.progress-cancel", values); err == nil {
+				t.Fatal("invalid parameters accepted")
+			}
+			if _, err := project.Read(root, "vba/WordUpProgress.bas"); !os.IsNotExist(err) {
+				t.Fatalf("source written after rejected parameters: %v", err)
+			}
+		})
 	}
 }
 

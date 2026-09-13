@@ -7,6 +7,7 @@ import (
 	"github.com/eliziff/WordUp/internal/project"
 	"github.com/eliziff/WordUp/internal/structure"
 	"io/fs"
+	"maps"
 	"os"
 	"path/filepath"
 	"sort"
@@ -33,6 +34,7 @@ type Manifest struct {
 	Acceptance         string            `json:"acceptance"`
 	Adaptation         string            `json:"adaptation"`
 	Files              []File            `json:"files"`
+	applied            map[string]string
 }
 type Installed struct {
 	ID             string            `json:"id"`
@@ -41,6 +43,7 @@ type Installed struct {
 	Provenance     string            `json:"provenance,omitempty"`
 	License        string            `json:"license,omitempty"`
 	ManifestSHA256 string            `json:"manifest_sha256,omitempty"`
+	Parameters     map[string]string `json:"parameters,omitempty"`
 }
 type Lock struct {
 	Schema     int                  `json:"schema"`
@@ -123,7 +126,15 @@ func readLock(root string) (Lock, error) {
 }
 
 func Add(root, id string) (Installed, error) {
+	return AddWith(root, id, nil)
+}
+
+func AddWith(root, id string, values map[string]string) (Installed, error) {
 	m, err := Get(id)
+	if err != nil {
+		return Installed{}, err
+	}
+	m, err = adapt(m, values)
 	if err != nil {
 		return Installed{}, err
 	}
@@ -166,7 +177,15 @@ func readBundleText(root, path string) (string, error) {
 }
 
 func AddBundle(root, dir string) (Installed, error) {
+	return AddBundleWith(root, dir, nil)
+}
+
+func AddBundleWith(root, dir string, values map[string]string) (Installed, error) {
 	m, err := LoadBundle(dir)
+	if err != nil {
+		return Installed{}, err
+	}
+	m, err = adapt(m, values)
 	if err != nil {
 		return Installed{}, err
 	}
@@ -174,11 +193,57 @@ func AddBundle(root, dir string) (Installed, error) {
 }
 
 func DiffBundle(root, dir string) (map[string]any, error) {
+	return DiffBundleWith(root, dir, nil)
+}
+
+func DiffBundleWith(root, dir string, values map[string]string) (map[string]any, error) {
 	m, err := LoadBundle(dir)
 	if err != nil {
 		return nil, err
 	}
+	values, err = diffParameters(root, m.ID, values)
+	if err != nil {
+		return nil, err
+	}
+	m, err = adapt(m, values)
+	if err != nil {
+		return nil, err
+	}
 	return diff(root, m)
+}
+
+func adapt(m Manifest, supplied map[string]string) (Manifest, error) {
+	values := map[string]string{}
+	for name, value := range m.Defaults {
+		values[name] = value
+	}
+	for name, value := range supplied {
+		if _, declared := m.Parameters[name]; !declared {
+			return Manifest{}, fmt.Errorf("component %s does not declare parameter %s", m.ID, name)
+		}
+		values[name] = value
+	}
+	for name := range m.Parameters {
+		if _, ok := values[name]; !ok {
+			return Manifest{}, fmt.Errorf("component %s requires parameter %s", m.ID, name)
+		}
+	}
+	for name, value := range values {
+		switch name {
+		case "module_prefix":
+			if !office.ValidIdentifier(value) {
+				return Manifest{}, fmt.Errorf("component %s parameter module_prefix must be a valid VBA identifier", m.ID)
+			}
+			for i := range m.Files {
+				m.Files[i].Text = strings.ReplaceAll(m.Files[i].Text, "WU_", value+"_")
+			}
+			m.Acceptance = strings.ReplaceAll(m.Acceptance, "WU_", value+"_")
+		default:
+			return Manifest{}, fmt.Errorf("component %s parameter %s has no typed adapter", m.ID, name)
+		}
+	}
+	m.applied = values
+	return m, nil
 }
 
 func install(root string, m Manifest) (Installed, error) {
@@ -208,12 +273,12 @@ func install(root string, m Manifest) (Installed, error) {
 		for _, f := range m.Files {
 			same = same && prior.Files[f.Path] == office.Hash([]byte(f.Text))
 		}
-		if status["state"] == "clean" && prior.Version == m.Version && same {
+		if status["state"] == "clean" && prior.Version == m.Version && same && maps.Equal(prior.Parameters, m.applied) {
 			return prior, nil
 		}
 		return Installed{}, fmt.Errorf("component %s is already installed and differs from its recorded source; inspect component.status or component.diff", id)
 	}
-	installed := Installed{ID: id, Version: m.Version, Files: map[string]string{}, Provenance: m.Provenance, License: m.License, ManifestSHA256: office.Hash(project.JSON(m))}
+	installed := Installed{ID: id, Version: m.Version, Files: map[string]string{}, Provenance: m.Provenance, License: m.License, ManifestSHA256: office.Hash(project.JSON(m)), Parameters: m.applied}
 	// Preflight every file before writing any source. Components are independent
 	// copies: no file in this path is allowed to replace an existing file.
 	seen := map[string]bool{}
@@ -322,15 +387,41 @@ func Status(root, id string) (map[string]any, error) {
 		rows = append(rows, row)
 	}
 	return map[string]any{"id": id, "version": installed.Version, "state": state, "files": rows,
-		"provenance": installed.Provenance, "license": installed.License, "manifest_sha256": installed.ManifestSHA256}, nil
+		"provenance": installed.Provenance, "license": installed.License, "manifest_sha256": installed.ManifestSHA256, "parameters": installed.Parameters}, nil
 }
 
 func Diff(root, id string) (map[string]any, error) {
+	return DiffWith(root, id, nil)
+}
+
+func DiffWith(root, id string, values map[string]string) (map[string]any, error) {
 	m, err := Get(id)
 	if err != nil {
 		return nil, err
 	}
+	values, err = diffParameters(root, m.ID, values)
+	if err != nil {
+		return nil, err
+	}
+	m, err = adapt(m, values)
+	if err != nil {
+		return nil, err
+	}
 	return diff(root, m)
+}
+
+func diffParameters(root, id string, supplied map[string]string) (map[string]string, error) {
+	if supplied != nil {
+		return supplied, nil
+	}
+	lock, err := readLock(root)
+	if err != nil {
+		return nil, err
+	}
+	if installed, ok := lock.Components[id]; ok {
+		return installed.Parameters, nil
+	}
+	return nil, nil
 }
 
 func diff(root string, m Manifest) (map[string]any, error) {
