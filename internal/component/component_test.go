@@ -146,3 +146,49 @@ func TestBundledCatalogIsComplete(t *testing.T) {
 		}
 	}
 }
+
+func TestLocalBundleInstallsAndDiffsWithoutEmbeddingSource(t *testing.T) {
+	bundle, root := t.TempDir(), t.TempDir()
+	manifest := Manifest{Schema: 1, ID: "example.local", Version: "1.2.3", License: "MIT", Provenance: "local test bundle", Files: []File{{Path: "vba/Local.bas"}}}
+	if err := project.Write(bundle, "component.json", project.JSON(manifest), ""); err != nil {
+		t.Fatal(err)
+	}
+	if err := project.Write(bundle, "vba/Local.bas", []byte("Attribute VB_Name = \"Local\"\nOption Explicit\n"), ""); err != nil {
+		t.Fatal(err)
+	}
+	installed, err := AddBundle(root, bundle)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if installed.ID != manifest.ID || installed.Provenance != manifest.Provenance {
+		t.Fatalf("wrong installed provenance: %#v", installed)
+	}
+	if _, err = AddBundle(root, bundle); err != nil {
+		t.Fatal("unchanged local bundle is not idempotent:", err)
+	}
+	diff, err := DiffBundle(root, bundle)
+	if err != nil || diff["component"] != manifest.ID {
+		t.Fatalf("local diff=%#v err=%v", diff, err)
+	}
+	if err = project.Write(root, "vba/Local.bas", []byte("adapted"), ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = AddBundle(root, bundle); err == nil {
+		t.Fatal("local bundle overwrote adapted source")
+	}
+}
+
+func TestLocalBundleRejectsUnsafeSources(t *testing.T) {
+	for _, file := range []File{{Path: "../escape.bas"}, {Path: "vba/Embedded.bas", Text: "embedded"}} {
+		t.Run(file.Path, func(t *testing.T) {
+			bundle := t.TempDir()
+			manifest := Manifest{Schema: 1, ID: "unsafe", Version: "1", License: "MIT", Provenance: "test", Files: []File{file}}
+			if err := project.Write(bundle, "component.json", project.JSON(manifest), ""); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := LoadBundle(bundle); err == nil {
+				t.Fatal("unsafe local bundle accepted")
+			}
+		})
+	}
+}

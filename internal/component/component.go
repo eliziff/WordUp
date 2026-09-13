@@ -130,6 +130,57 @@ func Add(root, id string) (Installed, error) {
 	return install(root, m)
 }
 
+func LoadBundle(dir string) (Manifest, error) {
+	raw, err := project.Read(dir, "component.json")
+	if err != nil {
+		return Manifest{}, fmt.Errorf("read component bundle manifest: %w", err)
+	}
+	var m Manifest
+	if err = project.ReadJSON(raw, &m); err != nil {
+		return Manifest{}, fmt.Errorf("component.json: %w", err)
+	}
+	if m.Schema != 1 || m.ID == "" || m.Version == "" || m.License == "" || m.Provenance == "" || len(m.Files) == 0 {
+		return Manifest{}, fmt.Errorf("component.json requires schema 1, id, version, license, provenance, and files")
+	}
+	for i := range m.Files {
+		if m.Files[i].Path == "" || m.Files[i].Text != "" {
+			return Manifest{}, fmt.Errorf("component.json file %d requires path and must not embed text", i)
+		}
+		m.Files[i].Text, err = readBundleText(dir, m.Files[i].Path)
+		if err != nil {
+			return Manifest{}, fmt.Errorf("component file %s: %w", m.Files[i].Path, err)
+		}
+	}
+	return m, nil
+}
+
+func readBundleText(root, path string) (string, error) {
+	b, err := project.Read(root, path)
+	if err != nil {
+		return "", err
+	}
+	if strings.IndexByte(string(b), 0) >= 0 {
+		return "", fmt.Errorf("bundled editable source contains NUL bytes")
+	}
+	return string(b), nil
+}
+
+func AddBundle(root, dir string) (Installed, error) {
+	m, err := LoadBundle(dir)
+	if err != nil {
+		return Installed{}, err
+	}
+	return install(root, m)
+}
+
+func DiffBundle(root, dir string) (map[string]any, error) {
+	m, err := LoadBundle(dir)
+	if err != nil {
+		return nil, err
+	}
+	return diff(root, m)
+}
+
 func install(root string, m Manifest) (Installed, error) {
 	id := m.ID
 	guard, err := project.Under(root, ".wordwright/component-install.lock")
@@ -279,7 +330,11 @@ func Diff(root, id string) (map[string]any, error) {
 	if err != nil {
 		return nil, err
 	}
-	status, err := Status(root, id)
+	return diff(root, m)
+}
+
+func diff(root string, m Manifest) (map[string]any, error) {
+	status, err := Status(root, m.ID)
 	if err != nil {
 		return nil, err
 	}

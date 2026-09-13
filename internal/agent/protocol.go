@@ -25,10 +25,10 @@ func Tools() []Tool {
 	ds = append(ds, [2]string{"structure.resolve", "Resolve generic heading candidates and hierarchy from package, style, outline, formatting and sequence evidence while retaining ambiguity: path."})
 	ds = append(ds,
 		[2]string{"component.list", "List bundled editable template components and their capabilities."},
-		[2]string{"component.get", "Return one bundled component manifest and source without changing the workspace: component."},
-		[2]string{"component.add", "Vendor one bundled component into the workspace with collision and modification protection: component."},
+		[2]string{"component.get", "Return one bundled component by component ID, or a local component.json bundle by path, without changing the workspace."},
+		[2]string{"component.add", "Vendor one bundled component ID or local component.json bundle path into the workspace with collision and modification protection."},
 		[2]string{"component.status", "Report whether an installed component remains identical to its starting source: component."},
-		[2]string{"component.diff", "Return bundled source and installed status for an agent-controlled comparison; never overwrites edits: component."},
+		[2]string{"component.diff", "Return bundled source and installed status for an agent-controlled comparison; accepts bundled component ID or local bundle path and never overwrites edits."},
 	)
 	props := map[string]any{}
 	ds = append(ds, [2]string{"test.freeze", "Freeze passing native report reference into a new local output directory, including the retained artifact, declared inputs and run evidence. Returns a portable bundle.json reference accepted by test.replay and test.compare; verifies hashes on load. Existing destinations are never overwritten. XML is copied unchanged. Uncaptured external inputs are not made hermetic."})

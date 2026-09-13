@@ -98,6 +98,12 @@ func (e *Engine) path(s string) (string, error) {
 	}
 	return project.Under(e.Root, filepath.ToSlash(s))
 }
+func (e *Engine) bundlePath(path string) (string, error) {
+	if filepath.IsAbs(path) {
+		return filepath.Clean(path), nil
+	}
+	return filepath.Abs(filepath.Join(e.Root, path))
+}
 func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, error) {
 	if !strings.HasPrefix(method, "native.") {
 		e.fsMu.Lock()
@@ -117,12 +123,33 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 	case "component.list":
 		return component.List(), nil
 	case "component.get":
+		if p.Path != "" {
+			dir, err := e.bundlePath(p.Path)
+			if err != nil {
+				return nil, err
+			}
+			return component.LoadBundle(dir)
+		}
 		return component.Get(p.Component)
 	case "component.add":
+		if p.Path != "" {
+			dir, err := e.bundlePath(p.Path)
+			if err != nil {
+				return nil, err
+			}
+			return component.AddBundle(e.Root, dir)
+		}
 		return component.Add(e.Root, p.Component)
 	case "component.status":
 		return component.Status(e.Root, p.Component)
 	case "component.diff":
+		if p.Path != "" {
+			dir, err := e.bundlePath(p.Path)
+			if err != nil {
+				return nil, err
+			}
+			return component.DiffBundle(e.Root, dir)
+		}
 		return component.Diff(e.Root, p.Component)
 	case "binary.inspect":
 		full, err := e.path(p.Path)

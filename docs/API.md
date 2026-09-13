@@ -126,7 +126,7 @@ Use `dictionary` to inspect the installed Word SDEF and the implemented operatio
 
 `call structure.source '{}'` returns the editable standalone `structure.detect` component and its contract. `call structure.inspect '@parameters.json'` accepts a document `path` and reads package evidence without Word: source-hashed paragraph locations, style ancestry, direct versus inherited outline levels, table/textbox containment and raw numbering definitions. `structure.resolve` adds generic candidate scoring, hierarchy, contradictions, and ambiguity while keeping the factual evidence intact; publication-specific role and style mapping remains separate. See [the detection boundary and reviewed upstream mechanisms](STRUCTURE-DETECTION.md).
 
-`component.list`, `component.get`, `component.add`, `component.status`, and `component.diff` expose the bundled editable components. Installation writes ordinary source and records its initial SHA-256 hashes in `.wordwright/components.json`; repeating an unchanged installation is idempotent, while an adapted or colliding file is never overwritten.
+`component.list`, `component.get`, `component.add`, `component.status`, and `component.diff` expose editable components. Pass `component` for a built-in, or `path` for a local directory containing `component.json` and its listed files. Installation writes ordinary source and records its initial SHA-256 hashes in `.wordwright/components.json`; repeating an unchanged installation is idempotent, while an adapted or colliding file is never overwritten.
 
 `xml.verify` compares expected XML `reference` directly with actual XML `path`.
 No manifest, labels, duplicated text, or rationales are required. Copy starting
