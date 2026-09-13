@@ -70,7 +70,7 @@ def main():
         original_streams = streams(source)
         with WordFile(source) as document:
             original_modules = document.vba_modules()
-        for operation in ("unchanged", "module-edit", "forms-read", "control-caption"):
+        for operation in ("unchanged", "module-edit", "module-lifecycle", "forms-read", "control-caption", "control-font"):
             samples = []
             row = {"input": str(source.resolve()), "source_sha256": original_hash, "operation": operation}
             try:
@@ -84,10 +84,19 @@ def main():
                         if operation == "module-edit":
                             expected[target] = modules[target].rstrip("\r\n") + "\r\n' WordUp writer comparison\r\n"
                             document.set_module(target, expected[target])
+                        if operation == "module-lifecycle":
+                            project = document.vba_project()
+                            added = 'Attribute VB_Name = "WriterAdded"\r\nPublic Function WriterAnswer() As Long\r\nWriterAnswer = 42\r\nEnd Function\r\n'
+                            project.add_module("WriterAdded", added)
+                            project.add_module("WriterRemoved", 'Attribute VB_Name = "WriterRemoved"\r\nPublic Sub Temporary()\r\nEnd Sub\r\n')
+                            document.save(args.output / f"{index}-lifecycle-intermediate-{iteration}.dotm")
+                            project.rename_module("WriterAdded", "WriterRenamed")
+                            project.delete_module("WriterRemoved")
+                            expected["WriterRenamed"] = added.replace('VB_Name = "WriterAdded"', 'VB_Name = "WriterRenamed"')
                         if operation == "forms-read":
                             row["forms"] = len(document.forms())
                         expected_controls = None
-                        if operation == "control-caption":
+                        if operation in ("control-caption", "control-font"):
                             controls = {(form.name, control.name): control for form in document.forms() for control in form.walk()}
                             expected_controls = {key: (control.kind, control.id, control.tab_index, copy.deepcopy(control.properties()))
                                                  for key, control in controls.items()}
@@ -95,8 +104,16 @@ def main():
                             if not eligible:
                                 raise ValueError("Precondition unmet: no supported caption control")
                             selected = eligible[0]
-                            controls[selected].set_property("Caption", "Writer comparison")
-                            expected_controls[selected][3]["Caption"] = "Writer comparison"
+                            if operation == "control-caption":
+                                controls[selected].set_property("Caption", "Writer comparison")
+                                expected_controls[selected][3]["Caption"] = "Writer comparison"
+                            else:
+                                font = controls[selected].record.text_props
+                                if font is None:
+                                    raise ValueError("Precondition unmet: control has no TextProps record")
+                                font.set_string("FontName", "Segoe UI")
+                                font.set_value("FontHeight", 240)
+                                expected_controls[selected][3].update({"Font.FontName":"Segoe UI", "Font.FontHeight":240})
                             row["control"] = list(selected)
                         document.save(output)
                     samples.append((time.perf_counter() - start) * 1000)
@@ -116,10 +133,11 @@ def main():
                                             if original_streams.get(name) != output_streams.get(name))
                     row.update(output=str(output.resolve()), output_sha256=digest(output), changed_parts=changed,
                                changed_streams=stream_changes)
-                    allowed = {"word/vbaProject.bin"} if operation in ("module-edit", "control-caption") else set()
+                    mutation = operation in ("module-edit", "module-lifecycle", "control-caption", "control-font")
+                    allowed = {"word/vbaProject.bin"} if mutation else set()
                     if set(changed) - allowed:
                         raise AssertionError("Unexpected changed package parts: " + str(changed))
-                    if operation in ("module-edit", "control-caption") and not changed:
+                    if mutation and not changed:
                         raise AssertionError("Requested edit was not written")
                 row["status"] = "passed"
             except Exception as error:

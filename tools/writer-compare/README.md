@@ -22,15 +22,15 @@ separate assets and tests. Do not require agents to merge ZIP or binary VBA data
 - Run Git tests in disposable repositories; never alter the development worktree
   or include private specimens in public fixtures.
 
-`compare.py` measures upstream unchanged saves, module edits, form reads and
-control-caption edits. It records independent olefile stream hashes, package-part
+`compare.py` measures upstream unchanged saves, module edits, module add/rename/delete,
+form reads, and control-caption/font edits. It records independent olefile stream hashes, package-part
 changes and module/property checks, retaining local outputs. `go/` measures the
 existing workspace build path; `--go-report` independently checks its outputs.
 These paths have different overhead: do not attribute timings to language alone.
 
 Git integration tests live in `internal/project/git_roundtrip_test.go` and include
-real disposable branches, merges and autocrlf checkouts. Native caption inspection
-uses `TestNativeWriterCaptionOutputs` with `WORDUP_NATIVE_TEST=1` and
+real disposable branches, merges, explicit overlapping-source conflicts and autocrlf checkouts. Native caption/font inspection
+uses `TestNativeWriterFormOutputs` with `WORDUP_NATIVE_TEST=1` and
 `WORDUP_WRITER_REPORT` pointing to the local comparison report. Native compilation,
 full form behavior and remaining writer capabilities are separate unfinished gates.
 
@@ -38,4 +38,6 @@ The native `open` operation accepts `named.disable_macros: true` on Windows.
 This forces disabled macros for that open even in an execution-authorized host;
 `macros_disabled_on_open` records the setting. It does not revoke the host's
 authority to perform subsequent explicitly requested calls, nor is it a sandbox.
-The caption check uses indexed COM reads without running VBA or showing a form.
+The form checks use indexed COM reads without running VBA or showing a form.
+Font size is checked against the COM currency contract's exact scaled integer
+string (12 points is `{"currency_scaled_10000":"120000"}`), not a rounded float.

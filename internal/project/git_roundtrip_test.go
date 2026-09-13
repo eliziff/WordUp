@@ -148,4 +148,32 @@ func TestGitNoOpBuildAndIndependentModuleMerge(t *testing.T) {
 			t.Fatalf("autocrlf=%s checkout build: %v", autocrlf, err)
 		}
 	}
+	// The same source line must remain an ordinary, visible Git conflict.
+	// Do not install a merge driver that silently chooses one implementation.
+	for _, branch := range []string{"conflict-left", "conflict-right"} {
+		git("checkout", "-qb", branch, "second")
+		source := "Public Function First() As Long\nFirst = 2 ' " + branch + "\nEnd Function\n"
+		if err := Write(w.Root, "vba/First.bas", []byte(source), ""); err != nil {
+			t.Fatal(err)
+		}
+		git("add", "vba/First.bas")
+		git("commit", "-qm", branch)
+	}
+	conflict := exec.Command("git", "-c", "user.name=WordUp Test", "-c", "user.email=test@example.invalid", "merge", "--no-edit", "conflict-left")
+	conflict.Dir = w.Root
+	if out, err := conflict.CombinedOutput(); err == nil {
+		t.Fatalf("Overlapping source edits merged silently: %s", out)
+	}
+	if status := git("status", "--porcelain", "--", "vba/First.bas"); !strings.HasPrefix(status, "UU ") {
+		t.Fatalf("Expected an unmerged source file, got %q", status)
+	}
+	conflicted, err := os.ReadFile(filepath.Join(w.Root, "vba", "First.bas"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, marker := range []string{"<<<<<<<", "=======", ">>>>>>>", "' conflict-left", "' conflict-right"} {
+		if !bytes.Contains(conflicted, []byte(marker)) {
+			t.Errorf("Conflict discarded source or marker %q", marker)
+		}
+	}
 }

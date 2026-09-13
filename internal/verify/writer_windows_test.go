@@ -13,7 +13,7 @@ import (
 	"github.com/eliziff/WordUp/internal/verify"
 )
 
-func TestNativeWriterCaptionOutputs(t *testing.T) {
+func TestNativeWriterFormOutputs(t *testing.T) {
 	path := os.Getenv("WORDUP_WRITER_REPORT")
 	if os.Getenv("WORDUP_NATIVE_TEST") != "1" || path == "" {
 		t.Skip("requires native opt-in and writer comparison report")
@@ -33,7 +33,7 @@ func TestNativeWriterCaptionOutputs(t *testing.T) {
 	}
 	count := 0
 	for _, row := range report.Results {
-		if row.Operation != "control-caption" || row.Status != "passed" {
+		if (row.Operation != "control-caption" && row.Operation != "control-font") || row.Status != "passed" {
 			continue
 		}
 		count++
@@ -46,7 +46,7 @@ func TestNativeWriterCaptionOutputs(t *testing.T) {
 				t.Fatal(err)
 			}
 			defer host.Close()
-			suite := verify.Suite{Schema: 1, Name: "Writer caption native inspection", Steps: []verify.Step{
+			suite := verify.Suite{Schema: 1, Name: "Writer form native inspection", Steps: []verify.Step{
 				{Name: "Open", Operation: native.Operation{Op: "open", File: "$artifact", As: "doc", Named: map[string]any{"disable_macros": true}}, Assert: []verify.Assertion{{Path: "/macros_disabled_on_open", Kind: "equals", Expected: true}}},
 				{Name: "Project", Operation: native.Operation{Op: "get", Target: "doc", Member: "VBProject", As: "project"}},
 				{Name: "Components", Operation: native.Operation{Op: "get", Target: "project", Member: "VBComponents", As: "components"}},
@@ -56,6 +56,12 @@ func TestNativeWriterCaptionOutputs(t *testing.T) {
 				{Name: "Control", Operation: native.Operation{Op: "invoke", Target: "controls", Member: "Item", Args: []any{row.Control[1]}, As: "control"}},
 				{Name: "Caption", Operation: native.Operation{Op: "get", Target: "control", Member: "Caption"}, Assert: []verify.Assertion{{Path: "", Kind: "equals", Expected: "Writer comparison"}}},
 			}}
+			if row.Operation == "control-font" {
+				suite.Steps = append(suite.Steps[:len(suite.Steps)-1],
+					verify.Step{Name: "Font", Operation: native.Operation{Op: "get", Target: "control", Member: "Font", As: "font"}},
+					verify.Step{Name: "Font name", Operation: native.Operation{Op: "get", Target: "font", Member: "Name"}, Assert: []verify.Assertion{{Path: "", Kind: "equals", Expected: "Segoe UI"}}},
+					verify.Step{Name: "Font size", Operation: native.Operation{Op: "get", Target: "font", Member: "Size"}, Assert: []verify.Assertion{{Path: "/currency_scaled_10000", Kind: "equals", Expected: "120000"}}})
+			}
 			// Permit the VBComponents.Item method, but open with macros disabled.
 			// This suite does not run VBA or mutate the form designer.
 			result, err := verify.Run(context.Background(), row.Output, suite, host, true)
@@ -63,12 +69,12 @@ func TestNativeWriterCaptionOutputs(t *testing.T) {
 				t.Fatal(saveErr)
 			}
 			if err != nil {
-				t.Fatalf("Native caption failed; report %s: %v", result.SavedReport, err)
+				t.Fatalf("Native form property failed; report %s: %v", result.SavedReport, err)
 			}
-			t.Logf("Native caption confirmed; report %s", result.SavedReport)
+			t.Logf("Native %s confirmed; report %s", row.Operation, result.SavedReport)
 		})
 	}
 	if count == 0 {
-		t.Fatal("No candidate captions tested")
+		t.Fatal("No candidate form properties tested")
 	}
 }
