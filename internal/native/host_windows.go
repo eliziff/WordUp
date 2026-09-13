@@ -366,6 +366,14 @@ func (h *wordHost) operation(op Operation) (any, error) {
 		}
 		return h.result(&v, op.As)
 	case "open", "new", "addin":
+		disableMacros := false
+		if value, present := op.Named["disable_macros"]; present {
+			var valid bool
+			disableMacros, valid = value.(bool)
+			if !valid || op.Op != "open" {
+				return nil, fmt.Errorf("disable_macros is a boolean option for open only")
+			}
+		}
 		var target string
 		var e error
 		if op.File != "" {
@@ -380,7 +388,7 @@ func (h *wordHost) operation(op Operation) (any, error) {
 			return nil, Fail("execution_not_authorized", "Template/add-in activation requires explicit execute capability", nil)
 		}
 		security := 3
-		if h.execute {
+		if h.execute && !disableMacros {
 			security = 1
 		}
 		if e = h.app.put("AutomationSecurity", security); e != nil {
@@ -426,6 +434,7 @@ func (h *wordHost) operation(op Operation) (any, error) {
 			return nil, e
 		}
 		opened := map[string]any{"handle": r, "staged_path": target, "source_sha256": h.staged[strings.ToLower(target)], "macro_execution_authorized": h.execute, "open_and_repair": false}
+		opened["macros_disabled_on_open"] = security == 3
 		if op.Op != "addin" {
 			if mode, modeErr := scalarNumber(h.objects[name], "CompatibilityMode"); modeErr == nil {
 				opened["compatibility_mode"] = int(mode)

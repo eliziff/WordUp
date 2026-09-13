@@ -354,6 +354,34 @@ func (p *Package) ContentType(part, kind string) error {
 	if len(b) == 0 {
 		b = []byte(`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="` + CT + `"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/></Types>`)
 	}
+	spans, err := XMLSpans(b)
+	if err != nil {
+		return err
+	}
+	existing, overridden := "", false
+	for _, s := range spans {
+		if s.Depth != 1 || s.Name.Space != CT {
+			continue
+		}
+		if s.Name.Local == "Override" && s.Attribute("", "PartName") == "/"+part {
+			existing, overridden = s.Attribute("", "ContentType"), true
+			break
+		}
+	}
+	if !overridden {
+		for _, s := range spans {
+			if s.Depth == 1 && s.Name.Space == CT && s.Name.Local == "Default" && s.Attribute("", "Extension") == strings.TrimPrefix(path.Ext(part), ".") {
+				existing = s.Attribute("", "ContentType")
+				break
+			}
+		}
+	}
+	if existing == kind && kind != "" {
+		if len(p.Files["[Content_Types].xml"]) == 0 {
+			p.Files["[Content_Types].xml"] = b
+		}
+		return nil
+	}
 	b, e := UpsertXML(b, CT, "Override", "", "PartName", "/"+part, `<Override xmlns="`+CT+`" PartName="/`+Esc(part)+`" ContentType="`+Esc(kind)+`"/>`)
 	if e == nil {
 		p.Files["[Content_Types].xml"] = b
@@ -371,6 +399,18 @@ func (p *Package) Relationship(source, id, typ, target, mode string) error {
 	b := p.Files[rel]
 	if len(b) == 0 {
 		b = []byte(`<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="` + RelNS + `"/>`)
+	}
+	spans, err := XMLSpans(b)
+	if err != nil {
+		return err
+	}
+	for _, s := range spans {
+		if s.Depth == 1 && s.Name.Space == RelNS && s.Name.Local == "Relationship" && s.Attribute("", "Id") == id {
+			if s.Attribute("", "Type") == typ && s.Attribute("", "Target") == target && s.Attribute("", "TargetMode") == mode {
+				return nil
+			}
+			break
+		}
 	}
 	m := ""
 	if mode != "" {

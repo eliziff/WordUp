@@ -338,6 +338,12 @@ func importPackage(p *office.Package, sourceName, destination string) (map[strin
 	if e := Write(destination, "AGENTS.md", []byte(AgentInstructions), ""); e != nil {
 		return nil, e
 	}
+	if e := Write(destination, ".gitattributes", []byte(workspaceGitAttributes), ""); e != nil {
+		return nil, e
+	}
+	if e := Write(destination, ".gitignore", []byte(workspaceGitIgnore), ""); e != nil {
+		return nil, e
+	}
 	catalog := office.Catalog(p)
 	if e := Write(destination, "reports/import.json", JSON(map[string]any{"source_sha256": m.SourceSHA256, "components": m.Components, "catalog": catalog, "warnings": warnings, "word_executed": false}), ""); e != nil {
 		return nil, e
@@ -345,6 +351,37 @@ func importPackage(p *office.Package, sourceName, destination string) (map[strin
 	good = true
 	return map[string]any{"workspace": destination, "components": m.Components, "catalog": catalog, "warnings": warnings, "word_executed": false}, nil
 }
+
+// Imported bytes and exact XML expectations must survive any user's autocrlf
+// setting. Disabling conversion does not disable text diffs for source files.
+const workspaceGitAttributes = `* -text
+*.bas diff
+*.cls diff
+*.vba diff
+*.xml diff
+*.rels diff
+*.json diff
+*.md diff
+*.opc binary
+*.bin binary
+*.dotm binary
+*.docm binary
+*.docx binary
+*.png binary
+*.jpg binary
+*.emf binary
+*.wmf binary
+`
+
+const workspaceGitIgnore = `/dist/
+/reports/
+/.wordwright/session.json
+/.wordwright/session.log
+/.wordwright/session.starting
+/.wordwright/component-install.lock
+/.wordwright/deploy/
+`
+
 func DocumentSource() string {
 	return `Attribute VB_Name = "ThisDocument"
 Attribute VB_Base = "0{00020906-0000-0000-C000-000000000046}"
@@ -720,6 +757,8 @@ func dropSignatures(p *office.Package) error {
 }
 
 const AgentInstructions = `# WordUp source workspace
+
+Commit editable source, tests, assets and the .wordwright baseline/index; treat dist outputs and reports as generated local evidence. Generated .gitattributes preserves imported bytes and exact XML expectations regardless of Git autocrlf settings while keeping source diffs readable. Do not merge DOTM binaries; merge source and rebuild. Private inputs remain private even when a workspace is Git-ready.
 Use the wordup executable. No module imports, VBE typing, or Python setup.
 
 - Edit vba/*.bas, *.cls, and *.vba as ordinary UTF-8 files; module names and VB_Name must agree.
