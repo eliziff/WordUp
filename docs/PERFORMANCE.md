@@ -33,3 +33,24 @@ For a warm workflow, start one authorized local session and reuse it:
 The request contains `path` (the template's absolute path) and `suite` (the suite JSON object). Each response contains per-operation timings, assertion results, artifact and suite hashes, owned-job CPU time, peak job memory, and visual evidence paths. Use a fresh process when testing startup behavior or process isolation. Repeated `selftest` calls through a session now also reuse its Word host unless `fresh` is requested.
 
 Local raw evidence: `build/lightning-ready-cold.json` and `build/lightning-ready-warm.json` contain the final results. Earlier experiments: `build/uia-final-warm.json`, `build/lightning-warm.json`, `build/lightning-ab-redraw.json`, and `build/lightning-ab-plain.json`. Build outputs are excluded from Git; timings above are a summary of those measurements.
+
+## Offline writer loop
+
+`tools/writer-compare` separates direct writer work, complete workspace rebuilds,
+resident cache checks, and independent verification. On a 708 KB complex local
+template, one controlled Windows run measured direct module edits at 93.1 ms in
+the Go library and 100.0 ms in pinned pyOpenVBA; direct class additions measured
+101.9 ms and 105.7 ms respectively. This small difference does not justify a
+language cutover. Complete Go workspace rebuilds measured 174.9–194.6 ms for
+those operations, identifying orchestration and source traversal as the larger
+optimization surface.
+
+The resident workspace cache uses one metadata traversal and retains parsed
+state only inside the existing idle-expiring agent session. It reloads the
+immutable baseline and import index whenever source, evidence, or artifact
+metadata changes; ordinary external source edits therefore force a real rebuild.
+After removing duplicate path resolution and stat calls, the same five-workload
+run measured warm cache medians of 2.3–4.4 ms and p95 of 4.1–7.2 ms. The full
+correctness suites still hash content on real builds, and the independent writer
+comparison validates source, package-part and CFB-stream changes outside the
+timed operation.

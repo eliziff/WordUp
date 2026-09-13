@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"maps"
 	"os"
 	"path/filepath"
 	"sort"
@@ -59,10 +60,24 @@ type BuildReport struct {
 	Warnings          []string `json:"warnings,omitempty"`
 }
 type Workspace struct {
-	Root     string
-	Manifest Manifest
-	Index    Index
-	Baseline *office.Package
+	Root      string
+	Manifest  Manifest
+	Index     Index
+	Baseline  *office.Package
+	buildMemo *buildMemo
+}
+
+type fileStamp struct {
+	Size       int64
+	ModifiedNS int64
+}
+
+type buildMemo struct {
+	Output   string
+	Sources  map[string]fileStamp
+	Artifact fileStamp
+	Evidence fileStamp
+	Report   BuildReport
 }
 
 func JSON(v any) []byte { b, _ := json.MarshalIndent(v, "", "  "); return append(b, '\n') }
@@ -454,8 +469,85 @@ func Fingerprint(files map[string][]byte) string {
 	}
 	return office.Hash([]byte(b.String()))
 }
+
+func sourceStamps(root string) (map[string]fileStamp, error) {
+	result := map[string]fileStamp{}
+	for _, rel := range []string{"project.json", ".wordwright/base.opc", ".wordwright/index.json"} {
+		info, err := os.Stat(filepath.Join(root, filepath.FromSlash(rel)))
+		if err != nil {
+			return nil, err
+		}
+		result[rel] = fileStamp{Size: info.Size(), ModifiedNS: info.ModTime().UnixNano()}
+	}
+	for _, top := range []string{"package", "vba", "forms", "styles", "content", "building_blocks", "assets"} {
+		base := filepath.Join(root, top)
+		err := filepath.WalkDir(base, func(path string, entry fs.DirEntry, err error) error {
+			if os.IsNotExist(err) {
+				return nil
+			}
+			if err != nil {
+				return err
+			}
+			if entry.Type()&os.ModeSymlink != 0 {
+				return fmt.Errorf("source symlink is not accepted")
+			}
+			if !entry.IsDir() {
+				rel, relErr := filepath.Rel(root, path)
+				if relErr != nil {
+					return relErr
+				}
+				info, infoErr := entry.Info()
+				if infoErr != nil {
+					return infoErr
+				}
+				result[filepath.ToSlash(rel)] = fileStamp{Size: info.Size(), ModifiedNS: info.ModTime().UnixNano()}
+			}
+			return nil
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+	return result, nil
+}
+
+func stamp(path string) (fileStamp, error) {
+	info, err := os.Stat(path)
+	if err != nil {
+		return fileStamp{}, err
+	}
+	return fileStamp{Size: info.Size(), ModifiedNS: info.ModTime().UnixNano()}, nil
+}
+
 func (w *Workspace) Build(output string) (*BuildReport, error) {
 	start := time.Now()
+	if output == "" {
+		output = filepath.Join(w.Root, "dist", w.Manifest.Name+".dotm")
+	}
+	var e error
+	output, e = filepath.Abs(output)
+	if e != nil {
+		return nil, e
+	}
+	if memo := w.buildMemo; memo != nil && memo.Output == output {
+		sources, sourceErr := sourceStamps(w.Root)
+		artifact, artifactErr := stamp(output)
+		evidence, evidenceErr := stamp(filepath.Join(w.Root, "reports", "build.json"))
+		if sourceErr == nil && artifactErr == nil && evidenceErr == nil && maps.Equal(sources, memo.Sources) && artifact == memo.Artifact && evidence == memo.Evidence {
+			report := memo.Report
+			report.Cached = true
+			report.DurationMS = float64(time.Since(start).Microseconds()) / 1000
+			return &report, nil
+		}
+		// Something outside this Workspace changed. Reload the immutable
+		// package and import index before doing real work so a resident agent
+		// observes direct filesystem edits just as a fresh process would.
+		fresh, refreshErr := Open(w.Root)
+		if refreshErr != nil {
+			return nil, refreshErr
+		}
+		w.Manifest, w.Index, w.Baseline, w.buildMemo = fresh.Manifest, fresh.Index, fresh.Baseline, nil
+	}
 	files, e := w.SourceFiles()
 	if e != nil {
 		return nil, e
@@ -472,13 +564,6 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 	}
 	w.Manifest = manifest
 	finger := Fingerprint(files)
-	if output == "" {
-		output = filepath.Join(w.Root, "dist", w.Manifest.Name+".dotm")
-	}
-	output, e = filepath.Abs(output)
-	if e != nil {
-		return nil, e
-	}
 	// Cache hits still validate both the source snapshot and artifact bytes.
 	if b, e := Read(w.Root, "reports/build.json"); e == nil {
 		var prior BuildReport
@@ -715,6 +800,13 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 	report.DurationMS = float64(time.Since(start).Microseconds()) / 1000
 	if e = Write(w.Root, "reports/build.json", JSON(report), ""); e != nil {
 		return nil, e
+	}
+	if sources, sourceErr := sourceStamps(w.Root); sourceErr == nil {
+		if artifact, artifactErr := stamp(output); artifactErr == nil {
+			if evidence, evidenceErr := stamp(filepath.Join(w.Root, "reports", "build.json")); evidenceErr == nil {
+				w.buildMemo = &buildMemo{Output: output, Sources: sources, Artifact: artifact, Evidence: evidence, Report: *report}
+			}
+		}
 	}
 	return report, nil
 }

@@ -63,6 +63,7 @@ type Engine struct {
 	fsMu          sync.Mutex
 	host          native.Host
 	nativeOptions native.Options
+	workspace     *project.Workspace
 }
 
 func (e *Engine) Close() error {
@@ -104,6 +105,16 @@ func (e *Engine) bundlePath(path string) (string, error) {
 		return filepath.Clean(path), nil
 	}
 	return filepath.Abs(filepath.Join(e.Root, path))
+}
+func (e *Engine) openWorkspace() (*project.Workspace, error) {
+	if e.workspace == nil {
+		workspace, err := project.Open(e.Root)
+		if err != nil {
+			return nil, err
+		}
+		e.workspace = workspace
+	}
+	return e.workspace, nil
 }
 func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, error) {
 	if !strings.HasPrefix(method, "native.") {
@@ -565,7 +576,13 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		}
 		return map[string]any{"results": out, "total": total, "truncated": total > len(out)}, nil
 	case "build", "compile", "check", "compat":
-		w, err := project.Open(e.Root)
+		var w *project.Workspace
+		var err error
+		if method == "build" || method == "compile" {
+			w, err = e.openWorkspace()
+		} else {
+			w, err = project.Open(e.Root)
+		}
 		if err != nil {
 			return nil, err
 		}
