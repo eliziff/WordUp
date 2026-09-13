@@ -12,6 +12,7 @@
     <PackageReference Include="NUnit" Version="3.14.0" />
     <Reference Include="System.Web.Extensions" />
     <Compile Include="SemanticProof.cs" />
+    <Compile Include="SourceSnapshot.cs" />
     <Compile Include="$(RubberduckSource)\RubberduckTests\Mocks\Windows.cs" Link="Upstream\Windows.cs" />
     <!-- Test-only in-memory editor boundary. The actual parser, declaration
          resolver and reference resolver are unmodified upstream production code. -->

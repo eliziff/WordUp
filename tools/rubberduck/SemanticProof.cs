@@ -14,6 +14,7 @@ class SemanticProof {
     static int Main() {
         Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.BelowNormal;
         try {
+            CheckSourceMapping();
             var modules = new[] {
                 ("Caller", "Option Explicit\nPublic Sub Run()\n Dim localValue As Long\n localValue = Callee.AddOne(4)\nEnd Sub\n", ComponentType.StandardModule),
                 ("Callee", "Option Explicit\nPublic Function AddOne(ByVal value As Long) As Long\n AddOne = value + 1\nEnd Function\n", ComponentType.StandardModule)
@@ -55,6 +56,29 @@ class SemanticProof {
         }
     }
     static void Require(bool condition, string message) { if (!condition) throw new Exception(message); }
+    static void CheckSourceMapping() {
+        var original = "\uFEFFAttribute VB_Name = \"Example\"\r\nOption Explicit\r\nPublic Sub Run()\r\nAttribute Run.VB_Description = \"entry\"\r\n 'Attribute VB_Name = \"comment\"\r\n Dim message As String\r\n message = \"Attribute VB_Name = text\"\r\nEnd Sub\r\n";
+        var source = new WordUp.Analysis.SourceSnapshot("vba/Example.bas", System.Text.Encoding.UTF8.GetBytes(original));
+        Require(source.FileLine(1)==2 && source.FileLine(3)==5 && source.FileLine(5)==7, "Code-pane source mapping lost hidden attribute offsets");
+        Require(source.CodePane.Contains("'Attribute VB_Name") && source.CodePane.Contains("message = \"Attribute"), "Comment/string incorrectly removed");
+        Require(source.Exported.Contains("Attribute Run.VB_Description"), "Attributes pass lost member metadata");
+        var key = new Rubberduck.VBEditor.QualifiedModuleName("Project", "", "Example", "snapshot");
+        var sources = new Dictionary<Rubberduck.VBEditor.QualifiedModuleName, WordUp.Analysis.SourceSnapshot>{{key,source}};
+        Require(new WordUp.Analysis.SnapshotSourceProvider(sources,false).SourceCode(key)==source.CodePane, "Code-pane provider mismatch");
+        Require(new WordUp.Analysis.SnapshotSourceProvider(sources,true).SourceCode(key)==source.Exported, "Attributes provider mismatch");
+        var constants = new Dictionary<string, Dictionary<string, short>>{{"snapshot",new Dictionary<string,short>()}};
+        var parsed = WordUp.Analysis.SnapshotParser.Create(sources,7.1,constants).Parse(key,CancellationToken.None);
+        Require(parsed.CodePaneParseTree != null && parsed.AttributesParseTree != null && parsed.Attributes.Count > 0,
+            "Real module parser lost code-pane or attribute results");
+        sources[key] = new WordUp.Analysis.SourceSnapshot("vba/Example.bas",System.Text.Encoding.UTF8.GetBytes(
+            "Attribute VB_Name = \"Example\"\nOption Explicit\nPublic Sub Run()\nAttribute Run.VB_Description = \"entry\"\nDim As Long\nEnd Sub\n"));
+        try {
+            WordUp.Analysis.SnapshotParser.Create(sources,7.1,constants).Parse(key,CancellationToken.None);
+            throw new Exception("Invalid workspace code accepted");
+        } catch (Rubberduck.Parsing.VBA.Parsing.ParsingExceptions.SyntaxErrorException error) {
+            Require(sources[key].FileLine(error.LineNumber)==5,"Parser diagnostic did not map to the editable file line");
+        }
+    }
     static object Check(string name, (string,string,ComponentType)[] modules, Action<Declaration[]> verify) {
         var timer=Stopwatch.StartNew();
         var vbe=MockVbeBuilder.BuildFromModules("SourceProof",modules,new ReferenceLibrary[0]);
