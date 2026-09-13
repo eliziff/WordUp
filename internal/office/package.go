@@ -77,6 +77,16 @@ type Package struct {
 	Original []byte
 	Files    map[string][]byte
 	archive  *zip.Reader
+	hashes   map[string]string
+}
+
+// Clone retains immutable ZIP metadata while isolating every editable part.
+func (p *Package) Clone() *Package {
+	clone := &Package{Original: p.Original, Files: make(map[string][]byte, len(p.Files)), archive: p.archive, hashes: p.hashes}
+	for name, data := range p.Files {
+		clone.Files[name] = append([]byte(nil), data...)
+	}
+	return clone
 }
 
 func Hash(b []byte) string { s := sha256.Sum256(b); return hex.EncodeToString(s[:]) }
@@ -106,7 +116,7 @@ func ReadPackage(data []byte) (*Package, error) {
 	if len(z.File) > 65536 {
 		return nil, fmt.Errorf("too many package entries")
 	}
-	p := &Package{Original: data, Files: map[string][]byte{}, archive: z}
+	p := &Package{Original: data, Files: map[string][]byte{}, archive: z, hashes: map[string]string{}}
 	names := map[string]bool{}
 	var total uint64
 	for _, f := range z.File {
@@ -138,6 +148,7 @@ func ReadPackage(data []byte) (*Package, error) {
 			return nil, fmt.Errorf("invalid ZIP entry size")
 		}
 		p.Files[f.Name] = b
+		p.hashes[f.Name] = Hash(b)
 	}
 	if _, ok := p.Files["[Content_Types].xml"]; !ok {
 		return nil, fmt.Errorf("not an Open Packaging Conventions file")
@@ -145,30 +156,69 @@ func ReadPackage(data []byte) (*Package, error) {
 	return p, nil
 }
 func (p *Package) Bytes() ([]byte, error) {
-	if p.archive != nil && len(p.Files) == len(p.archive.File) {
-		equal := true
-		for _, f := range p.archive.File {
-			b, ok := p.Files[f.Name]
-			if !ok {
-				equal = false
-				break
+	return p.bytes(nil)
+}
+
+// BytesChanged skips re-reading unchanged ZIP members after the caller has
+// already established the complete changed-part set by content hash.
+func (p *Package) BytesChanged(changed []string) ([]byte, error) {
+	if p.hashes == nil {
+		return p.Bytes()
+	}
+	dirty := make(map[string]bool, len(changed))
+	for _, name := range changed {
+		dirty[strings.TrimPrefix(name, "-")] = true
+	}
+	for name, original := range p.hashes {
+		data, exists := p.Files[name]
+		if !exists {
+			if !dirty[name] {
+				return nil, fmt.Errorf("changed-part set omits deleted part %s", name)
 			}
-			r, e := f.Open()
-			if e != nil {
-				return nil, e
-			}
-			orig, e := io.ReadAll(r)
-			r.Close()
-			if e != nil {
-				return nil, e
-			}
-			if !bytes.Equal(b, orig) {
-				equal = false
-				break
-			}
+			continue
 		}
-		if equal {
+		if !dirty[name] && Hash(data) != original {
+			return nil, fmt.Errorf("changed-part set omits modified part %s", name)
+		}
+	}
+	for name := range p.Files {
+		if _, existed := p.hashes[name]; !existed && !dirty[name] {
+			return nil, fmt.Errorf("changed-part set omits new part %s", name)
+		}
+	}
+	return p.bytes(dirty)
+}
+
+func (p *Package) bytes(knownChanges map[string]bool) ([]byte, error) {
+	if p.archive != nil && len(p.Files) == len(p.archive.File) {
+		if knownChanges != nil && len(knownChanges) == 0 {
 			return append([]byte(nil), p.Original...), nil
+		}
+		if knownChanges == nil {
+			equal := true
+			for _, f := range p.archive.File {
+				b, ok := p.Files[f.Name]
+				if !ok {
+					equal = false
+					break
+				}
+				r, e := f.Open()
+				if e != nil {
+					return nil, e
+				}
+				orig, e := io.ReadAll(r)
+				r.Close()
+				if e != nil {
+					return nil, e
+				}
+				if !bytes.Equal(b, orig) {
+					equal = false
+					break
+				}
+			}
+			if equal {
+				return append([]byte(nil), p.Original...), nil
+			}
 		}
 	}
 	var out bytes.Buffer
@@ -178,6 +228,13 @@ func (p *Package) Bytes() ([]byte, error) {
 		for _, f := range p.archive.File {
 			b, ok := p.Files[f.Name]
 			if !ok {
+				continue
+			}
+			if knownChanges != nil && !knownChanges[f.Name] {
+				if e := z.Copy(f); e != nil {
+					return nil, e
+				}
+				done[f.Name] = true
 				continue
 			}
 			r, e := f.Open()

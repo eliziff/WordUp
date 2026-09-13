@@ -60,11 +60,14 @@ type BuildReport struct {
 	Warnings          []string `json:"warnings,omitempty"`
 }
 type Workspace struct {
-	Root      string
-	Manifest  Manifest
-	Index     Index
-	Baseline  *office.Package
-	buildMemo *buildMemo
+	Root        string
+	Manifest    Manifest
+	Index       Index
+	Baseline    *office.Package
+	buildMemo   *buildMemo
+	baselineVBA *office.VBA
+	sourceMemo  map[string][]byte
+	sourceStamp map[string]fileStamp
 }
 
 type fileStamp struct {
@@ -511,6 +514,45 @@ func sourceStamps(root string) (map[string]fileStamp, error) {
 	return result, nil
 }
 
+func (w *Workspace) buildSourceFiles() (map[string][]byte, error) {
+	stamps, err := sourceStamps(w.Root)
+	if err != nil {
+		return nil, err
+	}
+	if w.sourceMemo == nil {
+		files, readErr := w.SourceFiles()
+		if readErr != nil {
+			return nil, readErr
+		}
+		w.sourceMemo, w.sourceStamp = files, stamps
+		return files, nil
+	}
+	files := make(map[string][]byte, len(w.sourceMemo))
+	for path, data := range w.sourceMemo {
+		files[path] = data
+	}
+	for path, current := range stamps {
+		if strings.HasPrefix(path, ".wordwright/") {
+			continue
+		}
+		if prior, ok := w.sourceStamp[path]; ok && prior == current {
+			continue
+		}
+		data, readErr := Read(w.Root, path)
+		if readErr != nil {
+			return nil, readErr
+		}
+		files[path] = data
+	}
+	for path := range files {
+		if _, exists := stamps[path]; !exists {
+			delete(files, path)
+		}
+	}
+	w.sourceMemo, w.sourceStamp = files, stamps
+	return files, nil
+}
+
 func stamp(path string) (fileStamp, error) {
 	info, err := os.Stat(path)
 	if err != nil {
@@ -542,13 +584,21 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 		// Something outside this Workspace changed. Reload the immutable
 		// package and import index before doing real work so a resident agent
 		// observes direct filesystem edits just as a fresh process would.
-		fresh, refreshErr := Open(w.Root)
-		if refreshErr != nil {
-			return nil, refreshErr
+		immutableChanged := sourceErr != nil
+		for _, path := range []string{".wordwright/base.opc", ".wordwright/index.json"} {
+			immutableChanged = immutableChanged || sources[path] != memo.Sources[path]
 		}
-		w.Manifest, w.Index, w.Baseline, w.buildMemo = fresh.Manifest, fresh.Index, fresh.Baseline, nil
+		if immutableChanged {
+			fresh, refreshErr := Open(w.Root)
+			if refreshErr != nil {
+				return nil, refreshErr
+			}
+			w.Manifest, w.Index, w.Baseline = fresh.Manifest, fresh.Index, fresh.Baseline
+			w.baselineVBA, w.sourceMemo, w.sourceStamp = nil, nil, nil
+		}
+		w.buildMemo = nil
 	}
-	files, e := w.SourceFiles()
+	files, e := w.buildSourceFiles()
 	if e != nil {
 		return nil, e
 	}
@@ -575,10 +625,7 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 			}
 		}
 	}
-	p, e := office.ReadPackage(w.Baseline.Original)
-	if e != nil {
-		return nil, e
-	}
+	p := w.Baseline.Clone()
 	original := map[string]string{}
 	for n, b := range p.Files {
 		original[n] = office.Hash(b)
@@ -596,10 +643,13 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 	formStreams := map[string]map[string][]byte{}
 	var v *office.VBA
 	if raw := w.Baseline.Files["word/vbaProject.bin"]; len(raw) > 0 {
-		v, e = office.ReadVBA(raw)
-		if e != nil {
-			return nil, e
+		if w.baselineVBA == nil {
+			w.baselineVBA, e = office.ReadVBA(raw)
+			if e != nil {
+				return nil, e
+			}
 		}
+		v = w.baselineVBA.Clone()
 	} else {
 		v = office.NewVBA(w.Manifest.Name)
 	}
@@ -786,7 +836,7 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 	if e = p.Validate(); e != nil {
 		return nil, e
 	}
-	result, e := p.Bytes()
+	result, e := p.BytesChanged(modified)
 	if e != nil {
 		return nil, e
 	}

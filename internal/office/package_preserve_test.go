@@ -51,3 +51,30 @@ func TestExistingPackageMetadataIsNotReserialized(t *testing.T) {
 		t.Fatal("Changed target ignored")
 	}
 }
+
+func TestKnownChangedPartsSkipReadsWithoutTrustingIncompleteSet(t *testing.T) {
+	original, err := BlankPackage().Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	p, err := ReadPackage(original)
+	if err != nil {
+		t.Fatal(err)
+	}
+	const part = "word/document.xml"
+	p.Files[part] = bytes.Replace(p.Files[part], []byte("</w:body>"), []byte("<w:p/></w:body>"), 1)
+	if _, err = p.BytesChanged(nil); err == nil {
+		t.Fatal("incomplete changed-part set accepted")
+	}
+	fast, err := p.BytesChanged([]string{part})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ordinary, err := p.Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(fast, ordinary) {
+		t.Fatal("known-change serialization differs from checked serialization")
+	}
+}

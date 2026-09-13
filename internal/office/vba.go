@@ -30,6 +30,27 @@ type VBA struct {
 	References                []map[string]any
 }
 
+// Clone isolates a build from the parsed imported project without reparsing CFB.
+func (v *VBA) Clone() *VBA {
+	clone := *v
+	clone.CFB = v.CFB.Clone()
+	clone.Directory = append([]byte(nil), v.Directory...)
+	clone.Prefix = append([]byte(nil), v.Prefix...)
+	clone.Suffix = append([]byte(nil), v.Suffix...)
+	clone.Modules = append([]Module(nil), v.Modules...)
+	for i := range clone.Modules {
+		clone.Modules[i].Records = append([]byte(nil), clone.Modules[i].Records...)
+	}
+	clone.References = make([]map[string]any, len(v.References))
+	for i, reference := range v.References {
+		clone.References[i] = make(map[string]any, len(reference))
+		for key, value := range reference {
+			clone.References[i][key] = value
+		}
+	}
+	return &clone
+}
+
 func Normalize(s string) string {
 	return strings.ReplaceAll(strings.ReplaceAll(s, "\r\n", "\n"), "\r", "\n")
 }
