@@ -37,6 +37,32 @@ def streams(path):
                 for name in compound.listdir(streams=True, storages=False)}
 
 
+def form_snapshot(document):
+    """Keep hierarchy/order and picture bytes, not just flattened labels/lengths."""
+    def pictures(record):
+        return {} if record is None else {name: hashlib.sha256(data).hexdigest()
+                                          for name, data in record.pictures.items()}
+
+    result = {}
+    for form in document.forms():
+        result[form.name, ""] = ("form", None, None, copy.deepcopy(form.properties()),
+                                  form.designer_source,
+                                  tuple(pictures(level.record) for level in form._levels))
+
+        def visit(controls, parent):
+            for index, control in enumerate(controls):
+                key = (form.name, control.name, parent, index)
+                if key in result:
+                    raise ValueError("Duplicate form/control identity: " + str(key))
+                result[key] = (control.kind, control.id, control.tab_index,
+                               copy.deepcopy(control.properties()), (parent, index),
+                               pictures(control.record))
+                visit(control.children, parent + (index,))
+
+        visit(form.controls, ())
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--upstream", type=Path, required=True)
@@ -70,6 +96,7 @@ def main():
         original_streams = streams(source)
         with WordFile(source) as document:
             original_modules = document.vba_modules()
+            original_controls = form_snapshot(document)
         for operation in ("unchanged", "module-edit", "module-lifecycle", "forms-read", "control-caption", "control-font"):
             samples = []
             row = {"input": str(source.resolve()), "source_sha256": original_hash, "operation": operation}
@@ -95,25 +122,27 @@ def main():
                             expected["WriterRenamed"] = added.replace('VB_Name = "WriterAdded"', 'VB_Name = "WriterRenamed"')
                         if operation == "forms-read":
                             row["forms"] = len(document.forms())
-                        expected_controls = None
+                        expected_controls = copy.deepcopy(original_controls)
                         if operation in ("control-caption", "control-font"):
                             controls = {(form.name, control.name): control for form in document.forms() for control in form.walk()}
-                            expected_controls = {key: (control.kind, control.id, control.tab_index, copy.deepcopy(control.properties()))
-                                                 for key, control in controls.items()}
                             eligible = sorted(key for key, control in controls.items() if control.kind in ("MSForms.Label", "MSForms.CommandButton"))
                             if not eligible:
                                 raise ValueError("Precondition unmet: no supported caption control")
                             selected = eligible[0]
+                            snapshot_keys = [key for key in expected_controls if key[:2] == selected]
+                            if len(snapshot_keys) != 1:
+                                raise ValueError("Ambiguous form/control identity: " + str(selected))
+                            selected_properties = expected_controls[snapshot_keys[0]][3]
                             if operation == "control-caption":
                                 controls[selected].set_property("Caption", "Writer comparison")
-                                expected_controls[selected][3]["Caption"] = "Writer comparison"
+                                selected_properties["Caption"] = "Writer comparison"
                             else:
                                 font = controls[selected].record.text_props
                                 if font is None:
                                     raise ValueError("Precondition unmet: control has no TextProps record")
                                 font.set_string("FontName", "Segoe UI")
                                 font.set_value("FontHeight", 240)
-                                expected_controls[selected][3].update({"Font.FontName":"Segoe UI", "Font.FontHeight":240})
+                                selected_properties.update({"Font.FontName":"Segoe UI", "Font.FontHeight":240})
                             row["control"] = list(selected)
                         document.save(output)
                     samples.append((time.perf_counter() - start) * 1000)
@@ -121,11 +150,8 @@ def main():
                         normalize = lambda values: {key: value.replace("\r\n", "\n").rstrip("\n") for key, value in values.items()}
                         if normalize(document.vba_modules()) != normalize(expected):
                             raise AssertionError("Module source preservation failed")
-                        if expected_controls is not None:
-                            actual_controls = {(form.name, control.name): (control.kind, control.id, control.tab_index, control.properties())
-                                               for form in document.forms() for control in form.walk()}
-                            if actual_controls != expected_controls:
-                                raise AssertionError("Control property or inventory preservation failed")
+                        if form_snapshot(document) != expected_controls:
+                            raise AssertionError("Form property, hierarchy, inventory or picture preservation failed")
                     output_parts = parts(output)
                     changed = sorted(name for name in set(original_parts) | set(output_parts) if original_parts.get(name) != output_parts.get(name))
                     output_streams = streams(output)
@@ -156,6 +182,7 @@ def main():
             try:
                 with WordFile(source) as document:
                     expected = document.vba_modules()
+                    expected_controls = form_snapshot(document)
                 if build["operation"] == "module-edit":
                     target = sorted(expected)[0]
                     expected[target] = expected[target].rstrip("\r\n") + "\r\n' WordUp writer comparison\r\n"
@@ -163,6 +190,8 @@ def main():
                     normalize = lambda values: {key: value.replace("\r\n", "\n").rstrip("\n") for key, value in values.items()}
                     if normalize(document.vba_modules()) != normalize(expected):
                         raise AssertionError("Go output source differs from intended edit")
+                    if form_snapshot(document) != expected_controls:
+                        raise AssertionError("Go output changed form properties, hierarchy, inventory or pictures")
                 before, after = parts(source), parts(output)
                 changed = sorted(name for name in set(before) | set(after) if before.get(name) != after.get(name))
                 before_streams, after_streams = streams(source), streams(output)

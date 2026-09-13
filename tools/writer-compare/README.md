@@ -27,6 +27,11 @@ form reads, and control-caption/font edits. It records independent olefile strea
 changes and module/property checks, retaining local outputs. `go/` measures the
 existing workspace build path; `--go-report` independently checks its outputs.
 These paths have different overhead: do not attribute timings to language alone.
+All operations compare form properties, designer text, structural control paths/order,
+and hashes of parsed picture bytes. Structural paths retain unnamed nested records.
+These parsed checks do not establish preservation of every unknown binary field;
+the separate independent stream hashes expose changes for further investigation.
+Run the oracle's defect controls with `python -m unittest discover -s tools/writer-compare`.
 
 Git integration tests live in `internal/project/git_roundtrip_test.go` and include
 real disposable branches, merges, explicit overlapping-source conflicts and autocrlf checkouts. Native caption/font inspection
