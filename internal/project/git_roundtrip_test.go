@@ -2,6 +2,7 @@ package project
 
 import (
 	"bytes"
+	"encoding/json"
 	"io/fs"
 	"os"
 	"os/exec"
@@ -101,6 +102,21 @@ func TestGitNoOpBuildAndIndependentModuleMerge(t *testing.T) {
 		t.Skip("git is required for checkout/merge verification")
 	}
 	w := newWorkspace(t)
+	w.Manifest.Components["MergeForm"] = "form"
+	design := office.Design{Name: "MergeForm", Mode: "replace", Controls: []office.ControlDesign{
+		{Name: "Run", Type: "CommandButton", Properties: map[string]any{"Caption": "Before", "Width": 72}},
+	}}
+	ribbon := []byte(`<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui"><ribbon><tabs><tab id="MergeTab" label="Before"><group id="MergeGroup" label="Commands"><button id="MergeButton" label="Run"/></group></tab></tabs></ribbon></customUI>`)
+	for path, data := range map[string][]byte{
+		"project.json":                    JSON(w.Manifest),
+		"forms/MergeForm.json":            JSON(design),
+		"vba/MergeForm.vba":               []byte("Attribute VB_Name = \"MergeForm\"\nOption Explicit\n"),
+		"package/customUI/customUI14.xml": ribbon,
+	} {
+		if err := Write(w.Root, path, data, ""); err != nil {
+			t.Fatal(err)
+		}
+	}
 	git := func(args ...string) string {
 		t.Helper()
 		cmd := exec.Command("git", append([]string{"-c", "user.name=WordUp Test", "-c", "user.email=test@example.invalid", "-c", "core.autocrlf=false"}, args...)...)
@@ -133,12 +149,22 @@ func TestGitNoOpBuildAndIndependentModuleMerge(t *testing.T) {
 		t.Fatal(err)
 	}
 	git("add", "vba/First.bas")
+	ribbon = bytes.Replace(ribbon, []byte(`label="Before"`), []byte(`label="After merge"`), 1)
+	if err := Write(w.Root, "package/customUI/customUI14.xml", ribbon, ""); err != nil {
+		t.Fatal(err)
+	}
+	git("add", "package/customUI/customUI14.xml")
 	git("commit", "-qm", "first module")
 	git("checkout", "-qb", "second", "baseline")
 	if err := Write(w.Root, "vba/Second.bas", []byte("Public Function Second() As Long\nSecond = 2\nEnd Function\n"), ""); err != nil {
 		t.Fatal(err)
 	}
 	git("add", "vba/Second.bas")
+	design.Controls[0].Properties["Caption"] = "After merge"
+	if err := Write(w.Root, "forms/MergeForm.json", JSON(design), ""); err != nil {
+		t.Fatal(err)
+	}
+	git("add", "forms/MergeForm.json")
 	git("commit", "-qm", "second module")
 	git("merge", "--no-edit", "first")
 	merged, err := Open(w.Root)
@@ -149,12 +175,27 @@ func TestGitNoOpBuildAndIndependentModuleMerge(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if report.Modules != 3 {
+	if report.Modules != 4 {
 		t.Fatalf("Merged modules missing: %+v", report)
 	}
 	destination := filepath.Join(t.TempDir(), "reimport")
 	if _, err := Import(report.Artifact, destination); err != nil {
 		t.Fatal(err)
+	}
+	actualRibbon, err := os.ReadFile(filepath.Join(destination, "package", "customUI", "customUI14.xml"))
+	if err != nil || !bytes.Equal(ribbon, actualRibbon) {
+		t.Fatalf("Merged Ribbon source changed or lost: %v", err)
+	}
+	actualForm, err := os.ReadFile(filepath.Join(destination, "forms", "MergeForm.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var importedDesign office.Design
+	if err := json.Unmarshal(actualForm, &importedDesign); err != nil {
+		t.Fatal(err)
+	}
+	if len(importedDesign.Controls) != 1 || importedDesign.Controls[0].Name != "Run" || importedDesign.Controls[0].Properties["Caption"] != "After merge" {
+		t.Fatalf("Merged form edit changed or lost: %s", actualForm)
 	}
 	for _, name := range []string{"First", "Second"} {
 		data, err := os.ReadFile(filepath.Join(destination, "vba", name+".bas"))
