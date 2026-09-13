@@ -6,9 +6,9 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os/exec"
-	"sync"
 	"syscall"
 	"time"
 )
@@ -22,9 +22,35 @@ type officeWorker struct {
 }
 
 var officeWorkers = struct {
-	sync.Mutex
-	all map[string]*officeWorker
-}{all: map[string]*officeWorker{}}
+	gate chan struct{}
+	all  map[string]*officeWorker
+}{gate: make(chan struct{}, 1), all: map[string]*officeWorker{}}
+
+func lockOfficeWorkers(ctx context.Context) error {
+	select {
+	case officeWorkers.gate <- struct{}{}:
+		if err := ctx.Err(); err != nil {
+			<-officeWorkers.gate
+			return err
+		}
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
+func unlockOfficeWorkers() { <-officeWorkers.gate }
+
+func decodeOfficeWorkerResponse(data []byte) (map[string]any, error) {
+	var value map[string]any
+	if err := json.Unmarshal(data, &value); err != nil {
+		return nil, err
+	}
+	if value == nil {
+		return nil, fmt.Errorf("helper response must be a JSON object, not null")
+	}
+	return value, nil
+}
 
 func stopOfficeWorker(key string, w *officeWorker) {
 	if w.timer != nil {
@@ -36,16 +62,18 @@ func stopOfficeWorker(key string, w *officeWorker) {
 	delete(officeWorkers.all, key)
 }
 func StopOfficeTools() {
-	officeWorkers.Lock()
-	defer officeWorkers.Unlock()
+	_ = lockOfficeWorkers(context.Background())
+	defer unlockOfficeWorkers()
 	for key, w := range officeWorkers.all {
 		stopOfficeWorker(key, w)
 	}
 }
 
 func callOfficeWorker(ctx context.Context, helper string, args []string) (map[string]any, error) {
-	officeWorkers.Lock()
-	defer officeWorkers.Unlock()
+	if err := lockOfficeWorkers(ctx); err != nil {
+		return nil, err
+	}
+	defer unlockOfficeWorkers()
 	w := officeWorkers.all[helper]
 	reused := w != nil
 	if w == nil {
@@ -93,8 +121,7 @@ func callOfficeWorker(ctx context.Context, helper string, args []string) (map[st
 			done <- response{err: e}
 			return
 		}
-		var value map[string]any
-		e := json.Unmarshal(w.output.Bytes(), &value)
+		value, e := decodeOfficeWorkerResponse(w.output.Bytes())
 		done <- response{value, e}
 	}()
 	select {
@@ -107,8 +134,8 @@ func callOfficeWorker(ctx context.Context, helper string, args []string) (map[st
 			return nil, r.err
 		}
 		w.timer = time.AfterFunc(30*time.Second, func() {
-			officeWorkers.Lock()
-			defer officeWorkers.Unlock()
+			_ = lockOfficeWorkers(context.Background())
+			defer unlockOfficeWorkers()
 			if officeWorkers.all[helper] == w && w.generation == generation {
 				stopOfficeWorker(helper, w)
 			}
