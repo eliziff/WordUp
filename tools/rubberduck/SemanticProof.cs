@@ -21,6 +21,7 @@ class SemanticProof {
             };
             var results = new List<object>();
             results.Add(CheckInspection());
+            results.Add(CheckWorkerProtocol());
             var wordLibrary = Environment.GetEnvironmentVariable("WORDUP_TEST_WORD_TYPELIB");
             if (!String.IsNullOrEmpty(wordLibrary)) results.Add(CheckWordLibrary(wordLibrary));
             results.Add(CheckSnapshotEditor(modules));
@@ -60,6 +61,45 @@ class SemanticProof {
         }
     }
     static void Require(bool condition, string message) { if (!condition) throw new Exception(message); }
+    static object CheckWorkerProtocol() {
+        var timer = Stopwatch.StartNew();
+        var json = new JavaScriptSerializer();
+        Func<string,string> request = kind => json.Serialize(new {
+            Modules = new[]{new {Name="Example",Kind=kind,Path="vba/Example.bas",Source="Public Sub Run()\nEnd Sub\n"}},
+            Inspections = new[]{"OptionExplicitInspection"}
+        });
+        var lines = new System.Collections.Concurrent.ConcurrentQueue<string>();
+        var errors = new System.Collections.Concurrent.ConcurrentQueue<string>();
+        using (var worker = new Process { StartInfo = new ProcessStartInfo {
+            FileName=System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"WordUp.Analysis.exe"),
+            Arguments="serve",UseShellExecute=false,CreateNoWindow=true,
+            RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true
+        }}) {
+            worker.OutputDataReceived += (s,e) => { if(e.Data != null) lines.Enqueue(e.Data); };
+            worker.ErrorDataReceived += (s,e) => { if(e.Data != null) errors.Enqueue(e.Data); };
+            worker.Start();
+            worker.BeginOutputReadLine(); worker.BeginErrorReadLine();
+            worker.StandardInput.WriteLine("null");
+            worker.StandardInput.WriteLine(json.Serialize(new[]{"analyze","{}"}));
+            worker.StandardInput.WriteLine(json.Serialize(new[]{"analyze",request("form")}));
+            worker.StandardInput.WriteLine(json.Serialize(new[]{"analyze",request("standard")}));
+            worker.StandardInput.Close();
+            if (!worker.WaitForExit(30000)) {
+                worker.Kill(); worker.WaitForExit();
+                throw new Exception("Analysis worker exceeded proof deadline");
+            }
+            worker.WaitForExit(); // Drain asynchronous output events.
+            Require(worker.ExitCode == 0 && errors.IsEmpty,"Analysis worker process failed: " + String.Join("\n",errors));
+        }
+        var replies = lines.Select(line => json.Deserialize<Dictionary<string,object>>(line)).ToArray();
+        Require(replies.Length == 4,"Analysis worker lost protocol responses");
+        Require(replies.Take(3).All(reply => reply.ContainsKey("error")),"Invalid or unsupported request was accepted");
+        Require(!replies[3].ContainsKey("error") && (string)replies[3]["scope"] == "source-only" && !(bool)replies[3]["native_compilation"],
+            "Worker failed recovery or overstated verification");
+        var findings = (System.Collections.ArrayList)replies[3]["diagnostics"];
+        Require(findings.Count == 1,"Worker did not execute inspection after errors");
+        return new {name="analysis worker protocol errors and recovery",duration_ms=timer.Elapsed.TotalMilliseconds};
+    }
     static object CheckInspection() {
         var timer = Stopwatch.StartNew();
         // Concrete inspections are internal upstream; instantiate the pinned

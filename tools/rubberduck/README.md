@@ -35,6 +35,16 @@ members, conditional code and property accessors. Moq/NUnit belong only to the
 proof project, not the analysis assembly. This is not native Word execution or
 an agent endpoint yet.
 
+`WordUp.Analysis.exe serve` now accepts the existing helper protocol: one JSON
+string array `["analyze", requestJson]` per line. Requests contain `Modules`
+(`Name`, `Kind`, `Path`, `Source`) and `Inspections`. Only standard/class modules
+and the two verified inspections are accepted. Input lines are bounded to 4 Mi
+characters; results identify source-only scope, original source hashes and mapped
+file locations. No source files are opened or modified by this worker.
+The proof starts the real executable and checks errors followed by successful
+analysis in the same process. Main application wiring, process-job containment,
+retrievable large results and release packaging remain unfinished.
+
 The proof runs the actual upstream unused-variable inspection on a defect,
 its correction, and the defect again, asserting the variable, module, line and
 resource description. This establishes that inspection path, not all inspections

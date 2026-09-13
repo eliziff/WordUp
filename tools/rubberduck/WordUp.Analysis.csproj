@@ -1,11 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
+    <OutputType>Exe</OutputType>
     <LangVersion>7.2</LangVersion>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <RubberduckSource Condition="'$(RubberduckSource)' == ''">$(MSBuildThisFileDirectory)..\..\workspaces\reuse\rubberduck-engine</RubberduckSource>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="System.Web.Extensions" />
+    <Compile Include="AnalysisWorker.cs" />
     <ProjectReference Include="$(RubberduckSource)\Rubberduck.Parsing\Rubberduck.Parsing.csproj" />
     <ProjectReference Include="$(RubberduckSource)\Rubberduck.CodeAnalysis\Rubberduck.CodeAnalysis.csproj" />
     <Compile Include="SourceSnapshot.cs" />
