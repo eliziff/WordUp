@@ -299,7 +299,12 @@ func (s Suite) Validate() error {
 	if len(s.Inputs) > 32 {
 		return fmt.Errorf("suite input limit is 32")
 	}
+	inputNames := map[string]bool{}
 	for name, path := range s.Inputs {
+		if inputNames[strings.ToLower(name)] {
+			return fmt.Errorf("suite input name collision: %s", name)
+		}
+		inputNames[strings.ToLower(name)] = true
 		if !inputName.MatchString(name) || !filepath.IsAbs(path) {
 			return fmt.Errorf("suite input %q requires a simple name and absolute source path", name)
 		}

@@ -458,6 +458,18 @@ func (h *wordHost) operation(op Operation) (any, error) {
 		if e != nil {
 			return nil, e
 		}
+		// Bind cleanup to the actual document, not an optional caller-supplied
+		// filename. Otherwise a saved working copy stays marked as immutable
+		// staged input even after it has been closed.
+		fullName, e := d.get("FullName")
+		if e != nil {
+			return nil, e
+		}
+		name, nameErr := fullName.value(0)
+		fullName.clear()
+		if nameErr != nil {
+			return nil, nameErr
+		}
 		v, e := d.call("Close", 0)
 		v.clear()
 		if e != nil {
@@ -466,8 +478,7 @@ func (h *wordHost) operation(op Operation) (any, error) {
 		d.release()
 		delete(h.objects, op.Target)
 		h.uiWindows.Delete(op.Target)
-		if op.File != "" {
-			target := filepath.Join(h.cfg.Directory, filepath.Base(op.File))
+		if target, ok := name.(string); ok && strings.EqualFold(filepath.Dir(target), h.cfg.Directory) {
 			delete(h.staged, strings.ToLower(target))
 		}
 		return true, nil

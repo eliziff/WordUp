@@ -4,6 +4,7 @@ import (
 	"github.com/eliziff/WordUp/internal/native"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -56,5 +57,13 @@ func TestReplayInputsUseFreshWorkingCopies(t *testing.T) {
 	}
 	if _, err := readInputs(declared, map[string]InputSnapshot{}); err == nil {
 		t.Fatal("uncaptured input accepted")
+	}
+}
+
+func TestInputNamesCannotCollideOnWindows(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "source.docx")
+	s := Suite{Schema: 1, Name: "collision", Inputs: map[string]string{"manuscript": path, "Manuscript": path}}
+	if err := s.Validate(); err == nil || !strings.Contains(err.Error(), "collision") {
+		t.Fatalf("input collision not diagnosed: %v", err)
 	}
 }

@@ -54,3 +54,23 @@ to the particular test, use the existing suite `xml.compare` with an explicit
 `named.xml_policy` and assert `/equal`. Keep the policy local and test defects
 under that same policy. Do not discard IDs referenced by comments or other
 document features. There is no automatic ignore list.
+
+## Repeating a native test
+
+Each test saves a distinct `saved_report` and retains the tested template bytes;
+`reports/acceptance.json` is only the latest report. To preserve a manuscript or
+expected XML file across iterations, declare an input in the suite:
+
+```json
+"inputs": {"manuscript":"C:/Work/input.docx","expected":"C:/Work/expected.xml"}
+```
+
+Use `$input:manuscript$` or `$input:expected$` in operation paths. Each run reads
+the declared files once, records their hashes and creates separate baseline and
+working copies. `test.replay` uses the captured inputs and resets working copies;
+an explicit artifact `path` lets it test new code against the same inputs.
+Without `path`, it uses the retained tested artifact. Changed snapshot hashes
+fail instead of silently reading current source files. `test.compare` requires
+matching captured input hashes. Paths accessed by macro code outside these
+declared inputs are not frozen or isolated. Old reports cannot retroactively
+prove which external files were used; capture a new baseline.
