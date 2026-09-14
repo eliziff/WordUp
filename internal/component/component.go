@@ -611,15 +611,22 @@ func rejectIdentifierCollisions(root, componentID string, files []File) error {
 		for _, symbol := range exportedSymbols(file.Path, file.Text) {
 			key := strings.ToLower(symbol.Name)
 			if prior, ok := seen[key]; ok && !compatiblePropertyAccessors(prior.Kind, symbol.Kind) {
-				return fmt.Errorf("component %s exports duplicate identifier %q in %s:%d and %s:%d", componentID, symbol.Name, prior.Path, prior.Line, symbol.Path, symbol.Line)
+				return fmt.Errorf("component %s exports duplicate %s %q in %s:%d and %s:%d", componentID, collisionLabel(prior, symbol), symbol.Name, prior.Path, prior.Line, symbol.Path, symbol.Line)
 			}
 			seen[key] = symbol
 			if prior, ok := existing[key]; ok && !compatiblePropertyAccessors(prior.Kind, symbol.Kind) {
-				return fmt.Errorf("component %s identifier %q in %s:%d conflicts with existing %s:%d", componentID, symbol.Name, symbol.Path, symbol.Line, prior.Path, prior.Line)
+				return fmt.Errorf("component %s %s %q in %s:%d conflicts with existing %s:%d", componentID, collisionLabel(prior, symbol), symbol.Name, symbol.Path, symbol.Line, prior.Path, prior.Line)
 			}
 		}
 	}
 	return nil
+}
+
+func collisionLabel(first, second exportedSymbol) string {
+	if first.Kind == "module" || second.Kind == "module" {
+		return "module name"
+	}
+	return "identifier"
 }
 
 func workspaceExportedSymbols(root string) (map[string]exportedSymbol, error) {
@@ -665,6 +672,9 @@ func workspaceExportedSymbols(root string) (map[string]exportedSymbol, error) {
 func exportedSymbols(path, source string) []exportedSymbol {
 	lines := strings.Split(strings.ReplaceAll(source, "\r\n", "\n"), "\n")
 	result := []exportedSymbol{}
+	if name, line := vbaModuleName(lines); name != "" {
+		result = append(result, exportedSymbol{Name: name, Kind: "module", Path: path, Line: line})
+	}
 	inProcedure := false
 	for index, raw := range lines {
 		line := strings.TrimSpace(vbaCodeLine(raw))
@@ -740,6 +750,29 @@ func exportedSymbols(path, source string) []exportedSymbol {
 		}
 	}
 	return result
+}
+
+func vbaModuleName(lines []string) (string, int) {
+	for index, raw := range lines {
+		line := strings.TrimSpace(raw)
+		lower := strings.ToLower(line)
+		if !strings.HasPrefix(lower, "attribute vb_name") {
+			continue
+		}
+		equal := strings.IndexByte(line, '=')
+		if equal < 0 {
+			continue
+		}
+		value := strings.TrimSpace(line[equal+1:])
+		if len(value) < 2 || value[0] != '"' || value[len(value)-1] != '"' {
+			continue
+		}
+		name := value[1 : len(value)-1]
+		if office.ValidIdentifier(name) {
+			return name, index + 1
+		}
+	}
+	return "", 0
 }
 
 func vbaCodeLine(line string) string {

@@ -108,6 +108,19 @@ func TestInstallationRejectsExportedIdentifierCollision(t *testing.T) {
 	}
 }
 
+func TestInstallationRejectsModuleNameCollision(t *testing.T) {
+	root := t.TempDir()
+	if err := project.Write(root, "vba/Existing.bas", []byte("Attribute VB_Name = \"WordUpSafeEdit\"\nPublic Sub OtherMacro()\nEnd Sub\n"), ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Add(root, "operation.safe-edit"); err == nil || !strings.Contains(err.Error(), `module name "WordUpSafeEdit"`) || !strings.Contains(err.Error(), "Existing.bas:1") {
+		t.Fatalf("module collision was not precise: %v", err)
+	}
+	if _, err := project.Read(root, "vba/WordUpSafeEdit.bas"); !os.IsNotExist(err) {
+		t.Fatalf("component source was written after module collision: %v", err)
+	}
+}
+
 func TestBundledVBADeclarations(t *testing.T) {
 	for _, manifest := range builtin() {
 		for _, file := range manifest.Files {
