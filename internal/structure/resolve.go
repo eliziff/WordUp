@@ -70,7 +70,9 @@ func Resolve(rows []map[string]any) map[string]any {
 			score += 25
 			evidence = append(evidence, "marker-grammar")
 		}
+		numbered := false
 		if numbering, ok := row["numbering_evidence"].(map[string]any); ok && numbering["family"] != "bullet" {
+			numbered = true
 			if n, ok := intValue(numbering["level"]); ok && level == 0 {
 				level = n
 			}
@@ -84,9 +86,13 @@ func Resolve(rows []map[string]any) map[string]any {
 			score += 15
 			evidence = append(evidence, "sequence-"+sequence.Action)
 		}
+		props, _ := row["paragraph_properties_xml"].(string)
+		keepNext := strings.Contains(props, ":keepNext")
+		emphasized := formattingSignal(row)
 		// A marker sequence is evidence, not permission to promote ordinary list
 		// paragraphs. Native outline or a heading-style family can override this.
-		if level > 0 && !hasNativeHeading(row) && listStyle(style) {
+		listRisk := listStyle(style) || numbered && !headingStyle(style) && !keepNext && !emphasized
+		if level > 0 && !hasNativeHeading(row) && listRisk {
 			score -= 30
 			evidence = append(evidence, "ordinary-list-risk")
 		}
@@ -96,12 +102,11 @@ func Resolve(rows []map[string]any) map[string]any {
 			score -= 25
 			evidence = append(evidence, "long-paragraph")
 		}
-		props, _ := row["paragraph_properties_xml"].(string)
-		if strings.Contains(props, ":keepNext") {
+		if keepNext {
 			score += 8
 			evidence = append(evidence, "keep-next")
 		}
-		if formattingSignal(row) {
+		if emphasized {
 			score += 8
 			evidence = append(evidence, "emphasis")
 		}

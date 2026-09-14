@@ -90,7 +90,12 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
             If headingStyle Then score = score + 35: WU_AddEvidence evidence, "heading-style"
             If Len(marker) > 0 Then score = score + 30: WU_AddEvidence evidence, "marker:" & marker
             If Len(text) <= 160 Then score = score + 8 Else score = score - 25
-            If Len(label) > 0 And Len(marker) = 0 And level = 0 Then score = score - 20: WU_AddEvidence evidence, "ordinary-list-risk"
+            ' A numbered list is not a heading merely because its text looks
+            ' like a marker. Preserve bold/keep-with-next heading evidence,
+            ' but demote ordinary numbered list paragraphs before resolution.
+            If Len(label) > 0 And level = 0 And Not headingStyle And Not keepNext Then
+                If scope.Bold <> True And scope.Font.SmallCaps <> True And scope.Font.AllCaps <> True Then score = score - 30: WU_AddEvidence evidence, "ordinary-list-risk"
+            End If
             If WU_SentenceEnding(text) And level = 0 And Len(marker) = 0 Then score = score - 18: WU_AddEvidence evidence, "sentence-ending"
             WU_CustomizeCandidate paragraph, score, level, evidence
         End If
