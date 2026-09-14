@@ -457,7 +457,9 @@ func CheckWithConstants(w *project.Workspace, constants map[string]any) (map[str
 			s := Symbols(name, string(b))
 			symbols = append(symbols, s...)
 			for _, x := range s {
-				byName[strings.ToLower(x.Name)] = true
+				if publicSymbol(x) {
+					byName[strings.ToLower(x.Name)] = true
+				}
 			}
 			if bytes.Contains(b, []byte{0}) {
 				diagnostics = append(diagnostics, map[string]any{"severity": "error", "file": n, "message": "NUL byte in VBA source"})
@@ -526,5 +528,6 @@ func CheckWithConstants(w *project.Workspace, constants map[string]any) (map[str
 		}
 		return symbols[i].Module < symbols[j].Module
 	})
-	return map[string]any{"symbols": symbols, "diagnostics": diagnostics, "compilation_constants": constants, "syntax_modules_parsed": parsedModules, "syntax_modules_skipped": skippedModules, "vba_compiled": false, "word_executed": false, "coverage": "Rubberduck VBA syntax with conditional preprocessing, lexical symbols, XML syntax, Windows RibbonX XSD validation, duplicate IDs and unresolved callback warnings; not a VBA compiler or complete callback/idMso checker"}, nil
+	inventory := CheckInventory(w.Root, files, &diagnostics)
+	return map[string]any{"symbols": symbols, "diagnostics": diagnostics, "compilation_constants": constants, "syntax_modules_parsed": parsedModules, "syntax_modules_skipped": skippedModules, "vba_compiled": false, "word_executed": false, "inventory": inventory, "coverage": "Rubberduck VBA syntax with conditional preprocessing, lexical symbols, XML syntax, Windows RibbonX XSD validation, duplicate IDs and unresolved callback warnings; not a VBA compiler or complete callback/idMso checker"}, nil
 }
