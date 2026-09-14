@@ -468,6 +468,13 @@ func (w *Workspace) SourceFiles() (map[string][]byte, error) {
 	return out, nil
 }
 func Fingerprint(files map[string][]byte) string {
+	return fingerprint(files, nil)
+}
+
+// fingerprint uses the hashes already collected by sourceStamps when they are
+// available. The fallback keeps this small public helper useful for callers
+// that only have an in-memory source map.
+func fingerprint(files map[string][]byte, stamps map[string]fileStamp) string {
 	names := make([]string, 0, len(files))
 	for n := range files {
 		names = append(names, n)
@@ -477,7 +484,16 @@ func Fingerprint(files map[string][]byte) string {
 	for _, n := range names {
 		b.WriteString(n)
 		b.WriteByte(0)
-		b.WriteString(office.Hash(files[n]))
+		hash := ""
+		if stamps != nil {
+			if stamp, ok := stamps[n]; ok {
+				hash = stamp.Hash
+			}
+		}
+		if hash == "" {
+			hash = office.Hash(files[n])
+		}
+		b.WriteString(hash)
 		b.WriteByte('\n')
 	}
 	return office.Hash([]byte(b.String()))
@@ -644,7 +660,7 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 		return nil, fmt.Errorf("invalid project name")
 	}
 	w.Manifest = manifest
-	finger := Fingerprint(files)
+	finger := fingerprint(files, w.sourceStamp)
 	// Cache hits still validate both the source snapshot and artifact bytes.
 	if b, e := Read(w.Root, "reports/build.json"); e == nil {
 		var prior BuildReport
