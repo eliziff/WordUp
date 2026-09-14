@@ -215,11 +215,33 @@ Private Function WU_SemanticRole(ByVal text As String, ByVal style As String, By
     If plain = "abstract" And level = 0 Then WU_SemanticRole = "abstract": Exit Function
     If plain = "contents" Or plain = "table of contents" Or context = "contents" Then WU_SemanticRole = "toc": Exit Function
     style = LCase$(style)
-    If InStr(style, "tocheading") > 0 Or (WU_StyleToken(style, "toc") And WU_StyleToken(style, "heading")) Then WU_SemanticRole = "toc": Exit Function
+	If (InStr(style, "tocheading") > 0 Or (WU_StyleToken(style, "toc") And WU_StyleToken(style, "heading"))) And WU_LikelyTOCText(text, context) Then WU_SemanticRole = "toc": Exit Function
     If WU_StyleToken(style, "quotation") Or WU_StyleToken(style, "quote") Or (WU_StyleToken(style, "block") And WU_StyleToken(style, "text")) Then WU_SemanticRole = "quotation": Exit Function
     If WU_StyleToken(style, "abstract") Then WU_SemanticRole = "abstract": Exit Function
     If WU_StyleToken(style, "author") Or WU_StyleToken(style, "byline") Then WU_SemanticRole = "author": Exit Function
-    If Not WU_StyleToken(style, "heading") And ((WU_StyleToken(style, "document") And WU_StyleToken(style, "title")) Or Trim$(style) = "title" Or Trim$(style) = "title normal") Then WU_SemanticRole = "title"
+	If Not WU_StyleToken(style, "heading") And ((WU_StyleToken(style, "document") And WU_StyleToken(style, "title")) Or Trim$(style) = "title" Or Trim$(style) = "title normal") Then WU_SemanticRole = "title"
+End Function
+
+' A built-in TOC style may be repurposed for body/front-matter text. Require
+' short TOC-label or entry evidence before allowing the style name to win.
+Private Function WU_LikelyTOCText(ByVal text As String, ByVal context As String) As Boolean
+    Dim plain As String
+    If context = "contents" Then WU_LikelyTOCText = True: Exit Function
+    plain = LCase$(Trim$(text))
+    If plain = "contents" Or plain = "table of contents" Or plain = "table of contents:" Then WU_LikelyTOCText = True: Exit Function
+    If InStr(text, vbTab) > 0 Then WU_LikelyTOCText = True: Exit Function
+    If Len(plain) <= 96 And WU_TrailingPageNumber(plain) Then WU_LikelyTOCText = True
+End Function
+
+Private Function WU_TrailingPageNumber(ByVal text As String) As Boolean
+    Dim i As Long, c As String
+    text = Trim$(text)
+    If Len(text) = 0 Then Exit Function
+    For i = Len(text) To 1 Step -1
+        c = Mid$(text, i, 1)
+        If c < "0" Or c > "9" Then Exit For
+    Next i
+    WU_TrailingPageNumber = (i < Len(text))
 End Function
 
 ' Publication-specific copies may adjust evidence here. Do not apply styles here.

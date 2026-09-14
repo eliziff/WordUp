@@ -112,3 +112,29 @@ func TestResolveRecognizesCamelCaseSemanticStyles(t *testing.T) {
 		}
 	}
 }
+
+func TestResolveDoesNotTrustRepurposedTOCStyle(t *testing.T) {
+	rows := []map[string]any{
+		{"context": "body", "text": "A Journal Article", "style_id": "Normal", "paragraph_alignment": "center", "direct_formatting_evidence": map[string]int{"text_units": 17, "bold_units": 17}},
+		{"context": "body", "text": "By Jane Doe", "style_id": "Normal", "paragraph_alignment": "center"},
+		{"context": "body", "text": "This long italic paragraph describes the article and its scope. It is deliberately long enough to look like front matter rather than a table-of-contents label, and it contains no page-number tabs or outline metadata.", "style_id": "TOCHeading", "direct_formatting_evidence": map[string]int{"text_units": 211, "italic_units": 211}},
+	}
+	Resolve(rows)
+	got := rows[2]["resolved_structure"].(map[string]any)
+	if got["role"] != "body" {
+		t.Fatalf("repurposed TOC style was promoted without TOC text evidence: %#v", got)
+	}
+}
+
+func TestResolveRecognizesTOCEntriesWithRepurposedStyle(t *testing.T) {
+	rows := []map[string]any{
+		{"context": "body", "text": "Table of Contents", "style_id": "TOCHeading"},
+		{"context": "body", "text": "I. INTRODUCTION\t1", "style_id": "TOCHeading"},
+	}
+	Resolve(rows)
+	for i, row := range rows {
+		if got := row["resolved_structure"].(map[string]any)["role"]; got != "toc" {
+			t.Fatalf("TOC row %d role=%v", i, got)
+		}
+	}
+}

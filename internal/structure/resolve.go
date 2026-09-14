@@ -328,7 +328,7 @@ func semanticRole(row map[string]any) string {
 	style := styleText(row)
 	normalizedStyle := strings.ToLower(style)
 	switch {
-	case strings.Contains(normalizedStyle, "tocheading") || (styleTokenPresent(style, "toc") && styleTokenPresent(style, "heading")):
+	case (strings.Contains(normalizedStyle, "tocheading") || (styleTokenPresent(style, "toc") && styleTokenPresent(style, "heading"))) && likelyTOCText(row, text):
 		return "toc"
 	case styleTokenPresent(style, "quotation") || styleTokenPresent(style, "quote") || (styleTokenPresent(style, "block") && styleTokenPresent(style, "text")):
 		return "quotation"
@@ -340,6 +340,38 @@ func semanticRole(row map[string]any) string {
 		return "title"
 	}
 	return ""
+}
+
+// likelyTOCText prevents a repurposed TOC style from overriding stronger
+// content/layout evidence. Word templates frequently reuse a built-in style
+// for an abstract or other front matter. A real TOC heading is a short label,
+// a TOC entry has tabular/page-number text, or the inspector has already
+// classified the paragraph as part of the contents story.
+func likelyTOCText(row map[string]any, text string) bool {
+	if row["context"] == "contents" {
+		return true
+	}
+	plain := strings.ToLower(strings.TrimSpace(text))
+	if plain == "contents" || plain == "table of contents" || plain == "table of contents:" {
+		return true
+	}
+	if strings.Contains(text, "\t") {
+		return true
+	}
+	trimmed := strings.TrimSpace(text)
+	return len([]rune(trimmed)) <= 96 && trailingPageNumber(trimmed)
+}
+
+func trailingPageNumber(text string) bool {
+	runes := []rune(strings.TrimSpace(text))
+	if len(runes) == 0 {
+		return false
+	}
+	i := len(runes) - 1
+	for i >= 0 && unicode.IsDigit(runes[i]) {
+		i--
+	}
+	return i < len(runes)-1
 }
 
 func attachParent(resolved map[string]any, rows []map[string]any, parents [10]int) {
