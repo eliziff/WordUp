@@ -10,6 +10,15 @@ import (
 // ConnectRibbons makes newly authored RibbonX parts discoverable by Office.
 // Existing relationship IDs and arbitrary part paths are preserved.
 func (p *Package) ConnectRibbons() error {
+	work := p.Clone()
+	if err := work.connectRibbons(); err != nil {
+		return err
+	}
+	*p = *work
+	return nil
+}
+
+func (p *Package) connectRibbons() error {
 	types := map[string]string{
 		"http://schemas.microsoft.com/office/2006/01/customui": "http://schemas.microsoft.com/office/2006/relationships/ui/extensibility",
 		"http://schemas.microsoft.com/office/2009/07/customui": "http://schemas.microsoft.com/office/2007/relationships/ui/extensibility",

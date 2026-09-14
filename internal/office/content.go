@@ -412,6 +412,15 @@ type StyleRecipe struct {
 }
 
 func ApplyStyles(p *Package, r StyleRecipe) error {
+	work := p.Clone()
+	if err := applyStyles(work, r); err != nil {
+		return err
+	}
+	*p = *work
+	return nil
+}
+
+func applyStyles(p *Package, r StyleRecipe) error {
 	if len(r.Styles) > 0 {
 		part := "word/styles.xml"
 		b := p.Files[part]
@@ -1004,6 +1013,15 @@ func (c *composer) blocks(blocks []Block) (string, error) {
 	return out.String(), nil
 }
 func Compose(p *Package, r ContentRecipe, asset func(string) ([]byte, error)) error {
+	work := p.Clone()
+	if err := compose(work, r, asset); err != nil {
+		return err
+	}
+	*p = *work
+	return nil
+}
+
+func compose(p *Package, r ContentRecipe, asset func(string) ([]byte, error)) error {
 	c := &composer{p: p, source: "word/document.xml", asset: asset, next: nextDocumentID(p)}
 	body, e := c.blocks(r.Blocks)
 	if e != nil {
@@ -1139,6 +1157,15 @@ func nextFootnoteID(p *Package) (int, error) {
 	return maxID + 1, nil
 }
 func AddBuildingBlocks(p *Package, blocks []BuildingBlock, asset func(string) ([]byte, error)) error {
+	work := p.Clone()
+	if err := addBuildingBlocks(work, blocks, asset); err != nil {
+		return err
+	}
+	*p = *work
+	return nil
+}
+
+func addBuildingBlocks(p *Package, blocks []BuildingBlock, asset func(string) ([]byte, error)) error {
 	if len(blocks) == 0 {
 		return nil
 	}
@@ -1222,7 +1249,9 @@ func AddBuildingBlocks(p *Package, blocks []BuildingBlock, asset func(string) ([
 	}
 	// Glossary content uses its own relationships, including references to styles.
 	if p.Files["word/styles.xml"] != nil {
-		p.Files["word/glossary/styles.xml"] = append([]byte(nil), p.Files["word/styles.xml"]...)
+		if _, exists := p.Files["word/glossary/styles.xml"]; !exists {
+			p.Files["word/glossary/styles.xml"] = append([]byte(nil), p.Files["word/styles.xml"]...)
+		}
 		if e := p.ContentType("word/glossary/styles.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"); e != nil {
 			return e
 		}
@@ -1231,7 +1260,9 @@ func AddBuildingBlocks(p *Package, blocks []BuildingBlock, asset func(string) ([
 		}
 	}
 	if p.Files["word/numbering.xml"] != nil {
-		p.Files["word/glossary/numbering.xml"] = append([]byte(nil), p.Files["word/numbering.xml"]...)
+		if _, exists := p.Files["word/glossary/numbering.xml"]; !exists {
+			p.Files["word/glossary/numbering.xml"] = append([]byte(nil), p.Files["word/numbering.xml"]...)
+		}
 		if e := p.ContentType("word/glossary/numbering.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"); e != nil {
 			return e
 		}

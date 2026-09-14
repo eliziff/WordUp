@@ -435,6 +435,44 @@ func TestComposePreservesExistingFootnotesAndAllocatesNewIDs(t *testing.T) {
 		t.Fatalf("new footnote did not allocate the next ID: %s", footnotes)
 	}
 }
+
+func TestBuildingBlocksPreserveExistingGlossaryDefinitions(t *testing.T) {
+	p := BlankPackage()
+	styles := []byte(`<w:styles xmlns:w="` + W + `"><w:style w:type="paragraph" w:styleId="GlossaryOnly"><w:name w:val="Glossary only"/></w:style></w:styles>`)
+	numbering := []byte(`<w:numbering xmlns:w="` + W + `"><w:abstractNum w:abstractNumId="91"/></w:numbering>`)
+	p.Files["word/glossary/styles.xml"] = styles
+	p.Files["word/glossary/numbering.xml"] = numbering
+	if err := AddBuildingBlocks(p, []BuildingBlock{{Name: "Snippet", Blocks: []Block{{Text: "Saved"}}}}, nil); err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(p.Files["word/glossary/styles.xml"], styles) || !bytes.Equal(p.Files["word/glossary/numbering.xml"], numbering) {
+		t.Fatal("adding a building block overwrote existing glossary definitions")
+	}
+	if err := p.Validate(); err != nil {
+		t.Fatal("preserved glossary package is invalid:", err)
+	}
+}
+
+func TestComposeFailureDoesNotMutatePackage(t *testing.T) {
+	p := BlankPackage()
+	p.Files[RelPart("word/document.xml")] = []byte(`<Relationships xmlns="` + RelNS + `"><Relationship Id="wwheader" Type="other" Target="existing.xml"/></Relationships>`)
+	before, err := p.Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = Compose(p, ContentRecipe{Page: &PageSpec{Header: []Block{{Text: "new"}}}}, nil)
+	if err == nil {
+		t.Fatal("relationship collision was not rejected")
+	}
+	after, err := p.Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(before, after) {
+		t.Fatal("failed composition mutated the package")
+	}
+}
+
 func TestBlankPackageHasDOCXContentType(t *testing.T) {
 	p := BlankPackage()
 	if !strings.Contains(string(p.Files["[Content_Types].xml"]), "wordprocessingml.document.main+xml") {

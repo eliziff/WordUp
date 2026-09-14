@@ -89,6 +89,18 @@ func (p *Package) WithFiles(files map[string][]byte) *Package {
 	return &Package{Original: p.Original, Files: files, archive: p.archive, archiveLogical: p.archiveLogical, hashes: p.hashes}
 }
 
+// Clone gives authoring operations an isolated part map while retaining the
+// immutable ZIP metadata used to preserve untouched entries byte-for-byte.
+// Package mutators replace part slices rather than editing them in place, so
+// sharing unchanged immutable bytes keeps the fast Ribbon/build path cheap.
+func (p *Package) Clone() *Package {
+	files := make(map[string][]byte, len(p.Files))
+	for name, data := range p.Files {
+		files[name] = data
+	}
+	return p.WithFiles(files)
+}
+
 func Hash(b []byte) string { s := sha256.Sum256(b); return hex.EncodeToString(s[:]) }
 func SafePart(name string) bool {
 	if name == "" || strings.ContainsAny(name, "\\\x00:") || strings.HasPrefix(name, "/") || path.Clean(name) != name {
