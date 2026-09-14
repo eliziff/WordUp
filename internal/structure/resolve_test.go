@@ -82,6 +82,27 @@ func TestResolveRetainsAlternativesScoreAndContradictions(t *testing.T) {
 	}
 }
 
+func TestResolveRejectsOutOfRangeHierarchyEvidence(t *testing.T) {
+	cases := []map[string]any{
+		{"context": "body", "text": "Body prose", "outline_evidence": map[string]any{"level": 99}},
+		{"context": "body", "text": "Body prose", "numbering_evidence": map[string]any{"level": 0, "family": "decimal"}},
+		{"context": "body", "text": "Body prose", "sequence_evidence": Assignment{Level: 10, Action: "open_level"}},
+	}
+	for i, row := range cases {
+		Resolve([]map[string]any{row})
+		resolved, ok := row["resolved_structure"].(map[string]any)
+		if !ok {
+			t.Fatalf("case %d did not resolve: %#v", i, row)
+		}
+		if level, _ := resolved["level"].(int); level < 0 || level > maxHierarchyLevel {
+			t.Fatalf("case %d emitted invalid level: %#v", i, resolved)
+		}
+		if resolved["ambiguous"] != true {
+			t.Fatalf("case %d discarded malformed hierarchy evidence: %#v", i, resolved)
+		}
+	}
+}
+
 func TestResolveDetectsLayoutFrontMatter(t *testing.T) {
 	rows := []map[string]any{
 		{"context": "body", "text": "A General Title", "style_id": "Normal", "paragraph_alignment": "center", "direct_formatting_evidence": map[string]int{"text_units": 14, "bold_units": 14}},

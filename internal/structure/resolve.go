@@ -6,6 +6,8 @@ import (
 	"unicode"
 )
 
+const maxHierarchyLevel = 9
+
 // Resolve fuses document-wide style, outline, marker and formatting evidence.
 // It mutates the supplied observation rows so callers retain exact source facts.
 func Resolve(rows []map[string]any) map[string]any {
@@ -40,14 +42,21 @@ func Resolve(rows []map[string]any) map[string]any {
 		}
 		if outline, ok := row["outline_evidence"].(map[string]any); ok && outline["body_text"] != true {
 			if n, ok := intValue(outline["level"]); ok {
-				level = n
-				score += 55
-				evidence = append(evidence, "native-outline")
+				if validHierarchyLevel(n) {
+					level = n
+					score += 55
+					evidence = append(evidence, "native-outline")
+				} else {
+					addContradiction(row, fmt.Sprintf("native outline level %d is outside Word's 1-9 hierarchy", n))
+					evidence = append(evidence, "invalid-native-outline")
+				}
 			}
 		}
 		if family, ok := row["style_family_evidence"].(map[string]any); ok && family["coherent"] == true {
 			if n, ok := intValue(family["corroborated_level"]); ok {
-				if level > 0 && level != n {
+				if !validHierarchyLevel(n) {
+					addContradiction(row, fmt.Sprintf("coherent style-family level %d is outside Word's 1-9 hierarchy", n))
+				} else if level > 0 && level != n {
 					row["structure_contradiction"] = fmt.Sprintf("native level %d conflicts with coherent style-family level %d", level, n)
 				} else if level == 0 {
 					level = n
@@ -80,7 +89,9 @@ func Resolve(rows []map[string]any) map[string]any {
 			} else {
 				numbered = true
 				if n, ok := intValue(numbering["level"]); ok {
-					if level == 0 {
+					if !validHierarchyLevel(n) {
+						addContradiction(row, fmt.Sprintf("numbering level %d is outside Word's 1-9 hierarchy", n))
+					} else if level == 0 {
 						level = n
 					} else if level != n {
 						row["structure_contradiction"] = fmt.Sprintf("heading level %d conflicts with numbering level %d", level, n)
@@ -91,11 +102,15 @@ func Resolve(rows []map[string]any) map[string]any {
 			}
 		}
 		if sequence, ok := row["sequence_evidence"].(Assignment); ok && sequence.Action != "violation" {
-			if level == 0 {
-				level = sequence.Level
+			if !validHierarchyLevel(sequence.Level) {
+				addContradiction(row, fmt.Sprintf("sequence level %d is outside Word's 1-9 hierarchy", sequence.Level))
+			} else {
+				if level == 0 {
+					level = sequence.Level
+				}
+				score += 15
+				evidence = append(evidence, "sequence-"+sequence.Action)
 			}
-			score += 15
-			evidence = append(evidence, "sequence-"+sequence.Action)
 		}
 		props, _ := row["paragraph_properties_xml"].(string)
 		keepNext := strings.Contains(props, ":keepNext")
@@ -172,7 +187,7 @@ func Resolve(rows []map[string]any) map[string]any {
 			}
 			row["resolved_structure"] = resolved
 			parents[level] = i + 1
-			for n := level + 1; n <= 9; n++ {
+			for n := level + 1; n <= maxHierarchyLevel; n++ {
 				parents[n] = 0
 			}
 			continue
@@ -194,6 +209,16 @@ func Resolve(rows []map[string]any) map[string]any {
 		row["resolved_structure"] = resolved
 	}
 	return map[string]any{"contract_version": ContractVersion, "paragraphs": len(rows), "headings": headings, "candidates": candidates, "ambiguities": ambiguities, "editorial_hierarchy_verified": false}
+}
+
+func validHierarchyLevel(level int) bool {
+	return level >= 1 && level <= maxHierarchyLevel
+}
+
+func addContradiction(row map[string]any, message string) {
+	if stringValue(row["structure_contradiction"]) == "" {
+		row["structure_contradiction"] = message
+	}
 }
 
 func markerAlternatives(row map[string]any) []Interpretation {
