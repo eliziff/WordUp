@@ -29,8 +29,13 @@ Native suites can query an earlier saved snapshot:
 Query steps do not count as Word execution. `named` also accepts `part` and
 `limit`. Large assertion error values carry JSON byte counts and hashes;
 full actual values remain in observations and expected values in the suite.
-Full reports are still detailed: general bounded tool summaries and evidence
-attachment retrieval are not yet implemented.
+Full reports are still detailed; general bounded tool summaries are not yet
+implemented.
+
+`read` can retrieve large report or evidence files in bounded chunks with
+`offset` and `limit`. The response always includes the full-file SHA-256,
+total byte count, returned range, and `next_offset` when more bytes remain;
+the default with neither field remains a complete read.
 
 ## Direct native object access (Windows)
 

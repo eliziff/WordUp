@@ -24,6 +24,9 @@ func Tools() []Tool {
 		if ds[i][0] == "check" {
 			ds[i][1] = "Check source syntax, XML/Ribbon wiring, and emit a compact inventory of public procedures, form events, Ribbon callbacks, hotkey/context-menu registrations, and installed component state; does not establish native compilation."
 		}
+		if ds[i][0] == "read" {
+			ds[i][1] = "Read a workspace file with its full-file SHA-256; optional offset and limit retrieve a bounded byte range for large reports or evidence."
+		}
 	}
 	ds = append(ds, [2]string{"structure.source", "Return an editable standalone VBA paragraph detection core, separate from house-style mapping. Read-only native evidence plus unresolved journal-marker candidates; no installation or execution."})
 	ds = append(ds, [2]string{"structure.inspect", "Inspect document path without Word: source-located paragraphs, style inheritance, direct versus inherited outline levels, character-weighted direct formatting, resolved numbering definitions, table/textbox containment and raw evidence XML. Evidence adapter, not editorial truth."})
@@ -69,7 +72,7 @@ func Tools() []Tool {
 	}
 	props["component"] = map[string]any{"type": "string", "description": "Stable bundled component ID such as structure.detect."}
 	props["parameters"] = map[string]any{"type": "object", "additionalProperties": map[string]any{"type": "string"}, "description": "Declared component adaptation values. Currently module_prefix is a validated VBA identifier; undeclared values are rejected."}
-	for _, key := range []string{"timeout_ms", "tolerance", "limit"} {
+	for _, key := range []string{"timeout_ms", "tolerance", "offset", "limit"} {
 		props[key] = map[string]any{"type": "integer"}
 	}
 	props["fresh"] = map[string]any{"type": "boolean"}

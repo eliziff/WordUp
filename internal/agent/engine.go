@@ -54,6 +54,7 @@ type Parameters struct {
 	Reference            string                  `json:"reference,omitempty"`
 	Tolerance            int                     `json:"tolerance,omitempty"`
 	Fresh                bool                    `json:"fresh,omitempty"`
+	Offset               int                     `json:"offset,omitempty"`
 	Limit                int                     `json:"limit,omitempty"`
 	NativeOptions        *native.Options         `json:"native_options,omitempty"`
 }
@@ -511,11 +512,27 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		if err != nil {
 			return nil, err
 		}
-		r := map[string]any{"path": p.Path, "sha256": office.Hash(b), "bytes": len(b)}
-		if utf8.Valid(b) && !strings.ContainsRune(string(b), 0) {
-			r["text"] = string(b)
+		if p.Offset < 0 || p.Offset > len(b) {
+			return nil, fmt.Errorf("read offset outside file: %d", p.Offset)
+		}
+		end := len(b)
+		if p.Limit > 0 {
+			if p.Limit > 16<<20 {
+				return nil, fmt.Errorf("read limit exceeds 16 MiB")
+			}
+			if remaining := p.Offset + p.Limit; remaining < end {
+				end = remaining
+			}
+		}
+		chunk := b[p.Offset:end]
+		r := map[string]any{"path": p.Path, "sha256": office.Hash(b), "bytes": len(b), "offset": p.Offset, "length": len(chunk), "truncated": end < len(b)}
+		if end < len(b) {
+			r["next_offset"] = end
+		}
+		if utf8.Valid(chunk) && !strings.ContainsRune(string(chunk), 0) {
+			r["text"] = string(chunk)
 		} else {
-			r["base64"] = base64.StdEncoding.EncodeToString(b)
+			r["base64"] = base64.StdEncoding.EncodeToString(chunk)
 		}
 		return r, nil
 	case "write":

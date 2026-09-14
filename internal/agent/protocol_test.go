@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"github.com/eliziff/WordUp/internal/office"
 	"github.com/eliziff/WordUp/internal/project"
 	"strings"
 	"testing"
@@ -62,5 +63,27 @@ func TestProtocolWriteReadHashGuard(t *testing.T) {
 	}
 	if _, err = e.Call(ctx, "write", Parameters{Path: "vba/Helpers.bas", Text: "bad", ExpectedSHA256: "wrong"}); err == nil {
 		t.Fatal("stale agent write accepted")
+	}
+}
+
+func TestProtocolReadRangeRetainsFullFileHash(t *testing.T) {
+	root := t.TempDir() + "/work"
+	if _, e := project.New("Test", root); e != nil {
+		t.Fatal(e)
+	}
+	if err := project.Write(root, "reports/evidence.xml", []byte("0123456789"), ""); err != nil {
+		t.Fatal(err)
+	}
+	e := &Engine{Root: root}
+	value, err := e.Call(context.Background(), "read", Parameters{Path: "reports/evidence.xml", Offset: 3, Limit: 4})
+	if err != nil {
+		t.Fatal(err)
+	}
+	row := value.(map[string]any)
+	if row["text"] != "3456" || row["bytes"] != 10 || row["offset"] != 3 || row["length"] != 4 || row["truncated"] != true || row["next_offset"] != 7 {
+		t.Fatalf("invalid bounded read: %#v", row)
+	}
+	if row["sha256"] != office.Hash([]byte("0123456789")) {
+		t.Fatal("bounded read lost full-file identity")
 	}
 }
