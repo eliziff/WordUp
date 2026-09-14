@@ -80,13 +80,9 @@ type Package struct {
 	hashes   map[string]string
 }
 
-// Clone retains immutable ZIP metadata while isolating every editable part.
-func (p *Package) Clone() *Package {
-	clone := &Package{Original: p.Original, Files: make(map[string][]byte, len(p.Files)), archive: p.archive, hashes: p.hashes}
-	for name, data := range p.Files {
-		clone.Files[name] = append([]byte(nil), data...)
-	}
-	return clone
+// WithFiles reuses immutable ZIP metadata with a caller-owned part map.
+func (p *Package) WithFiles(files map[string][]byte) *Package {
+	return &Package{Original: p.Original, Files: files, archive: p.archive, hashes: p.hashes}
 }
 
 func Hash(b []byte) string { s := sha256.Sum256(b); return hex.EncodeToString(s[:]) }

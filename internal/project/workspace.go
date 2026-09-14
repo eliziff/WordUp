@@ -625,23 +625,24 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 			}
 		}
 	}
-	p := w.Baseline.Clone()
 	original := map[string]string{}
-	for n, b := range p.Files {
+	for n, b := range w.Baseline.Files {
 		original[n] = office.Hash(b)
 	}
-	p.Files = map[string][]byte{}
+	packageFiles := map[string][]byte{}
 	for n, b := range files {
 		if strings.HasPrefix(n, "package/") {
-			p.Files[strings.TrimPrefix(n, "package/")] = b
+			packageFiles[strings.TrimPrefix(n, "package/")] = b
 		}
 	}
+	p := w.Baseline.WithFiles(packageFiles)
 	if e = p.ConnectRibbons(); e != nil {
 		return nil, e
 	}
 	mods := []office.Module{}
 	formStreams := map[string]map[string][]byte{}
 	var v *office.VBA
+	cfbOwned := false
 	if raw := w.Baseline.Files["word/vbaProject.bin"]; len(raw) > 0 {
 		if w.baselineVBA == nil {
 			w.baselineVBA, e = office.ReadVBA(raw)
@@ -649,7 +650,9 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 				return nil, e
 			}
 		}
-		v = w.baselineVBA.Clone()
+		copyV := *w.baselineVBA
+		copyV.Prefix = append([]byte(nil), copyV.Prefix...)
+		v = &copyV
 	} else {
 		v = office.NewVBA(w.Manifest.Name)
 	}
@@ -699,6 +702,10 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 				if _, e := v.CFB.Stream(name + "/f"); e == nil {
 					continue
 				}
+			}
+			if !cfbOwned {
+				v.CFB = v.CFB.Clone()
+				cfbOwned = true
 			}
 			var design office.Design
 			if e = ReadJSON(raw, &design); e != nil {
