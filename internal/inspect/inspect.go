@@ -268,12 +268,19 @@ func TextObservations(p *office.Package) ([]map[string]any, error) {
 			}
 			runs = append(runs, item)
 		}
+		paragraphID := s.Attribute("http://schemas.microsoft.com/office/word/2010/wordml", "paraId")
+		xmlPath := fmt.Sprintf("(//w:p)[%d]", len(out)+1)
+		sourceID := "word/document.xml#" + xmlPath
+		if paragraphID != "" {
+			sourceID = "word/document.xml#paraId=" + paragraphID
+		}
 		out = append(out, map[string]any{
 			"text": text.String(), "style_id": style, "paragraph_properties_xml": props, "run_properties": runs,
 			"direct_formatting_evidence": weighted,
 			"source_part":                "word/document.xml", "xml_start": s.Start, "xml_end": s.End,
-			"xml_path":     fmt.Sprintf("(//w:p)[%d]", len(out)+1),
-			"paragraph_id": s.Attribute("http://schemas.microsoft.com/office/word/2010/wordml", "paraId"),
+			"xml_path":     xmlPath,
+			"paragraph_id": paragraphID,
+			"source_id":    sourceID,
 			"references":   references,
 		})
 		if len(out) > 10000 {

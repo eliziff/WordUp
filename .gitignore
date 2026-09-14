@@ -33,6 +33,7 @@ Wordwright-*-ALR-*
 /reports/
 
 /reference/
+/testdata/structure-silver/
 /tools/office-bridge/packages/
 /tools/oletools/.venv/
 /vbaparse.test.exe

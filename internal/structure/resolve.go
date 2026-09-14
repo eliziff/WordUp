@@ -17,14 +17,26 @@ func Resolve(rows []map[string]any) map[string]any {
 		style, _ := row["style_id"].(string)
 		score, level := 0, 0
 		evidence := []string{}
+		if role := semanticRole(row); role != "" {
+			resolved := map[string]any{"role": role, "confidence": 100, "evidence": []string{"semantic-style-or-context"}}
+			if role == "quotation" || role == "abstract" {
+				attachParent(resolved, rows, parents)
+			}
+			row["resolved_structure"] = resolved
+			continue
+		}
 		if context != "body" || strings.TrimSpace(text) == "" {
-			row["resolved_structure"] = map[string]any{"role": fallbackRole(context), "confidence": 100, "evidence": evidence}
+			resolved := map[string]any{"role": fallbackRole(context, text), "confidence": 100, "evidence": evidence}
+			if resolved["role"] != "blank" {
+				attachParent(resolved, rows, parents)
+			}
+			row["resolved_structure"] = resolved
 			continue
 		}
 		if outline, ok := row["outline_evidence"].(map[string]any); ok && outline["body_text"] != true {
 			if n, ok := intValue(outline["level"]); ok {
 				level = n
-				score += 100
+				score += 55
 				evidence = append(evidence, "native-outline")
 			}
 		}
@@ -35,7 +47,7 @@ func Resolve(rows []map[string]any) map[string]any {
 				} else if level == 0 {
 					level = n
 				}
-				score += 35
+				score += 15
 				evidence = append(evidence, "coherent-style-family")
 			}
 		}
@@ -86,6 +98,10 @@ func Resolve(rows []map[string]any) map[string]any {
 			score += 8
 			evidence = append(evidence, "uppercase-text")
 		}
+		if level >= 5 && !headingStyle(style) && row["marker_interpretations"] == nil {
+			score -= 45
+			evidence = append(evidence, "deep-outline-body-risk")
+		}
 		if sentenceEnding(text) && level == 0 {
 			score -= 18
 			evidence = append(evidence, "sentence-ending")
@@ -102,7 +118,11 @@ func Resolve(rows []map[string]any) map[string]any {
 					break
 				}
 			}
-			row["resolved_structure"] = map[string]any{"role": role, "level": level, "parent_paragraph": parent, "confidence": clamp(score), "evidence": evidence}
+			resolved := map[string]any{"role": role, "level": level, "parent_paragraph": parent, "confidence": clamp(score), "evidence": evidence}
+			if parent > 0 {
+				resolved["parent_source_id"] = rows[parent-1]["source_id"]
+			}
+			row["resolved_structure"] = resolved
 			parents[level] = i + 1
 			for n := level + 1; n <= 9; n++ {
 				parents[n] = 0
@@ -119,16 +139,65 @@ func Resolve(rows []map[string]any) map[string]any {
 			ambiguous = true
 			ambiguities++
 		}
-		row["resolved_structure"] = map[string]any{"role": role, "level": level, "confidence": clamp(score), "ambiguous": ambiguous, "evidence": evidence}
+		resolved := map[string]any{"role": role, "level": level, "confidence": clamp(score), "ambiguous": ambiguous, "evidence": evidence}
+		attachParent(resolved, rows, parents)
+		row["resolved_structure"] = resolved
 	}
 	return map[string]any{"contract_version": ContractVersion, "paragraphs": len(rows), "headings": headings, "candidates": candidates, "ambiguities": ambiguities, "editorial_hierarchy_verified": false}
 }
 
-func fallbackRole(context string) string {
-	if context == "" || context == "body" {
-		return "body"
+func fallbackRole(context, text string) string {
+	if context != "" && context != "body" {
+		return context
 	}
-	return context
+	if strings.TrimSpace(text) == "" {
+		return "blank"
+	}
+	return "body"
+}
+
+func semanticRole(row map[string]any) string {
+	if text, _ := row["text"].(string); strings.TrimSpace(text) == "" {
+		return ""
+	}
+	if row["context"] == "contents" {
+		return "toc"
+	}
+	parts := []string{}
+	if id, _ := row["style_id"].(string); id != "" {
+		parts = append(parts, id)
+	}
+	if chain, ok := row["style_chain"].([]map[string]any); ok {
+		for _, style := range chain {
+			if name, _ := style["name"].(string); name != "" {
+				parts = append(parts, name)
+			}
+		}
+	}
+	style := strings.ToLower(strings.Join(parts, " "))
+	switch {
+	case strings.Contains(style, "toc heading"):
+		return "toc"
+	case strings.Contains(style, "quotation") || strings.Contains(style, "quote") || strings.Contains(style, "block text"):
+		return "quotation"
+	case strings.Contains(style, "abstract"):
+		return "abstract"
+	case strings.Contains(style, "author") || strings.Contains(style, "byline"):
+		return "author"
+	case !strings.Contains(style, "heading") && (strings.Contains(style, "document title") || strings.TrimSpace(style) == "title normal"):
+		return "title"
+	}
+	return ""
+}
+
+func attachParent(resolved map[string]any, rows []map[string]any, parents [10]int) {
+	for level := len(parents) - 1; level > 0; level-- {
+		if paragraph := parents[level]; paragraph > 0 {
+			resolved["parent_paragraph"] = paragraph
+			resolved["parent_source_id"] = rows[paragraph-1]["source_id"]
+			return
+		}
+	}
 }
 func clamp(n int) int {
 	if n < 0 {

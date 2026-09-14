@@ -23,6 +23,7 @@ func Tools() []Tool {
 	ds = append(ds, [2]string{"structure.source", "Return an editable standalone VBA paragraph detection core, separate from house-style mapping. Read-only native evidence plus unresolved journal-marker candidates; no installation or execution."})
 	ds = append(ds, [2]string{"structure.inspect", "Inspect document path without Word: source-located paragraphs, style inheritance, direct versus inherited outline levels, character-weighted direct formatting, resolved numbering definitions, table/textbox containment and raw evidence XML. Evidence adapter, not editorial truth."})
 	ds = append(ds, [2]string{"structure.resolve", "Resolve generic heading candidates and hierarchy from package, style, outline, formatting and sequence evidence while retaining ambiguity: path."})
+	ds = append(ds, [2]string{"structure.compare", "Compare resolved structure with model-authored silver XML: reference. Sources named in the silver are resolved relative to the workspace."})
 	ds = append(ds,
 		[2]string{"component.list", "List bundled editable template components and their capabilities."},
 		[2]string{"component.get", "Return one bundled component by component ID, or a local component.json bundle by path, without changing the workspace."},

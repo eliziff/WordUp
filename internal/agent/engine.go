@@ -445,6 +445,12 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 			return nil, err
 		}
 		return inspect.StructureResolved(path)
+	case "structure.compare":
+		reference, err := e.path(p.Reference)
+		if err != nil {
+			return nil, err
+		}
+		return inspect.CompareStructureSilver(e.Root, reference, p.Limit)
 	case "structure.source":
 		m, err := component.Get("structure.detect")
 		if err != nil {

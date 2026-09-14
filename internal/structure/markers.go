@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-var namedHeadingPrefix = regexp.MustCompile(`^\s*(?i:part|chapter)\s+([IVXLCDM]{1,7}|[0-9]{1,3})\s*([-\x{2013}\x{2014}])\s*(.+)$`)
+var namedHeadingPrefix = regexp.MustCompile(`^\s*(?i:part|chapter)\s+([IVXLCDM]{1,7}|[0-9]{1,3}|(?i:one|two|three|four|five|six|seven|eight|nine|ten))\s*([:\-\x{2013}\x{2014}])\s*(.+)$`)
 
 var headingPrefix = regexp.MustCompile(`^\s*(?:(?i:part|chapter)\s+)?([IVXLCDM]{1,7}|[A-Za-z]|[0-9]{1,3})([.)]|\s*[-\x{2013}\x{2014}])\s+(.+)$`)
 
@@ -30,6 +30,9 @@ func MarkerChoices(text string) []Interpretation {
 			return []Interpretation{{"numeric_" + punct, n}}
 		}
 		return nil
+	}
+	if n := map[string]int{"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10}[strings.ToLower(value)]; n > 0 {
+		return []Interpretation{{"numeric_" + punct, n}}
 	}
 	out := []Interpretation{}
 	roman := true
