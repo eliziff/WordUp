@@ -173,12 +173,8 @@ func semanticRole(row map[string]any) string {
 	if id, _ := row["style_id"].(string); id != "" {
 		parts = append(parts, id)
 	}
-	if chain, ok := row["style_chain"].([]map[string]any); ok {
-		for _, style := range chain {
-			if name, _ := style["name"].(string); name != "" {
-				parts = append(parts, name)
-			}
-		}
+	if names, ok := row["style_names"].([]string); ok {
+		parts = append(parts, names...)
 	}
 	style := strings.ToLower(strings.Join(parts, " "))
 	switch {
@@ -233,10 +229,8 @@ func headingLevelFromStyle(row map[string]any) int {
 	if id, _ := row["style_id"].(string); id != "" {
 		parts = append(parts, id)
 	}
-	if chain, ok := row["style_chain"].([]map[string]any); ok && len(chain) > 0 {
-		if name, _ := chain[0]["name"].(string); name != "" {
-			parts = append(parts, name)
-		}
+	if names, ok := row["style_names"].([]string); ok && len(names) > 0 {
+		parts = append(parts, names[0])
 	}
 	name := strings.ToLower(strings.Join(parts, " "))
 	if !strings.Contains(name, "heading") && !strings.Contains(name, "outline") {

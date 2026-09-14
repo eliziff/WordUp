@@ -133,13 +133,7 @@ func CompareStructureSilver(root, reference string, limit int) (map[string]any, 
 }
 
 func styleNames(row map[string]any) []string {
-	chain, _ := row["style_chain"].([]map[string]any)
-	names := make([]string, 0, len(chain))
-	for _, style := range chain {
-		if name, _ := style["name"].(string); name != "" {
-			names = append(names, name)
-		}
-	}
+	names, _ := row["style_names"].([]string)
 	return names
 }
 

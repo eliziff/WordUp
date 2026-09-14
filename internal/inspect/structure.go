@@ -136,12 +136,10 @@ func StructureReference(file string) (map[string]any, error) {
 		return nil, err
 	}
 	type style struct {
-		parent     string
-		outline    string
-		name       string
-		properties string
+		parent, outline, name, paragraphProperties, runProperties string
 	}
 	byID := map[string]style{}
+	styleEvidence := map[string]map[string]any{}
 	defaultID := ""
 	for i, s := range styles {
 		if s.Name.Space != office.W || s.Name.Local != "style" || s.Depth != 1 {
@@ -165,12 +163,31 @@ func StructureReference(file string) (map[string]any, error) {
 			case x.Depth == s.Depth+1 && x.Name.Local == "name":
 				def.name = x.Attribute(office.W, "val")
 			case x.Depth == s.Depth+1 && x.Name.Local == "pPr":
-				def.properties = string(p.Files["word/styles.xml"][x.Start:x.End])
+				def.paragraphProperties = string(p.Files["word/styles.xml"][x.Start:x.End])
+			case x.Depth == s.Depth+1 && x.Name.Local == "rPr":
+				def.runProperties = string(p.Files["word/styles.xml"][x.Start:x.End])
 			case x.Depth == s.Depth+2 && x.Name.Local == "outlineLvl":
 				def.outline = x.Attribute(office.W, "val")
 			}
 		}
 		byID[id] = def
+		styleEvidence[id] = map[string]any{"name": def.name, "based_on": def.parent, "paragraph_properties_xml": def.paragraphProperties, "run_properties_xml": def.runProperties}
+	}
+	defaultRunProperties := ""
+	for i, s := range styles {
+		if s.Name.Space != office.W || s.Name.Local != "rPrDefault" {
+			continue
+		}
+		for _, x := range styles[i+1:] {
+			if x.Start >= s.End {
+				break
+			}
+			if x.Name.Space == office.W && x.Name.Local == "rPr" && x.Depth == s.Depth+1 {
+				defaultRunProperties = string(p.Files["word/styles.xml"][x.Start:x.End])
+				break
+			}
+		}
+		break
 	}
 	spans, err := office.XMLSpans(p.Files["word/document.xml"])
 	if err != nil {
@@ -202,7 +219,8 @@ func StructureReference(file string) (map[string]any, error) {
 			if id == "" {
 				id = defaultID
 			}
-			chain := []map[string]any{}
+			chain := []string{}
+			styleNames := []string{}
 			seen := map[string]bool{}
 			outline, origin := "", ""
 			for at := id; at != ""; {
@@ -216,7 +234,8 @@ func StructureReference(file string) (map[string]any, error) {
 					item["style_error"] = "missing style " + at
 					break
 				}
-				chain = append(chain, map[string]any{"id": at, "name": def.name, "paragraph_properties_xml": def.properties})
+				chain = append(chain, at)
+				styleNames = append(styleNames, def.name)
 				if outline == "" && def.outline != "" {
 					outline = def.outline
 					origin = "style:" + at
@@ -224,10 +243,15 @@ func StructureReference(file string) (map[string]any, error) {
 				at = def.parent
 			}
 			item["style_chain"] = chain
+			item["style_names"] = styleNames
 			if context == "body" {
-				for _, ancestor := range chain {
+				for index, ancestor := range chain {
+					name := ""
+					if index < len(styleNames) {
+						name = styleNames[index]
+					}
 					for level := 1; level <= 9; level++ {
-						if strings.EqualFold(ancestor["id"].(string), fmt.Sprintf("TOC%d", level)) || strings.EqualFold(ancestor["name"].(string), fmt.Sprintf("toc %d", level)) {
+						if strings.EqualFold(ancestor, fmt.Sprintf("TOC%d", level)) || strings.EqualFold(name, fmt.Sprintf("toc %d", level)) {
 							item["context"] = "contents"
 						}
 					}
@@ -353,7 +377,7 @@ func StructureReference(file string) (map[string]any, error) {
 		rows[candidateRows[i]]["sequence_evidence"] = assignment
 		rows[candidateRows[i]]["sequence_is_heading_claim"] = false
 	}
-	return map[string]any{"source_sha256": office.Hash(b), "paragraphs": rows, "numbering_xml": string(p.Files["word/numbering.xml"]), "xml_namespaces": map[string]string{"w": office.W}, "locator_units": "UTF-8 XML byte offsets; paragraph indexes include nested paragraphs, not native Word range positions", "editorial_hierarchy_verified": false, "scope": "main document XML; native outline evidence, style ancestry and table/textbox containment; not a complete formatting cascade or heading inference engine"}, nil
+	return map[string]any{"source_sha256": office.Hash(b), "paragraphs": rows, "styles": styleEvidence, "document_default_run_properties_xml": defaultRunProperties, "numbering_xml": string(p.Files["word/numbering.xml"]), "xml_namespaces": map[string]string{"w": office.W}, "locator_units": "UTF-8 XML byte offsets; paragraph indexes include nested paragraphs, not native Word range positions", "editorial_hierarchy_verified": false, "scope": "main document XML; native outline evidence, style and formatting ancestry, and table/textbox containment; heading inference remains generic"}, nil
 }
 
 func StructureResolved(file string) (map[string]any, error) {
