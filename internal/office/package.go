@@ -180,7 +180,7 @@ func ReadPackage(data []byte) (*Package, error) {
 	return p, nil
 }
 func (p *Package) Bytes() ([]byte, error) {
-	return p.bytes(nil)
+	return p.bytes(nil, nil)
 }
 
 // BytesChanged skips re-reading unchanged ZIP members after the caller has
@@ -193,6 +193,7 @@ func (p *Package) BytesChanged(changed []string) ([]byte, error) {
 	for _, name := range changed {
 		dirty[strings.TrimPrefix(name, "-")] = true
 	}
+	currentHashes := make(map[string]string, len(p.hashes))
 	for name, original := range p.hashes {
 		data, exists := p.Files[name]
 		if !exists {
@@ -201,7 +202,9 @@ func (p *Package) BytesChanged(changed []string) ([]byte, error) {
 			}
 			continue
 		}
-		if !dirty[name] && Hash(data) != original {
+		current := Hash(data)
+		currentHashes[name] = current
+		if !dirty[name] && current != original {
 			return nil, fmt.Errorf("changed-part set omits modified part %s", name)
 		}
 	}
@@ -210,11 +213,13 @@ func (p *Package) BytesChanged(changed []string) ([]byte, error) {
 			return nil, fmt.Errorf("changed-part set omits new part %s", name)
 		}
 	}
-	return p.bytes(dirty)
+	return p.bytes(dirty, currentHashes)
 }
 
-func (p *Package) bytes(knownChanges map[string]bool) ([]byte, error) {
-	currentHashes := map[string]string{}
+func (p *Package) bytes(knownChanges map[string]bool, currentHashes map[string]string) ([]byte, error) {
+	if currentHashes == nil {
+		currentHashes = map[string]string{}
+	}
 	logicalName := func(f *zip.File) string {
 		if p.archiveLogical != nil {
 			if name, ok := p.archiveLogical[f.Name]; ok {
