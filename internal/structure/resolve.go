@@ -110,7 +110,10 @@ func Resolve(rows []map[string]any) map[string]any {
 			evidence = append(evidence, "uppercase-text")
 		}
 		if level >= 5 && !headingStyle(style) && row["marker_interpretations"] == nil {
-			score -= 45
+			// Deep outline levels on an ordinary body style are commonly stale
+			// residue from an editor's outline view. Keep the evidence, but do
+			// not let the native-outline bonus promote the paragraph by itself.
+			score -= 65
 			evidence = append(evidence, "deep-outline-body-risk")
 		}
 		if sentenceEnding(text) && level == 0 {
