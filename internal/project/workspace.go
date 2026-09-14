@@ -1017,7 +1017,7 @@ Use the wordup executable. No module imports, VBE typing, or Python setup.
 - New .bas files become standard modules; new .cls files become classes; .vba files are UserForm code.
 - forms/<name>.json describes persistent native MSForms design, in points. Existing unsupported controls remain opaque.
 - package/ is the full original Open XML package, including RibbonX XML, embedded assets and native saved parts. Do not rewrite the ZIP by hand.
-- Local component bundles may keep binary assets under assets/ and declare ribbon_merges in component.json; the normal build composes those fragments into the named customUI part and rejects collisions before copying source.
+- Local component bundles may keep binary assets under assets/ or package/ and declare ribbon_merges in component.json; the normal build composes those fragments into the named customUI part and rejects collisions before copying source.
 - Edit package XML directly or use native Word operations for document content, styles, numbering and saved building blocks.
 - Use xml.query for exact XML part offsets and hashes, then xml.patch for guarded byte-range edits that preserve every other byte; use xml.verify/xml.compare for direct expected-output checks.
 - build performs deterministic package and binary checks; it is not a VBA compiler.

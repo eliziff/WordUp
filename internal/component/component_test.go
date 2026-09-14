@@ -261,7 +261,7 @@ func TestAllBundledComponentsInstallWithoutCollisions(t *testing.T) {
 
 func TestLocalBundleInstallsAndDiffsWithoutEmbeddingSource(t *testing.T) {
 	bundle, root := t.TempDir(), t.TempDir()
-	manifest := Manifest{Schema: 1, ID: "example.local", Version: "1.2.3", License: "MIT", Provenance: "local test bundle", Files: []File{{Path: "vba/Local.bas"}, {Path: "assets/icon.bin"}}}
+	manifest := Manifest{Schema: 1, ID: "example.local", Version: "1.2.3", License: "MIT", Provenance: "local test bundle", Files: []File{{Path: "vba/Local.bas"}, {Path: "assets/icon.bin"}, {Path: "package/media/icon.png"}}}
 	if err := project.Write(bundle, "component.json", project.JSON(manifest), ""); err != nil {
 		t.Fatal(err)
 	}
@@ -270,6 +270,9 @@ func TestLocalBundleInstallsAndDiffsWithoutEmbeddingSource(t *testing.T) {
 	}
 	icon := []byte{0, 1, 2, 255, 0}
 	if err := project.Write(bundle, "assets/icon.bin", icon, ""); err != nil {
+		t.Fatal(err)
+	}
+	if err := project.Write(bundle, "package/media/icon.png", icon, ""); err != nil {
 		t.Fatal(err)
 	}
 	loaded, err := LoadBundle(bundle)
@@ -285,6 +288,9 @@ func TestLocalBundleInstallsAndDiffsWithoutEmbeddingSource(t *testing.T) {
 	}
 	if actual, err := project.Read(root, "assets/icon.bin"); err != nil || !bytes.Equal(actual, icon) {
 		t.Fatalf("binary source was not installed unchanged: %v", err)
+	}
+	if actual, err := project.Read(root, "package/media/icon.png"); err != nil || !bytes.Equal(actual, icon) {
+		t.Fatalf("binary package source was not installed unchanged: %v", err)
 	}
 	if _, err = AddBundle(root, bundle); err != nil {
 		t.Fatal("unchanged local bundle is not idempotent:", err)

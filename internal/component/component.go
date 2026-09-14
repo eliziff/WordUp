@@ -194,8 +194,8 @@ func LoadBundle(dir string) (Manifest, error) {
 		if utf8.Valid(data) && !bytes.Contains(data, []byte{0}) {
 			m.Files[i].Text = string(data)
 		} else {
-			if !strings.HasPrefix(strings.ToLower(filepath.ToSlash(m.Files[i].Path)), "assets/") {
-				return Manifest{}, fmt.Errorf("component file %s is binary; binary component sources must live under assets/", m.Files[i].Path)
+			if !binaryComponentPath(m.Files[i].Path) {
+				return Manifest{}, fmt.Errorf("component file %s is binary but its source path requires editable text", m.Files[i].Path)
 			}
 			m.Files[i].Binary = true
 			m.Files[i].data = data
@@ -213,6 +213,19 @@ func fileData(file File) []byte {
 		return file.data
 	}
 	return []byte(file.Text)
+}
+
+func binaryComponentPath(name string) bool {
+	name = strings.ToLower(filepath.ToSlash(name))
+	if strings.HasPrefix(name, "vba/") || strings.HasPrefix(name, "forms/") {
+		return false
+	}
+	switch strings.ToLower(filepath.Ext(name)) {
+	case ".bas", ".cls", ".vba", ".xml", ".rels", ".json", ".md":
+		return false
+	default:
+		return true
+	}
 }
 
 func AddBundle(root, dir string) (Installed, error) {
