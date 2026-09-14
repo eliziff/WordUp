@@ -79,7 +79,7 @@ func TestNativeComponentCleanup(t *testing.T) {
 const structureProof = `Attribute VB_Name = "StructureProof"
 Option Explicit
 Public Function Check() As Variant
-    Dim d As Document, r As Variant, before As String, mixed As Range
+    Dim d As Document, markerDoc As Document, r As Variant, markerResult As Variant, before As String, mixed As Range
     Dim i As Long, manuscript(1 To 400) As String, stress(1 To 1400) As String
     Dim started As Single, manuscriptElapsed As Single, stressElapsed As Single
     Set d = Documents.Add
@@ -104,6 +104,11 @@ Public Function Check() As Variant
     If r(4, WU_LEVEL) <> 1 Or InStr(r(4, WU_EVIDENCE), "coherent-style-family") = 0 Then Err.Raise 5, , "coherent candidate not resolved"
     If r(0, WU_PARENT) <> 0 Or r(2, WU_AMBIGUOUS) <> False Then Err.Raise 5, , "uninitialized contract values"
     If d.Content.Text <> before Or Not d.Saved Then Err.Raise 5, , "detector changed document"
+    Set markerDoc = Documents.Add
+    markerDoc.Content.Text = "I. Introduction" & vbCr & "A. Appendix" & vbCr
+    markerResult = WU_DetectStructure(markerDoc)
+    If markerResult(0, WU_AMBIGUOUS) <> True Or InStr(CStr(markerResult(0, WU_ALTERNATIVES)), "roman:") = 0 Or InStr(CStr(markerResult(0, WU_ALTERNATIVES)), "upper_alpha:") = 0 Then Err.Raise 5, , "ambiguous Roman/alpha marker was collapsed"
+    markerDoc.Close SaveChanges:=wdDoNotSaveChanges
     d.Paragraphs(2).OutlineLevel = 2
     r = WU_DetectStructure(d)
     If InStr(r(4, WU_EVIDENCE), "coherent-style-family") > 0 Then Err.Raise 5, , "conflicting style votes accepted"

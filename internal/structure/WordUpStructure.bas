@@ -28,7 +28,7 @@ Public Const WU_COLUMNS As Long = 18
 Public Function WU_DetectStructure(ByVal document As Document) As Variant
     Dim paragraphs As Paragraphs, count As Long, result() As Variant
     Dim i As Long, paragraph As Paragraph, scope As Range, text As String, rawText As String
-    Dim marker As String, label As String, style As String, context As String
+    Dim marker As String, label As String, style As String, context As String, alternatives As String
     Dim score As Long, level As Long, outline As Long, evidence As String, parentAt(1 To 9) As Long
     Dim hasLists As Boolean, hasTables As Boolean, plausible As Boolean
     Dim headingStyle As Boolean, keepNext As Boolean, upperText As Boolean
@@ -62,7 +62,7 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
             text = texts(i - 1): style = CStr(paragraph.Style)
             startPosition = starts(i - 1): endPosition = ends(i - 1)
         End If
-        marker = WU_ParseMarker(text): label = vbNullString
+        marker = WU_ParseMarker(text): alternatives = WU_MarkerAlternatives(marker): label = vbNullString
         If hasLists Then
             If scope Is Nothing Then Set scope = paragraph.Range
             If scope.ListFormat.ListType <> wdListNoNumbering Then label = scope.ListFormat.ListString
@@ -109,7 +109,9 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
         result(i - 1, WU_PARENT_SOURCE_ID) = vbNullString
         result(i - 1, WU_PROVENANCE) = "Word object model"
         result(i - 1, WU_CONTRADICTION) = vbNullString
-        result(i - 1, WU_ALTERNATIVES) = marker
+        result(i - 1, WU_ALTERNATIVES) = alternatives
+        result(i - 1, WU_AMBIGUOUS) = (InStr(1, alternatives, "|", vbBinaryCompare) > 0)
+        If result(i - 1, WU_AMBIGUOUS) Then WU_AddEvidence evidence, "ambiguous-marker": result(i - 1, WU_EVIDENCE) = evidence
     Next paragraph
     WU_ResolveStyleFamilies result, count
     WU_ResolveMarkerLadder result, count
@@ -228,6 +230,31 @@ Public Function WU_ParseMarker(ByVal text As String) As String
     For i = 1 To Len(prefix): c = Mid$(prefix, i, 1): If InStr(1, "IVXLCDM", c, vbBinaryCompare) = 0 Then Exit Function
     Next i
     WU_ParseMarker = prefix
+End Function
+
+' Keep the primary marker for the fast ladder, but expose competing readings
+' for one-letter Roman/alpha prefixes instead of silently choosing one.
+Private Function WU_MarkerAlternatives(ByVal marker As String) As String
+    Dim value As Long, alphaValue As Long, c As String
+    If Len(marker) = 0 Then Exit Function
+    If Left$(marker, 6) = "named:" Then
+        WU_MarkerAlternatives = marker
+        Exit Function
+    End If
+    If Len(marker) = 1 Then
+        c = UCase$(marker)
+        If InStr(1, "IVXLCDM", c, vbBinaryCompare) > 0 Then
+            value = WU_MarkerValue(marker, "roman")
+            alphaValue = AscW(c) - 64
+            WU_MarkerAlternatives = marker & "|roman:" & CStr(value) & "|upper_alpha:" & CStr(alphaValue)
+            Exit Function
+        End If
+        If c >= "A" And c <= "Z" Then
+            WU_MarkerAlternatives = marker
+            Exit Function
+        End If
+    End If
+    WU_MarkerAlternatives = marker
 End Function
 
 Private Function WU_MarkerFamily(ByVal marker As String) As String
