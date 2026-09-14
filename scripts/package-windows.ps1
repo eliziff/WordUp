@@ -56,7 +56,7 @@ WordUp Windows $architecture development distribution
 
 Keep wordup.exe, office-tools and wordup-oletools together. Native template execution requires installed Microsoft Word. Go and Python are not required on the end user's computer. OfficeTools uses Windows .NET Framework 4.8. VBA signing additionally requires Windows SDK SignTool and Office SIP.
 
-The main executable targets Windows $Platform. The bundled oletools helper is a
+The main executable targets Windows $architecture ($Platform). The bundled oletools helper is a
 portable x64 Windows payload and relies on Windows x64 emulation on ARM64.
 
 Run wordup.exe help and wordup.exe doctor first. Native execution requires --execute. This package is not a claim that every template or workflow has passed verification.
