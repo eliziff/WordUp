@@ -19,7 +19,7 @@ func TestCheckInventoryReportsWiringAndModifiedComponent(t *testing.T) {
 	if _, err := project.New("Inventory", root); err != nil {
 		t.Fatal(err)
 	}
-	commands := "Attribute VB_Name = \"Commands\"\nOption Explicit\nPublic Sub RunThing()\n    KeyBindings.Add wdKeyCategoryMacro, \"Commands.RunThing\", BuildKeyCode(wdKeyControl, wdKeyAlt, wdKeyU)\n    CommandBars(\"Text\").Controls.Add Type:=msoControlButton\nEnd Sub\n"
+	commands := "Attribute VB_Name = \"Commands\"\nOption Explicit\n' KeyBindings.Add wdKeyCategoryMacro, \"comment\"\nRem CommandBars(\"comment\").Controls.Add\nPublic Sub RunThing()\n    KeyBindings.Add wdKeyCategoryMacro, \"Commands.RunThing\", BuildKeyCode(wdKeyControl, wdKeyAlt, wdKeyU)\n    CommandBars(\"Text\").Controls.Add Type:=msoControlButton\nEnd Sub\n"
 	form := "Attribute VB_Name = \"Editor\"\nOption Explicit\nPrivate Sub cmdSave_Click()\nEnd Sub\n"
 	for name, data := range map[string][]byte{"vba/Commands.bas": []byte(commands), "vba/Editor.vba": []byte(form), "forms/Editor.json": []byte(`{"name":"Editor","controls":[{"name":"cmdSave","type":"CommandButton"}]}`), "package/customUI14.xml": []byte(`<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui"><ribbon><tabs><tab id="tab" label="Tab"><group id="group" label="Group"><button id="run" onAction="RunThing"/></group></tab></tabs></ribbon><contextMenus><contextMenu idMso="ContextMenuText"/></contextMenus></customUI>`)} {
 		if err := project.Write(root, name, data, ""); err != nil {

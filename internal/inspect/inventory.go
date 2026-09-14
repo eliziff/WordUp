@@ -191,10 +191,11 @@ func lineRegistrations(files map[string][]byte, pattern *regexp.Regexp, kind str
 	rows := []map[string]any{}
 	for _, path := range paths {
 		for lineNumber, line := range strings.Split(strings.ReplaceAll(string(files[path]), "\r\n", "\n"), "\n") {
-			if !pattern.MatchString(line) {
+			code := CommentFree(line)
+			if !pattern.MatchString(code) {
 				continue
 			}
-			rows = append(rows, map[string]any{"file": path, "line": lineNumber + 1, "kind": kind, "text": strings.TrimSpace(line)})
+			rows = append(rows, map[string]any{"file": path, "line": lineNumber + 1, "kind": kind, "text": strings.TrimSpace(code)})
 		}
 	}
 	return rows
