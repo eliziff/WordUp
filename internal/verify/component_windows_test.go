@@ -193,14 +193,24 @@ Failed:
     Resume CleanUp
 End Function
 Public Function CheckHotkeys() As String
-    Dim prior As Object, key As Long, failure As Long
+    Dim prior As Object, key As Long, failure As Long, beforeCount As Long, afterCount As Long, errorNumber As Long, errorDescription As String
     Dim stage As String
     On Error GoTo Failed
     Set prior = Application.CustomizationContext
     key = BuildKeyCode(wdKeyControl, wdKeyAlt, wdKeyF12)
+    WU_RemoveHotkey key
+    Application.CustomizationContext = ThisDocument
+    beforeCount = KeyBindings.Count
+    Application.CustomizationContext = prior
     stage = "register"
     WU_RegisterHotkey key, "Proof.HotkeyTarget"
     If Not (Application.CustomizationContext Is prior) Then Err.Raise 5, , "registration changed caller context"
+    stage = "reregister"
+    WU_RegisterHotkey key, "Proof.HotkeyTarget"
+    Application.CustomizationContext = ThisDocument
+    afterCount = KeyBindings.Count
+    Application.CustomizationContext = prior
+    If afterCount <> beforeCount + 1 Then Err.Raise 5, , "re-registration duplicated template binding"
     stage = "remove"
     WU_RemoveHotkey key
     If Not (Application.CustomizationContext Is prior) Then Err.Raise 5, , "removal changed caller context"
@@ -213,7 +223,12 @@ Public Function CheckHotkeys() As String
     CheckHotkeys = "PASS"
     Exit Function
 Failed:
-    CheckHotkeys = stage & ": " & CStr(Err.Number) & ": " & Err.Description
+    errorNumber = Err.Number: errorDescription = Err.Description
+    On Error Resume Next
+    WU_RemoveHotkey key
+    Application.CustomizationContext = prior
+    On Error GoTo 0
+    CheckHotkeys = stage & ": " & CStr(errorNumber) & ": " & errorDescription
 End Function
 Public Sub HotkeyTarget()
 End Sub
