@@ -18,9 +18,13 @@ $env:GOTOOLCHAIN = 'local'
 if (-not $online) { $env:GOPROXY = 'off' }
 New-Item -ItemType Directory -Force $env:GOCACHE, $env:GOMODCACHE, $env:GOTMPDIR | Out-Null
 
+# Windows environment names are case-insensitive, but PowerShell can leave
+# both `Path` and `PATH` after a caller assigns one spelling. Start-Process
+# rejects that duplicate block. Normalize to one entry before launching Go.
 $processPath = [Environment]::GetEnvironmentVariable('Path', 'Process')
-[Environment]::SetEnvironmentVariable('PATH', $null, 'Process')
-[Environment]::SetEnvironmentVariable('Path', $processPath, 'Process')
+Remove-Item -LiteralPath Env:\PATH -Force -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath Env:\Path -Force -ErrorAction SilentlyContinue
+$env:Path = $processPath
 # Start-Process joins an argument array into one Windows command line without
 # adding quotes. Quote arguments containing whitespace so repository paths such
 # as "reference/Style Guide [Fall].dotm" remain one argument.
