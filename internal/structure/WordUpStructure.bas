@@ -34,11 +34,13 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
     Dim headingStyle As Boolean, keepNext As Boolean, upperText As Boolean
     Dim story As Range, pieces As Variant, position As Long, startPosition As Long, endPosition As Long
     Dim starts() As Long, ends() As Long, texts() As String
+    Dim centered() As Boolean, frontEmphasis() As Boolean, frontRoles() As String
     Set story = document.StoryRanges(wdMainTextStory): Set paragraphs = story.Paragraphs
     count = paragraphs.count
     If count > 20000 Then Err.Raise 5, "WU_DetectStructure", "paragraph limit exceeds 20000"
     If count = 0 Then WU_DetectStructure = Array(): Exit Function
     ReDim result(0 To count - 1, 0 To WU_COLUMNS - 1)
+    ReDim centered(0 To count - 1): ReDim frontEmphasis(0 To count - 1): ReDim frontRoles(0 To count - 1)
     hasLists = (document.Lists.count > 0): hasTables = (document.Tables.count > 0)
     If Not hasTables Then
         pieces = Split(story.text, vbCr): position = story.Start
@@ -63,6 +65,11 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
             startPosition = starts(i - 1): endPosition = ends(i - 1)
         End If
         marker = WU_ParseMarker(text): alternatives = WU_MarkerAlternatives(marker): label = vbNullString
+        If i <= 64 And context = "body" And Len(Trim$(text)) > 0 Then
+            If scope Is Nothing Then Set scope = paragraph.Range
+            centered(i - 1) = (paragraph.Alignment = wdAlignParagraphCenter)
+            frontEmphasis(i - 1) = (scope.Bold = True Or scope.Font.SmallCaps = True Or scope.Font.AllCaps = True)
+        End If
         If hasLists Then
             If scope Is Nothing Then Set scope = paragraph.Range
             If scope.ListFormat.ListType <> wdListNoNumbering Then label = scope.ListFormat.ListString
@@ -115,6 +122,7 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
     Next paragraph
     WU_ResolveStyleFamilies result, count
     WU_ResolveMarkerLadder result, count
+    WU_ClassifyFrontMatter result, count, centered, frontEmphasis, frontRoles
     For i = 0 To count - 1
         score = CLng(result(i, WU_CONFIDENCE)): level = CLng(result(i, WU_LEVEL)): semanticRole = vbNullString
         If result(i, WU_CONTEXT) <> "body" Then
@@ -129,6 +137,11 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
                 result(i, WU_EVIDENCE) = "semantic-style-or-context"
                 result(i, WU_CONTRADICTION) = vbNullString: result(i, WU_ALTERNATIVES) = vbNullString
                 If semanticRole = "quotation" Or semanticRole = "abstract" Then result(i, WU_PARENT) = WU_FindDeepestParent(parentAt)
+            ElseIf Len(frontRoles(i)) > 0 Then
+                result(i, WU_ROLE) = frontRoles(i): result(i, WU_LEVEL) = 0: result(i, WU_PARENT) = 0
+                result(i, WU_CONFIDENCE) = 85: result(i, WU_AMBIGUOUS) = False
+                result(i, WU_EVIDENCE) = "front-matter-layout"
+                result(i, WU_CONTRADICTION) = vbNullString: result(i, WU_ALTERNATIVES) = vbNullString
             ElseIf level > 0 And score >= 35 Then
                 result(i, WU_ROLE) = "heading": result(i, WU_PARENT) = WU_FindParent(parentAt, level)
                 parentAt(level) = i + 1: WU_ClearDeeper parentAt, level
@@ -138,12 +151,55 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
                 result(i, WU_ROLE) = "body"
             End If
         End If
-        If result(i, WU_ROLE) <> "heading" And result(i, WU_ROLE) <> "blank" And Len(semanticRole) = 0 And CLng(result(i, WU_PARENT)) = 0 Then result(i, WU_PARENT) = WU_FindDeepestParent(parentAt)
+        If result(i, WU_ROLE) <> "heading" And result(i, WU_ROLE) <> "blank" And Len(semanticRole) = 0 And Len(frontRoles(i)) = 0 And CLng(result(i, WU_PARENT)) = 0 Then result(i, WU_PARENT) = WU_FindDeepestParent(parentAt)
         If CLng(result(i, WU_PARENT)) > 0 Then result(i, WU_PARENT_SOURCE_ID) = result(CLng(result(i, WU_PARENT)) - 1, WU_SOURCE_ID)
         If score > 100 Then result(i, WU_CONFIDENCE) = 100
         If score < 0 Then result(i, WU_CONFIDENCE) = 0
     Next i
     WU_DetectStructure = result
+End Function
+
+Private Sub WU_ClassifyFrontMatter(ByRef result As Variant, ByVal count As Long, ByRef centered() As Boolean, ByRef frontEmphasis() As Boolean, ByRef frontRoles() As String)
+    Dim i As Long, firstContent As Long, limit As Long
+    Dim text As String, style As String, titleSeen As Boolean, authorSeen As Boolean
+    Dim isCentered As Boolean, titleStyle As Boolean
+    firstContent = -1: limit = count
+    For i = 0 To count - 1
+        If result(i, WU_CONTEXT) = "body" And Len(Trim$(CStr(result(i, WU_TEXT)))) > 0 Then
+            If firstContent < 0 Then firstContent = i
+            style = LCase$(CStr(result(i, WU_STYLE)))
+            If (CLng(result(i, WU_LEVEL)) > 0 Or WU_HeadingStyle(style)) And InStr(style, "title") = 0 Then limit = i: Exit For
+        End If
+    Next i
+    If limit > 64 Then limit = 64
+    If firstContent < 0 Then Exit Sub
+    For i = 0 To limit - 1
+        If result(i, WU_CONTEXT) <> "body" Then GoTo NextFrontMatter
+        text = Trim$(CStr(result(i, WU_TEXT))): If Len(text) = 0 Or Len(text) > 240 Then GoTo NextFrontMatter
+        style = LCase$(CStr(result(i, WU_STYLE)))
+        isCentered = centered(i) Or InStr(style, "centred") > 0 Or InStr(style, "centered") > 0
+        titleStyle = (InStr(style, "document title") > 0 Or InStr(style, "heading title") > 0 Or Trim$(style) = "title")
+        If Not titleSeen And (titleStyle Or (i = firstContent And (isCentered Or frontEmphasis(i)))) Then
+            frontRoles(i) = "title": titleSeen = True
+        ElseIf titleSeen And Not authorSeen And titleStyle Then
+            frontRoles(i) = "title"
+        ElseIf titleSeen And Not authorSeen And isCentered And WU_LikelyAuthorLine(text) Then
+            frontRoles(i) = "author": authorSeen = True
+        ElseIf titleSeen And Not authorSeen And isCentered And frontEmphasis(i) Then
+            frontRoles(i) = "title"
+        End If
+NextFrontMatter:
+    Next i
+End Sub
+
+Private Function WU_LikelyAuthorLine(ByVal text As String) As Boolean
+    Dim lower As String, item As Variant
+    lower = LCase$(Trim$(text))
+    If Left$(lower, 3) = "by " Then WU_LikelyAuthorLine = True: Exit Function
+    For Each item In Array("draft", "revised", "january", "february", "march", "april", "may ", "june", "july", "august", "september", "october", "november", "december")
+        If InStr(lower, CStr(item)) > 0 Then Exit Function
+    Next item
+    WU_LikelyAuthorLine = (InStr(text, ",") > 0 Or (InStr(text, "*") > 0 And InStr(lower, " and ") > 0))
 End Function
 
 Private Function WU_SemanticRole(ByVal text As String, ByVal style As String, ByVal context As String, ByVal level As Long) As String
