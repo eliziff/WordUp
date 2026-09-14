@@ -150,6 +150,14 @@ func TestChangedPartMarkersHandleLeadingHyphenNames(t *testing.T) {
 	if _, exists := read.Files["asset.bin"]; exists {
 		t.Fatal("combined add/delete retained deleted part")
 	}
+
+	if _, err := p.BytesChanged([]string{DeletedPartPrefix + "missing.bin"}); err == nil {
+		t.Fatal("missing deletion target was accepted")
+	}
+	p.Files["asset.bin"] = []byte("present")
+	if _, err := p.BytesChanged([]string{DeletedPartPrefix + "asset.bin"}); err == nil {
+		t.Fatal("present deletion target was accepted")
+	}
 }
 
 func TestFailedVBAAttachDoesNotMutatePackage(t *testing.T) {

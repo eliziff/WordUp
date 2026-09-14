@@ -211,8 +211,14 @@ func (p *Package) BytesChangedWithHashes(changed []string, currentHashes map[str
 	for _, name := range changed {
 		if strings.HasPrefix(name, DeletedPartPrefix) {
 			part := strings.TrimPrefix(name, DeletedPartPrefix)
-			if part == "" {
+			if !SafePart(part) {
 				return nil, fmt.Errorf("invalid deleted package part marker")
+			}
+			if _, exists := p.Files[part]; exists {
+				return nil, fmt.Errorf("deleted package part is still present: %s", part)
+			}
+			if _, existed := p.hashes[part]; !existed {
+				return nil, fmt.Errorf("deleted package part was not in the original package: %s", part)
 			}
 			dirty[part] = true
 		} else {
@@ -442,7 +448,7 @@ func XMLSpans(b []byte) ([]XMLSpan, error) {
 			if start == 0 && bytes.HasPrefix(v, []byte{0xef, 0xbb, 0xbf}) {
 				v = v[3:]
 			}
-			if len(stack) == 0 && strings.TrimSpace(string(v)) != "" {
+			if len(stack) == 0 && len(bytes.TrimSpace(v)) != 0 {
 				return nil, fmt.Errorf("text outside XML root")
 			}
 		}
