@@ -224,7 +224,9 @@ Private Sub WU_DeleteContextMenus()
     Next i
 End Sub
 Private Function WU_ContextMenuTag() As String
-    WU_ContextMenuTag = "WordUp.ContextMenu." & ThisDocument.Name
+    ' The full path keeps two templates with the same file name independent.
+    ' FullName is still stable for an unsaved document (Word returns its name).
+    WU_ContextMenuTag = "WordUp.ContextMenu." & ThisDocument.FullName
 End Function
 Private Function WU_QualifiedMacro(ByVal macroName As String) As String
     If InStr(1, macroName, "!", vbBinaryCompare) > 0 Then WU_QualifiedMacro = macroName Else WU_QualifiedMacro = "'" & Replace(ThisDocument.Name, "'", "''") & "'!" & macroName

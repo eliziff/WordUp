@@ -112,7 +112,7 @@ func builtin() []Manifest {
 			items[i].Version = "1.0.3"
 		}
 		if items[i].ID == "command.context-menu" {
-			items[i].Version = "1.0.2"
+			items[i].Version = "1.0.3"
 		}
 		if items[i].ID == "ui.progress-cancel" {
 			items[i].Version = "1.0.1"
