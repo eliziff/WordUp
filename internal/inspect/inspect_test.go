@@ -196,6 +196,25 @@ func TestTextObservationsAcceptEmptyTextElements(t *testing.T) {
 	}
 }
 
+func TestRunEvidencePreservesBreakCharacters(t *testing.T) {
+	p := office.BlankPackage()
+	p.Files["word/document.xml"] = []byte(`<w:document xmlns:w="` + office.W + `"><w:body><w:p><w:r><w:t>first</w:t><w:br/><w:t>second</w:t><w:tab/><w:t>third</w:t></w:r></w:p></w:body></w:document>`)
+	rows, err := TextObservations(p)
+	if err != nil || len(rows) != 1 {
+		t.Fatalf("break observations: %v %v", rows, err)
+	}
+	runs, ok := rows[0]["run_properties"].([]map[string]any)
+	if !ok || len(runs) != 1 {
+		t.Fatalf("run evidence missing: %#v", rows[0]["run_properties"])
+	}
+	if rows[0]["text"] != "first\nsecond\tthird" {
+		t.Fatalf("paragraph text lost break semantics: %q", rows[0]["text"])
+	}
+	if runs[0]["text_units"] != 18 {
+		t.Fatalf("run text units lost break semantics: %#v", runs[0])
+	}
+}
+
 func TestTrackedRevisionEvidenceDoesNotDuplicateText(t *testing.T) {
 	p := office.BlankPackage()
 	p.Files["word/document.xml"] = []byte(`<w:document xmlns:w="` + office.W + `"><w:body><w:p><w:ins w:id="4" w:author="Editor" w:date="2026-01-02T03:04:05Z"><w:r><w:t>new</w:t></w:r></w:ins><w:del w:id="5" w:author="Editor"><w:r><w:delText>old</w:delText></w:r></w:del></w:p></w:body></w:document>`)

@@ -473,8 +473,10 @@ func textObservationsPart(p *office.Package, part string) ([]map[string]any, err
 						return nil, err
 					}
 					runText.WriteString(value)
-				case "tab", "br", "cr":
+				case "tab":
 					runText.WriteRune('\t')
+				case "br", "cr":
+					runText.WriteRune('\n')
 				case "b", "i", "caps", "smallCaps", "u":
 					value := x.Attribute(office.W, "val")
 					enabled := value == "" || (value != "0" && !strings.EqualFold(value, "false") && !strings.EqualFold(value, "off"))
