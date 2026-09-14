@@ -1,6 +1,12 @@
 package verify
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+
+	"github.com/eliziff/WordUp/internal/native"
+	"github.com/eliziff/WordUp/internal/office"
+)
 
 func TestExportedCompilerLineSkipsOnlyHiddenAttributes(t *testing.T) {
 	source := "Attribute VB_Name = \"Example\"\r\nOption Explicit\r\nPublic Sub Example()\r\nAttribute Example.VB_Description = \"Description\"\r\n' Attribute comment stays visible\r\nBroken declaration\r\nEnd Sub\r\n"
@@ -28,5 +34,22 @@ func TestProcedureAtLineUsesContainingSourceProcedure(t *testing.T) {
 	}
 	if got := procedureAtLine(source, 2); got != "" {
 		t.Fatalf("module header assigned procedure=%q", got)
+	}
+}
+
+func TestArtifactSourceUnwrapsWrappedRuntimeLocation(t *testing.T) {
+	v := office.NewVBA("Example")
+	data, err := v.Rewrite([]office.Module{{Name: "ExampleModule", Kind: "standard", Source: "Attribute VB_Name = \"ExampleModule\"\nOption Explicit\nPublic Sub First()\nBroken\nEnd Sub\n"}}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	artifact := &office.Package{Files: map[string][]byte{"word/vbaProject.bin": data}}
+	failure := native.Fail("vba_runtime_error", "broken", map[string]any{"runtime_location": map[string]any{
+		"location_kind": "native_vbe_selection", "module": "ExampleModule", "line": 3, "line_text": "Broken",
+	}})
+	artifactSource(fmt.Errorf("wrapped runtime: %w", failure), artifact)
+	details := failure.(*native.Fault).Details.(map[string]any)["runtime_location"].(map[string]any)
+	if details["source_file"] != "vba/ExampleModule.bas" || details["source_line"] != 4 || details["procedure"] != "First" {
+		t.Fatalf("wrapped location was not mapped: %#v", details)
 	}
 }

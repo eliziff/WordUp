@@ -600,7 +600,8 @@ func RunWithInputs(ctx context.Context, artifact string, s Suite, existing nativ
 			dc, stop := context.WithTimeout(context.Background(), 10*time.Second)
 			var diagnosticErr error
 			capture := native.Operation{Op: "ui.diagnostics", File: filepath.Join(output, fmt.Sprintf("failure-%02d", stepIndex+1))}
-			if fault, ok := err.(*native.Fault); ok {
+			var fault *native.Fault
+			if errors.As(err, &fault) {
 				details, _ := fault.Details.(map[string]any)
 				if fault.Code == "ui_provider_timeout" {
 					// PrintWindow can block on the same unresponsive UI thread.
@@ -620,7 +621,8 @@ func RunWithInputs(ctx context.Context, artifact string, s Suite, existing nativ
 				}
 			}
 			if op.Op == "compile" {
-				if fault, ok := err.(*native.Fault); ok {
+				var fault *native.Fault
+				if errors.As(err, &fault) {
 					if details, ok := fault.Details.(map[string]any); ok && details["module"] != nil && details["line_text"] != nil {
 						capture.Named = map[string]any{"window_class": "wndclass_desked_gsk", "trees": false}
 					}
@@ -630,7 +632,8 @@ func RunWithInputs(ctx context.Context, artifact string, s Suite, existing nativ
 			if capture.Op == "ui.windows" {
 				ob.Diagnostics = map[string]any{"windows": ob.Diagnostics, "capture_mode": "window_inventory", "screenshot_unavailable": "Provider timed out; synchronous window painting may block on the same UI thread"}
 			}
-			if failure, ok := diagnosticErr.(*native.Fault); ok && failure.Code == "diagnostic_window_not_found" {
+			var failure *native.Fault
+			if errors.As(diagnosticErr, &failure) && failure.Code == "diagnostic_window_not_found" {
 				capture.Named = nil
 				ob.Diagnostics, diagnosticErr = h.Call(dc, capture)
 			}

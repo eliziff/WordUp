@@ -1,6 +1,7 @@
 package verify
 
 import (
+	"errors"
 	"github.com/eliziff/WordUp/internal/native"
 	"github.com/eliziff/WordUp/internal/office"
 	"regexp"
@@ -10,8 +11,8 @@ import (
 var procedureDeclaration = regexp.MustCompile(`(?i)^\s*(?:(?:public|private|friend|static)\s+)*(?:sub|function|property\s+(?:get|let|set))\s+([A-Za-z_][A-Za-z0-9_]*)\b`)
 
 func artifactSource(err error, artifact *office.Package) {
-	failure, ok := err.(*native.Fault)
-	if !ok {
+	var failure *native.Fault
+	if !errors.As(err, &failure) {
 		return
 	}
 	details, ok := failure.Details.(map[string]any)
