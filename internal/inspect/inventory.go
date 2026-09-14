@@ -198,15 +198,43 @@ func lineRegistrations(files map[string][]byte, pattern *regexp.Regexp, kind str
 	sort.Strings(paths)
 	rows := []map[string]any{}
 	for _, path := range paths {
+		logical, startLine := "", 0
+		flush := func() {
+			if logical != "" && pattern.MatchString(logical) {
+				rows = append(rows, map[string]any{"file": path, "line": startLine, "kind": kind, "text": logical})
+			}
+			logical, startLine = "", 0
+		}
 		for lineNumber, line := range strings.Split(strings.ReplaceAll(string(files[path]), "\r\n", "\n"), "\n") {
-			code := registrationCode(line)
-			if !pattern.MatchString(code) {
+			code := strings.TrimSpace(registrationCode(line))
+			if code == "" {
+				flush()
 				continue
 			}
-			rows = append(rows, map[string]any{"file": path, "line": lineNumber + 1, "kind": kind, "text": strings.TrimSpace(code)})
+			if logical == "" {
+				startLine = lineNumber + 1
+			} else {
+				logical += " "
+			}
+			if vbaLineContinuation(code) {
+				logical += strings.TrimSpace(code[:len(code)-1])
+				continue
+			}
+			logical += code
+			flush()
 		}
+		flush()
 	}
 	return rows
+}
+
+// VBA requires whitespace before a line-continuation underscore. Checking the
+// boundary avoids joining ordinary identifiers that merely end in `_`.
+func vbaLineContinuation(code string) bool {
+	if len(code) < 2 || code[len(code)-1] != '_' {
+		return false
+	}
+	return code[len(code)-2] == ' ' || code[len(code)-2] == '\t'
 }
 
 // registrationCode removes comments and string literals before the lexical
