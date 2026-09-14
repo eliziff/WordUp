@@ -205,7 +205,23 @@ func (p *Package) BytesChangedWithHashes(changed []string, currentHashes map[str
 	}
 	dirty := make(map[string]bool, len(changed))
 	for _, name := range changed {
-		dirty[strings.TrimPrefix(name, "-")] = true
+		// Deleted parts are represented internally as -<part>, but a valid
+		// OPC part may itself begin with '-'. Prefer an exact current part;
+		// otherwise interpret the prefix only when the unprefixed name is an
+		// original part. This keeps modified/new names such as -asset.bin
+		// distinct from deletion markers without adding another representation.
+		if _, exists := p.Files[name]; exists {
+			dirty[name] = true
+			continue
+		}
+		if strings.HasPrefix(name, "-") {
+			candidate := strings.TrimPrefix(name, "-")
+			if _, existed := p.hashes[candidate]; existed {
+				dirty[candidate] = true
+				continue
+			}
+		}
+		dirty[name] = true
 	}
 	if currentHashes == nil {
 		currentHashes = make(map[string]string, len(p.hashes))

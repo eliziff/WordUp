@@ -91,6 +91,45 @@ func TestKnownChangedPartsSkipReadsWithoutTrustingIncompleteSet(t *testing.T) {
 	}
 }
 
+func TestChangedPartMarkersHandleLeadingHyphenNames(t *testing.T) {
+	base := BlankPackage()
+	base.Files["-asset.bin"] = []byte("before")
+	if err := base.ContentType("-asset.bin", "application/octet-stream"); err != nil {
+		t.Fatal(err)
+	}
+	original, err := base.Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p, err := ReadPackage(original)
+	if err != nil {
+		t.Fatal(err)
+	}
+	p.Files["-asset.bin"] = []byte("after")
+	changed, err := p.BytesChanged([]string{"-asset.bin"})
+	if err != nil {
+		t.Fatalf("modified leading-hyphen part rejected: %v", err)
+	}
+	read, err := ReadPackage(changed)
+	if err != nil || string(read.Files["-asset.bin"]) != "after" {
+		t.Fatalf("modified leading-hyphen part was not written: %v", err)
+	}
+
+	delete(p.Files, "-asset.bin")
+	deleted, err := p.BytesChanged([]string{"--asset.bin"})
+	if err != nil {
+		t.Fatalf("deleted leading-hyphen part rejected: %v", err)
+	}
+	read, err = ReadPackage(deleted)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, exists := read.Files["-asset.bin"]; exists {
+		t.Fatal("deleted leading-hyphen part remained in package")
+	}
+}
+
 func TestFailedVBAAttachDoesNotMutatePackage(t *testing.T) {
 	p := BlankPackage()
 	p.Files[RelPart("word/document.xml")] = []byte(`<Relationships xmlns="` + RelNS + `"><Relationship Id="rIdVBA" Type="` + VBAProjectRel + `" Target="existing.bin"/></Relationships>`)
