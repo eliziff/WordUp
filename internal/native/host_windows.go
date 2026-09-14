@@ -143,7 +143,16 @@ func connectWord(cfg hostConfig) (*wordHost, error) {
 		// The host is already running on the private desktop, so inheriting its
 		// current desktop preserves isolation while avoiding a second station
 		// lookup in restricted sessions.
+		initial := e
 		p, e = spawnOnDesktop(cfg.WordPath, []string{"/a", filepath.Join(cfg.Directory, "seed.docx")}, "", true, null, null, null, 0)
+		if e != nil && noLogonSessionError(e) {
+			return nil, Fail("native_session_restricted", "Windows refused hidden Word creation in the current logon session", map[string]any{
+				"desktop":                cfg.Desktop,
+				"word_path":              cfg.WordPath,
+				"initial_create_error":   initial.Error(),
+				"inherited_create_error": e.Error(),
+			})
+		}
 	}
 	if e != nil {
 		return nil, e

@@ -338,6 +338,13 @@ func Start(ctx context.Context, opt Options) (Host, error) {
 	// qualifying it with WinSta0 is not portable across interactive sessions.
 	h.process, e = spawnOnDesktop(exe, []string{"__host", configPath}, h.cfg.Desktop, !h.cfg.Options.Visible, inRead, outWrite, logWrite, h.job)
 	if e != nil {
+		if !opt.Visible && noLogonSessionError(e) {
+			return nil, Fail("native_session_restricted", "Windows refused the private WordUp desktop in the current logon session", map[string]any{
+				"desktop":      h.cfg.Desktop,
+				"word_path":    h.cfg.WordPath,
+				"create_error": e.Error(),
+			})
+		}
 		return nil, e
 	}
 	spawnFinished := time.Now()
