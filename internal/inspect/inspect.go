@@ -142,10 +142,21 @@ func Package(p *office.Package) map[string]any {
 	return out
 }
 
-// TextObservations retains the actual property XML and named-style IDs. An
-// agent may infer a recipe; unresolved inheritance is never labelled resolved.
+// TextObservations retains the actual property XML and named-style IDs for
+// the main document story. An agent may infer a recipe; unresolved inheritance
+// is never labelled resolved.
 func TextObservations(p *office.Package) ([]map[string]any, error) {
-	b := p.Files["word/document.xml"]
+	return textObservationsPart(p, "word/document.xml")
+}
+
+// textObservationsPart reads any Word text-bearing story without rewriting its
+// XML. Keeping the part name in every locator lets callers compare a header,
+// footer, note, or glossary paragraph directly against the source package.
+func textObservationsPart(p *office.Package, part string) ([]map[string]any, error) {
+	b := p.Files[part]
+	if len(b) == 0 {
+		return []map[string]any{}, nil
+	}
 	spans, e := office.XMLSpans(b)
 	if e != nil {
 		return nil, e
@@ -300,14 +311,14 @@ func TextObservations(p *office.Package) ([]map[string]any, error) {
 		}
 		paragraphID := s.Attribute("http://schemas.microsoft.com/office/word/2010/wordml", "paraId")
 		xmlPath := fmt.Sprintf("(//w:p)[%d]", len(out)+1)
-		sourceID := "word/document.xml#" + xmlPath
+		sourceID := part + "#" + xmlPath
 		if paragraphID != "" {
-			sourceID = "word/document.xml#paraId=" + paragraphID
+			sourceID = part + "#paraId=" + paragraphID
 		}
 		observation := map[string]any{
 			"text": text.String(), "style_id": style, "paragraph_properties_xml": props, "run_properties": runs,
 			"direct_formatting_evidence": weighted,
-			"source_part":                "word/document.xml", "xml_start": s.Start, "xml_end": s.End,
+			"source_part":                part, "xml_start": s.Start, "xml_end": s.End,
 			"xml_path":     xmlPath,
 			"paragraph_id": paragraphID,
 			"source_id":    sourceID,
@@ -338,11 +349,51 @@ func StyleReference(file string) (map[string]any, error) {
 		return nil, e
 	}
 	out["paragraph_observations"] = text
+	// Headers, footers, notes, comments, and glossary entries carry real
+	// journal/template formatting too. Keep them in separate, part-qualified
+	// observations so the main-story contract remains stable and callers can
+	// inspect only the stories they need.
+	parts := make([]string, 0)
+	for part := range p.Files {
+		if part != "word/document.xml" && isTextStoryPart(part) {
+			parts = append(parts, part)
+		}
+	}
+	sort.Strings(parts)
+	stories := make([]map[string]any, 0, len(parts))
+	for _, part := range parts {
+		observations, err := textObservationsPart(p, part)
+		if err != nil {
+			return nil, err
+		}
+		if len(observations) > 0 {
+			stories = append(stories, map[string]any{"part": part, "paragraph_observations": observations})
+		}
+	}
+	if len(stories) > 0 {
+		out["story_observations"] = stories
+	}
 	out["xml_namespaces"] = map[string]string{"w": office.W}
 	out["locator_units"] = "xml_start/xml_end are zero-based UTF-8 byte offsets in source_part, end exclusive; xml_path uses xml_namespaces and includes nested paragraphs, not Word document paragraph indexes"
 	out["source_sha256"] = office.Hash(b)
 	out["effective_layout_verified"] = false
 	return out, nil
+}
+
+func isTextStoryPart(part string) bool {
+	if !strings.HasPrefix(part, "word/") || !strings.HasSuffix(part, ".xml") {
+		return false
+	}
+	base := strings.TrimPrefix(part, "word/")
+	if strings.HasPrefix(base, "header") || strings.HasPrefix(base, "footer") {
+		return true
+	}
+	switch base {
+	case "footnotes.xml", "endnotes.xml", "comments.xml", "glossary/document.xml":
+		return true
+	default:
+		return false
+	}
 }
 func Check(w *project.Workspace) (map[string]any, error) {
 	return CheckWithConstants(w, nil)

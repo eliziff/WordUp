@@ -85,3 +85,34 @@ func TestParagraphSourceLocationsAndNestedText(t *testing.T) {
 		t.Fatalf("lost paragraph-mark formatting evidence: %v", mark)
 	}
 }
+
+func TestStoryObservationsKeepPartQualifiedLocations(t *testing.T) {
+	p := office.BlankPackage()
+	p.Files["word/header1.xml"] = []byte(`<w:hdr xmlns:w="` + office.W + `"><w:p w14:paraId="ABC" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml"><w:pPr><w:pStyle w:val="Header"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Aptos"/><w:sz w:val="18"/></w:rPr><w:t>Running head</w:t></w:r></w:p></w:hdr>`)
+	rows, err := textObservationsPart(p, "word/header1.xml")
+	if err != nil || len(rows) != 1 {
+		t.Fatalf("header observations: %v %v", rows, err)
+	}
+	if rows[0]["source_part"] != "word/header1.xml" || rows[0]["source_id"] != "word/header1.xml#paraId=ABC" || rows[0]["text"] != "Running head" {
+		t.Fatalf("lost story identity: %v", rows[0])
+	}
+	if rows[0]["xml_path"] != "(//w:p)[1]" {
+		t.Fatalf("unexpected story path: %v", rows[0]["xml_path"])
+	}
+	data, err := p.Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	file := filepath.Join(t.TempDir(), "reference.docx")
+	if err := os.WriteFile(file, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	reference, err := StyleReference(file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	stories, ok := reference["story_observations"].([]map[string]any)
+	if !ok || len(stories) != 1 || stories[0]["part"] != "word/header1.xml" {
+		t.Fatalf("public style reference omitted header story: %v", reference["story_observations"])
+	}
+}
