@@ -913,6 +913,7 @@ Use the wordup executable. No module imports, VBE typing, or Python setup.
 - forms/<name>.json describes persistent native MSForms design, in points. Existing unsupported controls remain opaque.
 - package/ is the full original Open XML package, including RibbonX XML, embedded assets and native saved parts. Do not rewrite the ZIP by hand.
 - Edit package XML directly or use native Word operations for document content, styles, numbering and saved building blocks.
+- Use xml.query for exact XML part offsets and hashes, then xml.patch for guarded byte-range edits that preserve every other byte; use xml.verify/xml.compare for direct expected-output checks.
 - build performs deterministic package and binary checks; it is not a VBA compiler.
 - native execution is local Microsoft Word, never an emulator. Authorize execution only for code the user intends to run. The private desktop is UI separation, NOT a security sandbox.
 - Wrap each user-facing editing action in one Application.UndoRecord custom record. For bulk edits, save Application.ScreenUpdating, set it False, and restore the saved value in shared success/error cleanup. Always close an opened undo record; do not blindly restore True when a caller already disabled updates. Read-only actions need no undo record. Test that one undo restores the edited content and that failures restore application state. Capture WordOpenXML outside the editing action and its undo record: a native opening-layout test demonstrated that exporting it during the record disrupted undo grouping.
