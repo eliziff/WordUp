@@ -167,10 +167,15 @@ func TestAddAppliesOnlyDeclaredTypedParameters(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	files := difference["bundled_files"].(map[string]any)
-	starting := files["vba/WordUpSafeEdit.bas"].(map[string]any)["text"].(string)
-	if !strings.Contains(starting, "Public Sub ACME_BeginSafeEdit") {
-		t.Fatal("diff did not reuse installed parameter values")
+	if difference["equal"] != true {
+		t.Fatalf("unchanged component diff is not equal: %#v", difference)
+	}
+	files := difference["files"].([]map[string]any)
+	if len(files) != 1 || files[0]["state"] != "clean" || files[0]["bundled_sha256"] != files[0]["installed_sha256"] {
+		t.Fatalf("diff did not compare installed parameterized source: %#v", difference)
+	}
+	if _, exists := files[0]["text"]; exists {
+		t.Fatal("component diff duplicated source text")
 	}
 	if _, err = AddWith(root, installed.ID, map[string]string{"module_prefix": "ACME"}); err != nil {
 		t.Fatal("same parameterization is not idempotent:", err)
@@ -238,6 +243,10 @@ func TestLocalBundleInstallsAndDiffsWithoutEmbeddingSource(t *testing.T) {
 	}
 	if err = project.Write(root, "vba/Local.bas", []byte("adapted"), ""); err != nil {
 		t.Fatal(err)
+	}
+	diff, err = DiffBundle(root, bundle)
+	if err != nil || diff["equal"] != false {
+		t.Fatalf("modified local bundle diff=%#v err=%v", diff, err)
 	}
 	if _, err = AddBundle(root, bundle); err == nil {
 		t.Fatal("local bundle overwrote adapted source")

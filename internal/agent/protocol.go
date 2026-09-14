@@ -40,7 +40,7 @@ func Tools() []Tool {
 		[2]string{"component.get", "Return one bundled component by component ID, or a local component.json bundle by path, without changing the workspace."},
 		[2]string{"component.add", "Vendor one bundled component ID or local component.json bundle path into the workspace with typed parameters, collision checks and modification protection."},
 		[2]string{"component.status", "Report source hashes, modification state and host-platform compatibility for an installed component: component."},
-		[2]string{"component.diff", "Compare installed source with the same parameterized bundled or local starting version; never overwrites edits."},
+		[2]string{"component.diff", "Compare installed source with the same parameterized bundled or local starting version using hashes, sizes and first differing byte; never overwrites edits or returns source text."},
 	)
 	props := map[string]any{}
 	ds = append(ds, [2]string{"test.freeze", "Freeze passing native report reference into a new local output directory, including the retained artifact, declared inputs and run evidence. Returns a portable bundle.json reference accepted by test.replay and test.compare; verifies hashes on load. Existing destinations are never overwritten. XML is copied unchanged. Uncaptured external inputs are not made hermetic."})

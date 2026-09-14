@@ -456,9 +456,45 @@ func diff(root string, m Manifest) (map[string]any, error) {
 	if err != nil {
 		return nil, err
 	}
-	base := map[string]any{}
+	files := make([]map[string]any, 0, len(m.Files))
+	equal := true
 	for _, f := range m.Files {
-		base[f.Path] = map[string]any{"sha256": office.Hash([]byte(f.Text)), "text": f.Text}
+		bundled := []byte(f.Text)
+		row := map[string]any{"path": f.Path, "bundled_sha256": office.Hash(bundled), "bundled_bytes": len(bundled)}
+		installed, readErr := project.Read(root, f.Path)
+		switch {
+		case os.IsNotExist(readErr):
+			row["state"] = "missing"
+			equal = false
+		case readErr != nil:
+			row["state"] = "unreadable"
+			row["error"] = readErr.Error()
+			equal = false
+		default:
+			row["installed_sha256"] = office.Hash(installed)
+			row["installed_bytes"] = len(installed)
+			if string(installed) == f.Text {
+				row["state"] = "clean"
+			} else {
+				row["state"] = "modified"
+				row["first_difference_byte"] = firstDifference(bundled, installed)
+				equal = false
+			}
+		}
+		files = append(files, row)
 	}
-	return map[string]any{"component": m.ID, "bundled_version": m.Version, "status": status, "bundled_files": base}, nil
+	return map[string]any{"component": m.ID, "bundled_version": m.Version, "status": status, "equal": equal, "files": files}, nil
+}
+
+func firstDifference(a, b []byte) int {
+	limit := len(a)
+	if len(b) < limit {
+		limit = len(b)
+	}
+	for i := 0; i < limit; i++ {
+		if a[i] != b[i] {
+			return i
+		}
+	}
+	return limit
 }
