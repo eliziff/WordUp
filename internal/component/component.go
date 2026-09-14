@@ -52,6 +52,13 @@ type Lock struct {
 	Components map[string]Installed `json:"components"`
 }
 
+type exportedSymbol struct {
+	Name string
+	Kind string
+	Path string
+	Line int
+}
+
 func builtin() []Manifest {
 	items := []Manifest{{ID: "structure.detect", Version: structure.ContractVersion,
 		Description:  "Editable, dependency-free Word VBA document structure detector.",
@@ -420,6 +427,9 @@ func install(root string, m Manifest) (Installed, error) {
 		}
 		installed.Files[f.Path] = office.Hash([]byte(f.Text))
 	}
+	if err := rejectIdentifierCollisions(root, id, m.Files); err != nil {
+		return Installed{}, err
+	}
 	created := []string{}
 	rollback := func(cause error) (Installed, error) {
 		for i := len(created) - 1; i >= 0; i-- {
@@ -468,6 +478,170 @@ func install(root string, m Manifest) (Installed, error) {
 		return rollback(err)
 	}
 	return installed, nil
+}
+
+func rejectIdentifierCollisions(root, componentID string, files []File) error {
+	existing, err := workspaceExportedSymbols(root)
+	if err != nil {
+		return err
+	}
+	seen := map[string]exportedSymbol{}
+	for _, file := range files {
+		if !strings.HasPrefix(strings.ToLower(filepath.ToSlash(file.Path)), "vba/") {
+			continue
+		}
+		for _, symbol := range exportedSymbols(file.Path, file.Text) {
+			key := strings.ToLower(symbol.Name)
+			if prior, ok := seen[key]; ok && !compatiblePropertyAccessors(prior.Kind, symbol.Kind) {
+				return fmt.Errorf("component %s exports duplicate identifier %q in %s:%d and %s:%d", componentID, symbol.Name, prior.Path, prior.Line, symbol.Path, symbol.Line)
+			}
+			seen[key] = symbol
+			if prior, ok := existing[key]; ok && !compatiblePropertyAccessors(prior.Kind, symbol.Kind) {
+				return fmt.Errorf("component %s identifier %q in %s:%d conflicts with existing %s:%d", componentID, symbol.Name, symbol.Path, symbol.Line, prior.Path, prior.Line)
+			}
+		}
+	}
+	return nil
+}
+
+func workspaceExportedSymbols(root string) (map[string]exportedSymbol, error) {
+	result := map[string]exportedSymbol{}
+	base := filepath.Join(root, "vba")
+	err := filepath.WalkDir(base, func(path string, entry fs.DirEntry, walkErr error) error {
+		if os.IsNotExist(walkErr) {
+			return nil
+		}
+		if walkErr != nil {
+			return walkErr
+		}
+		if entry.Type()&os.ModeSymlink != 0 {
+			return fmt.Errorf("source symlink is not accepted: %s", path)
+		}
+		if entry.IsDir() {
+			return nil
+		}
+		ext := strings.ToLower(filepath.Ext(entry.Name()))
+		if ext != ".bas" && ext != ".cls" && ext != ".vba" {
+			return nil
+		}
+		rel, err := filepath.Rel(root, path)
+		if err != nil {
+			return err
+		}
+		rel = filepath.ToSlash(rel)
+		data, err := project.Read(root, rel)
+		if err != nil {
+			return err
+		}
+		for _, symbol := range exportedSymbols(rel, string(data)) {
+			key := strings.ToLower(symbol.Name)
+			if prior, ok := result[key]; !ok || symbol.Line < prior.Line {
+				result[key] = symbol
+			}
+		}
+		return nil
+	})
+	return result, err
+}
+
+func exportedSymbols(path, source string) []exportedSymbol {
+	lines := strings.Split(strings.ReplaceAll(source, "\r\n", "\n"), "\n")
+	result := []exportedSymbol{}
+	inProcedure := false
+	for index, raw := range lines {
+		line := strings.TrimSpace(vbaCodeLine(raw))
+		if line == "" || strings.HasPrefix(line, "#") || strings.HasPrefix(strings.ToLower(line), "attribute ") {
+			continue
+		}
+		lowerLine := strings.ToLower(line)
+		if inProcedure {
+			if strings.HasPrefix(lowerLine, "end sub") || strings.HasPrefix(lowerLine, "end function") || strings.HasPrefix(lowerLine, "end property") {
+				inProcedure = false
+			}
+			continue
+		}
+		if strings.HasPrefix(lowerLine, "private sub ") || strings.HasPrefix(lowerLine, "private function ") || strings.HasPrefix(lowerLine, "private property ") || strings.HasPrefix(lowerLine, "private static sub ") || strings.HasPrefix(lowerLine, "private static function ") {
+			inProcedure = !strings.Contains(lowerLine, "end sub") && !strings.Contains(lowerLine, "end function") && !strings.Contains(lowerLine, "end property")
+			continue
+		}
+		fields := strings.Fields(line)
+		if len(fields) == 0 {
+			continue
+		}
+		position := 0
+		if strings.EqualFold(fields[position], "Private") {
+			continue
+		}
+		if strings.EqualFold(fields[position], "Public") || strings.EqualFold(fields[position], "Friend") || strings.EqualFold(fields[position], "Static") {
+			position++
+		}
+		if position >= len(fields) {
+			continue
+		}
+		kind := strings.ToLower(fields[position])
+		position++
+		if kind == "property" {
+			if position >= len(fields) {
+				continue
+			}
+			kind += " " + strings.ToLower(fields[position])
+			position++
+		}
+		if kind == "declare" && position < len(fields) {
+			kind = strings.ToLower(fields[position])
+			position++
+		}
+		procedure := false
+		switch kind {
+		case "sub", "function", "property get", "property let", "property set":
+			procedure = true
+		case "const", "dim", "enum", "type", "event":
+		default:
+			continue
+		}
+		if position >= len(fields) {
+			continue
+		}
+		name := strings.TrimLeft(fields[position], "[")
+		if cut := strings.IndexAny(name, "([%&^!#$@]"); cut >= 0 {
+			name = name[:cut]
+		}
+		if name == "" || !office.ValidIdentifier(name) {
+			continue
+		}
+		result = append(result, exportedSymbol{Name: name, Kind: kind, Path: path, Line: index + 1})
+		if procedure {
+			inProcedure = !strings.Contains(lowerLine, "end "+strings.Split(kind, " ")[0])
+		}
+	}
+	return result
+}
+
+func vbaCodeLine(line string) string {
+	quoted := false
+	for i := 0; i < len(line); i++ {
+		switch line[i] {
+		case '"':
+			if quoted && i+1 < len(line) && line[i+1] == '"' {
+				i++
+				continue
+			}
+			quoted = !quoted
+		case '\'':
+			if !quoted {
+				return line[:i]
+			}
+		}
+	}
+	trimmed := strings.TrimSpace(line)
+	if len(trimmed) >= 4 && strings.EqualFold(trimmed[:3], "Rem") && vbaWhitespace(trimmed[3]) {
+		return ""
+	}
+	return line
+}
+
+func compatiblePropertyAccessors(first, second string) bool {
+	return strings.HasPrefix(first, "property ") && strings.HasPrefix(second, "property ") && first != second
 }
 
 func Status(root, id string) (map[string]any, error) {

@@ -93,6 +93,19 @@ func TestInstallationLockProtectsExistingInstaller(t *testing.T) {
 	}
 }
 
+func TestInstallationRejectsExportedIdentifierCollision(t *testing.T) {
+	root := t.TempDir()
+	if err := project.Write(root, "vba/Existing.bas", []byte("Public Sub WU_BeginSafeEdit()\nEnd Sub\n"), ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Add(root, "operation.safe-edit"); err == nil || !strings.Contains(err.Error(), `identifier "WU_BeginSafeEdit"`) || !strings.Contains(err.Error(), "Existing.bas:1") {
+		t.Fatalf("collision was not precise: %v", err)
+	}
+	if _, err := project.Read(root, "vba/WordUpSafeEdit.bas"); !os.IsNotExist(err) {
+		t.Fatalf("component source was written after collision: %v", err)
+	}
+}
+
 func TestBundledVBADeclarations(t *testing.T) {
 	for _, manifest := range builtin() {
 		for _, file := range manifest.Files {
@@ -231,6 +244,15 @@ func TestBundledCatalogIsComplete(t *testing.T) {
 		}
 		if items[i].Provenance == "" || items[i].Acceptance == "" || len(items[i].SupportedPlatforms) == 0 {
 			t.Fatalf("incomplete manifest: %#v", items[i])
+		}
+	}
+}
+
+func TestAllBundledComponentsInstallWithoutCollisions(t *testing.T) {
+	root := t.TempDir()
+	for _, manifest := range builtin() {
+		if _, err := Add(root, manifest.ID); err != nil {
+			t.Fatalf("%s: %v", manifest.ID, err)
 		}
 	}
 }
