@@ -23,7 +23,7 @@ XML or establish effective formatting/layout fidelity.
 | Signing | Automatic local certificate creation/reuse and strongest V3 digest verification tested. SignTool and registered Office SIP remain prerequisites; automatic prerequisite installation and automatic recipient trust are not provided. |
 | Delivery and restore | Exact fresh-artifact/suite checks, backups, stale-target protection, interrupted-replacement recovery and guarded restore tested. |
 | Login recovery | Current-user Windows login command was registered, executed and removed in a native delivery test. No actual OS reboot was performed. Windows Script Host must be available; policy may prevent execution. |
-| Document/image references | Raw XML and typed recipes plus document/image inspection. No embedded model, OCR service, universal resolved-style engine or font-identification guarantee. |
+| Document/image references | Raw XML plus document/image inspection. No embedded model, OCR service, universal resolved-style engine or font-identification guarantee. |
 | Mac stretch | Offline code and Apple Events prototype exist. Actual Mac Word execution and native UI/render/compile parity remain unverified/incomplete. |
 
 ## Security and environment

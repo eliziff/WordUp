@@ -416,10 +416,13 @@ Attribute VB_Customizable = True
 Option Explicit
 `
 }
+
+var sourceDirectories = []string{"package", "vba", "forms", "assets"}
+
 func (w *Workspace) SourceFiles() (map[string][]byte, error) {
 	out := map[string][]byte{}
 	total := 0
-	for _, top := range []string{"package", "vba", "forms", "assets"} {
+	for _, top := range sourceDirectories {
 		base := filepath.Join(w.Root, top)
 		e := filepath.WalkDir(base, func(p string, d fs.DirEntry, e error) error {
 			if os.IsNotExist(e) {
@@ -486,7 +489,7 @@ func sourceStamps(root string) (map[string]fileStamp, error) {
 		}
 		result[rel] = fileStamp{Size: info.Size(), ModifiedNS: info.ModTime().UnixNano()}
 	}
-	for _, top := range []string{"package", "vba", "forms", "styles", "content", "building_blocks", "assets"} {
+	for _, top := range sourceDirectories {
 		base := filepath.Join(root, top)
 		err := filepath.WalkDir(base, func(path string, entry fs.DirEntry, err error) error {
 			if os.IsNotExist(err) {
@@ -692,7 +695,7 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 			raw, ok := files[rel]
 			if !ok {
 				if _, e := v.CFB.Stream(name + "/f"); e != nil {
-					return nil, fmt.Errorf("form %s needs a persistent design recipe", name)
+					return nil, fmt.Errorf("form %s needs persistent layout source", name)
 				}
 				continue
 			}
