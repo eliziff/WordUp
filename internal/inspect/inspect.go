@@ -9,6 +9,7 @@ import (
 	"github.com/eliziff/WordUp/internal/office"
 	"github.com/eliziff/WordUp/internal/project"
 	"github.com/eliziff/WordUp/internal/vbaparse"
+	pathpkg "path"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -578,6 +579,16 @@ func StyleReference(file string) (map[string]any, error) {
 		partInventory = append(partInventory, map[string]any{"part": name, "bytes": len(p.Files[name]), "sha256": office.Hash(p.Files[name])})
 	}
 	out["part_inventory"] = partInventory
+	relationships, e := relationshipInventory(p)
+	if e != nil {
+		return nil, e
+	}
+	out["relationship_inventory"] = relationships
+	contentTypes, e := contentTypeInventory(p)
+	if e != nil {
+		return nil, e
+	}
+	out["content_types"] = contentTypes
 	text, e := TextObservations(p)
 	if e != nil {
 		return nil, e
@@ -685,6 +696,94 @@ func isTextStoryPart(part string) bool {
 		return false
 	}
 }
+
+// relationshipInventory exposes the OPC graph without interpreting Word
+// semantics. Targets remain the package's declared strings; target_part is a
+// convenience only for safe internal targets.
+func relationshipInventory(p *office.Package) ([]map[string]any, error) {
+	parts := make([]string, 0)
+	for part := range p.Files {
+		if part == "_rels/.rels" || (strings.Contains(part, "/_rels/") && strings.HasSuffix(part, ".rels")) {
+			parts = append(parts, part)
+		}
+	}
+	sort.Strings(parts)
+	out := make([]map[string]any, 0, len(parts))
+	for _, part := range parts {
+		spans, err := office.XMLSpans(p.Files[part])
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", part, err)
+		}
+		source := ""
+		if part != "_rels/.rels" {
+			marker := "/_rels/"
+			at := strings.Index(part, marker)
+			if at < 0 || !strings.HasSuffix(part, ".rels") {
+				continue
+			}
+			source = part[:at] + "/" + strings.TrimSuffix(part[at+len(marker):], ".rels")
+		}
+		items := make([]map[string]any, 0)
+		for _, span := range spans {
+			if span.Name.Space != office.RelNS || span.Name.Local != "Relationship" || span.Depth != 1 {
+				continue
+			}
+			item := map[string]any{"id": span.Attribute("", "Id"), "type": span.Attribute("", "Type"), "target": span.Attribute("", "Target")}
+			if mode := span.Attribute("", "TargetMode"); mode != "" {
+				item["target_mode"] = mode
+			}
+			if target := item["target"].(string); target != "" && item["target_mode"] == nil {
+				resolved := target
+				if strings.HasPrefix(resolved, "/") {
+					resolved = strings.TrimPrefix(pathpkg.Clean(resolved), "/")
+				} else {
+					resolved = pathpkg.Clean(pathpkg.Join(pathpkg.Dir(source), resolved))
+				}
+				if office.SafePart(resolved) {
+					item["target_part"] = resolved
+				}
+			}
+			items = append(items, item)
+		}
+		out = append(out, map[string]any{"part": part, "source_part": source, "relationships": items})
+	}
+	return out, nil
+}
+
+func contentTypeInventory(p *office.Package) ([]map[string]any, error) {
+	raw := p.Files["[Content_Types].xml"]
+	if len(raw) == 0 {
+		return []map[string]any{}, nil
+	}
+	spans, err := office.XMLSpans(raw)
+	if err != nil {
+		return nil, fmt.Errorf("[Content_Types].xml: %w", err)
+	}
+	out := make([]map[string]any, 0)
+	for _, span := range spans {
+		if span.Depth != 1 || span.Name.Space != office.CT {
+			continue
+		}
+		item := map[string]any{"kind": strings.ToLower(span.Name.Local)}
+		switch span.Name.Local {
+		case "Default":
+			item["extension"] = span.Attribute("", "Extension")
+			item["content_type"] = span.Attribute("", "ContentType")
+		case "Override":
+			item["part"] = strings.TrimPrefix(span.Attribute("", "PartName"), "/")
+			item["content_type"] = span.Attribute("", "ContentType")
+		default:
+			continue
+		}
+		out = append(out, item)
+	}
+	sort.Slice(out, func(i, j int) bool {
+		left, right := fmt.Sprint(out[i]["part"], out[i]["extension"], out[i]["content_type"]), fmt.Sprint(out[j]["part"], out[j]["extension"], out[j]["content_type"])
+		return left < right
+	})
+	return out, nil
+}
+
 func Check(w *project.Workspace) (map[string]any, error) {
 	return CheckWithConstants(w, nil)
 }

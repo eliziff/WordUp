@@ -307,6 +307,37 @@ func TestStyleReferenceIncludesThemeAndNumberingInputs(t *testing.T) {
 	if !found {
 		t.Fatalf("opaque part missing from inventory: %#v", parts)
 	}
+	relationships, ok := reference["relationship_inventory"].([]map[string]any)
+	if !ok || len(relationships) == 0 {
+		t.Fatalf("missing relationship inventory: %#v", reference["relationship_inventory"])
+	}
+	foundDocumentStyles := false
+	for _, group := range relationships {
+		if group["source_part"] != "word/document.xml" {
+			continue
+		}
+		for _, relation := range group["relationships"].([]map[string]any) {
+			if relation["target_part"] == "word/styles.xml" {
+				foundDocumentStyles = true
+			}
+		}
+	}
+	if !foundDocumentStyles {
+		t.Fatalf("document relationship target was not resolved: %#v", relationships)
+	}
+	contentTypes, ok := reference["content_types"].([]map[string]any)
+	if !ok || len(contentTypes) == 0 {
+		t.Fatalf("missing content-type inventory: %#v", reference["content_types"])
+	}
+	foundDocumentType := false
+	for _, item := range contentTypes {
+		if item["part"] == "word/document.xml" && item["content_type"] == office.MainDOCX {
+			foundDocumentType = true
+		}
+	}
+	if !foundDocumentType {
+		t.Fatalf("document content type was not retained: %#v", contentTypes)
+	}
 }
 
 func TestStyleReferenceIncludesSectionAndDocumentSettings(t *testing.T) {
