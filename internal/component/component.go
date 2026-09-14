@@ -937,6 +937,9 @@ func compatiblePropertyAccessors(first, second string) bool {
 }
 
 func Status(root, id string) (map[string]any, error) {
+	if err := project.ValidateSourceDirectories(root); err != nil {
+		return nil, err
+	}
 	lock, err := readLock(root)
 	if err != nil {
 		return nil, err

@@ -47,6 +47,16 @@ func TestInstallationRejectsCaseVariantSourceDirectory(t *testing.T) {
 	}
 }
 
+func TestStatusRejectsCaseVariantSourceDirectory(t *testing.T) {
+	root := t.TempDir()
+	if err := os.Mkdir(filepath.Join(root, "VBA"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Status(root, "operation.safe-edit"); err == nil || !strings.Contains(err.Error(), `workspace source directory must be named "vba" (found "VBA")`) {
+		t.Fatalf("status accepted case-variant source directory: %v", err)
+	}
+}
+
 func TestInstallationRollsBackCompletedCopies(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "workspace")
 	// A parent file prevents directory creation after an earlier copy succeeds.
