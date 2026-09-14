@@ -452,7 +452,7 @@ func validateFormDesigns(files map[string][]byte, diagnostics *[]map[string]any)
 		*diagnostics = append(*diagnostics, map[string]any{
 			"severity": "warning", "file": path,
 			"message": "form source has no matching persistent design; new forms require forms/" + formName + ".json",
-			"form": formName, "expected_design": "forms/" + formName + ".json",
+			"form":    formName, "expected_design": "forms/" + formName + ".json",
 		})
 	}
 }
@@ -465,6 +465,11 @@ func CheckInventory(root string, files map[string][]byte, diagnostics *[]map[str
 	publicByName := map[string][]Symbol{}
 	publicMacros := []map[string]any{}
 	formEvents := []map[string]any{}
+	type formControls struct {
+		known   bool
+		control map[string]bool
+	}
+	formDesigns := map[string]formControls{}
 	orderedPaths := make([]string, 0, len(paths))
 	for _, path := range paths {
 		orderedPaths = append(orderedPaths, path)
@@ -517,21 +522,25 @@ func CheckInventory(root string, files map[string][]byte, diagnostics *[]map[str
 			}
 			lower := strings.ToLower(symbol.Name)
 			if strings.HasPrefix(lower, "userform_") || (strings.Contains(symbol.Name, "_") && formEventSuffixes[strings.ToLower(symbol.Name[strings.LastIndexByte(symbol.Name, '_')+1:])]) {
-				controls := map[string]bool{}
-				designKnown := false
 				formName := strings.TrimSuffix(pathpkg.Base(path), pathpkg.Ext(path))
-				if raw, ok := files["forms/"+formName+".json"]; ok {
-					var design office.Design
-					if err := project.ReadJSON(raw, &design); err == nil {
-						designKnown = true
-						formControlNames(design, controls)
+				designPath := "forms/" + formName + ".json"
+				cached, ok := formDesigns[designPath]
+				if !ok {
+					cached = formControls{control: map[string]bool{}}
+					if raw, exists := files[designPath]; exists {
+						var design office.Design
+						if err := project.ReadJSON(raw, &design); err == nil {
+							cached.known = true
+							formControlNames(design, cached.control)
+						}
 					}
+					formDesigns[designPath] = cached
 				}
-				if !designKnown && !strings.HasSuffix(strings.ToLower(path), ".vba") && !strings.HasPrefix(lower, "userform_") {
+				if !cached.known && !strings.HasSuffix(strings.ToLower(path), ".vba") && !strings.HasPrefix(lower, "userform_") {
 					continue
 				}
-				formEvents = append(formEvents, formEventRow(path, symbol, controls, designKnown))
-				if designKnown && formEvents[len(formEvents)-1]["wiring"] == "control_not_declared" {
+				formEvents = append(formEvents, formEventRow(path, symbol, cached.control, cached.known))
+				if cached.known && formEvents[len(formEvents)-1]["wiring"] == "control_not_declared" {
 					*diagnostics = append(*diagnostics, map[string]any{"severity": "warning", "file": path, "line": symbol.Line, "message": "form event names a control not present in its design", "event": symbol.Name, "control": formEvents[len(formEvents)-1]["control"]})
 				}
 			}
