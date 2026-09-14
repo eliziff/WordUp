@@ -98,7 +98,21 @@ func CompareStructureSilver(root, reference string, limit int) (map[string]any, 
 				}
 				roleConfusionStyles[confusion][style]++
 				if roleExamples[confusion] == nil {
-					roleExamples[confusion] = map[string]any{"document": expectedDocument.Source, "source_id": id, "context": row["context"], "style_id": row["style_id"], "style_chain": styleNames(row), "formatting": row["direct_formatting_evidence"], "alignment": row["paragraph_alignment"], "resolved_level": got["level"], "evidence": got["evidence"]}
+					roleExamples[confusion] = map[string]any{
+						"document":                  expectedDocument.Source,
+						"source_id":                 id,
+						"xml_path":                  row["xml_path"],
+						"xml_start":                 row["xml_start"],
+						"xml_end":                   row["xml_end"],
+						"context":                   row["context"],
+						"style_id":                  row["style_id"],
+						"style_chain":               styleNames(row),
+						"formatting":                row["direct_formatting_evidence"],
+						"paragraph_mark_formatting": row["paragraph_mark_formatting"],
+						"alignment":                 row["paragraph_alignment"],
+						"resolved_level":            got["level"],
+						"evidence":                  got["evidence"],
+					}
 				}
 			}
 			if expected.Role == "heading" {
