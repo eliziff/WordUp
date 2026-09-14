@@ -48,6 +48,9 @@ func TestStructureEvidenceInheritanceOverrideAndContainment(t *testing.T) {
 	if result["editorial_hierarchy_verified"] != false {
 		t.Fatal("overclaimed hierarchy")
 	}
+	if result["styles_xml"] != string(p.Files["word/styles.xml"]) || result["styles_sha256"] != office.Hash(p.Files["word/styles.xml"]) || result["document_xml_sha256"] != office.Hash(p.Files["word/document.xml"]) {
+		t.Fatalf("exact style/document inputs were not retained: %#v", result)
+	}
 }
 
 func TestStructureResolvesParagraphNumberingDefinition(t *testing.T) {
@@ -69,6 +72,9 @@ func TestStructureResolvesParagraphNumberingDefinition(t *testing.T) {
 	evidence := result["paragraphs"].([]map[string]any)[0]["numbering_evidence"].(map[string]any)
 	if evidence["level"] != 2 || evidence["family"] != "lowerLetter" || evidence["label_pattern"] != "%2." || evidence["start"] != 4 || evidence["start_override"] != true {
 		t.Fatalf("unresolved numbering evidence: %v", evidence)
+	}
+	if result["numbering_xml"] != string(p.Files["word/numbering.xml"]) || result["numbering_sha256"] != office.Hash(p.Files["word/numbering.xml"]) {
+		t.Fatalf("exact numbering input was not retained: %#v", result)
 	}
 }
 

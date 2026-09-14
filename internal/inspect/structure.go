@@ -647,7 +647,28 @@ func StructureReference(file string) (map[string]any, error) {
 		rows[candidateRows[i]]["sequence_evidence"] = assignment
 		rows[candidateRows[i]]["sequence_is_heading_claim"] = false
 	}
-	out := map[string]any{"source_sha256": office.Hash(b), "paragraphs": rows, "styles": styleEvidence, "document_default_run_properties_xml": defaultRunProperties, "document_default_fonts": resolvedFonts(defaultFonts, fonts), "theme_fonts": fonts, "numbering_xml": string(p.Files["word/numbering.xml"]), "xml_namespaces": map[string]string{"w": office.W}, "locator_units": "UTF-8 XML byte offsets; paragraph indexes include nested paragraphs, not native Word range positions", "editorial_hierarchy_verified": false, "scope": "main document XML; native outline evidence, style and formatting ancestry, theme fonts, and table/textbox containment; heading inference remains generic"}
+	out := map[string]any{"source_sha256": office.Hash(b), "paragraphs": rows, "styles": styleEvidence, "document_default_run_properties_xml": defaultRunProperties, "document_default_fonts": resolvedFonts(defaultFonts, fonts), "theme_fonts": fonts, "xml_namespaces": map[string]string{"w": office.W}, "locator_units": "UTF-8 XML byte offsets; paragraph indexes include nested paragraphs, not native Word range positions", "editorial_hierarchy_verified": false, "scope": "main document XML; native outline evidence, style and formatting ancestry, theme fonts, and table/textbox containment; heading inference remains generic"}
+	// Keep the exact style inputs beside the derived evidence. These are the
+	// authoring source of truth for minute formatting (including properties this
+	// generic detector does not interpret), not a second recipe representation.
+	for _, source := range []struct {
+		part    string
+		key     string
+		hashKey string
+	}{
+		{part: "word/styles.xml", key: "styles_xml", hashKey: "styles_sha256"},
+		{part: "word/numbering.xml", key: "numbering_xml", hashKey: "numbering_sha256"},
+		{part: "word/theme/theme1.xml", key: "theme_xml", hashKey: "theme_sha256"},
+		{part: "word/fontTable.xml", key: "font_table_xml", hashKey: "font_table_sha256"},
+	} {
+		if raw := p.Files[source.part]; len(raw) > 0 {
+			out[source.key] = string(raw)
+			out[source.hashKey] = office.Hash(raw)
+		}
+	}
+	if document := p.Files["word/document.xml"]; len(document) > 0 {
+		out["document_xml_sha256"] = office.Hash(document)
+	}
 	if len(styleDuplicateOrder) > 0 {
 		duplicates := make([]map[string]any, 0, len(styleDuplicateOrder))
 		for _, id := range styleDuplicateOrder {
