@@ -21,6 +21,8 @@ The current Windows x64 and ARM64 fidelity-36 package candidates each contain 25
 
 The exact x64 fidelity-36 candidate's disposable `--execute selftest` was attempted and failed in 278 ms with `native_session_restricted`: this Windows logon session refuses hidden Word creation (`CreateProcessW`: logon session does not exist). No native pass is claimed until that host boundary is cleared.
 
+The same package passed an outside-repository package-only smoke run: `new`, `check` and uncached `build` all returned zero, with 68.1 ms check time, 24.1 ms build time, valid OPC output, and `vba_compiled=false` correctly retained because Word was not executed.
+
 ## Remaining completion gates
 
 The Rizzuto comment discrepancy is fixed by restoring character-collection traversal; tracked-formatting visibility is preserved explicitly. The selected-options baseline passes (`workspaces/alr-baseline/reports/full-rizzuto-with-alignment.json`, 67.914 s), and the complete output comparison passes with `equal=true`, `byte_identical=false`. Reopening saved Flat OPC was rejected as a shortcut because Word added font metadata; the final baseline ran the unchanged original on the original input instead.
