@@ -11,7 +11,6 @@ import (
 	"github.com/eliziff/WordUp/internal/component"
 	"github.com/eliziff/WordUp/internal/deploy"
 	"github.com/eliziff/WordUp/internal/example"
-	"github.com/eliziff/WordUp/internal/gold"
 	"github.com/eliziff/WordUp/internal/inspect"
 	"github.com/eliziff/WordUp/internal/native"
 	"github.com/eliziff/WordUp/internal/office"
@@ -122,16 +121,6 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		defer e.fsMu.Unlock()
 	}
 	switch method {
-	case "gold.structure.validate":
-		_, report, err := gold.ValidateStructure(e.Root, p.Path)
-		return report, err
-	case "gold.structure.compare":
-		return gold.CompareStructure(e.Root, p.Reference, p.Path)
-	case "gold.validate":
-		_, report, err := gold.ValidateFixture(e.Root, p.Path)
-		return report, err
-	case "gold.verify":
-		return gold.VerifyFixture(e.Root, p.Reference, p.Path)
 	case "component.list":
 		return component.List(), nil
 	case "component.get":

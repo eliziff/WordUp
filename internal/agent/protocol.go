@@ -32,8 +32,6 @@ func Tools() []Tool {
 	)
 	props := map[string]any{}
 	ds = append(ds, [2]string{"test.freeze", "Freeze passing native report reference into a new local output directory, including the retained artifact, declared inputs and run evidence. Returns a portable bundle.json reference accepted by test.replay and test.compare; verifies hashes on load. Existing destinations are never overwritten. XML is copied unchanged. Uncaptured external inputs are not made hermetic."})
-	// Preserve old gold.* calls for local artifacts, without advertising an
-	// annotation workflow. The expected document XML is the reference.
 	ds = append(ds, [2]string{"xml.verify", "Verify actual XML path against expected XML reference directly. No manifest or annotations. comparison defaults to exact; semantic is explicit namespace-aware equality. No ignored content. Mismatch returns an error plus hashes and difference locations. Does not run Word."})
 	props["comparison"] = map[string]any{"type": "string", "enum": []string{"exact", "semantic"}, "description": "xml.verify comparison; defaults to exact bytes."}
 	props["namespaces"] = map[string]any{"type": "object", "additionalProperties": map[string]any{"type": "string"}, "description": "XPath prefix to namespace URI bindings, independent of source prefixes."}

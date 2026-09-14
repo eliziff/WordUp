@@ -24,6 +24,7 @@ func TestSubmissionCorpus(t *testing.T) {
 	}
 	passed, rejected, paragraphs := 0, 0, 0
 	var total, slowest time.Duration
+	var slowestFile string
 	for _, file := range files {
 		start := time.Now()
 		result, err := StructureResolved(file)
@@ -31,6 +32,7 @@ func TestSubmissionCorpus(t *testing.T) {
 		total += elapsed
 		if elapsed > slowest {
 			slowest = elapsed
+			slowestFile = filepath.Base(file)
 		}
 		if err != nil {
 			if !strings.HasSuffix(file, "--3a668c4999c4.docx") || !strings.Contains(err.Error(), "unsafe package part") {
@@ -61,7 +63,7 @@ func TestSubmissionCorpus(t *testing.T) {
 			}
 		}
 	}
-	t.Logf("documents=%d resolved=%d rejected=%d paragraphs=%d total=%s slowest=%s", len(files), passed, rejected, paragraphs, total, slowest)
+	t.Logf("documents=%d resolved=%d rejected=%d paragraphs=%d total=%s slowest=%s file=%s", len(files), passed, rejected, paragraphs, total, slowest, slowestFile)
 	if rejected > 1 {
 		t.Fatalf("unexpected rejected manuscripts: %d", rejected)
 	}

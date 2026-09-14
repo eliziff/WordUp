@@ -15,6 +15,24 @@ import (
 	"strings"
 )
 
+func textElement(b []byte) (string, error) {
+	start, end := bytes.IndexByte(b, '>'), bytes.LastIndexByte(b, '<')
+	if start < 0 || end <= start {
+		return "", fmt.Errorf("invalid text element")
+	}
+	inner := b[start+1 : end]
+	if !bytes.ContainsRune(inner, '&') {
+		return string(inner), nil
+	}
+	var value struct {
+		Text string `xml:",chardata"`
+	}
+	if err := xml.Unmarshal(b, &value); err != nil {
+		return "", err
+	}
+	return value.Text, nil
+}
+
 type Symbol struct {
 	Module      string `json:"module"`
 	Name        string `json:"name"`
@@ -165,13 +183,11 @@ func TextObservations(p *office.Package) ([]map[string]any, error) {
 				propertiesEnd = x.End
 			}
 			if x.Name.Local == "t" {
-				var tmp struct {
-					Text string `xml:",chardata"`
+				value, err := textElement(b[x.Start:x.End])
+				if err != nil {
+					return nil, err
 				}
-				if e = xml.Unmarshal(b[x.Start:x.End], &tmp); e != nil {
-					return nil, e
-				}
-				text.WriteString(tmp.Text)
+				text.WriteString(value)
 			}
 			if x.Name.Local == "rPr" {
 				runs = append(runs, map[string]any{"xml": string(b[x.Start:x.End])})
