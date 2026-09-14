@@ -320,6 +320,28 @@ func TestSourceStampsRejectsMetadataSymlink(t *testing.T) {
 	}
 }
 
+func TestSourceStampsRejectsOversizedSourceBeforeHashing(t *testing.T) {
+	w := newWorkspace(t)
+	path := filepath.Join(w.Root, "assets", "oversized.bin")
+	if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
+		t.Fatal(err)
+	}
+	file, err := os.Create(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := file.Truncate(int64(office.Limit) + 1); err != nil {
+		file.Close()
+		t.Fatal(err)
+	}
+	if err := file.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := sourceStamps(w.Root, nil); err == nil || !strings.Contains(err.Error(), "file budget exceeded: assets/oversized.bin") {
+		t.Fatalf("oversized source was hashed or accepted: %v", err)
+	}
+}
+
 func TestSpecimenWorkspaceRoundTripAndControlledEdit(t *testing.T) {
 	src := os.Getenv("WORDUP_SPECIMEN")
 	if src == "" {

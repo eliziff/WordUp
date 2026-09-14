@@ -528,6 +528,12 @@ func fingerprint(files map[string][]byte, stamps map[string]fileStamp) string {
 func sourceStamps(root string, previous map[string]fileStamp) (map[string]fileStamp, error) {
 	result := map[string]fileStamp{}
 	record := func(rel, path string, info os.FileInfo) error {
+		if !info.Mode().IsRegular() {
+			return fmt.Errorf("workspace source is not a regular file: %s", rel)
+		}
+		if info.Size() > office.Limit {
+			return fmt.Errorf("file budget exceeded: %s", rel)
+		}
 		changedNS, reliable := fileChangeStamp(path)
 		current := fileStamp{Size: info.Size(), ModifiedNS: info.ModTime().UnixNano(), ChangedNS: changedNS}
 		if reliable {
