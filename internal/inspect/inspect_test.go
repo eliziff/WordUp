@@ -55,7 +55,7 @@ func TestRibbonDiagnosticsUseXMLIdentity(t *testing.T) {
 }
 
 func TestParagraphSourceLocationsAndNestedText(t *testing.T) {
-	xml := `<w:document xmlns:w="` + office.W + `" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:x="urn:foreign"><w:body><w:p w14:paraId="1234ABCD"><w:pPr><w:pStyle w:val="Title"/><w:tabs><w:tab w:val="left" w:pos="720"/></w:tabs></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Author</w:t><w:tab/><w:t>Name</w:t><w:br/><w:footnoteReference w:id="7"/><x:t>not Word text</x:t><w:drawing><w:txbxContent><w:p><w:pPr><w:pStyle w:val="Textbox"/></w:pPr><w:r><w:t>Nested</w:t></w:r></w:p></w:txbxContent></w:drawing></w:r></w:p><w:p><w:r><w:t>Body &amp; text</w:t></w:r></w:p></w:body></w:document>`
+	xml := `<w:document xmlns:w="` + office.W + `" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:x="urn:foreign"><w:body><w:p w14:paraId="1234ABCD"><w:pPr><w:pStyle w:val="Title"/><w:tabs><w:tab w:val="left" w:pos="720"/></w:tabs><w:rPr><w:i/></w:rPr></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Author</w:t><w:tab/><w:t>Name</w:t><w:br/><w:footnoteReference w:id="7"/><x:t>not Word text</x:t><w:drawing><w:txbxContent><w:p><w:pPr><w:pStyle w:val="Textbox"/></w:pPr><w:r><w:t>Nested</w:t></w:r></w:p></w:txbxContent></w:drawing></w:r></w:p><w:p><w:r><w:t>Body &amp; text</w:t></w:r></w:p></w:body></w:document>`
 	p := office.BlankPackage()
 	p.Files["word/document.xml"] = []byte(xml)
 	rows, err := TextObservations(p)
@@ -79,5 +79,9 @@ func TestParagraphSourceLocationsAndNestedText(t *testing.T) {
 	evidence := rows[0]["direct_formatting_evidence"].(map[string]int)
 	if evidence["text_units"] != 12 || evidence["bold_units"] != 12 {
 		t.Fatalf("character-weighted formatting includes nested text or loses controls: %v", evidence)
+	}
+	mark := rows[0]["paragraph_mark_formatting"].(map[string]bool)
+	if !mark["italic"] {
+		t.Fatalf("lost paragraph-mark formatting evidence: %v", mark)
 	}
 }

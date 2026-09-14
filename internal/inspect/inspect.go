@@ -158,10 +158,12 @@ func TextObservations(p *office.Package) ([]map[string]any, error) {
 		text := strings.Builder{}
 		style := ""
 		props := ""
+		paragraphMarkFormatting := map[string]bool{}
 		runs := []map[string]any{}
 		references := []map[string]any{}
 		nestedEnd := 0
 		propertiesEnd := 0
+		paragraphMarkEnd := 0
 		for _, x := range spans[index+1:] {
 			if x.Start >= s.End {
 				break
@@ -183,6 +185,21 @@ func TextObservations(p *office.Package) ([]map[string]any, error) {
 				props = string(b[x.Start:x.End])
 				propertiesEnd = x.End
 			}
+			if x.Name.Local == "rPr" && x.Depth == s.Depth+2 && x.Start < propertiesEnd {
+				paragraphMarkEnd = x.End
+			}
+			if paragraphMarkEnd > 0 && x.Start < paragraphMarkEnd && x.Depth == s.Depth+3 {
+				switch x.Name.Local {
+				case "b", "i", "caps", "smallCaps", "u":
+					value := x.Attribute(office.W, "val")
+					key := map[string]string{"b": "bold", "i": "italic", "caps": "caps", "smallCaps": "small_caps", "u": "underline"}[x.Name.Local]
+					enabled := value == "" || (value != "0" && !strings.EqualFold(value, "false") && !strings.EqualFold(value, "off"))
+					if x.Name.Local == "u" && strings.EqualFold(value, "none") {
+						enabled = false
+					}
+					paragraphMarkFormatting[key] = enabled
+				}
+			}
 			if x.Name.Local == "t" {
 				value, err := textElement(b[x.Start:x.End])
 				if err != nil {
@@ -202,7 +219,7 @@ func TextObservations(p *office.Package) ([]map[string]any, error) {
 				references = append(references, map[string]any{"kind": x.Name.Local, "id": x.Attribute(office.W, "id"), "xml_start": x.Start})
 			}
 		}
-		weighted := map[string]int{"text_units": 0, "bold_units": 0, "italic_units": 0, "caps_units": 0, "small_caps_units": 0}
+		weighted := map[string]int{"text_units": 0, "bold_units": 0, "italic_units": 0, "caps_units": 0, "small_caps_units": 0, "underline_units": 0}
 		nestedEnd = 0
 		for runIndex, run := range spans[index+1:] {
 			if run.Start >= s.End {
@@ -243,9 +260,13 @@ func TextObservations(p *office.Package) ([]map[string]any, error) {
 					runText.WriteString(value)
 				case "tab", "br", "cr":
 					runText.WriteRune('\t')
-				case "b", "i", "caps", "smallCaps":
+				case "b", "i", "caps", "smallCaps", "u":
 					value := x.Attribute(office.W, "val")
-					item[x.Name.Local] = value == "" || (value != "0" && !strings.EqualFold(value, "false") && !strings.EqualFold(value, "off"))
+					enabled := value == "" || (value != "0" && !strings.EqualFold(value, "false") && !strings.EqualFold(value, "off"))
+					if x.Name.Local == "u" && strings.EqualFold(value, "none") {
+						enabled = false
+					}
+					item[x.Name.Local] = enabled
 				case "rFonts":
 					fonts := map[string]string{}
 					for _, name := range []string{"ascii", "hAnsi", "cs", "eastAsia", "asciiTheme", "hAnsiTheme", "cstheme", "csTheme", "eastAsiaTheme"} {
@@ -269,8 +290,8 @@ func TextObservations(p *office.Package) ([]map[string]any, error) {
 			units := len(utf16.Encode([]rune(runText.String())))
 			item["text_units"] = units
 			weighted["text_units"] += units
-			for _, name := range []string{"bold", "italic", "caps", "small_caps"} {
-				xmlName := map[string]string{"bold": "b", "italic": "i", "caps": "caps", "small_caps": "smallCaps"}[name]
+			for _, name := range []string{"bold", "italic", "caps", "small_caps", "underline"} {
+				xmlName := map[string]string{"bold": "b", "italic": "i", "caps": "caps", "small_caps": "smallCaps", "underline": "u"}[name]
 				if item[xmlName] == true {
 					weighted[name+"_units"] += units
 				}
@@ -283,7 +304,7 @@ func TextObservations(p *office.Package) ([]map[string]any, error) {
 		if paragraphID != "" {
 			sourceID = "word/document.xml#paraId=" + paragraphID
 		}
-		out = append(out, map[string]any{
+		observation := map[string]any{
 			"text": text.String(), "style_id": style, "paragraph_properties_xml": props, "run_properties": runs,
 			"direct_formatting_evidence": weighted,
 			"source_part":                "word/document.xml", "xml_start": s.Start, "xml_end": s.End,
@@ -291,7 +312,11 @@ func TextObservations(p *office.Package) ([]map[string]any, error) {
 			"paragraph_id": paragraphID,
 			"source_id":    sourceID,
 			"references":   references,
-		})
+		}
+		if len(paragraphMarkFormatting) > 0 {
+			observation["paragraph_mark_formatting"] = paragraphMarkFormatting
+		}
+		out = append(out, observation)
 		if len(out) > 10000 {
 			return nil, fmt.Errorf("paragraph observation budget exceeded")
 		}
