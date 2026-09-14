@@ -16,6 +16,19 @@ if ([string]::IsNullOrWhiteSpace($Destination)) {
 }
 $destinationRoot = [IO.Path]::GetFullPath($Destination)
 $executablePath = (Resolve-Path -LiteralPath $Executable).Path
+$executableBytes = [IO.File]::ReadAllBytes($executablePath)
+if ($executableBytes.Length -lt 64 -or $executableBytes[0] -ne 0x4d -or $executableBytes[1] -ne 0x5a) {
+ throw "Executable is not a Windows PE file: $executablePath"
+}
+$peOffset = [BitConverter]::ToInt32($executableBytes, 0x3c)
+if ($peOffset -lt 0 -or $peOffset + 6 -gt $executableBytes.Length -or $executableBytes[$peOffset] -ne 0x50 -or $executableBytes[$peOffset + 1] -ne 0x45) {
+ throw "Executable has an invalid PE header: $executablePath"
+}
+$machine = [BitConverter]::ToUInt16($executableBytes, $peOffset + 4)
+$expectedMachine = if ($Platform -eq 'windows/arm64') { 0xaa64 } else { 0x8664 }
+if ($machine -ne $expectedMachine) {
+ throw ("Executable machine 0x{0:x4} does not match {1}: {2}" -f $machine, $Platform, $executablePath)
+}
 $required = @('office-tools/WordUp.OfficeTools.exe','office-tools/OPENXML-LICENSE','wordup-oletools/wordup-oletools.exe','wordup-oletools/DEPENDENCIES.txt','wordup-oletools/licenses')
 foreach ($relative in $required) {
  if (!(Test-Path -LiteralPath (Join-Path $root ('bin/' + $relative)))) { throw "Missing $relative; build tools/office-bridge/build.ps1 and tools/oletools/build.ps1 first." }
