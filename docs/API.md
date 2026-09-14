@@ -35,7 +35,8 @@ implemented.
 `read` can retrieve large report or evidence files in bounded chunks with
 `offset` and `limit`. The response always includes the full-file SHA-256,
 total byte count, returned range, and `next_offset` when more bytes remain;
-the default with neither field remains a complete read.
+offsets are raw bytes (a chunk that is not valid UTF-8 is returned as base64),
+and the default with neither field remains a complete read.
 
 ## Direct native object access (Windows)
 
