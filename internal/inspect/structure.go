@@ -13,13 +13,15 @@ import (
 type numberingLevel struct {
 	Family, Pattern string
 	Start           int
+	StartSpecified  bool
 	RestartAfter    int
 }
 
 type numberingDefinition struct {
-	AbstractID string
-	Levels     map[int]numberingLevel
-	Overrides  map[int]int
+	AbstractID     string
+	Levels         map[int]numberingLevel
+	Overrides      map[int]int
+	LevelOverrides map[int]numberingLevel
 }
 
 type numberingState struct {
@@ -214,7 +216,7 @@ func numberingDefinitions(p *office.Package) (map[string]numberingDefinition, er
 					switch x.Name.Local {
 					case "start":
 						if n, e := strconv.Atoi(x.Attribute(office.W, "val")); e == nil {
-							item.Start = n
+							item.Start, item.StartSpecified = n, true
 						}
 					case "numFmt":
 						item.Family = x.Attribute(office.W, "val")
@@ -230,7 +232,7 @@ func numberingDefinitions(p *office.Package) (map[string]numberingDefinition, er
 			}
 			abstracts[s.Attribute(office.W, "abstractNumId")] = levels
 		case "num":
-			definition := numberingDefinition{Levels: map[int]numberingLevel{}, Overrides: map[int]int{}}
+			definition := numberingDefinition{Levels: map[int]numberingLevel{}, Overrides: map[int]int{}, LevelOverrides: map[int]numberingLevel{}}
 			for j, x := range spans[i+1:] {
 				if x.Start >= s.End {
 					break
@@ -248,7 +250,7 @@ func numberingDefinitions(p *office.Package) (map[string]numberingDefinition, er
 				if parseErr != nil {
 					continue
 				}
-				for _, override := range spans[i+1+j+1:] {
+				for k, override := range spans[i+1+j+1:] {
 					if override.Start >= x.End {
 						break
 					}
@@ -257,13 +259,53 @@ func numberingDefinitions(p *office.Package) (map[string]numberingDefinition, er
 							definition.Overrides[ilvl] = n
 						}
 					}
+					if override.Name.Space != office.W || override.Name.Local != "lvl" || override.Depth != x.Depth+1 {
+						continue
+					}
+					item := numberingLevel{Start: 1, RestartAfter: -1}
+					for _, child := range spans[i+1+j+1+k+1:] {
+						if child.Start >= override.End {
+							break
+						}
+						if child.Name.Space != office.W || child.Depth != override.Depth+1 {
+							continue
+						}
+						switch child.Name.Local {
+						case "start":
+							if n, e := strconv.Atoi(child.Attribute(office.W, "val")); e == nil {
+								item.Start, item.StartSpecified = n, true
+							}
+						case "numFmt":
+							item.Family = child.Attribute(office.W, "val")
+						case "lvlText":
+							item.Pattern = child.Attribute(office.W, "val")
+						}
+					}
+					definition.LevelOverrides[ilvl] = item
 				}
 			}
 			definitions[s.Attribute(office.W, "numId")] = definition
 		}
 	}
 	for id, definition := range definitions {
-		definition.Levels = abstracts[definition.AbstractID]
+		baseLevels := abstracts[definition.AbstractID]
+		definition.Levels = make(map[int]numberingLevel, len(baseLevels))
+		for level, item := range baseLevels {
+			definition.Levels[level] = item
+		}
+		for level, override := range definition.LevelOverrides {
+			item := definition.Levels[level]
+			if override.Family != "" {
+				item.Family = override.Family
+			}
+			if override.Pattern != "" {
+				item.Pattern = override.Pattern
+			}
+			if override.StartSpecified {
+				item.Start, item.StartSpecified = override.Start, true
+			}
+			definition.Levels[level] = item
+		}
 		definitions[id] = definition
 	}
 	return definitions, nil
@@ -554,6 +596,9 @@ func StructureReference(file string) (map[string]any, error) {
 					if start, overridden := definition.Overrides[ilvl]; overridden {
 						evidence["start"] = start
 						evidence["start_override"] = true
+					}
+					if _, overridden := definition.LevelOverrides[ilvl]; overridden {
+						evidence["level_override"] = true
 					}
 					state := numberingStates[numID]
 					if state == nil {

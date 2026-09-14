@@ -185,3 +185,33 @@ func TestNumberingLabelHonorsWordRestartRules(t *testing.T) {
 		}
 	}
 }
+
+func TestStructureUsesNumberingLevelOverrideFormatting(t *testing.T) {
+	p := office.BlankPackage()
+	p.Files["word/document.xml"] = []byte(`<w:document xmlns:w="` + office.W + `"><w:body><w:p><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="7"/></w:numPr></w:pPr><w:r><w:t>First</w:t></w:r></w:p><w:p><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="7"/></w:numPr></w:pPr><w:r><w:t>Second</w:t></w:r></w:p></w:body></w:document>`)
+	p.Files["word/numbering.xml"] = []byte(`<w:numbering xmlns:w="` + office.W + `"><w:abstractNum w:abstractNumId="3"><w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="decimal"/><w:lvlText w:val="%1."/></w:lvl></w:abstractNum><w:num w:numId="7"><w:abstractNumId w:val="3"/><w:lvlOverride w:ilvl="0"><w:startOverride w:val="4"/><w:lvl w:ilvl="0"><w:start w:val="2"/><w:numFmt w:val="upperRoman"/><w:lvlText w:val="%1)"/></w:lvl></w:lvlOverride></w:num></w:numbering>`)
+	b, err := p.Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(t.TempDir(), "numbering-override.docx")
+	if err = os.WriteFile(path, b, 0600); err != nil {
+		t.Fatal(err)
+	}
+	result, err := StructureReference(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rows := result["paragraphs"].([]map[string]any)
+	if len(rows) != 2 {
+		t.Fatal(rows)
+	}
+	first := rows[0]["numbering_evidence"].(map[string]any)
+	if first["family"] != "upperRoman" || first["label_pattern"] != "%1)" || first["start"] != 4 || first["start_override"] != true || first["level_override"] != true || first["displayed_label"] != "IV)" {
+		t.Fatalf("level override formatting was not applied: %#v", first)
+	}
+	second := rows[1]["numbering_evidence"].(map[string]any)
+	if second["displayed_label"] != "V)" {
+		t.Fatalf("overridden numbering counter did not continue: %#v", second)
+	}
+}
