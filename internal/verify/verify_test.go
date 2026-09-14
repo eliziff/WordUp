@@ -125,6 +125,32 @@ func TestSuiteXMLComparison(t *testing.T) {
 	}
 }
 
+func TestSuiteXMLComparisonSelectsPackagePart(t *testing.T) {
+	dir := t.TempDir()
+	pkg := office.BlankPackage()
+	pkg.Files["word/document.xml"] = []byte(`<w:document xmlns:w="` + office.W + `"><w:body><w:p><w:r><w:t>keep</w:t></w:r></w:p></w:body></w:document>`)
+	data, err := pkg.Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	packagePath := filepath.Join(dir, "sample.docx")
+	expectedPath := filepath.Join(dir, "expected.xml")
+	if err := os.WriteFile(packagePath, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(expectedPath, pkg.Files["word/document.xml"], 0600); err != nil {
+		t.Fatal(err)
+	}
+	op := native.Operation{Op: "xml.verify", Target: expectedPath, File: packagePath, Named: map[string]any{"part": "word/document.xml"}}
+	if _, err := observedCall(context.Background(), nil, op); err != nil {
+		t.Fatal(err)
+	}
+	op.Named["part"] = "../word/document.xml"
+	if _, err := observedCall(context.Background(), nil, op); err == nil {
+		t.Fatal("unsafe package part accepted")
+	}
+}
+
 type mockHost struct{ n int }
 
 type failingCleanupHost struct{ mockHost }

@@ -34,12 +34,13 @@ it. Test reusable features on varied documents. XML comparison is deterministic;
 the model-authored expectation can still be wrong. Native behavior and visual
 fidelity require actual Word execution and rendering respectively.
 
-Native suites can capture and verify directly:
+Native suites can capture and verify directly. When the expected or actual
+path is a DOCX/DOTM, `named.part` selects the same XML part in memory:
 
 ```json
 [
   {"name":"Capture output","operation":{"op":"xml.snapshot","target":"doc","file":"$output/actual.xml"}},
-  {"name":"Check expected XML","operation":{"op":"xml.verify","target":"C:/Work/tests/expected.xml","file":"$output/actual.xml"},"assert":[{"path":"/matches_expected","kind":"equals","expected":true}]}
+  {"name":"Check expected XML","operation":{"op":"xml.verify","target":"C:/Work/tests/expected.xml","file":"$output/actual.docx","named":{"part":"word/document.xml"}},"assert":[{"path":"/matches_expected","kind":"equals","expected":true}]}
 ]
 ```
 

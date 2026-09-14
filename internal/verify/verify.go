@@ -733,12 +733,22 @@ func observedCall(ctx context.Context, h native.Host, op native.Operation) (any,
 	}
 	if op.Op == "xml.compare" || op.Op == "xml.verify" {
 		var policy office.XMLComparePolicy
+		part := ""
 		if raw, ok := op.Named["xml_policy"]; ok {
 			encoded, err := json.Marshal(raw)
 			if err != nil {
 				return nil, err
 			}
 			if err = project.ReadJSON(encoded, &policy); err != nil {
+				return nil, err
+			}
+		}
+		if raw, ok := op.Named["part"]; ok {
+			encoded, err := json.Marshal(raw)
+			if err != nil {
+				return nil, err
+			}
+			if err = project.ReadJSON(encoded, &part); err != nil {
 				return nil, err
 			}
 		}
@@ -750,9 +760,18 @@ func observedCall(ctx context.Context, h native.Host, op native.Operation) (any,
 		if err != nil {
 			return nil, err
 		}
+		a, err = office.XMLInput(a, part)
+		if err != nil {
+			return nil, err
+		}
+		b, err = office.XMLInput(b, part)
+		if err != nil {
+			return nil, err
+		}
 		if op.Op == "xml.verify" {
 			var options struct {
 				Comparison string `json:"comparison"`
+				Part       string `json:"part"`
 			}
 			if len(op.Named) > 0 {
 				encoded, err := json.Marshal(op.Named)
