@@ -127,6 +127,13 @@ func TestAddTracksAndProtectsEditedComponent(t *testing.T) {
 	if err != nil || status["state"] != "modified" {
 		t.Fatalf("status=%v err=%v", status, err)
 	}
+	platforms, ok := status["supported_platforms"].([]string)
+	if !ok || len(platforms) != 1 || platforms[0] != "windows" {
+		t.Fatalf("status lost platform declaration: %#v", status)
+	}
+	if compatibility, ok := status["compatibility"].(string); !ok || compatibility == "" {
+		t.Fatalf("status lost compatibility: %#v", status)
+	}
 	if _, err = Add(root, "structure.detect"); err == nil {
 		t.Fatal("edited component overwritten")
 	}

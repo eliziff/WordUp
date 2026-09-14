@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/eliziff/WordUp/internal/component"
 	"github.com/eliziff/WordUp/internal/office"
 	"github.com/eliziff/WordUp/internal/project"
 )
@@ -107,13 +108,14 @@ var contextMenuRegistration = regexp.MustCompile(`(?i)\b(?:commandbars\s*\(|cont
 type componentLock struct {
 	Schema     int `json:"schema"`
 	Components map[string]struct {
-		ID             string            `json:"id"`
-		Version        string            `json:"version"`
-		Files          map[string]string `json:"files"`
-		Provenance     string            `json:"provenance"`
-		License        string            `json:"license"`
-		ManifestSHA256 string            `json:"manifest_sha256"`
-		Parameters     map[string]string `json:"parameters"`
+		ID                 string            `json:"id"`
+		Version            string            `json:"version"`
+		Files              map[string]string `json:"files"`
+		Provenance         string            `json:"provenance"`
+		License            string            `json:"license"`
+		ManifestSHA256     string            `json:"manifest_sha256"`
+		Parameters         map[string]string `json:"parameters"`
+		SupportedPlatforms []string          `json:"supported_platforms"`
 	} `json:"components"`
 }
 
@@ -328,7 +330,7 @@ func installedComponentInventory(root string, diagnostics *[]map[string]any) []m
 			}
 			files = append(files, row)
 		}
-		result := map[string]any{"id": id, "version": installed.Version, "state": state, "files": files, "provenance": installed.Provenance, "license": installed.License, "manifest_sha256": installed.ManifestSHA256, "parameters": installed.Parameters}
+		result := map[string]any{"id": id, "version": installed.Version, "state": state, "files": files, "provenance": installed.Provenance, "license": installed.License, "manifest_sha256": installed.ManifestSHA256, "parameters": installed.Parameters, "supported_platforms": installed.SupportedPlatforms, "compatibility": component.Compatibility(installed.SupportedPlatforms)}
 		rows = append(rows, result)
 		if state != "clean" {
 			severity := "warning"

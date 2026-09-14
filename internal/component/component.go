@@ -10,6 +10,7 @@ import (
 	"maps"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 )
@@ -37,13 +38,14 @@ type Manifest struct {
 	applied            map[string]string
 }
 type Installed struct {
-	ID             string            `json:"id"`
-	Version        string            `json:"version"`
-	Files          map[string]string `json:"files"`
-	Provenance     string            `json:"provenance,omitempty"`
-	License        string            `json:"license,omitempty"`
-	ManifestSHA256 string            `json:"manifest_sha256,omitempty"`
-	Parameters     map[string]string `json:"parameters,omitempty"`
+	ID                 string            `json:"id"`
+	Version            string            `json:"version"`
+	Files              map[string]string `json:"files"`
+	Provenance         string            `json:"provenance,omitempty"`
+	License            string            `json:"license,omitempty"`
+	ManifestSHA256     string            `json:"manifest_sha256,omitempty"`
+	Parameters         map[string]string `json:"parameters,omitempty"`
+	SupportedPlatforms []string          `json:"supported_platforms,omitempty"`
 }
 type Lock struct {
 	Schema     int                  `json:"schema"`
@@ -287,7 +289,7 @@ func install(root string, m Manifest) (Installed, error) {
 		}
 		return Installed{}, fmt.Errorf("component %s is already installed and differs from its recorded source; inspect component.status or component.diff", id)
 	}
-	installed := Installed{ID: id, Version: m.Version, Files: map[string]string{}, Provenance: m.Provenance, License: m.License, ManifestSHA256: office.Hash(project.JSON(m)), Parameters: m.applied}
+	installed := Installed{ID: id, Version: m.Version, Files: map[string]string{}, Provenance: m.Provenance, License: m.License, ManifestSHA256: office.Hash(project.JSON(m)), Parameters: m.applied, SupportedPlatforms: append([]string(nil), m.SupportedPlatforms...)}
 	// Preflight every file before writing any source. Components are independent
 	// copies: no file in this path is allowed to replace an existing file.
 	seen := map[string]bool{}
@@ -396,7 +398,8 @@ func Status(root, id string) (map[string]any, error) {
 		rows = append(rows, row)
 	}
 	return map[string]any{"id": id, "version": installed.Version, "state": state, "files": rows,
-		"provenance": installed.Provenance, "license": installed.License, "manifest_sha256": installed.ManifestSHA256, "parameters": installed.Parameters}, nil
+		"provenance": installed.Provenance, "license": installed.License, "manifest_sha256": installed.ManifestSHA256, "parameters": installed.Parameters,
+		"supported_platforms": installed.SupportedPlatforms, "compatibility": Compatibility(installed.SupportedPlatforms)}, nil
 }
 
 func Diff(root, id string) (map[string]any, error) {
@@ -431,6 +434,21 @@ func diffParameters(root, id string, supplied map[string]string) (map[string]str
 		return installed.Parameters, nil
 	}
 	return nil, nil
+}
+
+// Compatibility reports whether the installed component can run on this host.
+// An empty list means the source did not declare a platform, so status remains
+// explicit rather than guessing.
+func Compatibility(platforms []string) string {
+	if len(platforms) == 0 {
+		return "unknown"
+	}
+	for _, platform := range platforms {
+		if platform == "*" || strings.EqualFold(platform, "all") || strings.EqualFold(platform, runtime.GOOS) {
+			return "compatible"
+		}
+	}
+	return "unsupported"
 }
 
 func diff(root string, m Manifest) (map[string]any, error) {
