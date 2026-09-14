@@ -102,21 +102,21 @@ End Sub
 
 const contextMenuSource = `Attribute VB_Name = "WordUpContextMenu"
 Option Explicit
-Private Const WU_TAG As String = "WordUp.Component.ContextMenu"
-Private WU_OwnedContextMenu As CommandBarButton
 Public Sub WU_RegisterContextMenu(ByVal caption As String, ByVal macroName As String)
+    If Len(Trim$(caption)) = 0 Then Err.Raise 5, "WU_RegisterContextMenu", "caption is required"
+    If Len(Trim$(macroName)) = 0 Then Err.Raise 5, "WU_RegisterContextMenu", "macro name is required"
     WU_ChangeContextMenu caption, macroName, False
 End Sub
 Public Sub WU_RemoveContextMenu()
     WU_ChangeContextMenu "", "", True
 End Sub
 Public Function WU_ContextMenuRegistered(Optional ByVal expectedCaption As String = "", Optional ByVal expectedMacro As String = "") As Boolean
-    On Error Resume Next
-    WU_ContextMenuRegistered = Not (WU_OwnedContextMenu Is Nothing)
-    If WU_ContextMenuRegistered Then WU_ContextMenuRegistered = (WU_OwnedContextMenu.Tag = WU_TAG)
-    If WU_ContextMenuRegistered And expectedCaption <> "" Then WU_ContextMenuRegistered = (WU_OwnedContextMenu.Caption = expectedCaption)
-    If WU_ContextMenuRegistered And expectedMacro <> "" Then WU_ContextMenuRegistered = (WU_OwnedContextMenu.OnAction = expectedMacro)
-    On Error GoTo 0
+    Dim item As CommandBarButton
+    Set item = WU_FindContextMenu()
+    If item Is Nothing Then Exit Function
+    If expectedCaption <> "" Then If item.Caption <> expectedCaption Then Exit Function
+    If expectedMacro <> "" Then If item.OnAction <> WU_QualifiedMacro(expectedMacro) Then Exit Function
+    WU_ContextMenuRegistered = True
 End Function
 Private Sub WU_ChangeContextMenu(ByVal caption As String, ByVal macroName As String, ByVal removeOnly As Boolean)
     Dim prior As Object, item As CommandBarButton
@@ -124,19 +124,13 @@ Private Sub WU_ChangeContextMenu(ByVal caption As String, ByVal macroName As Str
     Set prior = Application.CustomizationContext
     On Error GoTo Failed
     Application.CustomizationContext = ThisDocument
-    On Error Resume Next
-    WU_OwnedContextMenu.Delete
-    Set WU_OwnedContextMenu = Nothing
-    Err.Clear
-    On Error GoTo Failed
+    WU_DeleteContextMenus
     If Not removeOnly Then
         Set item = CommandBars("Text").Controls.Add(Type:=msoControlButton, Temporary:=True)
-        item.Caption = caption: item.OnAction = macroName: item.Tag = WU_TAG
-        Set WU_OwnedContextMenu = item
+        item.Caption = caption: item.OnAction = WU_QualifiedMacro(macroName): item.Tag = WU_ContextMenuTag()
     End If
 CleanUp:
     On Error Resume Next
-    If failure <> 0 Then Set WU_OwnedContextMenu = Nothing
     Err.Clear
     Application.CustomizationContext = prior
     If failure = 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
@@ -147,6 +141,27 @@ Failed:
     failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
     Resume CleanUp
 End Sub
+Private Function WU_FindContextMenu() As CommandBarButton
+    Dim control As CommandBarControl
+    On Error Resume Next
+    For Each control In CommandBars("Text").Controls
+        If control.Tag = WU_ContextMenuTag() And control.Type = msoControlButton Then Set WU_FindContextMenu = control: Exit Function
+    Next control
+    On Error GoTo 0
+End Function
+Private Sub WU_DeleteContextMenus()
+    Dim controls As CommandBarControls, i As Long
+    Set controls = CommandBars("Text").Controls
+    For i = controls.Count To 1 Step -1
+        If controls(i).Tag = WU_ContextMenuTag() Then controls(i).Delete
+    Next i
+End Sub
+Private Function WU_ContextMenuTag() As String
+    WU_ContextMenuTag = "WordUp.ContextMenu." & ThisDocument.Name
+End Function
+Private Function WU_QualifiedMacro(ByVal macroName As String) As String
+    If InStr(1, macroName, "!", vbBinaryCompare) > 0 Then WU_QualifiedMacro = macroName Else WU_QualifiedMacro = "'" & ThisDocument.Name & "'!" & macroName
+End Function
 `
 
 const styleConverterSource = `Attribute VB_Name = "WordUpStyleConverter"
