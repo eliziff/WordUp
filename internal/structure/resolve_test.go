@@ -64,3 +64,18 @@ func TestResolveRetainsAlternativesScoreAndContradictions(t *testing.T) {
 		t.Fatalf("contradictions were dropped: %#v", resolved["contradictions"])
 	}
 }
+
+func TestResolveDetectsLayoutFrontMatter(t *testing.T) {
+	rows := []map[string]any{
+		{"context": "body", "text": "A General Title", "style_id": "Normal", "paragraph_alignment": "center", "direct_formatting_evidence": map[string]int{"text_units": 14, "bold_units": 14}},
+		{"context": "body", "text": "Jane Doe, Editor", "style_id": "Normal", "paragraph_alignment": "center"},
+		{"context": "body", "text": "Introduction", "style_id": "Heading 1", "outline_evidence": map[string]any{"level": 1}},
+	}
+	Resolve(rows)
+	if got := rows[0]["resolved_structure"].(map[string]any)["role"]; got != "title" {
+		t.Fatalf("centered first paragraph was not title: %#v", rows[0])
+	}
+	if got := rows[1]["resolved_structure"].(map[string]any)["role"]; got != "author" {
+		t.Fatalf("centered author line was not author: %#v", rows[1])
+	}
+}
