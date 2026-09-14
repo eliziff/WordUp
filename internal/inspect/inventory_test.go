@@ -176,3 +176,39 @@ func TestCheckInventoryReportsInvalidModuleFilename(t *testing.T) {
 	}
 	t.Fatalf("invalid module filename diagnostic missing: %#v", result["diagnostics"])
 }
+
+func TestCheckReportsInvalidAndMisnamedFormDesigns(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "workspace")
+	if _, err := project.New("FormDesignChecks", root); err != nil {
+		t.Fatal(err)
+	}
+	for path, data := range map[string][]byte{
+		"forms/Broken.json": []byte(`{"name":`),
+		"forms/Wrong.json":  []byte(`{"name":"Other"}`),
+		"vba/Wrong.vba":     []byte("Option Explicit\n"),
+	} {
+		if err := project.Write(root, path, data, ""); err != nil {
+			t.Fatal(err)
+		}
+	}
+	w, err := project.Open(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := Check(w)
+	if err != nil {
+		t.Fatal(err)
+	}
+	foundBroken, foundMismatch := false, false
+	for _, diagnostic := range result["diagnostics"].([]map[string]any) {
+		if diagnostic["file"] == "forms/Broken.json" && diagnostic["message"] == "invalid form design: unexpected EOF" {
+			foundBroken = true
+		}
+		if diagnostic["file"] == "forms/Wrong.json" && diagnostic["message"] == `form design name "Other" does not match filename "Wrong"` {
+			foundMismatch = true
+		}
+	}
+	if !foundBroken || !foundMismatch {
+		t.Fatalf("form design diagnostics missing: %#v", result["diagnostics"])
+	}
+}

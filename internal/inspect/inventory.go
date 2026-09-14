@@ -392,6 +392,42 @@ func installedComponentInventory(root string, diagnostics *[]map[string]any) []m
 	return rows
 }
 
+func validateFormDesigns(files map[string][]byte, diagnostics *[]map[string]any) {
+	sources := vbaSourceFiles(files)
+	paths := make([]string, 0)
+	for path := range files {
+		if strings.HasPrefix(path, "forms/") && strings.EqualFold(pathpkg.Ext(path), ".json") {
+			paths = append(paths, path)
+		}
+	}
+	sort.Strings(paths)
+	for _, path := range paths {
+		expected := strings.TrimSuffix(pathpkg.Base(path), pathpkg.Ext(path))
+		var design office.Design
+		if err := project.ReadJSON(files[path], &design); err != nil {
+			*diagnostics = append(*diagnostics, map[string]any{
+				"severity": "error", "file": path,
+				"message": "invalid form design: " + err.Error(),
+			})
+			continue
+		}
+		if design.Name != expected {
+			*diagnostics = append(*diagnostics, map[string]any{
+				"severity": "error", "file": path,
+				"message": fmt.Sprintf("form design name %q does not match filename %q", design.Name, expected),
+				"form":    design.Name, "expected_form": expected,
+			})
+		}
+		if _, ok := sources[strings.ToLower(expected)]; !ok {
+			*diagnostics = append(*diagnostics, map[string]any{
+				"severity": "warning", "file": path,
+				"message":       "form design has no matching VBA source module",
+				"expected_form": expected,
+			})
+		}
+	}
+}
+
 func CheckInventory(root string, files map[string][]byte, diagnostics *[]map[string]any) map[string]any {
 	paths := vbaSourceFiles(files)
 	moduleByName := map[string][]map[string]any{}

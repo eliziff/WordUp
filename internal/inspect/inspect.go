@@ -852,6 +852,7 @@ func CheckWithConstants(w *project.Workspace, constants map[string]any) (map[str
 			}
 		}
 	}
+	validateFormDesigns(files, &diagnostics)
 	for _, n := range orderedFiles {
 		b := files[n]
 		if !strings.HasPrefix(n, "package/") || !strings.HasSuffix(strings.ToLower(n), ".xml") {
