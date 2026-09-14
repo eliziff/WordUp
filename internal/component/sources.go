@@ -69,7 +69,7 @@ Public Sub WU_RibbonCommand(ByVal control As Object)
     controlID = CStr(control.Id)
     If Len(controlID) = 0 Then Err.Raise 5, "WU_RibbonCommand", "control id is required"
     macroName = "WU_Command_" & Replace(Replace(controlID, "-", "_"), ".", "_")
-    Application.Run "'" & ThisDocument.Name & "'!" & macroName
+    Application.Run macroName
 End Sub
 `
 
@@ -86,9 +86,7 @@ Public Function WU_HotkeyRegistered(ByVal keyCode As Long, Optional ByVal expect
     Dim binding As KeyBinding
     Set binding = WU_OwnedHotkey(keyCode)
     If binding Is Nothing Then Exit Function
-    If expectedMacro <> "" Then
-        If StrComp(binding.Command, expectedMacro, vbTextCompare) <> 0 And StrComp(binding.Command, WU_QualifiedHotkeyMacro(expectedMacro), vbTextCompare) <> 0 Then Exit Function
-    End If
+    If expectedMacro <> "" Then If StrComp(binding.Command, expectedMacro, vbTextCompare) <> 0 Then Exit Function
     WU_HotkeyRegistered = True
 End Function
 Private Sub WU_ChangeHotkey(ByVal keyCode As Long, ByVal macroName As String, ByVal remove As Boolean)
@@ -101,7 +99,7 @@ Private Sub WU_ChangeHotkey(ByVal keyCode As Long, ByVal macroName As String, By
         Set binding = WU_OwnedHotkey(keyCode)
         If Not binding Is Nothing Then binding.Clear
     Else
-        KeyBindings.Add wdKeyCategoryMacro, WU_QualifiedHotkeyMacro(macroName), keyCode
+        KeyBindings.Add wdKeyCategoryMacro, macroName, keyCode
     End If
 CleanUp:
     On Error Resume Next
@@ -123,9 +121,6 @@ Private Function WU_OwnedHotkey(ByVal keyCode As Long) As KeyBinding
     If owner Is ThisDocument Then Set WU_OwnedHotkey = binding
     On Error GoTo 0
 End Function
-Private Function WU_QualifiedHotkeyMacro(ByVal macroName As String) As String
-    If InStr(1, macroName, "!", vbBinaryCompare) > 0 Then WU_QualifiedHotkeyMacro = macroName Else WU_QualifiedHotkeyMacro = "'" & ThisDocument.Name & "'!" & macroName
-End Function
 `
 
 const contextMenuSource = `Attribute VB_Name = "WordUpContextMenu"
@@ -139,15 +134,30 @@ Public Sub WU_RemoveContextMenu()
     WU_ChangeContextMenu "", "", True
 End Sub
 Public Function WU_ContextMenuRegistered(Optional ByVal expectedCaption As String = "", Optional ByVal expectedMacro As String = "") As Boolean
-    Dim item As CommandBarButton
+    Dim prior As Object, item As CommandBarControl
+    Dim failure As Long, failureSource As String, failureText As String
+    Set prior = Application.CustomizationContext
+    On Error GoTo Failed
+    Application.CustomizationContext = ThisDocument
     Set item = WU_FindContextMenu()
-    If item Is Nothing Then Exit Function
-    If expectedCaption <> "" Then If item.Caption <> expectedCaption Then Exit Function
-    If expectedMacro <> "" Then If item.OnAction <> WU_QualifiedMacro(expectedMacro) Then Exit Function
+    If item Is Nothing Then GoTo CleanUp
+    If expectedCaption <> "" Then If item.Caption <> expectedCaption Then GoTo CleanUp
+    If expectedMacro <> "" Then If StrComp(WU_MacroMember(item.OnAction), WU_MacroMember(expectedMacro), vbTextCompare) <> 0 Then GoTo CleanUp
     WU_ContextMenuRegistered = True
+CleanUp:
+    On Error Resume Next
+    Err.Clear
+    Application.CustomizationContext = prior
+    If failure = 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
 End Function
 Private Sub WU_ChangeContextMenu(ByVal caption As String, ByVal macroName As String, ByVal removeOnly As Boolean)
-    Dim prior As Object, item As CommandBarButton
+    Dim prior As Object, item As CommandBarControl
     Dim failure As Long, failureSource As String, failureText As String
     Set prior = Application.CustomizationContext
     On Error GoTo Failed
@@ -169,7 +179,7 @@ Failed:
     failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
     Resume CleanUp
 End Sub
-Private Function WU_FindContextMenu() As CommandBarButton
+Private Function WU_FindContextMenu() As CommandBarControl
     Dim control As CommandBarControl
     On Error Resume Next
     For Each control In CommandBars("Text").Controls
@@ -189,6 +199,11 @@ Private Function WU_ContextMenuTag() As String
 End Function
 Private Function WU_QualifiedMacro(ByVal macroName As String) As String
     If InStr(1, macroName, "!", vbBinaryCompare) > 0 Then WU_QualifiedMacro = macroName Else WU_QualifiedMacro = "'" & ThisDocument.Name & "'!" & macroName
+End Function
+Private Function WU_MacroMember(ByVal macroName As String) As String
+    Dim separator As Long
+    separator = InStrRev(macroName, "!", -1, vbBinaryCompare)
+    If separator = 0 Then WU_MacroMember = macroName Else WU_MacroMember = Mid$(macroName, separator + 1)
 End Function
 `
 
