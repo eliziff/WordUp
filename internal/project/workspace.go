@@ -73,6 +73,7 @@ type Workspace struct {
 type fileStamp struct {
 	Size       int64
 	ModifiedNS int64
+	ChangedNS  int64
 	Hash       string
 }
 
@@ -502,28 +503,42 @@ func fingerprint(files map[string][]byte, stamps map[string]fileStamp) string {
 	return office.Hash([]byte(b.String()))
 }
 
-func sourceStamps(root string) (map[string]fileStamp, error) {
+func sourceStamps(root string, previous map[string]fileStamp) (map[string]fileStamp, error) {
 	result := map[string]fileStamp{}
+	record := func(rel, path string, info os.FileInfo) error {
+		changedNS, reliable := fileChangeStamp(path)
+		current := fileStamp{Size: info.Size(), ModifiedNS: info.ModTime().UnixNano(), ChangedNS: changedNS}
+		if reliable {
+			if prior, ok := previous[rel]; ok && prior.Size == current.Size && prior.ModifiedNS == current.ModifiedNS && prior.ChangedNS == current.ChangedNS && prior.Hash != "" {
+				current.Hash = prior.Hash
+			}
+		}
+		if current.Hash == "" {
+			hash, err := fileHash(path)
+			if err != nil {
+				return err
+			}
+			current.Hash = hash
+		}
+		result[rel] = current
+		return nil
+	}
 	for _, rel := range []string{"project.json", ".wordwright/base.opc", ".wordwright/index.json"} {
 		path := filepath.Join(root, filepath.FromSlash(rel))
 		info, err := os.Stat(path)
 		if err != nil {
 			return nil, err
 		}
-		hash, err := fileHash(path)
-		if err != nil {
+		if err := record(rel, path, info); err != nil {
 			return nil, err
 		}
-		result[rel] = fileStamp{Size: info.Size(), ModifiedNS: info.ModTime().UnixNano(), Hash: hash}
 	}
 	rel := componentLockSource
 	path := filepath.Join(root, filepath.FromSlash(rel))
 	if info, err := os.Stat(path); err == nil {
-		hash, hashErr := fileHash(path)
-		if hashErr != nil {
+		if hashErr := record(rel, path, info); hashErr != nil {
 			return nil, hashErr
 		}
-		result[rel] = fileStamp{Size: info.Size(), ModifiedNS: info.ModTime().UnixNano(), Hash: hash}
 	} else if !os.IsNotExist(err) {
 		return nil, err
 	}
@@ -548,11 +563,9 @@ func sourceStamps(root string) (map[string]fileStamp, error) {
 				if infoErr != nil {
 					return infoErr
 				}
-				hash, hashErr := fileHash(path)
-				if hashErr != nil {
+				if hashErr := record(filepath.ToSlash(rel), path, info); hashErr != nil {
 					return hashErr
 				}
-				result[filepath.ToSlash(rel)] = fileStamp{Size: info.Size(), ModifiedNS: info.ModTime().UnixNano(), Hash: hash}
 			}
 			return nil
 		})
@@ -566,7 +579,7 @@ func sourceStamps(root string) (map[string]fileStamp, error) {
 func (w *Workspace) buildSourceFiles(stamps map[string]fileStamp) (map[string][]byte, error) {
 	if stamps == nil {
 		var err error
-		stamps, err = sourceStamps(w.Root)
+		stamps, err = sourceStamps(w.Root, w.sourceStamp)
 		if err != nil {
 			return nil, err
 		}
@@ -711,7 +724,7 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 		return nil, e
 	}
 	if memo := w.buildMemo; memo != nil && memo.Output == output {
-		sources, sourceErr := sourceStamps(w.Root)
+		sources, sourceErr := sourceStamps(w.Root, memo.Sources)
 		if sourceErr == nil {
 			sourceSnapshot = sources
 		}
@@ -743,7 +756,7 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 		w.buildMemo = nil
 	}
 	if sourceSnapshot == nil {
-		sourceSnapshot, e = sourceStamps(w.Root)
+		sourceSnapshot, e = sourceStamps(w.Root, w.sourceStamp)
 		if e != nil {
 			return nil, e
 		}
@@ -1020,7 +1033,7 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 	if e = Write(w.Root, "reports/build.json", JSON(report), ""); e != nil {
 		return nil, e
 	}
-	if sources, sourceErr := sourceStamps(w.Root); sourceErr == nil {
+	if sources, sourceErr := sourceStamps(w.Root, w.sourceStamp); sourceErr == nil {
 		if artifact, artifactErr := stamp(output); artifactErr == nil {
 			if evidence, evidenceErr := stamp(filepath.Join(w.Root, "reports", "build.json")); evidenceErr == nil {
 				w.buildMemo = &buildMemo{Output: output, Sources: sources, Artifact: artifact, Evidence: evidence, Report: *report}
