@@ -13,12 +13,108 @@ import (
 type numberingLevel struct {
 	Family, Pattern string
 	Start           int
+	RestartAfter    int
 }
 
 type numberingDefinition struct {
 	AbstractID string
 	Levels     map[int]numberingLevel
 	Overrides  map[int]int
+}
+
+type numberingState struct {
+	values [9]int
+	seen   [9]bool
+}
+
+func numberingLabel(definition numberingDefinition, level int, state *numberingState) (string, bool) {
+	if level < 0 || level >= len(state.values) {
+		return "", false
+	}
+	item, ok := definition.Levels[level]
+	if !ok || item.Pattern == "" || item.Family == "bullet" {
+		return "", false
+	}
+	start := item.Start
+	if override, exists := definition.Overrides[level]; exists {
+		start = override
+	}
+	if state.seen[level] {
+		state.values[level]++
+	} else {
+		state.values[level], state.seen[level] = start, true
+	}
+	for deeper := level + 1; deeper < len(state.values); deeper++ {
+		restart := definition.Levels[deeper].RestartAfter
+		if restart == 0 || (restart > 0 && restart-1 != level) {
+			continue
+		}
+		state.values[deeper], state.seen[deeper] = 0, false
+	}
+	label, certain := item.Pattern, true
+	for index := 0; index < len(state.values); index++ {
+		placeholder := "%" + strconv.Itoa(index+1)
+		if !strings.Contains(label, placeholder) {
+			continue
+		}
+		part, exists := definition.Levels[index]
+		if !exists || !state.seen[index] {
+			certain = false
+			continue
+		}
+		value, supported := numberingValue(state.values[index], part.Family)
+		if !supported {
+			certain = false
+		}
+		label = strings.ReplaceAll(label, placeholder, value)
+	}
+	return label, certain
+}
+
+func numberingValue(value int, family string) (string, bool) {
+	switch family {
+	case "decimal":
+		return strconv.Itoa(value), true
+	case "decimalZero":
+		if value >= 0 && value < 10 {
+			return "0" + strconv.Itoa(value), true
+		}
+		return strconv.Itoa(value), true
+	case "upperLetter", "lowerLetter":
+		if value < 1 {
+			return strconv.Itoa(value), false
+		}
+		var out string
+		for value > 0 {
+			value--
+			out = string(rune('A'+value%26)) + out
+			value /= 26
+		}
+		if family == "lowerLetter" {
+			out = strings.ToLower(out)
+		}
+		return out, true
+	case "upperRoman", "lowerRoman":
+		if value < 1 || value > 3999 {
+			return strconv.Itoa(value), false
+		}
+		var out strings.Builder
+		for _, part := range []struct {
+			value int
+			text  string
+		}{{1000, "M"}, {900, "CM"}, {500, "D"}, {400, "CD"}, {100, "C"}, {90, "XC"}, {50, "L"}, {40, "XL"}, {10, "X"}, {9, "IX"}, {5, "V"}, {4, "IV"}, {1, "I"}} {
+			for value >= part.value {
+				out.WriteString(part.text)
+				value -= part.value
+			}
+		}
+		if family == "lowerRoman" {
+			return strings.ToLower(out.String()), true
+		}
+		return out.String(), true
+	default:
+		return strconv.Itoa(value), false
+	}
 }
 
 const drawingML = "http://schemas.openxmlformats.org/drawingml/2006/main"
@@ -98,7 +194,7 @@ func numberingDefinitions(p *office.Package) (map[string]numberingDefinition, er
 				if parseErr != nil {
 					continue
 				}
-				item := numberingLevel{Start: 1}
+				item := numberingLevel{Start: 1, RestartAfter: -1}
 				for _, x := range spans[i+1+j+1:] {
 					if x.Start >= level.End {
 						break
@@ -115,6 +211,10 @@ func numberingDefinitions(p *office.Package) (map[string]numberingDefinition, er
 						item.Family = x.Attribute(office.W, "val")
 					case "lvlText":
 						item.Pattern = x.Attribute(office.W, "val")
+					case "lvlRestart":
+						if n, e := strconv.Atoi(x.Attribute(office.W, "val")); e == nil {
+							item.RestartAfter = n
+						}
 					}
 				}
 				levels[ilvl] = item
@@ -190,6 +290,9 @@ func StructureReference(file string) (map[string]any, error) {
 	type style struct {
 		parent, outline, name, paragraphProperties, runProperties string
 		fonts                                                     map[string]string
+		numID                                                     string
+		ilvl                                                      int
+		hasIlvl                                                   bool
 	}
 	byID := map[string]style{}
 	styleEvidence := map[string]map[string]any{}
@@ -227,10 +330,23 @@ func StructureReference(file string) (map[string]any, error) {
 				}
 			case x.Depth == s.Depth+2 && x.Name.Local == "outlineLvl":
 				def.outline = x.Attribute(office.W, "val")
+			case x.Depth == s.Depth+3 && x.Name.Local == "numId":
+				def.numID = x.Attribute(office.W, "val")
+			case x.Depth == s.Depth+3 && x.Name.Local == "ilvl":
+				if n, e := strconv.Atoi(x.Attribute(office.W, "val")); e == nil {
+					def.ilvl, def.hasIlvl = n, true
+				}
 			}
 		}
 		byID[id] = def
-		styleEvidence[id] = map[string]any{"name": def.name, "based_on": def.parent, "paragraph_properties_xml": def.paragraphProperties, "run_properties_xml": def.runProperties, "fonts": resolvedFonts(def.fonts, fonts)}
+		evidence := map[string]any{"name": def.name, "based_on": def.parent, "paragraph_properties_xml": def.paragraphProperties, "run_properties_xml": def.runProperties, "fonts": resolvedFonts(def.fonts, fonts)}
+		if def.numID != "" {
+			evidence["num_id"] = def.numID
+			if def.hasIlvl {
+				evidence["numbering_level"] = def.ilvl + 1
+			}
+		}
+		styleEvidence[id] = evidence
 	}
 	defaultRunProperties := ""
 	defaultFonts := map[string]string{}
@@ -270,6 +386,7 @@ func StructureReference(file string) (map[string]any, error) {
 		return nil, err
 	}
 	ancestors := []office.XMLSpan{}
+	numberingStates := map[string]*numberingState{}
 	row := 0
 	for i, s := range spans {
 		for len(ancestors) > 0 && ancestors[len(ancestors)-1].End <= s.Start {
@@ -299,6 +416,8 @@ func StructureReference(file string) (map[string]any, error) {
 			styleNames := []string{}
 			seen := map[string]bool{}
 			outline, origin := "", ""
+			styleNumID, styleNumOrigin, styleIlvl := "", "", 0
+			styleHasIlvl := false
 			for at := id; at != ""; {
 				if seen[at] {
 					item["style_error"] = "cyclic style inheritance at " + at
@@ -315,6 +434,10 @@ func StructureReference(file string) (map[string]any, error) {
 				if outline == "" && def.outline != "" {
 					outline = def.outline
 					origin = "style:" + at
+				}
+				if styleNumID == "" && def.numID != "" {
+					styleNumID, styleNumOrigin = def.numID, "style:"+at
+					styleIlvl, styleHasIlvl = def.ilvl, def.hasIlvl
 				}
 				at = def.parent
 			}
@@ -343,6 +466,7 @@ func StructureReference(file string) (map[string]any, error) {
 				}
 			}
 			numID, ilvl := "", 0
+			numIDSpecified, ilvlSpecified := false, false
 			for _, x := range spans[i+1:] {
 				if x.Start >= s.End {
 					break
@@ -353,24 +477,48 @@ func StructureReference(file string) (map[string]any, error) {
 				switch x.Name.Local {
 				case "numId":
 					numID = x.Attribute(office.W, "val")
+					numIDSpecified = true
 				case "ilvl":
 					if n, parseErr := strconv.Atoi(x.Attribute(office.W, "val")); parseErr == nil {
 						ilvl = n
+						ilvlSpecified = true
 					}
 				}
 			}
+			numberingOrigin := "direct paragraph formatting"
+			if !numIDSpecified {
+				numID, numberingOrigin = styleNumID, styleNumOrigin
+			}
+			if !ilvlSpecified && styleHasIlvl {
+				ilvl = styleIlvl
+			}
 			if numID != "" && numID != "0" {
-				evidence := map[string]any{"num_id": numID, "level": ilvl + 1, "provenance": "package XML"}
+				evidence := map[string]any{"num_id": numID, "level": ilvl + 1, "provenance": "package XML", "origin": numberingOrigin}
 				if definition, ok := numbering[numID]; ok {
 					evidence["abstract_num_id"] = definition.AbstractID
 					if level, exists := definition.Levels[ilvl]; exists {
 						evidence["family"] = level.Family
 						evidence["label_pattern"] = level.Pattern
 						evidence["start"] = level.Start
+						if level.RestartAfter >= 0 {
+							evidence["restart_after_level"] = level.RestartAfter
+						}
 					}
 					if start, overridden := definition.Overrides[ilvl]; overridden {
 						evidence["start"] = start
 						evidence["start_override"] = true
+					}
+					state := numberingStates[numID]
+					if state == nil {
+						state = &numberingState{}
+						numberingStates[numID] = state
+					}
+					if label, certain := numberingLabel(definition, ilvl, state); label != "" {
+						evidence["displayed_label"] = label
+						evidence["displayed_label_provenance"] = "package XML reconstruction"
+						if !certain {
+							evidence["displayed_label_uncertain"] = true
+						}
 					}
 				} else {
 					evidence["unresolved"] = true
