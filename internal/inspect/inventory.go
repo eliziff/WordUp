@@ -337,45 +337,21 @@ func installedComponentInventory(root string, diagnostics *[]map[string]any) []m
 	sort.Strings(ids)
 	rows := make([]map[string]any, 0, len(ids))
 	for _, id := range ids {
-		installed := lock.Components[id]
-		state := "clean"
-		files := make([]map[string]any, 0, len(installed.Files))
-		names := make([]string, 0, len(installed.Files))
-		for name := range installed.Files {
-			names = append(names, name)
+		result, statusErr := component.Status(root, id)
+		if statusErr != nil {
+			*diagnostics = append(*diagnostics, map[string]any{"severity": "error", "file": ".wordwright/components.json", "component": id, "message": "cannot inspect installed component: " + statusErr.Error()})
+			continue
 		}
-		sort.Strings(names)
-		for _, name := range names {
-			row := map[string]any{"path": name, "installed_sha256": installed.Files[name]}
-			data, readErr := project.Read(root, name)
-			switch {
-			case os.IsNotExist(readErr):
-				row["state"] = "missing"
-				state = "modified"
-			case readErr != nil:
-				row["state"] = "unreadable"
-				row["error"] = readErr.Error()
-				state = "modified"
-			case office.Hash(data) != installed.Files[name]:
-				row["state"] = "modified"
-				row["current_sha256"] = office.Hash(data)
-				state = "modified"
-			default:
-				row["state"] = "clean"
-			}
-			files = append(files, row)
-		}
-		result := map[string]any{"id": id, "version": installed.Version, "state": state, "files": files, "provenance": installed.Provenance, "license": installed.License, "manifest_sha256": installed.ManifestSHA256, "parameters": installed.Parameters, "supported_platforms": installed.SupportedPlatforms, "ribbon_merges": installed.RibbonMerges, "compatibility": component.Compatibility(installed.SupportedPlatforms)}
 		rows = append(rows, result)
-		if state != "clean" {
+		if result["state"] != "clean" {
 			severity := "warning"
-			for _, file := range files {
+			for _, file := range result["files"].([]map[string]any) {
 				if file["state"] == "missing" || file["state"] == "unreadable" {
 					severity = "error"
 					break
 				}
 			}
-			*diagnostics = append(*diagnostics, map[string]any{"severity": severity, "file": ".wordwright/components.json", "component": id, "message": "installed component source is missing or modified", "state": state})
+			*diagnostics = append(*diagnostics, map[string]any{"severity": severity, "file": ".wordwright/components.json", "component": id, "message": "installed component source is missing or modified", "state": result["state"]})
 		}
 	}
 	return rows
