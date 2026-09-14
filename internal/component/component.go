@@ -569,10 +569,14 @@ func exportedSymbols(path, source string) []exportedSymbol {
 			continue
 		}
 		position := 0
+		explicitExport := false
 		if strings.EqualFold(fields[position], "Private") {
 			continue
 		}
-		if strings.EqualFold(fields[position], "Public") || strings.EqualFold(fields[position], "Friend") || strings.EqualFold(fields[position], "Static") {
+		if strings.EqualFold(fields[position], "Public") || strings.EqualFold(fields[position], "Friend") {
+			explicitExport = true
+			position++
+		} else if strings.EqualFold(fields[position], "Static") {
 			position++
 		}
 		if position >= len(fields) {
@@ -607,6 +611,9 @@ func exportedSymbols(path, source string) []exportedSymbol {
 			name = name[:cut]
 		}
 		if name == "" || !office.ValidIdentifier(name) {
+			continue
+		}
+		if !procedure && !explicitExport {
 			continue
 		}
 		result = append(result, exportedSymbol{Name: name, Kind: kind, Path: path, Line: index + 1})
