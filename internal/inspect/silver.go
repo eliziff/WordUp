@@ -50,6 +50,7 @@ func CompareStructureSilver(root, reference string, limit int) (map[string]any, 
 	mismatchCount := 0
 	mismatchFields := map[string]int{}
 	roleConfusions := map[string]int{}
+	roleConfusionStyles := map[string]map[string]int{}
 	roleExamples := map[string]any{}
 	parentMismatches := map[string]int{}
 	for _, expectedDocument := range silver.Documents {
@@ -88,8 +89,16 @@ func CompareStructureSilver(root, reference string, limit int) (map[string]any, 
 				mismatchFields["role"]++
 				confusion := expected.Role + " -> " + fmt.Sprint(got["role"])
 				roleConfusions[confusion]++
+				if roleConfusionStyles[confusion] == nil {
+					roleConfusionStyles[confusion] = map[string]int{}
+				}
+				style := fmt.Sprint(row["style_id"])
+				if style == "" {
+					style = "(none)"
+				}
+				roleConfusionStyles[confusion][style]++
 				if roleExamples[confusion] == nil {
-					roleExamples[confusion] = map[string]any{"document": expectedDocument.Source, "source_id": id, "context": row["context"], "style_id": row["style_id"], "style_chain": styleNames(row), "text_units": formattingUnits(row), "resolved_level": got["level"]}
+					roleExamples[confusion] = map[string]any{"document": expectedDocument.Source, "source_id": id, "context": row["context"], "style_id": row["style_id"], "style_chain": styleNames(row), "formatting": row["direct_formatting_evidence"], "alignment": row["paragraph_alignment"], "resolved_level": got["level"], "evidence": got["evidence"]}
 				}
 			}
 			if expected.Role == "heading" {
@@ -127,7 +136,7 @@ func CompareStructureSilver(root, reference string, limit int) (map[string]any, 
 		"schema": silver.Schema, "silver_status": silver.Status,
 		"documents": len(silver.Documents), "paragraphs_compared": compared,
 		"mismatches": mismatches, "mismatch_count": mismatchCount,
-		"mismatch_fields": mismatchFields, "role_confusions": roleConfusions, "role_confusion_examples": roleExamples, "parent_mismatches": parentMismatches,
+		"mismatch_fields": mismatchFields, "role_confusions": roleConfusions, "role_confusion_styles": roleConfusionStyles, "role_confusion_examples": roleExamples, "parent_mismatches": parentMismatches,
 		"exact": mismatchCount == 0,
 	}, nil
 }
@@ -135,11 +144,6 @@ func CompareStructureSilver(root, reference string, limit int) (map[string]any, 
 func styleNames(row map[string]any) []string {
 	names, _ := row["style_names"].([]string)
 	return names
-}
-
-func formattingUnits(row map[string]any) int {
-	evidence, _ := row["direct_formatting_evidence"].(map[string]int)
-	return evidence["text_units"]
 }
 
 func compareStructureValue(out *[]map[string]any, limit int, document, id, field string, expected, actual any) bool {

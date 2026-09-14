@@ -460,9 +460,14 @@ func StructureReference(file string) (map[string]any, error) {
 				if x.Start >= s.End {
 					break
 				}
-				if x.Name.Space == office.W && x.Depth == s.Depth+2 && x.Name.Local == "outlineLvl" {
-					outline = x.Attribute(office.W, "val")
-					origin = "direct paragraph formatting"
+				if x.Name.Space == office.W && x.Depth == s.Depth+2 {
+					switch x.Name.Local {
+					case "outlineLvl":
+						outline = x.Attribute(office.W, "val")
+						origin = "direct paragraph formatting"
+					case "jc":
+						item["paragraph_alignment"] = x.Attribute(office.W, "val")
+					}
 				}
 			}
 			numID, ilvl := "", 0

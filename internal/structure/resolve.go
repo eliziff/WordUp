@@ -10,6 +10,7 @@ import (
 // It mutates the supplied observation rows so callers retain exact source facts.
 func Resolve(rows []map[string]any) map[string]any {
 	parents := [10]int{}
+	frontMatter := frontMatterRoles(rows)
 	headings, candidates, ambiguities := 0, 0, 0
 	for i, row := range rows {
 		context, _ := row["context"].(string)
@@ -23,6 +24,10 @@ func Resolve(rows []map[string]any) map[string]any {
 				attachParent(resolved, rows, parents)
 			}
 			row["resolved_structure"] = resolved
+			continue
+		}
+		if role := frontMatter[i]; role != "" {
+			row["resolved_structure"] = map[string]any{"role": role, "confidence": 85, "evidence": []string{"front-matter-layout"}}
 			continue
 		}
 		if context != "body" || strings.TrimSpace(text) == "" {
@@ -152,6 +157,84 @@ func Resolve(rows []map[string]any) map[string]any {
 	return map[string]any{"contract_version": ContractVersion, "paragraphs": len(rows), "headings": headings, "candidates": candidates, "ambiguities": ambiguities, "editorial_hierarchy_verified": false}
 }
 
+func frontMatterRoles(rows []map[string]any) map[int]string {
+	roles := map[int]string{}
+	limit := len(rows)
+	for i, row := range rows {
+		if row["context"] != "body" || strings.TrimSpace(stringValue(row["text"])) == "" {
+			continue
+		}
+		style := styleText(row)
+		if (hasNativeHeading(row) || headingLevelFromStyle(row) > 0) && !strings.Contains(style, "title") {
+			limit = i
+			break
+		}
+	}
+	if limit > 64 {
+		limit = 64
+	}
+	firstContent := -1
+	for i := 0; i < limit; i++ {
+		if rows[i]["context"] == "body" && strings.TrimSpace(stringValue(rows[i]["text"])) != "" {
+			firstContent = i
+			break
+		}
+	}
+	titleSeen, authorSeen := false, false
+	for i := 0; i < limit; i++ {
+		row := rows[i]
+		text := strings.TrimSpace(stringValue(row["text"]))
+		if text == "" || row["context"] != "body" {
+			continue
+		}
+		style := styleText(row)
+		centered := strings.EqualFold(stringValue(row["paragraph_alignment"]), "center") || strings.Contains(style, "centred") || strings.Contains(style, "centered")
+		titleStyle := strings.Contains(style, "document title") || strings.Contains(style, "heading title") || strings.TrimSpace(style) == "title"
+		if !titleSeen && len([]rune(text)) <= 240 && (titleStyle || i == firstContent && (centered || formattingSignal(row))) {
+			roles[i], titleSeen = "title", true
+			continue
+		}
+		if titleSeen && !authorSeen && titleStyle {
+			roles[i] = "title"
+			continue
+		}
+		if titleSeen && !authorSeen && centered && len([]rune(text)) <= 240 && likelyAuthorLine(text) {
+			roles[i], authorSeen = "author", true
+			continue
+		}
+		if titleSeen && !authorSeen && centered && len([]rune(text)) <= 240 && formattingSignal(row) {
+			roles[i] = "title"
+		}
+	}
+	return roles
+}
+
+func styleText(row map[string]any) string {
+	parts := []string{stringValue(row["style_id"])}
+	if names, ok := row["style_names"].([]string); ok {
+		parts = append(parts, names...)
+	}
+	return strings.ToLower(strings.Join(parts, " "))
+}
+
+func stringValue(value any) string {
+	text, _ := value.(string)
+	return text
+}
+
+func likelyAuthorLine(text string) bool {
+	lower := strings.ToLower(strings.TrimSpace(text))
+	if strings.HasPrefix(lower, "by ") {
+		return true
+	}
+	for _, word := range []string{"draft", "revised", "january", "february", "march", "april", "may ", "june", "july", "august", "september", "october", "november", "december"} {
+		if strings.Contains(lower, word) {
+			return false
+		}
+	}
+	return strings.Contains(text, ",") || strings.Contains(text, "*") && strings.Contains(lower, " and ")
+}
+
 func fallbackRole(context, text string) string {
 	if context != "" && context != "body" {
 		return context
@@ -163,20 +246,21 @@ func fallbackRole(context, text string) string {
 }
 
 func semanticRole(row map[string]any) string {
-	if text, _ := row["text"].(string); strings.TrimSpace(text) == "" {
+	text, _ := row["text"].(string)
+	plain := strings.ToLower(strings.Trim(strings.TrimSpace(text), ":"))
+	if plain == "" {
 		return ""
+	}
+	if plain == "abstract" && !hasNativeHeading(row) && headingLevelFromStyle(row) == 0 {
+		return "abstract"
+	}
+	if plain == "contents" || plain == "table of contents" {
+		return "toc"
 	}
 	if row["context"] == "contents" {
 		return "toc"
 	}
-	parts := []string{}
-	if id, _ := row["style_id"].(string); id != "" {
-		parts = append(parts, id)
-	}
-	if names, ok := row["style_names"].([]string); ok {
-		parts = append(parts, names...)
-	}
-	style := strings.ToLower(strings.Join(parts, " "))
+	style := styleText(row)
 	switch {
 	case strings.Contains(style, "toc heading"):
 		return "toc"
