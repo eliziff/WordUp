@@ -70,6 +70,27 @@ type exportedSymbol struct {
 	Line int
 }
 
+type manifestFileHash struct {
+	Path   string `json:"path"`
+	SHA256 string `json:"sha256"`
+	Binary bool   `json:"binary,omitempty"`
+}
+
+// manifestHash binds provenance to the declared manifest and the exact bytes
+// of every listed file. Binary payloads live outside Manifest's JSON source
+// field, so hashing only project.JSON(m) would silently omit them.
+func manifestHash(m Manifest) string {
+	files := make([]manifestFileHash, 0, len(m.Files))
+	for _, file := range m.Files {
+		files = append(files, manifestFileHash{Path: file.Path, SHA256: office.Hash(fileData(file)), Binary: file.Binary})
+	}
+	m.Files = nil
+	return office.Hash(project.JSON(struct {
+		Manifest Manifest           `json:"manifest"`
+		Files    []manifestFileHash `json:"files"`
+	}{Manifest: m, Files: files}))
+}
+
 func builtin() []Manifest {
 	items := []Manifest{{ID: "structure.detect", Version: structure.ContractVersion,
 		Description:  "Editable, dependency-free Word VBA document structure detector.",
@@ -443,7 +464,7 @@ func install(root string, m Manifest) (Installed, error) {
 		}
 		return Installed{}, fmt.Errorf("component %s is already installed and differs from its recorded source; inspect component.status or component.diff", id)
 	}
-	installed := Installed{ID: id, Version: m.Version, Files: map[string]string{}, Provenance: m.Provenance, License: m.License, ManifestSHA256: office.Hash(project.JSON(m)), Parameters: m.applied, SupportedPlatforms: append([]string(nil), m.SupportedPlatforms...), RibbonMerges: append([]RibbonMerge(nil), m.RibbonMerges...)}
+	installed := Installed{ID: id, Version: m.Version, Files: map[string]string{}, Provenance: m.Provenance, License: m.License, ManifestSHA256: manifestHash(m), Parameters: m.applied, SupportedPlatforms: append([]string(nil), m.SupportedPlatforms...), RibbonMerges: append([]RibbonMerge(nil), m.RibbonMerges...)}
 	// Preflight every file before writing any source. Components are independent
 	// copies: no file in this path is allowed to replace an existing file.
 	seen := map[string]bool{}

@@ -326,6 +326,16 @@ func TestLocalBundleRejectsUnsafeSources(t *testing.T) {
 	}
 }
 
+func TestManifestHashIncludesBinarySourceBytes(t *testing.T) {
+	base := Manifest{Schema: 1, ID: "binary.hash", Version: "1", License: "MIT", Provenance: "test", Files: []File{{Path: "assets/icon.bin", Binary: true, data: []byte{1, 2, 3}}}}
+	changed := base
+	changed.Files = append([]File(nil), base.Files...)
+	changed.Files[0].data = []byte{1, 2, 4}
+	if manifestHash(base) == manifestHash(changed) {
+		t.Fatal("manifest hash ignored binary component bytes")
+	}
+}
+
 func TestRibbonMergeBundleIsPreflightedAndBuilt(t *testing.T) {
 	const ns = "http://schemas.microsoft.com/office/2009/07/customui"
 	base := []byte(`<customUI xmlns="` + ns + `"><ribbon><tabs><tab id="base"/></tabs></ribbon></customUI>`)
