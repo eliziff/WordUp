@@ -138,6 +138,7 @@ The signing report distinguishes `signed`, `digest_verified` and certificate tru
 
 `check` performs the offline source/XML checks, validates the assembled OPC
 package graph (content types and relationship targets), and also returns a compact
+`package_validation` object (`checked`, `valid`, and an error when invalid) plus
 `inventory`: public procedures, UserForm event handlers and their declared
 controls, Ribbon callback bindings (including conservative declaration-shape
 warnings), VBA hotkey/context-menu registrations, and
