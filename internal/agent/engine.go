@@ -56,6 +56,7 @@ type Parameters struct {
 	Fresh                bool                    `json:"fresh,omitempty"`
 	Offset               int                     `json:"offset,omitempty"`
 	Limit                int                     `json:"limit,omitempty"`
+	Length               int                     `json:"length,omitempty"`
 	NativeOptions        *native.Options         `json:"native_options,omitempty"`
 }
 type Engine struct {
@@ -555,6 +556,55 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 			return nil, err
 		}
 		return map[string]any{"path": p.Path, "sha256": office.Hash(b), "bytes": len(b)}, nil
+	case "xml.patch":
+		if p.Part != "" {
+			return nil, fmt.Errorf("xml.patch edits an XML source path; materialize the workspace package part instead of rewriting a ZIP")
+		}
+		if p.ExpectedSHA256 == "" {
+			return nil, fmt.Errorf("xml.patch requires expected_sha256")
+		}
+		if p.Offset < 0 || p.Length < 0 {
+			return nil, fmt.Errorf("xml.patch offset and length must be non-negative")
+		}
+		full, err := e.path(p.Path)
+		if err != nil {
+			return nil, err
+		}
+		before, err := project.Read(filepath.Dir(full), filepath.Base(full))
+		if err != nil {
+			return nil, err
+		}
+		oldHash := office.Hash(before)
+		if oldHash != p.ExpectedSHA256 {
+			return nil, fmt.Errorf("stale source hash: reread before editing")
+		}
+		if p.Offset > len(before) || p.Length > len(before)-p.Offset {
+			return nil, fmt.Errorf("xml.patch range outside file: offset=%d length=%d bytes=%d", p.Offset, p.Length, len(before))
+		}
+		replacement := []byte(p.Text)
+		if p.Base64 != "" {
+			if p.Text != "" {
+				return nil, fmt.Errorf("choose text or base64")
+			}
+			replacement, err = base64.StdEncoding.DecodeString(p.Base64)
+			if err != nil {
+				return nil, err
+			}
+		}
+		after := make([]byte, 0, len(before)-p.Length+len(replacement))
+		after = append(after, before[:p.Offset]...)
+		after = append(after, replacement...)
+		after = append(after, before[p.Offset+p.Length:]...)
+		if !utf8.Valid(after) {
+			return nil, fmt.Errorf("xml.patch result is not valid UTF-8")
+		}
+		if _, err := office.XMLSpans(after); err != nil {
+			return nil, fmt.Errorf("xml.patch result is not valid XML: %w", err)
+		}
+		if err := project.Write(e.Root, p.Path, after, p.ExpectedSHA256); err != nil {
+			return nil, err
+		}
+		return map[string]any{"path": p.Path, "old_sha256": oldHash, "sha256": office.Hash(after), "bytes": len(after), "offset": p.Offset, "length": p.Length, "replacement_bytes": len(replacement)}, nil
 	case "files", "search":
 		w, err := project.Open(e.Root)
 		if err != nil {

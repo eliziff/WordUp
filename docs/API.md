@@ -38,6 +38,14 @@ total byte count, returned range, and `next_offset` when more bytes remain;
 offsets are raw bytes (a chunk that is not valid UTF-8 is returned as base64),
 and the default with neither field remains a complete read.
 
+`xml.patch` applies a small direct byte-range edit to an XML source already in
+the workspace (for example `package/word/styles.xml`). Use the exact offsets
+and `source_sha256` returned by `xml.query` as `offset`, `length`, and
+`expected_sha256`; provide replacement `text` or `base64`. The result is
+checked as UTF-8 and strict XML before an atomic guarded write. It preserves
+all bytes outside the range and intentionally does not rewrite a DOCX/DOTM
+ZIP; import the artifact first and edit its ordinary package source.
+
 ## Direct native object access (Windows)
 
 Create `operation.json`:

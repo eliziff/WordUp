@@ -45,6 +45,7 @@ func Tools() []Tool {
 	props["comparison"] = map[string]any{"type": "string", "enum": []string{"exact", "semantic"}, "description": "xml.verify comparison; defaults to exact bytes."}
 	props["namespaces"] = map[string]any{"type": "object", "additionalProperties": map[string]any{"type": "string"}, "description": "XPath prefix to namespace URI bindings, independent of source prefixes."}
 	ds = append(ds, [2]string{"xml.query", "Read-only XPath over UTF-8 XML path, or DOCX/DOTM path with explicit part (e.g. word/styles.xml), using query and namespaces. Returns scalar values or bounded matches with original element byte offsets and source hashes. limit=1..100 (default 20); truncated is not an exact total. Does not start Word or rewrite XML."})
+	ds = append(ds, [2]string{"xml.patch", "Replace an exact byte range in a workspace XML source after xml.query. Requires expected_sha256, validates UTF-8 and strict XML, and preserves every byte outside the range; it does not rewrite ZIP packages."})
 	props["xml_policy"] = map[string]any{"type": "object", "description": "Explicit ignored XML attributes/elements, each a {Space: namespace URI, Local: local name} object. No automatic exclusions.", "properties": map[string]any{"attributes": map[string]any{"type": "array", "items": map[string]any{"type": "object"}}, "elements": map[string]any{"type": "array", "items": map[string]any{"type": "object"}}}, "additionalProperties": false}
 	props["xml_policy"].(map[string]any)["properties"].(map[string]any)["context_parts"] = map[string]any{"type": "array", "items": map[string]any{"type": "string"}, "description": "Flat OPC part names to prioritize for bounded difference context (up to eight); this does not filter comparison or change equality."}
 	props["xml_policy"].(map[string]any)["properties"].(map[string]any)["generated_toc_bookmarks"] = map[string]any{"type": "boolean", "description": "Opt-in canonical names for generated _Toc<number> bookmarks, hyperlink anchors and field references, by bookmark document order. Preserves positions, content and link correspondence; raw bytes/hashes remain unchanged."}
@@ -72,7 +73,7 @@ func Tools() []Tool {
 	}
 	props["component"] = map[string]any{"type": "string", "description": "Stable bundled component ID such as structure.detect."}
 	props["parameters"] = map[string]any{"type": "object", "additionalProperties": map[string]any{"type": "string"}, "description": "Declared component adaptation values. Currently module_prefix is a validated VBA identifier; undeclared values are rejected."}
-	for _, key := range []string{"timeout_ms", "tolerance", "offset", "limit"} {
+	for _, key := range []string{"timeout_ms", "tolerance", "offset", "limit", "length"} {
 		props[key] = map[string]any{"type": "integer"}
 	}
 	props["fresh"] = map[string]any{"type": "boolean"}
