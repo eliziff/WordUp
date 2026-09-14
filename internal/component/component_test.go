@@ -477,6 +477,20 @@ func TestLocalBundleRejectsUnsafeSources(t *testing.T) {
 	}
 }
 
+func TestLocalBundleRejectsCaseCollisionBeforePayloadReads(t *testing.T) {
+	bundle := t.TempDir()
+	manifest := Manifest{Schema: 1, ID: "duplicate.paths", Version: "1", License: "MIT", Provenance: "test", Files: []File{{Path: "assets/icon.bin"}, {Path: "assets/ICON.BIN"}}}
+	if err := project.Write(bundle, "component.json", project.JSON(manifest), ""); err != nil {
+		t.Fatal(err)
+	}
+	if err := project.Write(bundle, "assets/icon.bin", []byte("icon"), ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := LoadBundle(bundle); err == nil || !strings.Contains(err.Error(), "duplicate path") {
+		t.Fatalf("case-colliding component paths were accepted: %v", err)
+	}
+}
+
 func TestLocalBundleRejectsDuplicateFormControlsBeforeCopy(t *testing.T) {
 	bundle, root := t.TempDir(), t.TempDir()
 	manifest := Manifest{Schema: 1, ID: "form.invalid", Version: "1", License: "MIT", Provenance: "test", Files: []File{{Path: "forms/Editor.json"}}}

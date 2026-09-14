@@ -20,6 +20,11 @@ import (
 
 const lockPath = ".wordwright/components.json"
 
+// A local bundle is an editable source input, not an unbounded archive. Keep
+// manifest intake bounded before reading all of its payloads so a cloned
+// component cannot turn a fast install/check loop into a memory or I/O sink.
+const maxBundleFiles = 4096
+
 type File struct {
 	Path   string `json:"path"`
 	Text   string `json:"text,omitempty"`
@@ -209,15 +214,33 @@ func LoadBundle(dir string) (Manifest, error) {
 	if m.Schema != 1 || m.ID == "" || m.Version == "" || m.License == "" || m.Provenance == "" || len(m.Files) == 0 {
 		return Manifest{}, fmt.Errorf("component.json requires schema 1, id, version, license, provenance, and files")
 	}
+	if len(m.Files) > maxBundleFiles {
+		return Manifest{}, fmt.Errorf("component.json file count exceeds %d", maxBundleFiles)
+	}
+	seen := map[string]bool{}
+	var total int64
 	for i := range m.Files {
 		if m.Files[i].Path == "" || m.Files[i].Text != "" || m.Files[i].Binary {
 			return Manifest{}, fmt.Errorf("component.json file %d requires a path and must not embed source or binary data", i)
 		}
+		path := filepath.ToSlash(m.Files[i].Path)
+		if !fs.ValidPath(path) || path == "." || strings.ContainsAny(path, `\:`) {
+			return Manifest{}, fmt.Errorf("component.json file %d requires a canonical relative path: %q", i, m.Files[i].Path)
+		}
+		key := strings.ToLower(path)
+		if seen[key] {
+			return Manifest{}, fmt.Errorf("component.json has duplicate path %q", m.Files[i].Path)
+		}
+		seen[key] = true
 		data, readErr := readBundleData(dir, m.Files[i].Path)
 		err = readErr
 		if err != nil {
 			return Manifest{}, fmt.Errorf("component file %s: %w", m.Files[i].Path, err)
 		}
+		if total > int64(office.Limit)-int64(len(data)) {
+			return Manifest{}, fmt.Errorf("component bundle byte budget exceeded")
+		}
+		total += int64(len(data))
 		if utf8.Valid(data) && !bytes.Contains(data, []byte{0}) {
 			m.Files[i].Text = string(data)
 		} else {
