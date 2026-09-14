@@ -38,6 +38,27 @@ func newWorkspace(t *testing.T) *Workspace {
 	}
 	return w
 }
+
+func TestWorkspaceManifestHasOneCurrentShape(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "work")
+	if _, err := New("TestProject", root); err != nil {
+		t.Fatal(err)
+	}
+	b, err := Read(root, "project.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(b) != "{\n  \"name\": \"TestProject\"\n}\n" {
+		t.Fatalf("project manifest grew a redundant source of truth: %s", b)
+	}
+	if err = Write(root, "project.json", []byte(`{"format":2,"name":"TestProject"}`), ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = Open(root); err == nil || !strings.Contains(err.Error(), "unknown field \"format\"") {
+		t.Fatalf("discarded workspace format was accepted: %v", err)
+	}
+}
+
 func TestSourceBuildCacheAndTamper(t *testing.T) {
 	w := newWorkspace(t)
 	if err := Write(w.Root, "vba/Answer.bas", []byte("Option Explicit\nPublic Function Answer() As Long\nAnswer = 42\nEnd Function\n"), ""); err != nil {
