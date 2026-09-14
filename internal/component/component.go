@@ -121,7 +121,7 @@ func builtin() []Manifest {
 			items[i].Version = "1.0.1"
 		}
 		if items[i].ID == "ui.ribbon-command" {
-			items[i].Version = "1.0.2"
+			items[i].Version = "1.0.3"
 		}
 		if items[i].ID == "document.style-converter" {
 			items[i].Version = "1.0.3"

@@ -315,6 +315,25 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 	}
 }
 
+func TestRibbonCallbackEncodingUsesASCIIOnly(t *testing.T) {
+	item, err := Get("ui.ribbon-command")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if item.Version != "1.0.3" {
+		t.Fatalf("Ribbon component version did not advance: %q", item.Version)
+	}
+	var source string
+	for _, file := range item.Files {
+		if file.Path == "vba/WordUpRibbon.bas" {
+			source = file.Text
+		}
+	}
+	if !strings.Contains(source, "code = AscW(character)") || !strings.Contains(source, "code >= 48 And code <= 57") || strings.Contains(source, `character Like "[A-Za-z0-9]"`) {
+		t.Fatalf("Ribbon callback encoder is not locale-independent: %s", source)
+	}
+}
+
 func TestAllBundledComponentsInstallWithoutCollisions(t *testing.T) {
 	root := t.TempDir()
 	for _, manifest := range builtin() {

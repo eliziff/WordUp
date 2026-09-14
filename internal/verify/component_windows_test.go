@@ -146,6 +146,9 @@ End Sub
 Public Sub WU_Command_proof_x005F_button()
     WU_Dispatched = WU_Dispatched Or 2
 End Sub
+Public Sub WU_Command__x00E9_()
+    WU_Dispatched = WU_Dispatched Or 4
+End Sub
 Public Function CheckRibbonAndProgress() As String
     Dim control As New ProofControl, i As Long, started As Single, elapsed As Single
     ProofProgress_ResetProgress
@@ -166,6 +169,9 @@ Public Function CheckRibbonAndProgress() As String
     control.Id = "proof_button"
     WU_RibbonCommand control
     If WU_Dispatched <> 3 Then Err.Raise 5, , "underscore Ribbon control ID collided with another control"
+    control.Id = ChrW(&HE9)
+    WU_RibbonCommand control
+    If WU_Dispatched <> 7 Then Err.Raise 5, , "non-ASCII Ribbon control ID was not escaped deterministically"
     CheckRibbonAndProgress = "PASS"
 End Function
 Public Function CheckFormShell() As String

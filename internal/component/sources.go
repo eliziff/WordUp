@@ -91,11 +91,11 @@ Private Function WU_RibbonMacroName(ByVal controlID As String) As String
     value = "WU_Command_"
     For i = 1 To Len(controlID)
         character = Mid$(controlID, i, 1)
-        If character Like "[A-Za-z0-9]" Then
+        code = AscW(character)
+        If code < 0 Then code = code + 65536
+        If (code >= 48 And code <= 57) Or (code >= 65 And code <= 90) Or (code >= 97 And code <= 122) Then
             value = value & character
         Else
-            code = AscW(character)
-            If code < 0 Then code = code + 65536
             value = value & "_x" & Right$("0000" & Hex$(code), 4) & "_"
         End If
     Next i
