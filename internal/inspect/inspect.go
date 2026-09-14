@@ -172,6 +172,7 @@ func textObservationsPart(p *office.Package, part string) ([]map[string]any, err
 		paragraphMarkFormatting := map[string]bool{}
 		runs := []map[string]any{}
 		references := []map[string]any{}
+		revisions := []map[string]any{}
 		nestedEnd := 0
 		propertiesEnd := 0
 		paragraphMarkEnd := 0
@@ -188,6 +189,33 @@ func textObservationsPart(p *office.Package, part string) ([]map[string]any, err
 			if x.Name.Local == "p" {
 				nestedEnd = x.End
 				continue
+			}
+			if x.Name.Local == "ins" || x.Name.Local == "del" {
+				revision := map[string]any{"kind": x.Name.Local, "xml_start": x.Start, "xml_end": x.End}
+				for _, attribute := range []string{"id", "author", "date"} {
+					if value := x.Attribute(office.W, attribute); value != "" {
+						revision[attribute] = value
+					}
+				}
+				units := 0
+				for _, y := range spans[index+1:] {
+					if y.Start < x.Start {
+						continue
+					}
+					if y.Start >= x.End {
+						break
+					}
+					if y.Name.Space != office.W || y.Name.Local != "t" && y.Name.Local != "delText" {
+						continue
+					}
+					value, err := textElement(b[y.Start:y.End])
+					if err != nil {
+						return nil, err
+					}
+					units += len(utf16.Encode([]rune(value)))
+				}
+				revision["text_units"] = units
+				revisions = append(revisions, revision)
 			}
 			if x.Name.Local == "pStyle" {
 				style = x.Attribute(office.W, "val")
@@ -323,6 +351,9 @@ func textObservationsPart(p *office.Package, part string) ([]map[string]any, err
 			"paragraph_id": paragraphID,
 			"source_id":    sourceID,
 			"references":   references,
+		}
+		if len(revisions) > 0 {
+			observation["revision_evidence"] = revisions
 		}
 		if len(paragraphMarkFormatting) > 0 {
 			observation["paragraph_mark_formatting"] = paragraphMarkFormatting

@@ -116,7 +116,7 @@ The signing report distinguishes `signed`, `digest_verified` and certificate tru
 
 ## Images and style references
 
-`reference.document` accepts a DOCX/DOTM path and returns native style definitions and paragraph/direct-formatting observations. The main story is returned as `paragraph_observations`; headers, footers, notes, comments, and glossary entries are returned separately as part-qualified `story_observations` when present. It is not a complete resolved cascading-style engine. `reference.image` supplies actual image pixels to MCP/vision clients. An ordinary CLI agent can also read that same local image file. `image.compare` takes `reference`, `path`, optional `tolerance` and optional `output` for a difference PNG. Different dimensions fail: there is no hidden alignment or rescaling that could create a misleading pass.
+`reference.document` accepts a DOCX/DOTM path and returns native style definitions and paragraph/direct-formatting observations. The main story is returned as `paragraph_observations`; headers, footers, notes, comments, and glossary entries are returned separately as part-qualified `story_observations` when present. Paragraphs with tracked edits carry compact `revision_evidence` (kind, source bounds, author/date/id when present, and UTF-16 units) while displayed text excludes deleted runs. It is not a complete resolved cascading-style engine. `reference.image` supplies actual image pixels to MCP/vision clients. An ordinary CLI agent can also read that same local image file. `image.compare` takes `reference`, `path`, optional `tolerance` and optional `output` for a difference PNG. Different dimensions fail: there is no hidden alignment or rescaling that could create a misleading pass.
 
 ## Mac native prototype
 

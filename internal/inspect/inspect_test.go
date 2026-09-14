@@ -86,6 +86,25 @@ func TestParagraphSourceLocationsAndNestedText(t *testing.T) {
 	}
 }
 
+func TestTrackedRevisionEvidenceDoesNotDuplicateText(t *testing.T) {
+	p := office.BlankPackage()
+	p.Files["word/document.xml"] = []byte(`<w:document xmlns:w="` + office.W + `"><w:body><w:p><w:ins w:id="4" w:author="Editor" w:date="2026-01-02T03:04:05Z"><w:r><w:t>new</w:t></w:r></w:ins><w:del w:id="5" w:author="Editor"><w:r><w:delText>old</w:delText></w:r></w:del></w:p></w:body></w:document>`)
+	rows, err := TextObservations(p)
+	if err != nil || len(rows) != 1 {
+		t.Fatalf("revision observations: %v %v", rows, err)
+	}
+	if rows[0]["text"] != "new" {
+		t.Fatalf("deleted text leaked into displayed text: %v", rows[0]["text"])
+	}
+	revisions, ok := rows[0]["revision_evidence"].([]map[string]any)
+	if !ok || len(revisions) != 2 {
+		t.Fatalf("missing revision evidence: %v", rows[0]["revision_evidence"])
+	}
+	if revisions[0]["kind"] != "ins" || revisions[0]["author"] != "Editor" || revisions[0]["text_units"] != 3 || revisions[1]["kind"] != "del" || revisions[1]["text_units"] != 3 {
+		t.Fatalf("incorrect revision evidence: %v", revisions)
+	}
+}
+
 func TestStoryObservationsKeepPartQualifiedLocations(t *testing.T) {
 	p := office.BlankPackage()
 	p.Files["word/header1.xml"] = []byte(`<w:hdr xmlns:w="` + office.W + `"><w:p w14:paraId="ABC" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml"><w:pPr><w:pStyle w:val="Header"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Aptos"/><w:sz w:val="18"/></w:rPr><w:t>Running head</w:t></w:r></w:p></w:hdr>`)
