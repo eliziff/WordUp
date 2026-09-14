@@ -878,7 +878,13 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 				return nil, fmt.Errorf("package source paths collide after case normalization: %s", part)
 			}
 			packageFiles[part] = b
-			currentHash := office.Hash(b)
+			currentHash := ""
+			if stamp, ok := sourceSnapshot[n]; ok {
+				currentHash = stamp.Hash
+			}
+			if currentHash == "" {
+				currentHash = office.Hash(b)
+			}
 			packageHashes[part] = currentHash
 			expected := w.Index.Files[n]
 			if expected == "" {
@@ -976,7 +982,14 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 		}
 		seen[strings.ToLower(name)] = true
 		source := office.Normalize(string(files[n]))
-		if w.Index.Files[n] != office.Hash(files[n]) {
+		currentHash := ""
+		if stamp, ok := sourceSnapshot[n]; ok {
+			currentHash = stamp.Hash
+		}
+		if currentHash == "" {
+			currentHash = office.Hash(files[n])
+		}
+		if w.Index.Files[n] != currentHash {
 			changed = true
 		}
 		mod := office.Module{Name: name, Kind: kind, Source: source}
