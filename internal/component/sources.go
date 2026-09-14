@@ -110,14 +110,14 @@ Public Function WU_HotkeyRegistered(ByVal keyCode As Long, Optional ByVal expect
     Dim binding As KeyBinding
     Set binding = WU_OwnedHotkey(keyCode)
     If binding Is Nothing Then Exit Function
-    If expectedMacro <> "" Then If StrComp(binding.Command, expectedMacro, vbTextCompare) <> 0 Then Exit Function
+    If expectedMacro <> "" Then If StrComp(WU_MacroMember(binding.Command), WU_MacroMember(expectedMacro), vbTextCompare) <> 0 Then Exit Function
     WU_HotkeyRegistered = True
 End Function
 Private Sub WU_ChangeHotkey(ByVal keyCode As Long, ByVal macroName As String, ByVal remove As Boolean)
     Dim prior As Object, binding As KeyBinding
     Dim failure As Long, failureSource As String, failureText As String
-    Set prior = Application.CustomizationContext
     On Error GoTo Failed
+    Set prior = Application.CustomizationContext
     Application.CustomizationContext = ThisDocument
     If remove Then
         Set binding = WU_OwnedHotkey(keyCode)
@@ -128,7 +128,7 @@ Private Sub WU_ChangeHotkey(ByVal keyCode As Long, ByVal macroName As String, By
         ' template's customization context.
         Set binding = WU_OwnedHotkey(keyCode)
         If Not binding Is Nothing Then binding.Clear
-        KeyBindings.Add wdKeyCategoryMacro, macroName, keyCode
+        KeyBindings.Add wdKeyCategoryMacro, WU_QualifiedMacro(macroName), keyCode
     End If
 CleanUp:
     On Error Resume Next
@@ -149,6 +149,14 @@ Private Function WU_OwnedHotkey(ByVal keyCode As Long) As KeyBinding
     Set owner = binding.Context
     If owner Is ThisDocument Then Set WU_OwnedHotkey = binding
     On Error GoTo 0
+End Function
+Private Function WU_QualifiedMacro(ByVal macroName As String) As String
+    If InStr(1, macroName, "!", vbBinaryCompare) > 0 Then WU_QualifiedMacro = macroName Else WU_QualifiedMacro = "'" & Replace(ThisDocument.Name, "'", "''") & "'!" & macroName
+End Function
+Private Function WU_MacroMember(ByVal macroName As String) As String
+    Dim separator As Long
+    separator = InStrRev(macroName, "!", -1, vbBinaryCompare)
+    If separator = 0 Then WU_MacroMember = macroName Else WU_MacroMember = Mid$(macroName, separator + 1)
 End Function
 `
 
