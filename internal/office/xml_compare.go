@@ -69,6 +69,7 @@ func CompareXML(a, b []byte, policy XMLComparePolicy) (map[string]any, error) {
 		}
 		d := xml.NewDecoder(bytes.NewReader(raw))
 		inInstruction := false
+		structureDepth, roots := 0, 0
 		ignored := func(names []xml.Name, n xml.Name) bool {
 			for _, x := range names {
 				if x == n {
@@ -93,6 +94,13 @@ func CompareXML(a, b []byte, policy XMLComparePolicy) (map[string]any, error) {
 			case xml.Directive:
 				return nil, fmt.Errorf("XML directives/DTD are not accepted")
 			case xml.StartElement:
+				if structureDepth == 0 {
+					roots++
+					if roots > 1 {
+						return nil, fmt.Errorf("multiple XML roots")
+					}
+				}
+				structureDepth++
 				inInstruction = t.Name == (xml.Name{Space: wordXMLNamespace, Local: "instrText"})
 				if skip > 0 || ignored(policy.Elements, t.Name) {
 					skip++
@@ -131,6 +139,10 @@ func CompareXML(a, b []byte, policy XMLComparePolicy) (map[string]any, error) {
 				sort.Strings(attrs)
 				appendToken(fmt.Sprintf("start {%s}%s %q", t.Name.Space, t.Name.Local, attrs))
 			case xml.EndElement:
+				if structureDepth == 0 {
+					return nil, fmt.Errorf("XML stack underflow")
+				}
+				structureDepth--
 				inInstruction = false
 				if skip > 0 {
 					skip--
@@ -138,6 +150,9 @@ func CompareXML(a, b []byte, policy XMLComparePolicy) (map[string]any, error) {
 				}
 				appendToken(fmt.Sprintf("end {%s}%s", t.Name.Space, t.Name.Local))
 			case xml.CharData:
+				if structureDepth == 0 && len(bytes.TrimSpace(t)) > 0 {
+					return nil, fmt.Errorf("text outside XML root")
+				}
 				if skip == 0 {
 					value := string(t)
 					if inInstruction && len(tocNames) > 0 {
@@ -159,6 +174,9 @@ func CompareXML(a, b []byte, policy XMLComparePolicy) (map[string]any, error) {
 					appendToken(fmt.Sprintf("instruction %s %q", t.Target, t.Inst))
 				}
 			}
+		}
+		if roots != 1 || structureDepth != 0 {
+			return nil, fmt.Errorf("incomplete XML document")
 		}
 		return out, nil
 	}

@@ -85,6 +85,11 @@ func TestXMLComparisonNeverIgnoresUnrequestedChanges(t *testing.T) {
 	if _, e := CompareXML([]byte(`<!DOCTYPE p><p/>`), b, policy); e == nil {
 		t.Fatal("accepted DTD")
 	}
+	for _, malformed := range []string{`<p/><q/>`, `prefix<p/>`, `<p>`} {
+		if _, e := CompareXML([]byte(malformed), b, policy); e == nil {
+			t.Fatalf("accepted malformed XML %q", malformed)
+		}
+	}
 }
 
 func TestLargeTokenDiagnosticsDoNotHideLateDifference(t *testing.T) {
