@@ -20,14 +20,9 @@ import (
 const Version = "0.4.0"
 
 type Manifest struct {
-	Format         int               `json:"format"`
-	Name           string            `json:"name"`
-	SourceName     string            `json:"source_name,omitempty"`
-	SourceSHA256   string            `json:"source_sha256,omitempty"`
-	Target         string            `json:"target"`
-	Components     map[string]string `json:"components,omitempty"`
-	References     []Reference       `json:"add_references,omitempty"`
-	DropSignatures bool              `json:"drop_signatures,omitempty"`
+	Name           string      `json:"name"`
+	References     []Reference `json:"add_references,omitempty"`
+	DropSignatures bool        `json:"drop_signatures,omitempty"`
 }
 type Reference struct {
 	Name        string `json:"name"`
@@ -37,7 +32,9 @@ type Reference struct {
 	Description string `json:"description,omitempty"`
 }
 type Index struct {
-	Files map[string]string `json:"files"`
+	BaselineSHA256 string            `json:"baseline_sha256"`
+	Files          map[string]string `json:"files"`
+	Components     map[string]string `json:"components"`
 }
 type BuildReport struct {
 	ToolSHA256        string   `json:"tool_sha256"`
@@ -210,9 +207,6 @@ func Open(root string) (*Workspace, error) {
 	if e = ReadJSON(b, &w.Manifest); e != nil {
 		return nil, e
 	}
-	if w.Manifest.Format != 2 {
-		return nil, fmt.Errorf("workspace format %d: import the source artifact into a format-2 workspace", w.Manifest.Format)
-	}
 	b, e = Read(root, ".wordwright/index.json")
 	if e != nil {
 		return nil, e
@@ -224,12 +218,27 @@ func Open(root string) (*Workspace, error) {
 	if e != nil {
 		return nil, e
 	}
-	if office.Hash(b) != w.Manifest.SourceSHA256 {
+	if office.Hash(b) != w.Index.BaselineSHA256 {
 		return nil, fmt.Errorf("baseline hash mismatch")
 	}
 	w.Baseline, e = office.ReadPackage(b)
 	return w, e
 }
+
+// ModuleKind derives source kind from its extension and imported VBA metadata.
+func (w *Workspace) ModuleKind(name, ext string) (string, error) {
+	kind := map[string]string{".bas": "standard", ".cls": "class", ".vba": "form"}[strings.ToLower(ext)]
+	if kind == "" {
+		return "", fmt.Errorf("unrecognized module extension %s", ext)
+	}
+	for component, importedKind := range w.Index.Components {
+		if strings.EqualFold(component, name) {
+			return importedKind, nil
+		}
+	}
+	return kind, nil
+}
+
 func Import(source, destination string) (map[string]any, error) {
 	source, e := filepath.Abs(source)
 	if e != nil {
@@ -288,8 +297,9 @@ func importPackage(p *office.Package, sourceName, destination string) (map[strin
 			os.RemoveAll(destination)
 		}
 	}()
-	m := Manifest{Format: 2, Name: "WordProject", SourceName: sourceName, SourceSHA256: office.Hash(p.Original), Target: "windows+mac", Components: map[string]string{}}
-	idx := Index{Files: map[string]string{}}
+	m := Manifest{Name: "WordProject"}
+	components := map[string]string{}
+	idx := Index{BaselineSHA256: office.Hash(p.Original), Files: map[string]string{}, Components: components}
 	put := func(rel string, b []byte) error {
 		idx.Files[rel] = office.Hash(b)
 		return Write(destination, rel, b, "")
@@ -312,7 +322,7 @@ func importPackage(p *office.Package, sourceName, destination string) (map[strin
 			if e = put(rel, []byte(mod.Source)); e != nil {
 				return nil, e
 			}
-			m.Components[mod.Name] = mod.Kind
+			components[mod.Name] = mod.Kind
 			if mod.Kind == "form" {
 				form, e := office.ReadForm(v.CFB, mod.Name, v.Codepage)
 				var data []byte
@@ -328,7 +338,7 @@ func importPackage(p *office.Package, sourceName, destination string) (map[strin
 			}
 		}
 	} else {
-		m.Components["ThisDocument"] = "document"
+		components["ThisDocument"] = "document"
 		if e := put("vba/ThisDocument.cls", []byte(DocumentSource())); e != nil {
 			return nil, e
 		}
@@ -357,11 +367,11 @@ func importPackage(p *office.Package, sourceName, destination string) (map[strin
 		return nil, e
 	}
 	catalog := office.Catalog(p)
-	if e := Write(destination, "reports/import.json", JSON(map[string]any{"source_sha256": m.SourceSHA256, "components": m.Components, "catalog": catalog, "warnings": warnings, "word_executed": false}), ""); e != nil {
+	if e := Write(destination, "reports/import.json", JSON(map[string]any{"source_name": sourceName, "source_sha256": idx.BaselineSHA256, "components": components, "catalog": catalog, "warnings": warnings, "word_executed": false}), ""); e != nil {
 		return nil, e
 	}
 	good = true
-	return map[string]any{"workspace": destination, "components": m.Components, "catalog": catalog, "warnings": warnings, "word_executed": false}, nil
+	return map[string]any{"workspace": destination, "components": components, "catalog": catalog, "warnings": warnings, "word_executed": false}, nil
 }
 
 // Imported bytes and exact XML expectations must survive any user's autocrlf
@@ -600,9 +610,6 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 	if e = ReadJSON(files["project.json"], &manifest); e != nil {
 		return nil, e
 	}
-	if manifest.Format != 2 || manifest.SourceSHA256 != office.Hash(w.Baseline.Original) {
-		return nil, fmt.Errorf("source snapshot changed the immutable baseline contract")
-	}
 	if !office.ValidIdentifier(manifest.Name) {
 		return nil, fmt.Errorf("invalid project name")
 	}
@@ -666,12 +673,9 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 			return nil, fmt.Errorf("unrecognized source file %s", n)
 		}
 		name := strings.TrimSuffix(filepath.Base(n), filepath.Ext(n))
-		kind := w.Manifest.Components[name]
-		if kind == "" {
-			kind = map[string]string{".bas": "standard", ".cls": "class", ".vba": "form"}[ext]
-		}
-		if kind == "" {
-			return nil, fmt.Errorf("cannot infer module kind")
+		kind, kindErr := w.ModuleKind(name, ext)
+		if kindErr != nil {
+			return nil, kindErr
 		}
 		if seen[strings.ToLower(name)] {
 			return nil, fmt.Errorf("duplicate component source %s", name)

@@ -32,22 +32,9 @@ func analysisRequest(root string, paths []string) (string, error) {
 			return "", fmt.Errorf("duplicate analysis module: %s", name)
 		}
 		seen[strings.ToLower(name)] = true
-		kind := w.Manifest.Components[name]
-		if kind == "" {
-			for declared, declaredKind := range w.Manifest.Components {
-				if strings.EqualFold(declared, name) {
-					kind = declaredKind
-					break
-				}
-			}
-		}
-		if kind == "" {
-			switch strings.ToLower(filepath.Ext(path)) {
-			case ".bas":
-				kind = "standard"
-			case ".cls":
-				kind = "class"
-			}
+		kind, err := w.ModuleKind(name, filepath.Ext(path))
+		if err != nil {
+			return "", err
 		}
 		if kind != "standard" && kind != "class" {
 			return "", fmt.Errorf("analysis host/designer metadata not integrated for %s (%s)", path, kind)

@@ -56,7 +56,7 @@ For reference-driven template work, use the [WordUp template-builder agent skill
 For legal-document projects, agents can reuse [Legal Structure Parser](https://github.com/eliziff/legal-structure-parser) and [Legal PDF Parser](https://github.com/eliziff/legal-pdf-parser). WordUp's generated agent instructions link to both. They are optional development tools; the executable and delivered templates do not require them. See [reuse guidance](docs/REUSE.md).
 
 ```text
-project.json                   Project metadata still required by the writer
+project.json                   VBA project name and explicit build choices
 .wordwright/base.opc           Immutable, hash-checked original package
 .wordwright/index.json         Baseline source hashes
 vba/*.bas                      Standard VBA modules

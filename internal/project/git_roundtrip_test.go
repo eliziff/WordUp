@@ -15,7 +15,6 @@ import (
 
 func TestRepeatedImportHasIdenticalFiles(t *testing.T) {
 	w := newWorkspace(t)
-	w.Manifest.Components["ExampleForm"] = "form"
 	design := office.Design{Name: "ExampleForm", Mode: "replace", Controls: []office.ControlDesign{
 		{Name: "Group", Type: "Frame", Controls: []office.ControlDesign{
 			{Name: "Run", Type: "CommandButton", Properties: map[string]any{"Caption": "Run", "Width": 72}},
@@ -102,7 +101,6 @@ func TestGitNoOpBuildAndIndependentModuleMerge(t *testing.T) {
 		t.Skip("git is required for checkout/merge verification")
 	}
 	w := newWorkspace(t)
-	w.Manifest.Components["MergeForm"] = "form"
 	design := office.Design{Name: "MergeForm", Mode: "replace", Controls: []office.ControlDesign{
 		{Name: "Run", Type: "CommandButton", Properties: map[string]any{"Caption": "Before", "Width": 72}},
 	}}

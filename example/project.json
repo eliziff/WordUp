@@ -1,11 +1,3 @@
 {
-  "format": 2,
-  "name": "WordUpStudio",
-  "source_name": "WordUpStudio.dotm",
-  "source_sha256": "62abfc2a420e5083d5d196b2492f419cdadaf4c4e6e4d1aa17a8d5c7b969dfb8",
-  "target": "windows+mac",
-  "components": {
-    "StudioForm": "form",
-    "ThisDocument": "document"
-  }
+  "name": "WordUpStudio"
 }
