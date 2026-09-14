@@ -667,17 +667,17 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 			replayInputs = report.InputSnapshots
 			replay = &verify.ReplaySource{ReportSHA256: reportHash, ArtifactSHA256: report.SHA256, SuiteSHA256: report.SuiteSHA256}
 			if p.Path == "" {
-				p.Path = report.Artifact
-				if report.ArtifactSnapshot != "" {
-					frozen, readErr := project.Read(filepath.Dir(report.ArtifactSnapshot), filepath.Base(report.ArtifactSnapshot))
-					if readErr != nil {
-						return nil, fmt.Errorf("recorded artifact snapshot unavailable: %w", readErr)
-					}
-					if office.Hash(frozen) != report.SHA256 {
-						return nil, fmt.Errorf("recorded artifact snapshot hash mismatch")
-					}
-					p.Path = report.ArtifactSnapshot
+				if report.ArtifactSnapshot == "" {
+					return nil, fmt.Errorf("recorded artifact snapshot missing; run a new baseline test")
 				}
+				frozen, readErr := project.Read(filepath.Dir(report.ArtifactSnapshot), filepath.Base(report.ArtifactSnapshot))
+				if readErr != nil {
+					return nil, fmt.Errorf("recorded artifact snapshot unavailable: %w", readErr)
+				}
+				if office.Hash(frozen) != report.SHA256 {
+					return nil, fmt.Errorf("recorded artifact snapshot hash mismatch")
+				}
+				p.Path = report.ArtifactSnapshot
 			}
 		}
 		artifact, err := e.path(p.Path)

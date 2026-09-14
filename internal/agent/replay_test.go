@@ -28,6 +28,19 @@ func TestReplayRejectsTamperedSnapshotBeforeWord(t *testing.T) {
 	}
 }
 
+func TestReplayRequiresSnapshotBeforeWord(t *testing.T) {
+	root := t.TempDir()
+	report := verify.Report{Schema: 1, SHA256: "original", Suite: verify.Suite{Schema: 1, Name: "replay", Steps: []verify.Step{{Name: "observe", Operation: native.Operation{Op: "get", Member: "Version"}, Assert: []verify.Assertion{{Kind: "equals", Expected: "16"}}}}}}
+	if err := project.Write(root, "report.json", project.JSON(report), ""); err != nil {
+		t.Fatal(err)
+	}
+	e := &Engine{Root: root, Execute: true}
+	_, err := e.Call(context.Background(), "test.replay", Parameters{Reference: "report.json"})
+	if err == nil || !strings.Contains(err.Error(), "snapshot missing") || e.host != nil {
+		t.Fatalf("unsafe replay: %v", err)
+	}
+}
+
 func TestReplayRejectsInvalidRequestsBeforeStartingWord(t *testing.T) {
 	e := &Engine{Root: t.TempDir()}
 	if _, err := e.Call(context.Background(), "test.replay", Parameters{}); err == nil || !strings.Contains(err.Error(), "--execute") {
