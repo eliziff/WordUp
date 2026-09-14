@@ -77,7 +77,7 @@ func builtin() []Manifest {
 			items[i].Version = "1.0.1"
 		}
 		if items[i].ID == "document.style-converter" {
-			items[i].Version = "1.0.1"
+			items[i].Version = "1.0.2"
 		}
 		items[i].Schema = 1
 		items[i].License = "MIT"

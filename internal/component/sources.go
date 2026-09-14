@@ -195,7 +195,7 @@ End Function
 const styleConverterSource = `Attribute VB_Name = "WordUpStyleConverter"
 Option Explicit
 Public Function WU_ConvertStyle(ByVal document As Document, ByVal fromStyle As String, ByVal toStyle As String) As Boolean
-    Dim scope As Range, updating As Boolean, opened As Boolean
+    Dim firstStory As Range, story As Range, updating As Boolean, opened As Boolean
     Dim failure As Long, failureSource As String, failureText As String
     Dim sourceStyle As Style, targetStyle As Style
     On Error GoTo Failed
@@ -205,19 +205,13 @@ Public Function WU_ConvertStyle(ByVal document As Document, ByVal fromStyle As S
     If StrComp(sourceStyle.NameLocal, targetStyle.NameLocal, vbTextCompare) = 0 Then Exit Function
     Application.ScreenUpdating = False
     Application.UndoRecord.StartCustomRecord "Convert style": opened = True
-    Set scope = document.Content.Duplicate
-    With scope.Find
-        .ClearFormatting
-        .Replacement.ClearFormatting
-        .Text = "^p"
-        .Style = sourceStyle
-        .Replacement.Text = "^&"
-        .Replacement.Style = targetStyle
-        .Forward = True
-        .Wrap = wdFindStop
-        .Format = True
-    End With
-    WU_ConvertStyle = scope.Find.Execute(Replace:=wdReplaceAll)
+    For Each firstStory In document.StoryRanges
+        Set story = firstStory
+        Do
+            If WU_ConvertStyleInRange(story, sourceStyle, targetStyle) Then WU_ConvertStyle = True
+            Set story = story.NextStoryRange
+        Loop Until story Is Nothing
+    Next firstStory
 CleanUp:
     On Error Resume Next
     If opened Then Application.UndoRecord.EndCustomRecord
@@ -229,5 +223,21 @@ CleanUp:
 Failed:
     failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
     Resume CleanUp
+End Function
+Private Function WU_ConvertStyleInRange(ByVal story As Range, ByVal sourceStyle As Style, ByVal targetStyle As Style) As Boolean
+    Dim scope As Range
+    Set scope = story.Duplicate
+    With scope.Find
+        .ClearFormatting
+        .Replacement.ClearFormatting
+        .Text = "^p"
+        .Style = sourceStyle
+        .Replacement.Text = "^&"
+        .Replacement.Style = targetStyle
+        .Forward = True
+        .Wrap = wdFindStop
+        .Format = True
+    End With
+    WU_ConvertStyleInRange = scope.Find.Execute(Replace:=wdReplaceAll)
 End Function
 `
