@@ -14,12 +14,20 @@ func TestRibbonSchemas(t *testing.T) {
 			{`<ribbon><tabs><button id="wrongParent"/></tabs></ribbon>`, false},
 			{`<ribbon nonsense="true"/>`, false},
 		} {
-			r, e := ValidateRibbon([]byte(`<customUI xmlns="` + ns + `">` + test.body + `</customUI>`))
+			data := []byte(`<customUI xmlns="` + ns + `">` + test.body + `</customUI>`)
+			r, e := ValidateRibbon(data)
 			if e != nil {
 				t.Fatal(e)
 			}
 			if r["valid"] != test.valid {
 				t.Fatalf("expected valid=%v: %v", test.valid, r)
+			}
+			// A caller must not be able to mutate the process-local cached
+			// validation result for the next check.
+			r["valid"] = !test.valid
+			repeated, e := ValidateRibbon(data)
+			if e != nil || repeated["valid"] != test.valid {
+				t.Fatalf("cached validation was not isolated: %v", repeated)
 			}
 		}
 	}

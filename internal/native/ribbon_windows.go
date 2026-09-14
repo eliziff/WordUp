@@ -3,13 +3,64 @@
 package native
 
 import (
+	"crypto/sha256"
 	"embed"
 	"encoding/xml"
 	"fmt"
 	"runtime"
+	"sync"
 	"syscall"
 	"unsafe"
 )
+
+// Ribbon validation is a pure function of the XML bytes, but constructing the
+// MSXML schema cache is relatively expensive. Keep a small process-local cache
+// so repeated source-only checks do not pay that cost again. The bound matters
+// because an agent can inspect many unrelated workspaces in one resident
+// process. Callers receive a copy so one response cannot mutate cached data.
+const ribbonValidationCacheLimit = 64
+
+var ribbonValidationCache = struct {
+	sync.Mutex
+	values map[[32]byte]map[string]any
+	order  [][32]byte
+}{values: map[[32]byte]map[string]any{}}
+
+func copyRibbonValidation(value map[string]any) map[string]any {
+	copy := make(map[string]any, len(value))
+	for key, item := range value {
+		copy[key] = item
+	}
+	return copy
+}
+
+func cachedRibbonValidation(data []byte) (map[string]any, bool) {
+	key := sha256.Sum256(data)
+	ribbonValidationCache.Lock()
+	defer ribbonValidationCache.Unlock()
+	value, ok := ribbonValidationCache.values[key]
+	if !ok {
+		return nil, false
+	}
+	return copyRibbonValidation(value), true
+}
+
+func rememberRibbonValidation(data []byte, value map[string]any) {
+	key := sha256.Sum256(data)
+	ribbonValidationCache.Lock()
+	defer ribbonValidationCache.Unlock()
+	if _, exists := ribbonValidationCache.values[key]; exists {
+		ribbonValidationCache.values[key] = copyRibbonValidation(value)
+		return
+	}
+	if len(ribbonValidationCache.order) >= ribbonValidationCacheLimit {
+		oldest := ribbonValidationCache.order[0]
+		delete(ribbonValidationCache.values, oldest)
+		ribbonValidationCache.order = ribbonValidationCache.order[1:]
+	}
+	ribbonValidationCache.values[key] = copyRibbonValidation(value)
+	ribbonValidationCache.order = append(ribbonValidationCache.order, key)
+}
 
 //go:embed schemas/*.xsd
 var ribbonSchemas embed.FS
@@ -35,6 +86,9 @@ func automationObject(progID string) (dispatch, error) {
 // ValidateRibbon uses the Windows XML engine and bundled Office schemas; it
 // neither launches Word nor downloads schemas or external document entities.
 func ValidateRibbon(data []byte) (map[string]any, error) {
+	if cached, ok := cachedRibbonValidation(data); ok {
+		return cached, nil
+	}
 	var root struct{ XMLName xml.Name }
 	if e := xml.Unmarshal(data, &root); e != nil {
 		return nil, e
@@ -133,5 +187,6 @@ func ValidateRibbon(data []byte) (map[string]any, error) {
 		}
 	}
 	result["valid"] = fmt.Sprint(result["errorCode"]) == "0"
+	rememberRibbonValidation(data, result)
 	return result, nil
 }
