@@ -3,8 +3,11 @@ package verify
 import (
 	"github.com/eliziff/WordUp/internal/native"
 	"github.com/eliziff/WordUp/internal/office"
+	"regexp"
 	"strings"
 )
+
+var procedureDeclaration = regexp.MustCompile(`(?i)^\s*(?:(?:public|private|friend|static)\s+)*(?:sub|function|property\s+(?:get|let|set))\s+([A-Za-z_][A-Za-z0-9_]*)\b`)
 
 func artifactSource(err error, artifact *office.Package) {
 	failure, ok := err.(*native.Fault)
@@ -44,10 +47,37 @@ func artifactSource(err error, artifact *office.Package) {
 		extension := map[string]string{"standard": ".bas", "class": ".cls", "document": ".cls", "form": ".vba"}[module.Kind]
 		details["source_file"] = "vba/" + module.Name + extension
 		details["source_line"] = sourceLine
+		if procedure := procedureAtLine(module.Source, sourceLine); procedure != "" {
+			details["procedure"] = procedure
+		}
 		details["artifact_module_source_sha256"] = office.Hash([]byte(module.Source))
 		return
 	}
 	details["source_mapping_error"] = "Selected module was not found in the tested artifact"
+}
+
+// procedureAtLine identifies the lexical procedure containing a verified
+// physical source line. It deliberately does not infer a procedure from a
+// declaration in another module or from a malformed signature.
+func procedureAtLine(source string, lineNumber int) string {
+	if lineNumber <= 0 {
+		return ""
+	}
+	current := ""
+	for index, raw := range strings.Split(office.Normalize(source), "\n") {
+		line := strings.TrimSpace(strings.SplitN(raw, "'", 2)[0])
+		lower := strings.ToLower(line)
+		if strings.HasPrefix(lower, "end sub") || strings.HasPrefix(lower, "end function") || strings.HasPrefix(lower, "end property") {
+			current = ""
+		}
+		if match := procedureDeclaration.FindStringSubmatch(line); match != nil {
+			current = match[1]
+		}
+		if index+1 == lineNumber {
+			return current
+		}
+	}
+	return ""
 }
 
 func exportedLine(source string, visibleLine int, expected string) int {

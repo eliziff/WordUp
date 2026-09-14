@@ -14,3 +14,19 @@ func TestExportedCompilerLineSkipsOnlyHiddenAttributes(t *testing.T) {
 		t.Fatal("guessed location", got)
 	}
 }
+
+func TestProcedureAtLineUsesContainingSourceProcedure(t *testing.T) {
+	source := "Attribute VB_Name = \"Example\"\r\nOption Explicit\r\nPublic Sub First()\r\n    Dim value As Long\r\nEnd Sub\r\nPrivate Function Second() As Long\r\n    Second = 42\r\nEnd Function\r\n"
+	if got := procedureAtLine(source, 4); got != "First" {
+		t.Fatalf("first procedure=%q", got)
+	}
+	if got := procedureAtLine(source, 7); got != "Second" {
+		t.Fatalf("second procedure=%q", got)
+	}
+	if got := procedureAtLine(source, 9); got != "" {
+		t.Fatalf("end line retained procedure=%q", got)
+	}
+	if got := procedureAtLine(source, 2); got != "" {
+		t.Fatalf("module header assigned procedure=%q", got)
+	}
+}
