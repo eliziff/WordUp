@@ -39,7 +39,7 @@ func Tools() []Tool {
 		[2]string{"component.list", "List bundled editable template components and their capabilities."},
 		[2]string{"component.get", "Return one bundled component by component ID, or a local component.json bundle by path, without changing the workspace."},
 		[2]string{"component.add", "Vendor one bundled component ID or local component.json bundle path into the workspace with typed parameters, collision checks and modification protection."},
-		[2]string{"component.status", "Report whether an installed component remains identical to its starting source: component."},
+		[2]string{"component.status", "Report source hashes, modification state and host-platform compatibility for an installed component: component."},
 		[2]string{"component.diff", "Compare installed source with the same parameterized bundled or local starting version; never overwrites edits."},
 	)
 	props := map[string]any{}
