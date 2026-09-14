@@ -379,6 +379,14 @@ func StyleReference(file string) (map[string]any, error) {
 	if e != nil {
 		return nil, e
 	}
+	theme, e := themeFonts(p)
+	if e != nil {
+		return nil, e
+	}
+	out["theme_fonts"] = theme
+	if numbering := p.Files["word/numbering.xml"]; len(numbering) > 0 {
+		out["numbering_xml"] = string(numbering)
+	}
 	out["paragraph_observations"] = text
 	// Headers, footers, notes, comments, and glossary entries carry real
 	// journal/template formatting too. Keep them in separate, part-qualified

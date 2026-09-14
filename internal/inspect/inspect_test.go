@@ -135,3 +135,26 @@ func TestStoryObservationsKeepPartQualifiedLocations(t *testing.T) {
 		t.Fatalf("public style reference omitted header story: %v", reference["story_observations"])
 	}
 }
+
+func TestStyleReferenceIncludesThemeAndNumberingInputs(t *testing.T) {
+	p := office.BlankPackage()
+	p.Files["word/document.xml"] = []byte(`<w:document xmlns:w="` + office.W + `"><w:body><w:p><w:r><w:t>Text</w:t></w:r></w:p></w:body></w:document>`)
+	p.Files["word/theme/theme1.xml"] = []byte(`<a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:themeElements><a:fontScheme><a:majorFont><a:latin typeface="Aptos Display"/></a:majorFont></a:fontScheme></a:themeElements></a:theme>`)
+	p.Files["word/numbering.xml"] = []byte(`<w:numbering xmlns:w="` + office.W + `"><w:abstractNum w:abstractNumId="1"/></w:numbering>`)
+	data, err := p.Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	file := filepath.Join(t.TempDir(), "reference.docx")
+	if err := os.WriteFile(file, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	reference, err := StyleReference(file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	theme := reference["theme_fonts"].(map[string]string)
+	if theme["majorHAnsi"] != "Aptos Display" || !strings.Contains(reference["numbering_xml"].(string), "abstractNumId") {
+		t.Fatalf("lost style cascade inputs: %#v", reference)
+	}
+}
