@@ -135,18 +135,27 @@ func publicSymbol(symbol Symbol) bool {
 
 func vbaSourceFiles(files map[string][]byte) map[string]string {
 	out := map[string]string{}
+	for _, path := range vbaSourcePaths(files) {
+		ext := strings.ToLower(pathpkg.Ext(path))
+		name := strings.TrimSuffix(pathpkg.Base(path), ext)
+		out[strings.ToLower(name)] = path
+	}
+	return out
+}
+
+func vbaSourcePaths(files map[string][]byte) []string {
+	paths := make([]string, 0)
 	for path := range files {
 		if !strings.HasPrefix(path, "vba/") {
 			continue
 		}
 		ext := strings.ToLower(pathpkg.Ext(path))
-		if ext != ".bas" && ext != ".cls" && ext != ".vba" {
-			continue
+		if ext == ".bas" || ext == ".cls" || ext == ".vba" {
+			paths = append(paths, path)
 		}
-		name := strings.TrimSuffix(pathpkg.Base(path), ext)
-		out[strings.ToLower(name)] = path
 	}
-	return out
+	sort.Strings(paths)
+	return paths
 }
 
 func formControlNames(design office.Design, names map[string]bool) {
@@ -429,7 +438,7 @@ func validateFormDesigns(files map[string][]byte, diagnostics *[]map[string]any)
 }
 
 func CheckInventory(root string, files map[string][]byte, diagnostics *[]map[string]any) map[string]any {
-	paths := vbaSourceFiles(files)
+	paths := vbaSourcePaths(files)
 	moduleByName := map[string][]map[string]any{}
 	moduleNames := []map[string]any{}
 	publicNames := map[string]bool{}

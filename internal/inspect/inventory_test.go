@@ -129,6 +129,36 @@ func TestCheckInventoryReportsDerivedModuleName(t *testing.T) {
 	t.Fatalf("filename-derived module was not inventoried: %#v", modules)
 }
 
+func TestCheckInventoryReportsNestedDerivedModuleCollision(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "workspace")
+	if _, err := project.New("NestedDuplicateModules", root); err != nil {
+		t.Fatal(err)
+	}
+	for path := range map[string]bool{"vba/first/Foo.bas": true, "vba/second/Foo.cls": true} {
+		if err := project.Write(root, path, []byte("Option Explicit\n"), ""); err != nil {
+			t.Fatal(err)
+		}
+	}
+	w, err := project.Open(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := Check(w)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, diagnostic := range result["diagnostics"].([]map[string]any) {
+		if diagnostic["message"] == "duplicate VBA module name: foo" {
+			locations := diagnostic["locations"].([]map[string]any)
+			if len(locations) != 2 {
+				t.Fatalf("duplicate module locations=%#v", locations)
+			}
+			return
+		}
+	}
+	t.Fatalf("nested duplicate module diagnostic missing: %#v", result["diagnostics"])
+}
+
 func TestCheckInventoryReportsModuleNameMismatch(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "workspace")
 	if _, err := project.New("ModuleMismatch", root); err != nil {
