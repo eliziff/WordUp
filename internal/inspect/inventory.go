@@ -143,7 +143,7 @@ func vbaSourceFiles(files map[string][]byte) map[string]string {
 		if ext != ".bas" && ext != ".cls" && ext != ".vba" {
 			continue
 		}
-		name := strings.TrimSuffix(strings.TrimPrefix(path, "vba/"), ext)
+		name := strings.TrimSuffix(pathpkg.Base(path), ext)
 		out[strings.ToLower(name)] = path
 	}
 	return out
@@ -443,7 +443,7 @@ func CheckInventory(root string, files map[string][]byte, diagnostics *[]map[str
 	sort.Strings(orderedPaths)
 	for _, path := range orderedPaths {
 		ext := pathpkg.Ext(path)
-		expectedModule := strings.TrimSuffix(strings.TrimPrefix(path, "vba/"), ext)
+		expectedModule := strings.TrimSuffix(pathpkg.Base(path), ext)
 		if !office.ValidIdentifier(expectedModule) {
 			*diagnostics = append(*diagnostics, map[string]any{
 				"severity": "error", "file": path,
@@ -471,7 +471,7 @@ func CheckInventory(root string, files map[string][]byte, diagnostics *[]map[str
 				moduleByName[key] = append(moduleByName[key], row)
 			}
 		}
-		for _, symbol := range Symbols(strings.TrimSuffix(strings.TrimPrefix(path, "vba/"), pathpkg.Ext(path)), string(files[path])) {
+		for _, symbol := range Symbols(strings.TrimSuffix(pathpkg.Base(path), pathpkg.Ext(path)), string(files[path])) {
 			if publicSymbol(symbol) {
 				publicNames[strings.ToLower(symbol.Name)] = true
 				publicByName[strings.ToLower(symbol.Name)] = append(publicByName[strings.ToLower(symbol.Name)], symbol)
@@ -483,7 +483,7 @@ func CheckInventory(root string, files map[string][]byte, diagnostics *[]map[str
 			if strings.HasPrefix(lower, "userform_") || (strings.Contains(symbol.Name, "_") && formEventSuffixes[strings.ToLower(symbol.Name[strings.LastIndexByte(symbol.Name, '_')+1:])]) {
 				controls := map[string]bool{}
 				designKnown := false
-				formName := strings.TrimSuffix(strings.TrimPrefix(path, "vba/"), pathpkg.Ext(path))
+				formName := strings.TrimSuffix(pathpkg.Base(path), pathpkg.Ext(path))
 				if raw, ok := files["forms/"+formName+".json"]; ok {
 					var design office.Design
 					if err := project.ReadJSON(raw, &design); err == nil {

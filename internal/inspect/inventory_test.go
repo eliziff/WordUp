@@ -108,7 +108,7 @@ func TestCheckInventoryReportsDerivedModuleName(t *testing.T) {
 	if _, err := project.New("DerivedModule", root); err != nil {
 		t.Fatal(err)
 	}
-	if err := project.Write(root, "vba/NoAttribute.bas", []byte("Option Explicit\nPublic Sub Run()\nEnd Sub\n"), ""); err != nil {
+	if err := project.Write(root, "vba/nested/NoAttribute.bas", []byte("Option Explicit\nPublic Sub Run()\nEnd Sub\n"), ""); err != nil {
 		t.Fatal(err)
 	}
 	w, err := project.Open(root)
@@ -122,7 +122,7 @@ func TestCheckInventoryReportsDerivedModuleName(t *testing.T) {
 	inventory := result["inventory"].(map[string]any)
 	modules := inventory["module_names"].([]map[string]any)
 	for _, module := range modules {
-		if module["file"] == "vba/NoAttribute.bas" && module["module"] == "NoAttribute" && module["derived"] == true {
+		if module["file"] == "vba/nested/NoAttribute.bas" && module["module"] == "NoAttribute" && module["derived"] == true {
 			return
 		}
 	}
