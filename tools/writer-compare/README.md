@@ -12,8 +12,9 @@ isolation.
 ## Git acceptance
 
 The editable workspace is the review/merge surface; DOTM is a built artifact.
-Preserve existing workspace compatibility: text VBA, XML, structured form design,
-separate assets and tests. Do not require agents to merge ZIP or binary VBA data.
+There is one source format: text VBA, exact extracted OOXML, persistent editable
+form source, separate assets and tests. Delete superseded formats instead of
+adding compatibility paths. Do not require agents to merge ZIP or binary VBA data.
 
 - Repeated imports of identical bytes produce identical editable source.
 - A no-op build does not modify tracked source, and preserves package content.
