@@ -34,3 +34,29 @@ func TestResolveDoesNotTreatOneBoldWordAsHeadingEmphasis(t *testing.T) {
 		}
 	}
 }
+
+func TestResolveRetainsAlternativesScoreAndContradictions(t *testing.T) {
+	row := map[string]any{
+		"context":                "body",
+		"text":                   "I. Introduction",
+		"style_id":               "Normal",
+		"marker_interpretations": []Interpretation{{Family: "roman_.", Value: 1}, {Family: "upper_alpha_.", Value: 9}},
+		"sequence_evidence":      Assignment{Family: "roman_.", Value: 1, Level: 1, Action: "open_level"},
+		"outline_evidence":       map[string]any{"level": 1},
+		"style_family_evidence":  map[string]any{"coherent": true, "corroborated_level": 2},
+	}
+	Resolve([]map[string]any{row})
+	resolved := row["resolved_structure"].(map[string]any)
+	if resolved["candidate_score"].(int) <= 0 || resolved["confidence"].(int) <= 0 {
+		t.Fatalf("missing score fields: %#v", resolved)
+	}
+	if resolved["ambiguous"] != true {
+		t.Fatalf("contradictory alternatives were not marked ambiguous: %#v", resolved)
+	}
+	if got, ok := resolved["alternatives"].([]Interpretation); !ok || len(got) != 2 {
+		t.Fatalf("marker alternatives were dropped: %#v", resolved["alternatives"])
+	}
+	if got, ok := resolved["contradictions"].([]string); !ok || len(got) != 1 {
+		t.Fatalf("contradictions were dropped: %#v", resolved["contradictions"])
+	}
+}

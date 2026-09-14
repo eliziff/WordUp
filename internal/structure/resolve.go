@@ -19,7 +19,7 @@ func Resolve(rows []map[string]any) map[string]any {
 		score, level := 0, 0
 		evidence := []string{}
 		if role := semanticRole(row); role != "" {
-			resolved := map[string]any{"role": role, "confidence": 100, "evidence": []string{"semantic-style-or-context"}}
+			resolved := map[string]any{"role": role, "candidate_score": 100, "confidence": 100, "evidence": []string{"semantic-style-or-context"}}
 			if role == "quotation" || role == "abstract" {
 				attachParent(resolved, rows, parents)
 			}
@@ -27,11 +27,11 @@ func Resolve(rows []map[string]any) map[string]any {
 			continue
 		}
 		if role := frontMatter[i]; role != "" {
-			row["resolved_structure"] = map[string]any{"role": role, "confidence": 85, "evidence": []string{"front-matter-layout"}}
+			row["resolved_structure"] = map[string]any{"role": role, "candidate_score": 85, "confidence": 85, "evidence": []string{"front-matter-layout"}}
 			continue
 		}
 		if context != "body" || strings.TrimSpace(text) == "" {
-			resolved := map[string]any{"role": fallbackRole(context, text), "confidence": 100, "evidence": evidence}
+			resolved := map[string]any{"role": fallbackRole(context, text), "candidate_score": score, "confidence": 100, "evidence": evidence}
 			if resolved["role"] != "blank" {
 				attachParent(resolved, rows, parents)
 			}
@@ -120,7 +120,12 @@ func Resolve(rows []map[string]any) map[string]any {
 			score -= 18
 			evidence = append(evidence, "sentence-ending")
 		}
-		ambiguous := false
+		alternatives := markerAlternatives(row)
+		contradictions := structureContradictions(row)
+		ambiguous := len(alternatives) > 1 || len(contradictions) > 0
+		if len(alternatives) > 1 {
+			evidence = append(evidence, "ambiguous-marker")
+		}
 		role := "body"
 		if level > 0 && score >= 35 {
 			role = "heading"
@@ -132,9 +137,13 @@ func Resolve(rows []map[string]any) map[string]any {
 					break
 				}
 			}
-			resolved := map[string]any{"role": role, "level": level, "parent_paragraph": parent, "confidence": clamp(score), "evidence": evidence}
+			resolved := map[string]any{"role": role, "level": level, "parent_paragraph": parent, "candidate_score": score, "confidence": clamp(score), "ambiguous": ambiguous, "evidence": evidence}
+			addResolutionAlternatives(resolved, alternatives, contradictions)
 			if parent > 0 {
 				resolved["parent_source_id"] = rows[parent-1]["source_id"]
+			}
+			if ambiguous {
+				ambiguities++
 			}
 			row["resolved_structure"] = resolved
 			parents[level] = i + 1
@@ -147,17 +156,43 @@ func Resolve(rows []map[string]any) map[string]any {
 			role = "candidate"
 			ambiguous = true
 			candidates++
-			ambiguities++
 		}
 		if row["structure_contradiction"] != nil {
 			ambiguous = true
+		}
+		if ambiguous {
 			ambiguities++
 		}
-		resolved := map[string]any{"role": role, "level": level, "confidence": clamp(score), "ambiguous": ambiguous, "evidence": evidence}
+		resolved := map[string]any{"role": role, "level": level, "candidate_score": score, "confidence": clamp(score), "ambiguous": ambiguous, "evidence": evidence}
+		addResolutionAlternatives(resolved, alternatives, contradictions)
 		attachParent(resolved, rows, parents)
 		row["resolved_structure"] = resolved
 	}
 	return map[string]any{"contract_version": ContractVersion, "paragraphs": len(rows), "headings": headings, "candidates": candidates, "ambiguities": ambiguities, "editorial_hierarchy_verified": false}
+}
+
+func markerAlternatives(row map[string]any) []Interpretation {
+	choices, ok := row["marker_interpretations"].([]Interpretation)
+	if !ok || len(choices) == 0 {
+		return nil
+	}
+	return append([]Interpretation(nil), choices...)
+}
+
+func structureContradictions(row map[string]any) []string {
+	if text := stringValue(row["structure_contradiction"]); text != "" {
+		return []string{text}
+	}
+	return nil
+}
+
+func addResolutionAlternatives(resolved map[string]any, alternatives []Interpretation, contradictions []string) {
+	if len(alternatives) > 0 {
+		resolved["alternatives"] = alternatives
+	}
+	if len(contradictions) > 0 {
+		resolved["contradictions"] = contradictions
+	}
 }
 
 func frontMatterRoles(rows []map[string]any) map[int]string {
