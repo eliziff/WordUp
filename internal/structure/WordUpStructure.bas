@@ -22,44 +22,75 @@ Public Const WU_COLUMNS As Long = 13
 ' This procedure reads the document and never edits it.
 Public Function WU_DetectStructure(ByVal document As Document) As Variant
     Dim paragraphs As Paragraphs, count As Long, result() As Variant
-    Dim i As Long, paragraph As Paragraph, scope As Range, text As String
+    Dim i As Long, paragraph As Paragraph, scope As Range, text As String, rawText As String
     Dim marker As String, label As String, style As String, context As String
     Dim score As Long, level As Long, outline As Long, evidence As String, parentAt(1 To 9) As Long
-    Set paragraphs = document.StoryRanges(wdMainTextStory).Paragraphs
+    Dim hasLists As Boolean, hasTables As Boolean, plausible As Boolean
+    Dim headingStyle As Boolean, keepNext As Boolean, upperText As Boolean
+    Dim story As Range, pieces As Variant, position As Long, startPosition As Long, endPosition As Long
+    Dim starts() As Long, ends() As Long, texts() As String
+    Set story = document.StoryRanges(wdMainTextStory): Set paragraphs = story.Paragraphs
     count = paragraphs.count
     If count > 20000 Then Err.Raise 5, "WU_DetectStructure", "paragraph limit exceeds 20000"
     If count = 0 Then WU_DetectStructure = Array(): Exit Function
     ReDim result(0 To count - 1, 0 To WU_COLUMNS - 1)
+    hasLists = (document.Lists.count > 0): hasTables = (document.Tables.count > 0)
+    If Not hasTables Then
+        pieces = Split(story.text, vbCr): position = story.Start
+        ReDim starts(0 To count - 1): ReDim ends(0 To count - 1)
+        ReDim texts(0 To count - 1)
+        For i = 0 To count - 1
+            rawText = CStr(pieces(i)): starts(i) = position
+            ends(i) = position + Len(rawText) + 1: position = ends(i)
+            texts(i) = WU_CleanText(rawText)
+        Next i
+    End If
     i = 0
     For Each paragraph In paragraphs
         i = i + 1
-        Set scope = paragraph.Range
-        text = WU_CleanText(scope.text): style = CStr(paragraph.Style.NameLocal)
+        Set scope = Nothing
+        If hasTables Then
+            Set scope = paragraph.Range: rawText = scope.text
+            startPosition = scope.Start: endPosition = scope.End
+            text = WU_CleanText(rawText): style = CStr(paragraph.Style)
+        Else
+            text = texts(i - 1): style = CStr(paragraph.Style)
+            startPosition = starts(i - 1): endPosition = ends(i - 1)
+        End If
         marker = WU_ParseMarker(text): label = vbNullString
-        If scope.ListFormat.ListType <> wdListNoNumbering Then label = scope.ListFormat.ListString
-        context = "body": If scope.Information(wdWithInTable) Then context = "table"
+        If hasLists Then
+            If scope Is Nothing Then Set scope = paragraph.Range
+            If scope.ListFormat.ListType <> wdListNoNumbering Then label = scope.ListFormat.ListString
+        End If
+        context = "body": If hasTables Then If scope.Information(wdWithInTable) Then context = "table"
         score = 0: level = 0: evidence = vbNullString
         If context = "body" And Len(Trim$(text)) > 0 Then
-            outline = paragraph.OutlineLevel
-            If outline >= 1 And outline <= 9 Then
-                level = outline: score = score + 100: WU_AddEvidence evidence, "native-outline"
-            End If
-            If WU_HeadingStyle(style) Then score = score + 35: WU_AddEvidence evidence, "heading-style"
-            If Len(marker) > 0 Then score = score + 30: WU_AddEvidence evidence, "marker:" & marker
-            If Len(text) <= 160 Then score = score + 8 Else score = score - 25
-            If paragraph.KeepWithNext <> 0 Then score = score + 8: WU_AddEvidence evidence, "keep-next"
-            If Len(text) <= 160 Or level > 0 Or Len(marker) > 0 Or score >= 35 Then
+            headingStyle = WU_HeadingStyle(style)
+            upperText = (Len(text) <= 160 And WU_UpperShare(text) >= 0.8)
+            plausible = (Len(marker) > 0 Or headingStyle Or upperText Or (Len(text) <= 160 And Not WU_SentenceEnding(text)))
+            keepNext = False
+            If plausible Then
+                outline = paragraph.OutlineLevel
+                If outline >= 1 And outline <= 9 Then
+                    level = outline: score = score + 100: WU_AddEvidence evidence, "native-outline"
+                End If
+                If scope Is Nothing Then Set scope = paragraph.Range
+                keepNext = (paragraph.KeepWithNext <> 0)
+                If keepNext Then score = score + 8: WU_AddEvidence evidence, "keep-next"
+                If upperText Then score = score + 8: WU_AddEvidence evidence, "uppercase-text"
                 ' wdUndefined is mixed formatting, not affirmative evidence.
                 If scope.Bold = True Then score = score + 8: WU_AddEvidence evidence, "aggregate-bold"
                 If scope.Font.SmallCaps = True Or scope.Font.AllCaps = True Then score = score + 8: WU_AddEvidence evidence, "aggregate-caps"
-                If WU_UpperShare(text) >= 0.8 Then score = score + 8: WU_AddEvidence evidence, "uppercase-text"
             End If
+            If headingStyle Then score = score + 35: WU_AddEvidence evidence, "heading-style"
+            If Len(marker) > 0 Then score = score + 30: WU_AddEvidence evidence, "marker:" & marker
+            If Len(text) <= 160 Then score = score + 8 Else score = score - 25
             If Len(label) > 0 And Len(marker) = 0 And level = 0 Then score = score - 20: WU_AddEvidence evidence, "ordinary-list-risk"
             If WU_SentenceEnding(text) And level = 0 And Len(marker) = 0 Then score = score - 18: WU_AddEvidence evidence, "sentence-ending"
             WU_CustomizeCandidate paragraph, score, level, evidence
         End If
         result(i - 1, WU_STYLE) = style: result(i - 1, WU_TEXT) = text
-        result(i - 1, WU_START) = scope.Start: result(i - 1, WU_END) = scope.End
+        result(i - 1, WU_START) = startPosition: result(i - 1, WU_END) = endPosition
         result(i - 1, WU_MARKER) = marker: result(i - 1, WU_LIST_LABEL) = label
         result(i - 1, WU_CONTEXT) = context: result(i - 1, WU_EVIDENCE) = evidence
         result(i - 1, WU_CONFIDENCE) = score: result(i - 1, WU_LEVEL) = level

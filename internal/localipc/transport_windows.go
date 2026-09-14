@@ -137,4 +137,6 @@ func dial(ctx context.Context, address string) (io.ReadWriteCloser, error) {
 		}
 	}
 }
-func detach(cmd *exec.Cmd) { cmd.SysProcAttr = &syscall.SysProcAttr{CreationFlags: 0x08000000} }
+func detach(cmd *exec.Cmd) {
+	cmd.SysProcAttr = &syscall.SysProcAttr{CreationFlags: 0x08000000 | 0x00004000} // CREATE_NO_WINDOW | BELOW_NORMAL_PRIORITY_CLASS
+}

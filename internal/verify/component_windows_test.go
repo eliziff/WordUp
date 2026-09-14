@@ -81,7 +81,7 @@ const structureProof = `Attribute VB_Name = "StructureProof"
 Option Explicit
 Public Function Check() As Variant
     Dim d As Document, r As Variant, before As String, mixed As Range
-    Dim i As Long, text As String, started As Single, elapsed As Single
+    Dim i As Long, lines(1 To 1400) As String, started As Single, elapsed As Single
     Set d = Documents.Add
     d.Content.Text = "First heading" & vbCr & "Second heading" & vbCr & "Ordinary body sentence." & vbCr & "Mixed emphasis text" & vbCr & "THIRD HEADING"
     d.Content.Style = wdStyleNormal
@@ -107,10 +107,8 @@ Public Function Check() As Variant
     d.Paragraphs(2).OutlineLevel = 2
     r = WU_DetectStructure(d)
     If InStr(r(4, WU_EVIDENCE), "coherent-style-family") > 0 Then Err.Raise 5, , "conflicting style votes accepted"
-    For i = 1 To 1400
-        text = text & "Ordinary manuscript text with no heading evidence." & vbCr
-    Next i
-    d.Content.Text = text
+    For i = 1 To 1400: lines(i) = "Ordinary manuscript text with no heading evidence.": Next i
+    d.Content.Text = Join(lines, vbCr)
     d.Content.Style = wdStyleNormal
     d.Content.ParagraphFormat.OutlineLevel = wdOutlineLevelBodyText
     started = Timer
