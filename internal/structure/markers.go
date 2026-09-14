@@ -9,14 +9,20 @@ import (
 var namedHeadingPrefix = regexp.MustCompile(`^\s*((?i:part|chapter|theme|section|article|appendix|schedule|division|book|title))\s+((?i:[IVXLCDM]){1,7}|[A-Za-z]|[0-9]{1,3}|(?i:one|two|three|four|five|six|seven|eight|nine|ten))\s*([:\-\x{2013}\x{2014}])\s*(.+)$`)
 
 var headingPrefix = regexp.MustCompile(`^\s*(?:(?i:part|chapter)\s+)?((?i:[IVXLCDM]){1,7}|[A-Za-z]|[0-9]{1,3})([.)]|\s*[-\x{2013}\x{2014}])\s+(.+)$`)
+var parenthesizedHeadingPrefix = regexp.MustCompile(`^\s*\(((?i:[IVXLCDM]){1,7}|[A-Za-z]|[0-9]{1,3})\)\s+(.+)$`)
 
 // MarkerChoices retains ambiguous Roman/letter interpretations. It recognizes
 // candidates only; prose, lists and quoted instruments can have these prefixes.
 func MarkerChoices(text string) []Interpretation {
 	parts := namedHeadingPrefix.FindStringSubmatch(text)
 	named := parts != nil
+	parenthesized := false
 	if !named {
 		parts = headingPrefix.FindStringSubmatch(text)
+		if parts == nil {
+			parts = parenthesizedHeadingPrefix.FindStringSubmatch(text)
+			parenthesized = parts != nil
+		}
 	}
 	if parts == nil {
 		return nil
@@ -28,6 +34,8 @@ func MarkerChoices(text string) []Interpretation {
 		// legitimately nest Part, Chapter, and Appendix sequences; merging
 		// them makes a restart look like a malformed counter.
 		punct = namedPrefix + "_named_section"
+	} else if parenthesized {
+		punct = ")"
 	}
 	if n, err := strconv.Atoi(value); err == nil {
 		if n > 0 {

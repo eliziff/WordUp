@@ -81,3 +81,17 @@ func TestPartAndChapterKeepSeparateFamilies(t *testing.T) {
 		t.Fatalf("separate named ladders did not nest predictably: %#v", got)
 	}
 }
+
+func TestParenthesizedMarkersRemainEvidence(t *testing.T) {
+	upper := MarkerChoices("(A) Sources")
+	if len(upper) != 1 || upper[0].Family != "upper_alpha_)" || upper[0].Value != 1 {
+		t.Fatalf("parenthesized alpha marker was not recognized: %#v", upper)
+	}
+	lower := MarkerChoices("(iv) Scope")
+	if len(lower) != 1 || lower[0].Family != "roman_)" || lower[0].Value != 4 {
+		t.Fatalf("parenthesized Roman marker was not recognized: %#v", lower)
+	}
+	if got := MarkerChoices("(1.5 percent)"); len(got) != 0 {
+		t.Fatalf("decimal prose was treated as a parenthesized marker: %#v", got)
+	}
+}

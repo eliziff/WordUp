@@ -1,7 +1,7 @@
 Attribute VB_Name = "WordUpStructure"
 Option Explicit
 
-' WordUp structure contract 1.2.3. MIT licensed; editable and dependency-free.
+' WordUp structure contract 1.2.4. MIT licensed; editable and dependency-free.
 ' Detection is separate from publication-specific style mapping.
 Public Const WU_ROLE As Long = 0
 Public Const WU_LEVEL As Long = 1
@@ -335,22 +335,28 @@ Public Function WU_ParseMarker(ByVal text As String) As String
             If IsNumeric(prefix) Or WU_WordNumber(prefix) > 0 Or WU_IsRoman(prefix) Or (Len(prefix) = 1 And LCase$(prefix) >= "a" And LCase$(prefix) <= "z") Then WU_ParseMarker = "named:" & LCase$(namedKind) & ":" & prefix: Exit Function
         End If
     End If
-    at = InStr(text, ".")
-    If at >= 2 And at <= 8 And Left$(Mid$(text, at + 1), 1) = " " Then
-        prefix = Left$(text, at - 1): rest = Mid$(text, at + 1)
-    Else
+    If Left$(text, 1) = "(" Then
         at = InStr(text, ")")
+        If at < 3 Or at > 9 Or Left$(Mid$(text, at + 1), 1) <> " " Then Exit Function
+        prefix = Mid$(text, 2, at - 2): rest = Mid$(text, at + 1)
+    Else
+        at = InStr(text, ".")
         If at >= 2 And at <= 8 And Left$(Mid$(text, at + 1), 1) = " " Then
             prefix = Left$(text, at - 1): rest = Mid$(text, at + 1)
         Else
-            at = 0
-            For Each candidate In Array("-", ChrW(&H2013), ChrW(&H2014))
-                dashAt = InStr(text, CStr(candidate))
-                If dashAt >= 2 And dashAt <= 8 And Left$(Mid$(text, dashAt + 1), 1) = " " Then
-                    at = dashAt: prefix = Trim$(Left$(text, at - 1)): rest = Mid$(text, at + 1): Exit For
-                End If
-            Next candidate
-            If at = 0 Then Exit Function
+            at = InStr(text, ")")
+            If at >= 2 And at <= 8 And Left$(Mid$(text, at + 1), 1) = " " Then
+                prefix = Left$(text, at - 1): rest = Mid$(text, at + 1)
+            Else
+                at = 0
+                For Each candidate In Array("-", ChrW(&H2013), ChrW(&H2014))
+                    dashAt = InStr(text, CStr(candidate))
+                    If dashAt >= 2 And dashAt <= 8 And Left$(Mid$(text, dashAt + 1), 1) = " " Then
+                        at = dashAt: prefix = Trim$(Left$(text, at - 1)): rest = Mid$(text, at + 1): Exit For
+                    End If
+                Next candidate
+                If at = 0 Then Exit Function
+            End If
         End If
     End If
     If Len(Trim$(rest)) = 0 Or InStr(prefix, " ") > 0 Then Exit Function
