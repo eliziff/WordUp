@@ -55,6 +55,15 @@ agent session; external source, evidence, or artifact changes invalidate it and
 force a real build. Independent verification still hashes source, package parts,
 and CFB streams outside the timed operation.
 
+A 2026-09-14 run on the supplied complex macro fixture measured 27.72 ms for
+unchanged forced rebuilds, 54.04 ms for a module edit, 58.90 ms for a class add,
+and 58.93 ms for a form-caption edit; same-output cache warm medians were
+2.07, 2.12, 2.92, and 1.99 ms respectively. The direct Go package lane was
+39.35 ms for a module edit and 38.43 ms for a class add. The form-font lane
+varied from 1.6 to 628.0 ms under the same run, so it remains a machine-load
+observation rather than a gate. No language or cutover conclusion follows from
+one run; the measurements identify which path deserves further profiling.
+
 The older pyOpenVBA comparison is historical evidence, not a current gate: this
 checkout does not contain a separate repository at the pinned revision, so no
 current cross-language result is claimed. When that oracle is available, run
