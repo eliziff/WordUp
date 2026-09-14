@@ -85,12 +85,19 @@ Public Sub WU_RibbonCommand(ByVal control As Object)
     Application.Run WU_QualifiedMacro(macroName)
 End Sub
 Private Function WU_RibbonMacroName(ByVal controlID As String) As String
-    Dim i As Long, character As String, value As String
+    Dim i As Long, character As String, value As String, code As Long
     value = "WU_Command_"
     For i = 1 To Len(controlID)
         character = Mid$(controlID, i, 1)
-        If character Like "[A-Za-z0-9_]" Then value = value & character Else value = value & "_"
+        If character Like "[A-Za-z0-9]" Then
+            value = value & character
+        Else
+            code = AscW(character)
+            If code < 0 Then code = code + 65536
+            value = value & "_x" & Right$("0000" & Hex$(code), 4) & "_"
+        End If
     Next i
+    If Len(value) > 240 Then Err.Raise 5, "WU_RibbonMacroName", "control id is too long for a VBA callback name"
     WU_RibbonMacroName = value
 End Function
 Private Function WU_QualifiedMacro(ByVal macroName As String) As String

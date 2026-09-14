@@ -138,10 +138,13 @@ End Function
 
 const componentProof = `Attribute VB_Name = "Proof"
 Option Explicit
-Private WU_Dispatched As Boolean
+Private WU_Dispatched As Long
 Public WU_FormShown As Boolean
-Public Sub WU_Command_proof_button()
-    WU_Dispatched = True
+Public Sub WU_Command_proof_x002D_button()
+    WU_Dispatched = WU_Dispatched Or 1
+End Sub
+Public Sub WU_Command_proof_x005F_button()
+    WU_Dispatched = WU_Dispatched Or 2
 End Sub
 Public Function CheckRibbonAndProgress() As String
     Dim control As New ProofControl, i As Long, started As Single, elapsed As Single
@@ -157,9 +160,12 @@ Public Function CheckRibbonAndProgress() As String
     ProofProgress_RequestCancel
     If Not ProofProgress_CancelRequested Then Err.Raise 5, , "cancellation request was lost"
     control.Id = "proof-button"
-    WU_Dispatched = False
+    WU_Dispatched = 0
     WU_RibbonCommand control
-    If Not WU_Dispatched Then Err.Raise 5, , "Ribbon command was not dispatched"
+    If WU_Dispatched <> 1 Then Err.Raise 5, , "hyphenated Ribbon control ID was not dispatched independently"
+    control.Id = "proof_button"
+    WU_RibbonCommand control
+    If WU_Dispatched <> 3 Then Err.Raise 5, , "underscore Ribbon control ID collided with another control"
     CheckRibbonAndProgress = "PASS"
 End Function
 Public Function CheckFormShell() As String
