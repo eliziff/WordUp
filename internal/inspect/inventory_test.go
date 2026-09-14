@@ -72,3 +72,33 @@ func TestCheckInventoryReportsWiringAndModifiedComponent(t *testing.T) {
 		t.Fatal("modified component did not produce a wiring diagnostic")
 	}
 }
+
+func TestCheckInventoryReportsDuplicateModuleNames(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "workspace")
+	if _, err := project.New("DuplicateModules", root); err != nil {
+		t.Fatal(err)
+	}
+	for name := range map[string]bool{"vba/First.bas": true, "vba/Second.bas": true} {
+		if err := project.Write(root, name, []byte("Attribute VB_Name = \"SameModule\"\nOption Explicit\n"), ""); err != nil {
+			t.Fatal(err)
+		}
+	}
+	w, err := project.Open(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := Check(w)
+	if err != nil {
+		t.Fatal(err)
+	}
+	inventory := result["inventory"].(map[string]any)
+	if modules := inventory["module_names"].([]map[string]any); len(modules) != 3 {
+		t.Fatalf("module inventory=%#v", modules)
+	}
+	for _, diagnostic := range result["diagnostics"].([]map[string]any) {
+		if diagnostic["message"] == "duplicate VBA module name: samemodule" {
+			return
+		}
+	}
+	t.Fatal("duplicate module diagnostic missing")
+}

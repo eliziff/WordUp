@@ -362,11 +362,24 @@ func installedComponentInventory(root string, diagnostics *[]map[string]any) []m
 
 func CheckInventory(root string, files map[string][]byte, diagnostics *[]map[string]any) map[string]any {
 	paths := vbaSourceFiles(files)
+	moduleByName := map[string][]map[string]any{}
+	moduleNames := []map[string]any{}
 	publicNames := map[string]bool{}
 	publicByName := map[string][]Symbol{}
 	publicMacros := []map[string]any{}
 	formEvents := []map[string]any{}
+	orderedPaths := make([]string, 0, len(paths))
 	for _, path := range paths {
+		orderedPaths = append(orderedPaths, path)
+	}
+	sort.Strings(orderedPaths)
+	for _, path := range orderedPaths {
+		if name, line, ok := component.ModuleName(string(files[path])); ok {
+			row := map[string]any{"file": path, "module": name, "line": line}
+			moduleNames = append(moduleNames, row)
+			key := strings.ToLower(name)
+			moduleByName[key] = append(moduleByName[key], row)
+		}
 		for _, symbol := range Symbols(strings.TrimSuffix(strings.TrimPrefix(path, "vba/"), pathpkg.Ext(path)), string(files[path])) {
 			if publicSymbol(symbol) {
 				publicNames[strings.ToLower(symbol.Name)] = true
@@ -409,15 +422,34 @@ func CheckInventory(root string, files map[string][]byte, diagnostics *[]map[str
 		}
 		return formEvents[i]["file"].(string) < formEvents[j]["file"].(string)
 	})
-	for name, symbols := range publicByName {
+	publicNamesSorted := make([]string, 0, len(publicByName))
+	for name := range publicByName {
+		publicNamesSorted = append(publicNamesSorted, name)
+	}
+	sort.Strings(publicNamesSorted)
+	for _, name := range publicNamesSorted {
+		symbols := publicByName[name]
 		if len(symbols) > 1 {
 			*diagnostics = append(*diagnostics, map[string]any{"severity": "error", "message": "duplicate public procedure name: " + name, "name": name, "locations": symbols})
 		}
 	}
+	moduleNamesSorted := make([]string, 0, len(moduleByName))
+	for name := range moduleByName {
+		moduleNamesSorted = append(moduleNamesSorted, name)
+	}
+	sort.Strings(moduleNamesSorted)
+	for _, name := range moduleNamesSorted {
+		modules := moduleByName[name]
+		if len(modules) > 1 {
+			*diagnostics = append(*diagnostics, map[string]any{"severity": "error", "message": "duplicate VBA module name: " + name, "module": name, "locations": modules})
+		}
+	}
+	sort.Slice(moduleNames, func(i, j int) bool { return moduleNames[i]["file"].(string) < moduleNames[j]["file"].(string) })
 	components := installedComponentInventory(root, diagnostics)
 	menus := lineRegistrations(files, contextMenuRegistration, "VBA context-menu registration")
 	menus = append(menus, ribbonContextMenus(files)...)
 	return map[string]any{
+		"module_names":               moduleNames,
 		"public_macros":              publicMacros,
 		"form_events":                formEvents,
 		"ribbon_callbacks":           ribbonInventory(files, publicNames),

@@ -775,6 +775,13 @@ func vbaModuleName(lines []string) (string, int) {
 	return "", 0
 }
 
+// ModuleName returns the exported VBA module name and its Attribute line.
+// Callers use it for source-only diagnostics before Word compilation.
+func ModuleName(source string) (string, int, bool) {
+	name, line := vbaModuleName(strings.Split(strings.ReplaceAll(source, "\r\n", "\n"), "\n"))
+	return name, line, name != ""
+}
+
 func vbaCodeLine(line string) string {
 	quoted := false
 	for i := 0; i < len(line); i++ {
