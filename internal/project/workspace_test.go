@@ -59,6 +59,27 @@ func TestWorkspaceManifestHasOneCurrentShape(t *testing.T) {
 	}
 }
 
+func TestSourceDirectoryRejectsCaseVariant(t *testing.T) {
+	w := newWorkspace(t)
+	original := filepath.Join(w.Root, "vba")
+	temporary := filepath.Join(w.Root, ".vba-case-rename")
+	if err := os.Rename(original, temporary); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Rename(temporary, filepath.Join(w.Root, "VBA")); err != nil {
+		t.Fatal(err)
+	}
+	for name, check := range map[string]func() error{
+		"source files":  func() error { _, err := w.SourceFiles(); return err },
+		"source stamps": func() error { _, err := sourceStamps(w.Root, nil); return err },
+	} {
+		err := check()
+		if err == nil || !strings.Contains(err.Error(), `workspace source directory must be named "vba" (found "VBA")`) {
+			t.Errorf("%s accepted case-variant source directory: %v", name, err)
+		}
+	}
+}
+
 func TestImportBuildPreservesCaseDistinctPackageParts(t *testing.T) {
 	p := office.BlankPackage()
 	p.Files["customXml/item1.xml"] = []byte(`<item xmlns="urn:one"/>`)

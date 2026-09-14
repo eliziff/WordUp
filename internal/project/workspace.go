@@ -426,11 +426,41 @@ var sourceDirectories = []string{"package", "vba", "forms", "assets"}
 
 const componentLockSource = ".wordwright/components.json"
 
+// sourceDirectory returns the canonical source directory and rejects a
+// case-variant or non-directory entry. Windows resolves those names to the
+// same path while the in-memory source map and package writer use canonical,
+// case-sensitive prefixes; accepting a variant would therefore make source
+// files silently disappear from check/build.
+func sourceDirectory(root, top string) (string, error) {
+	entries, err := os.ReadDir(root)
+	if err != nil {
+		return "", err
+	}
+	for _, entry := range entries {
+		if !strings.EqualFold(entry.Name(), top) {
+			continue
+		}
+		if entry.Name() != top {
+			return "", fmt.Errorf("workspace source directory must be named %q (found %q)", top, entry.Name())
+		}
+		if !entry.IsDir() {
+			return "", fmt.Errorf("workspace source directory is not a directory: %s", top)
+		}
+	}
+	return filepath.Join(root, top), nil
+}
+
 func (w *Workspace) SourceFiles() (map[string][]byte, error) {
 	out := map[string][]byte{}
 	total := 0
 	for _, top := range sourceDirectories {
-		base := filepath.Join(w.Root, top)
+		base, err := sourceDirectory(w.Root, top)
+		if os.IsNotExist(err) {
+			continue
+		}
+		if err != nil {
+			return nil, err
+		}
 		e := filepath.WalkDir(base, func(p string, d fs.DirEntry, e error) error {
 			if os.IsNotExist(e) {
 				return nil
@@ -578,7 +608,13 @@ func sourceStamps(root string, previous map[string]fileStamp) (map[string]fileSt
 		return nil, err
 	}
 	for _, top := range sourceDirectories {
-		base := filepath.Join(root, top)
+		base, dirErr := sourceDirectory(root, top)
+		if os.IsNotExist(dirErr) {
+			continue
+		}
+		if dirErr != nil {
+			return nil, dirErr
+		}
 		err := filepath.WalkDir(base, func(path string, entry fs.DirEntry, err error) error {
 			if os.IsNotExist(err) {
 				return nil
