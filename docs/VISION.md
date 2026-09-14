@@ -60,6 +60,14 @@ These are engineering gaps to close, not permission to weaken the product.
 Historical evidence in `evidence/` and `VALIDATION.md` is retained unchanged and
 does not certify the renamed or subsequently modified executable.
 
+Agents work in two loops. The inner loop edits source and runs the smallest
+deterministic offline or warm-session check that can reject the change. The
+outer loop deliberately pays for process isolation, fresh Word startup,
+compilation, signing, rendering, full-corpus coverage and release acceptance.
+Reports attribute time to those boundaries so a slow inner loop cannot hide
+inside an aggregate suite. Timeouts contain failures; they are not performance
+targets and must not be raised in place of diagnosing unexpected latency.
+
 ## Current status (0.3.0)
 
 The starting gaps above describe the imported preview. Windows native compilation, forms, Ribbon, rendering, containment and latency now have real evidence. Login recovery and guarded restore have native delivery evidence. See VALIDATION-WINDOWS.md and LIMITS.md for current coverage and remaining gaps. Optional human pointing/feedback, improved manuscript heading recovery and Mac parity remain future work.
