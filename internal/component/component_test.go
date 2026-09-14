@@ -1,6 +1,7 @@
 package component
 
 import (
+	"bytes"
 	"github.com/eliziff/WordUp/internal/office"
 	"github.com/eliziff/WordUp/internal/project"
 	"github.com/eliziff/WordUp/internal/vbaparse"
@@ -260,12 +261,20 @@ func TestAllBundledComponentsInstallWithoutCollisions(t *testing.T) {
 
 func TestLocalBundleInstallsAndDiffsWithoutEmbeddingSource(t *testing.T) {
 	bundle, root := t.TempDir(), t.TempDir()
-	manifest := Manifest{Schema: 1, ID: "example.local", Version: "1.2.3", License: "MIT", Provenance: "local test bundle", Files: []File{{Path: "vba/Local.bas"}}}
+	manifest := Manifest{Schema: 1, ID: "example.local", Version: "1.2.3", License: "MIT", Provenance: "local test bundle", Files: []File{{Path: "vba/Local.bas"}, {Path: "assets/icon.bin"}}}
 	if err := project.Write(bundle, "component.json", project.JSON(manifest), ""); err != nil {
 		t.Fatal(err)
 	}
 	if err := project.Write(bundle, "vba/Local.bas", []byte("Attribute VB_Name = \"Local\"\nOption Explicit\n"), ""); err != nil {
 		t.Fatal(err)
+	}
+	icon := []byte{0, 1, 2, 255, 0}
+	if err := project.Write(bundle, "assets/icon.bin", icon, ""); err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := LoadBundle(bundle)
+	if err != nil || !loaded.Files[1].Binary || !bytes.Equal(loaded.Files[1].data, icon) {
+		t.Fatalf("binary bundle source was not preserved: %#v (%v)", loaded.Files, err)
 	}
 	installed, err := AddBundle(root, bundle)
 	if err != nil {
@@ -273,6 +282,9 @@ func TestLocalBundleInstallsAndDiffsWithoutEmbeddingSource(t *testing.T) {
 	}
 	if installed.ID != manifest.ID || installed.Provenance != manifest.Provenance {
 		t.Fatalf("wrong installed provenance: %#v", installed)
+	}
+	if actual, err := project.Read(root, "assets/icon.bin"); err != nil || !bytes.Equal(actual, icon) {
+		t.Fatalf("binary source was not installed unchanged: %v", err)
 	}
 	if _, err = AddBundle(root, bundle); err != nil {
 		t.Fatal("unchanged local bundle is not idempotent:", err)

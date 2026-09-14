@@ -2,6 +2,7 @@
 package component
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/eliziff/WordUp/internal/office"
 	"github.com/eliziff/WordUp/internal/project"
@@ -14,13 +15,16 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"unicode/utf8"
 )
 
 const lockPath = ".wordwright/components.json"
 
 type File struct {
-	Path string `json:"path"`
-	Text string `json:"text,omitempty"`
+	Path   string `json:"path"`
+	Text   string `json:"text,omitempty"`
+	Binary bool   `json:"binary,omitempty"`
+	data   []byte
 }
 type RibbonMerge struct {
 	Source string `json:"source"`
@@ -179,26 +183,36 @@ func LoadBundle(dir string) (Manifest, error) {
 		return Manifest{}, fmt.Errorf("component.json requires schema 1, id, version, license, provenance, and files")
 	}
 	for i := range m.Files {
-		if m.Files[i].Path == "" || m.Files[i].Text != "" {
-			return Manifest{}, fmt.Errorf("component.json file %d requires path and must not embed text", i)
+		if m.Files[i].Path == "" || m.Files[i].Text != "" || m.Files[i].Binary {
+			return Manifest{}, fmt.Errorf("component.json file %d requires a path and must not embed source or binary data", i)
 		}
-		m.Files[i].Text, err = readBundleText(dir, m.Files[i].Path)
+		data, readErr := readBundleData(dir, m.Files[i].Path)
+		err = readErr
 		if err != nil {
 			return Manifest{}, fmt.Errorf("component file %s: %w", m.Files[i].Path, err)
+		}
+		if utf8.Valid(data) && !bytes.Contains(data, []byte{0}) {
+			m.Files[i].Text = string(data)
+		} else {
+			if !strings.HasPrefix(strings.ToLower(filepath.ToSlash(m.Files[i].Path)), "assets/") {
+				return Manifest{}, fmt.Errorf("component file %s is binary; binary component sources must live under assets/", m.Files[i].Path)
+			}
+			m.Files[i].Binary = true
+			m.Files[i].data = data
 		}
 	}
 	return m, nil
 }
 
-func readBundleText(root, path string) (string, error) {
-	b, err := project.Read(root, path)
-	if err != nil {
-		return "", err
+func readBundleData(root, path string) ([]byte, error) {
+	return project.Read(root, path)
+}
+
+func fileData(file File) []byte {
+	if file.Binary {
+		return file.data
 	}
-	if strings.IndexByte(string(b), 0) >= 0 {
-		return "", fmt.Errorf("bundled editable source contains NUL bytes")
-	}
-	return string(b), nil
+	return []byte(file.Text)
 }
 
 func AddBundle(root, dir string) (Installed, error) {
@@ -409,7 +423,7 @@ func install(root string, m Manifest) (Installed, error) {
 		}
 		same := len(prior.Files) == len(m.Files)
 		for _, f := range m.Files {
-			same = same && prior.Files[f.Path] == office.Hash([]byte(f.Text))
+			same = same && prior.Files[f.Path] == office.Hash(fileData(f))
 		}
 		if status["state"] == "clean" && prior.Version == m.Version && same && maps.Equal(prior.Parameters, m.applied) && slices.Equal(prior.RibbonMerges, m.RibbonMerges) {
 			return prior, nil
@@ -434,7 +448,7 @@ func install(root string, m Manifest) (Installed, error) {
 		} else if !os.IsNotExist(err) {
 			return Installed{}, err
 		}
-		installed.Files[f.Path] = office.Hash([]byte(f.Text))
+		installed.Files[f.Path] = office.Hash(fileData(f))
 	}
 	if err := validateRibbonMerges(root, id, m); err != nil {
 		return Installed{}, err
@@ -473,7 +487,7 @@ func install(root string, m Manifest) (Installed, error) {
 		if createErr != nil {
 			return rollback(createErr)
 		}
-		_, writeErr := output.WriteString(f.Text)
+		_, writeErr := output.Write(fileData(f))
 		if writeErr == nil {
 			writeErr = output.Sync()
 		}
@@ -535,13 +549,13 @@ func validateRibbonMerges(root, componentID string, m Manifest) error {
 		}
 		if !hasBase[target] {
 			probe := office.BlankPackage()
-			if err := probe.MergeRibbon(target, []byte(file.Text)); err != nil {
+			if err := probe.MergeRibbon(target, fileData(file)); err != nil {
 				return fmt.Errorf("component %s Ribbon merge %s -> %s: %w", componentID, merge.Source, merge.Target, err)
 			}
 			working[target] = append([]byte(nil), probe.Files[target]...)
 			continue
 		}
-		merged, err := office.MergeRibbonXML(working[target], []byte(file.Text))
+		merged, err := office.MergeRibbonXML(working[target], fileData(file))
 		if err != nil {
 			return fmt.Errorf("component %s Ribbon merge %s -> %s: %w", componentID, merge.Source, merge.Target, err)
 		}
@@ -821,7 +835,7 @@ func diff(root string, m Manifest) (map[string]any, error) {
 	files := make([]map[string]any, 0, len(m.Files))
 	equal := true
 	for _, f := range m.Files {
-		bundled := []byte(f.Text)
+		bundled := fileData(f)
 		row := map[string]any{"path": f.Path, "bundled_sha256": office.Hash(bundled), "bundled_bytes": len(bundled)}
 		installed, readErr := project.Read(root, f.Path)
 		switch {
@@ -835,7 +849,7 @@ func diff(root string, m Manifest) (map[string]any, error) {
 		default:
 			row["installed_sha256"] = office.Hash(installed)
 			row["installed_bytes"] = len(installed)
-			if string(installed) == f.Text {
+			if bytes.Equal(installed, bundled) {
 				row["state"] = "clean"
 			} else {
 				row["state"] = "modified"
