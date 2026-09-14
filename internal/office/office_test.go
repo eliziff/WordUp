@@ -475,6 +475,17 @@ func TestBuildingBlocksRejectCaseCollisions(t *testing.T) {
 	}
 }
 
+func TestPackageValidationRejectsCaseCollidingParts(t *testing.T) {
+	p := BlankPackage()
+	p.Files["word/STYLES.xml"] = append([]byte(nil), p.Files["word/styles.xml"]...)
+	if err := p.ContentType("word/STYLES.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"); err != nil {
+		t.Fatal(err)
+	}
+	if err := p.Validate(); err == nil || !strings.Contains(err.Error(), "case-colliding package parts") {
+		t.Fatalf("case-colliding package parts were accepted: %v", err)
+	}
+}
+
 func TestComposeFailureDoesNotMutatePackage(t *testing.T) {
 	p := BlankPackage()
 	p.Files[RelPart("word/document.xml")] = []byte(`<Relationships xmlns="` + RelNS + `"><Relationship Id="wwheader" Type="other" Target="existing.xml"/></Relationships>`)

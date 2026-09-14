@@ -566,6 +566,14 @@ func (p *Package) HasSignatures() bool {
 	return false
 }
 func (p *Package) Validate() error {
+	partNames := map[string]string{}
+	for name := range p.Files {
+		key := strings.ToLower(name)
+		if prior, exists := partNames[key]; exists && prior != name {
+			return fmt.Errorf("case-colliding package parts %s and %s", prior, name)
+		}
+		partNames[key] = name
+	}
 	defaults, overrides := map[string]string{}, map[string]string{}
 	ct, e := validationXMLSpans(p.Files["[Content_Types].xml"])
 	if e != nil {
