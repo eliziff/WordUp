@@ -210,7 +210,7 @@ Private Function WU_ContextMenuTag() As String
     WU_ContextMenuTag = "WordUp.ContextMenu." & ThisDocument.Name
 End Function
 Private Function WU_QualifiedMacro(ByVal macroName As String) As String
-    If InStr(1, macroName, "!", vbBinaryCompare) > 0 Then WU_QualifiedMacro = macroName Else WU_QualifiedMacro = "'" & ThisDocument.Name & "'!" & macroName
+    If InStr(1, macroName, "!", vbBinaryCompare) > 0 Then WU_QualifiedMacro = macroName Else WU_QualifiedMacro = "'" & Replace(ThisDocument.Name, "'", "''") & "'!" & macroName
 End Function
 Private Function WU_MacroMember(ByVal macroName As String) As String
     Dim separator As Long
