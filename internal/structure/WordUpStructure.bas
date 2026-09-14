@@ -1,27 +1,28 @@
 Attribute VB_Name = "WordUpStructure"
 Option Explicit
 
-' WordUp structure contract 1.1.0. MIT licensed; editable and dependency-free.
+' WordUp structure contract 1.2.0. MIT licensed; editable and dependency-free.
 ' Detection is separate from publication-specific style mapping.
 Public Const WU_ROLE As Long = 0
 Public Const WU_LEVEL As Long = 1
 Public Const WU_PARENT As Long = 2
-Public Const WU_CONFIDENCE As Long = 3
-Public Const WU_AMBIGUOUS As Long = 4
-Public Const WU_EVIDENCE As Long = 5
-Public Const WU_STYLE As Long = 6
-Public Const WU_TEXT As Long = 7
-Public Const WU_START As Long = 8
-Public Const WU_END As Long = 9
-Public Const WU_MARKER As Long = 10
-Public Const WU_LIST_LABEL As Long = 11
-Public Const WU_CONTEXT As Long = 12
-Public Const WU_SOURCE_ID As Long = 13
-Public Const WU_PARENT_SOURCE_ID As Long = 14
-Public Const WU_PROVENANCE As Long = 15
-Public Const WU_CONTRADICTION As Long = 16
-Public Const WU_ALTERNATIVES As Long = 17
-Public Const WU_COLUMNS As Long = 18
+Public Const WU_CANDIDATE_SCORE As Long = 3
+Public Const WU_CONFIDENCE As Long = 4
+Public Const WU_AMBIGUOUS As Long = 5
+Public Const WU_EVIDENCE As Long = 6
+Public Const WU_STYLE As Long = 7
+Public Const WU_TEXT As Long = 8
+Public Const WU_START As Long = 9
+Public Const WU_END As Long = 10
+Public Const WU_MARKER As Long = 11
+Public Const WU_LIST_LABEL As Long = 12
+Public Const WU_CONTEXT As Long = 13
+Public Const WU_SOURCE_ID As Long = 14
+Public Const WU_PARENT_SOURCE_ID As Long = 15
+Public Const WU_PROVENANCE As Long = 16
+Public Const WU_CONTRADICTION As Long = 17
+Public Const WU_ALTERNATIVES As Long = 18
+Public Const WU_COLUMNS As Long = 19
 
 ' Returns result(paragraphIndex, WU_*). Positions are Word UTF-16 story offsets.
 ' This procedure reads the document and never edits it.
@@ -29,7 +30,7 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
     Dim paragraphs As Paragraphs, count As Long, result() As Variant
     Dim i As Long, paragraph As Paragraph, scope As Range, text As String, rawText As String
     Dim marker As String, label As String, style As String, context As String, alternatives As String
-    Dim score As Long, level As Long, outline As Long, evidence As String, semanticRole As String, parentAt(1 To 9) As Long
+    Dim score As Long, confidence As Long, level As Long, outline As Long, evidence As String, semanticRole As String, parentAt(1 To 9) As Long
     Dim hasLists As Boolean, hasTables As Boolean, plausible As Boolean
     Dim headingStyle As Boolean, keepNext As Boolean, upperText As Boolean
     Dim story As Range, pieces As Variant, position As Long, startPosition As Long, endPosition As Long
@@ -110,7 +111,7 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
         result(i - 1, WU_START) = startPosition: result(i - 1, WU_END) = endPosition
         result(i - 1, WU_MARKER) = marker: result(i - 1, WU_LIST_LABEL) = label
         result(i - 1, WU_CONTEXT) = context: result(i - 1, WU_EVIDENCE) = evidence
-        result(i - 1, WU_CONFIDENCE) = score: result(i - 1, WU_LEVEL) = level
+        result(i - 1, WU_CANDIDATE_SCORE) = score: result(i - 1, WU_CONFIDENCE) = score: result(i - 1, WU_LEVEL) = level
         result(i - 1, WU_PARENT) = 0: result(i - 1, WU_AMBIGUOUS) = False
         result(i - 1, WU_SOURCE_ID) = "main:" & CStr(startPosition) & ":" & CStr(endPosition)
         result(i - 1, WU_PARENT_SOURCE_ID) = vbNullString
@@ -124,22 +125,24 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
     WU_ResolveStyleFamilies result, count
     WU_ResolveMarkerLadder result, count
     For i = 0 To count - 1
-        score = CLng(result(i, WU_CONFIDENCE)): level = CLng(result(i, WU_LEVEL)): semanticRole = vbNullString
+        score = CLng(result(i, WU_CONFIDENCE)): confidence = score: level = CLng(result(i, WU_LEVEL)): semanticRole = vbNullString
         If result(i, WU_CONTEXT) <> "body" Then
             result(i, WU_ROLE) = result(i, WU_CONTEXT)
+            score = 0: confidence = 100
         ElseIf Len(Trim$(CStr(result(i, WU_TEXT)))) = 0 Then
             result(i, WU_ROLE) = "blank"
+            score = 0: confidence = 100
         Else
             semanticRole = WU_SemanticRole(CStr(result(i, WU_TEXT)), CStr(result(i, WU_STYLE)), CStr(result(i, WU_CONTEXT)), level)
             If Len(semanticRole) > 0 Then
                 result(i, WU_ROLE) = semanticRole: result(i, WU_LEVEL) = 0
-                result(i, WU_CONFIDENCE) = 100: result(i, WU_AMBIGUOUS) = False
+                score = 100: confidence = 100: result(i, WU_AMBIGUOUS) = False
                 result(i, WU_EVIDENCE) = "semantic-style-or-context"
                 result(i, WU_CONTRADICTION) = vbNullString: result(i, WU_ALTERNATIVES) = vbNullString
                 If semanticRole = "quotation" Or semanticRole = "abstract" Then result(i, WU_PARENT) = WU_FindDeepestParent(parentAt)
             ElseIf Len(frontRoles(i)) > 0 Then
                 result(i, WU_ROLE) = frontRoles(i): result(i, WU_LEVEL) = 0: result(i, WU_PARENT) = 0
-                result(i, WU_CONFIDENCE) = 85: result(i, WU_AMBIGUOUS) = False
+                score = 85: confidence = 85: result(i, WU_AMBIGUOUS) = False
                 result(i, WU_EVIDENCE) = "front-matter-layout"
                 result(i, WU_CONTRADICTION) = vbNullString: result(i, WU_ALTERNATIVES) = vbNullString
             ElseIf level > 0 And score >= 35 Then
@@ -153,8 +156,10 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
         End If
         If result(i, WU_ROLE) <> "heading" And result(i, WU_ROLE) <> "blank" And Len(semanticRole) = 0 And Len(frontRoles(i)) = 0 And CLng(result(i, WU_PARENT)) = 0 Then result(i, WU_PARENT) = WU_FindDeepestParent(parentAt)
         If CLng(result(i, WU_PARENT)) > 0 Then result(i, WU_PARENT_SOURCE_ID) = result(CLng(result(i, WU_PARENT)) - 1, WU_SOURCE_ID)
-        If score > 100 Then result(i, WU_CONFIDENCE) = 100
-        If score < 0 Then result(i, WU_CONFIDENCE) = 0
+        result(i, WU_CANDIDATE_SCORE) = score
+        If confidence > 100 Then confidence = 100
+        If confidence < 0 Then confidence = 0
+        result(i, WU_CONFIDENCE) = confidence
     Next i
     WU_DetectStructure = result
 End Function
