@@ -38,6 +38,10 @@ func TestMarkerChoicesPreserveAmbiguity(t *testing.T) {
 	if len(MarkerChoices("Part IV - Contractual Rights")) != 1 {
 		t.Fatal("named part not recognized")
 	}
+	period := MarkerChoices("Part II. Introduction")
+	if len(period) != 1 || period[0].Family != "roman_." || period[0].Value != 2 {
+		t.Fatalf("part period marker lost generic form: %#v", period)
+	}
 }
 
 func TestNamedHeadingDashVariants(t *testing.T) {

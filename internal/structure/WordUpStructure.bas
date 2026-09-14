@@ -1,7 +1,7 @@
 Attribute VB_Name = "WordUpStructure"
 Option Explicit
 
-' WordUp structure contract 1.2.4. MIT licensed; editable and dependency-free.
+' WordUp structure contract 1.2.5. MIT licensed; editable and dependency-free.
 ' Detection is separate from publication-specific style mapping.
 Public Const WU_ROLE As Long = 0
 Public Const WU_LEVEL As Long = 1
@@ -334,6 +334,14 @@ Public Function WU_ParseMarker(ByVal text As String) As String
             prefix = Trim$(Mid$(text, InStr(text, " ") + 1, at - InStr(text, " ") - 1))
             If IsNumeric(prefix) Or WU_WordNumber(prefix) > 0 Or WU_IsRoman(prefix) Or (Len(prefix) = 1 And LCase$(prefix) >= "a" And LCase$(prefix) <= "z") Then WU_ParseMarker = "named:" & LCase$(namedKind) & ":" & prefix: Exit Function
         End If
+    End If
+    ' Part/Chapter prefixes also occur with the ordinary period or close
+    ' parenthesis marker. Keep those forms in the generic marker family, as
+    ' the offline detector does, rather than dropping the marker entirely.
+    If Left$(lowerText, 5) = "part " Then
+        text = Mid$(text, 6): lowerText = LCase$(text)
+    ElseIf Left$(lowerText, 8) = "chapter " Then
+        text = Mid$(text, 9): lowerText = LCase$(text)
     End If
     If Left$(text, 1) = "(" Then
         at = InStr(text, ")")
