@@ -24,6 +24,10 @@ const (
 	MainDOTM      = "application/vnd.ms-word.template.macroEnabledTemplate.main+xml"
 	MainDOCX      = "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"
 	VBAProjectRel = "http://schemas.microsoft.com/office/2006/relationships/vbaProject"
+	// DeletedPartPrefix is used only in the changed-part handoff between the
+	// project builder and package writer. NUL cannot occur in a SafePart name,
+	// so deletion remains unambiguous even when a real part begins with '-'.
+	DeletedPartPrefix = "\x00"
 )
 
 // SetVBA attaches the native project using Word's extension relationship, which
@@ -205,23 +209,15 @@ func (p *Package) BytesChangedWithHashes(changed []string, currentHashes map[str
 	}
 	dirty := make(map[string]bool, len(changed))
 	for _, name := range changed {
-		// Deleted parts are represented internally as -<part>, but a valid
-		// OPC part may itself begin with '-'. Prefer an exact current part;
-		// otherwise interpret the prefix only when the unprefixed name is an
-		// original part. This keeps modified/new names such as -asset.bin
-		// distinct from deletion markers without adding another representation.
-		if _, exists := p.Files[name]; exists {
-			dirty[name] = true
-			continue
-		}
-		if strings.HasPrefix(name, "-") {
-			candidate := strings.TrimPrefix(name, "-")
-			if _, existed := p.hashes[candidate]; existed {
-				dirty[candidate] = true
-				continue
+		if strings.HasPrefix(name, DeletedPartPrefix) {
+			part := strings.TrimPrefix(name, DeletedPartPrefix)
+			if part == "" {
+				return nil, fmt.Errorf("invalid deleted package part marker")
 			}
+			dirty[part] = true
+		} else {
+			dirty[name] = true
 		}
-		dirty[name] = true
 	}
 	if currentHashes == nil {
 		currentHashes = make(map[string]string, len(p.hashes))

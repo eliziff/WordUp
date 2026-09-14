@@ -1128,7 +1128,7 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 	if e != nil {
 		return nil, e
 	}
-	report := &BuildReport{Schema: 2, ToolVersion: Version, ToolSHA256: ExecutableSHA256(), Artifact: output, SHA256: office.Hash(result), SourceFingerprint: finger, Bytes: len(result), NoChange: bytes.Equal(result, w.Baseline.Original), Modules: len(mods), Forms: forms, ModifiedParts: modified, PackageValidated: true}
+	report := &BuildReport{Schema: 2, ToolVersion: Version, ToolSHA256: ExecutableSHA256(), Artifact: output, SHA256: office.Hash(result), SourceFingerprint: finger, Bytes: len(result), NoChange: bytes.Equal(result, w.Baseline.Original), Modules: len(mods), Forms: forms, ModifiedParts: displayPackageChanges(modified), PackageValidated: true}
 	if changed {
 		report.Warnings = append(report.Warnings, "VBA binary serialization passed source reparse; only the native Word runtime can establish compilation and behavior.")
 	}
@@ -1172,11 +1172,23 @@ func packageChanges(p *office.Package, original, packageHashes map[string]string
 	}
 	for name := range original {
 		if _, ok := p.Files[name]; !ok {
-			modified = append(modified, "-"+name)
+			modified = append(modified, office.DeletedPartPrefix+name)
 		}
 	}
 	sort.Strings(modified)
 	return modified, currentHashes
+}
+
+func displayPackageChanges(changes []string) []string {
+	display := make([]string, len(changes))
+	for i, name := range changes {
+		if strings.HasPrefix(name, office.DeletedPartPrefix) {
+			display[i] = "-" + strings.TrimPrefix(name, office.DeletedPartPrefix)
+		} else {
+			display[i] = name
+		}
+	}
+	return display
 }
 
 func dropSignatures(p *office.Package) error {

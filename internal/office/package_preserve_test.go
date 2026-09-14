@@ -94,7 +94,11 @@ func TestKnownChangedPartsSkipReadsWithoutTrustingIncompleteSet(t *testing.T) {
 func TestChangedPartMarkersHandleLeadingHyphenNames(t *testing.T) {
 	base := BlankPackage()
 	base.Files["-asset.bin"] = []byte("before")
+	base.Files["asset.bin"] = []byte("also before")
 	if err := base.ContentType("-asset.bin", "application/octet-stream"); err != nil {
+		t.Fatal(err)
+	}
+	if err := base.ContentType("asset.bin", "application/octet-stream"); err != nil {
 		t.Fatal(err)
 	}
 	original, err := base.Bytes()
@@ -116,17 +120,35 @@ func TestChangedPartMarkersHandleLeadingHyphenNames(t *testing.T) {
 		t.Fatalf("modified leading-hyphen part was not written: %v", err)
 	}
 
-	delete(p.Files, "-asset.bin")
-	deleted, err := p.BytesChanged([]string{"--asset.bin"})
+	delete(p.Files, "asset.bin")
+	deleted, err := p.BytesChanged([]string{"-asset.bin", DeletedPartPrefix + "asset.bin"})
 	if err != nil {
-		t.Fatalf("deleted leading-hyphen part rejected: %v", err)
+		t.Fatalf("deleted part rejected: %v", err)
 	}
 	read, err = ReadPackage(deleted)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, exists := read.Files["-asset.bin"]; exists {
-		t.Fatal("deleted leading-hyphen part remained in package")
+	if _, exists := read.Files["asset.bin"]; exists {
+		t.Fatal("deleted part remained in package")
+	}
+
+	// A new -asset.bin and a deleted asset.bin must be representable in the
+	// same changed set; the old '-' marker made these two entries identical.
+	p.Files["asset.bin"] = []byte("restored")
+	delete(p.Files, "-asset.bin")
+	delete(p.Files, "asset.bin")
+	p.Files["-asset.bin"] = []byte("new")
+	combined, err := p.BytesChanged([]string{"-asset.bin", DeletedPartPrefix + "asset.bin"})
+	if err != nil {
+		t.Fatalf("combined add/delete changed set rejected: %v", err)
+	}
+	read, err = ReadPackage(combined)
+	if err != nil || string(read.Files["-asset.bin"]) != "new" {
+		t.Fatalf("combined add/delete result incorrect: %v", err)
+	}
+	if _, exists := read.Files["asset.bin"]; exists {
+		t.Fatal("combined add/delete retained deleted part")
 	}
 }
 
