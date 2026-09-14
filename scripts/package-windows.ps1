@@ -56,6 +56,9 @@ foreach ($folder in @('office-tools','wordup-oletools')) {
  Copy-Item -LiteralPath (Join-Path $root ('bin/' + $folder)) -Destination $destinationRoot -Recurse
 }
 Copy-Item -LiteralPath $analysisSource -Destination (Join-Path $destinationRoot 'analysis') -Recurse
+if (@(Get-ChildItem -LiteralPath $destinationRoot -Recurse -File -Filter '*.pdb').Count -gt 0) {
+ throw 'Debug symbol files are not release contents; rebuild the analysis helper with DebugType=None.'
+}
 foreach ($file in @('LICENSE','LICENSE-MIT-ORIGINAL','THIRD-PARTY-NOTICES.md')) {
  Copy-Item -LiteralPath (Join-Path $root $file) -Destination $destinationRoot
 }

@@ -23,7 +23,10 @@ $env:MSBuildSDKsPath = Join-Path $env:DOTNET_ROOT 'sdk/8.0.425/Sdks'
 if (!(Test-Path -LiteralPath $env:MSBuildSDKsPath)) { throw 'Install the pinned .NET SDK 8.0.425 or supply DotnetRoot.' }
 $overrides = Join-Path $PSScriptRoot 'Headless.targets'
 $project = if ($Proof) { 'SemanticProof.csproj' } else { 'WordUp.Analysis.csproj' }
-& $MSBuild (Join-Path $PSScriptRoot $project) /restore /t:Build /p:Configuration=Release /p:RestoreSources=https://api.nuget.org/v3/index.json "/p:SolutionDir=$sourceRoot\" "/p:RubberduckSource=$sourceRoot" "/p:RestorePackagesPath=$([IO.Path]::GetFullPath($Packages))" "/p:CustomAfterMicrosoftCommonTargets=$overrides" /nologo /verbosity:minimal /warnasmessage:MSB4011
+# The analysis helper is shipped inside the user package. Release binaries do
+# not need debugger symbols, and retaining them leaks the local PDB path into
+# the PE CodeView record even when the PDB itself is omitted later.
+& $MSBuild (Join-Path $PSScriptRoot $project) /restore /t:Build /p:Configuration=Release /p:DebugType=None /p:DebugSymbols=false /p:RestoreSources=https://api.nuget.org/v3/index.json "/p:SolutionDir=$sourceRoot\" "/p:RubberduckSource=$sourceRoot" "/p:RestorePackagesPath=$([IO.Path]::GetFullPath($Packages))" "/p:CustomAfterMicrosoftCommonTargets=$overrides" /nologo /verbosity:minimal /warnasmessage:MSB4011
 if ($LASTEXITCODE -ne 0) { throw 'Rubberduck workspace analysis build failed.' }
 if ($Proof) {
  & (Join-Path $PSScriptRoot 'bin/Release/net462/SemanticProof.exe')
