@@ -145,6 +145,24 @@ func TestInstallationRejectsModuleNameMismatch(t *testing.T) {
 	}
 }
 
+func TestInstallationRejectsInvalidVBNameAttribute(t *testing.T) {
+	for name, source := range map[string]string{
+		"invalid identifier": "Attribute VB_Name = \"Bad-Name\"\nOption Explicit\n",
+		"malformed value":    "Attribute VB_Name = BadName\nOption Explicit\n",
+	} {
+		t.Run(name, func(t *testing.T) {
+			root := t.TempDir()
+			m := Manifest{ID: "invalid-vb-name", Version: "1", Files: []File{{Path: "vba/Good.bas", Text: source}}}
+			if _, err := install(root, m); err == nil || !strings.Contains(err.Error(), "invalid VB_Name attribute") {
+				t.Fatalf("invalid VB_Name attribute was accepted: %v", err)
+			}
+			if _, err := project.Read(root, "vba/Good.bas"); !os.IsNotExist(err) {
+				t.Fatalf("invalid component source was written: %v", err)
+			}
+		})
+	}
+}
+
 func TestBundledVBADeclarations(t *testing.T) {
 	for _, manifest := range builtin() {
 		for _, file := range manifest.Files {

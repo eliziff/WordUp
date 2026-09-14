@@ -460,13 +460,20 @@ func CheckInventory(root string, files map[string][]byte, diagnostics *[]map[str
 				"expected_module": expectedModule,
 			})
 		}
-		if name, line, ok := component.ModuleName(string(files[path])); ok {
-			row := map[string]any{"file": path, "module": name, "line": line}
-			moduleNames = append(moduleNames, row)
-			key := strings.ToLower(name)
-			moduleByName[key] = append(moduleByName[key], row)
-			if office.ValidIdentifier(expectedModule) && !strings.EqualFold(name, expectedModule) {
-				*diagnostics = append(*diagnostics, map[string]any{"severity": "error", "file": path, "line": line, "message": fmt.Sprintf("VB_Name %q does not match module filename %q", name, expectedModule), "module": name, "expected_module": expectedModule})
+		if name, line, present := component.ModuleName(string(files[path])); present {
+			if !office.ValidIdentifier(name) {
+				*diagnostics = append(*diagnostics, map[string]any{
+					"severity": "error", "file": path, "line": line,
+					"message": "invalid VB_Name attribute", "module": name,
+				})
+			} else {
+				row := map[string]any{"file": path, "module": name, "line": line}
+				moduleNames = append(moduleNames, row)
+				key := strings.ToLower(name)
+				moduleByName[key] = append(moduleByName[key], row)
+				if office.ValidIdentifier(expectedModule) && !strings.EqualFold(name, expectedModule) {
+					*diagnostics = append(*diagnostics, map[string]any{"severity": "error", "file": path, "line": line, "message": fmt.Sprintf("VB_Name %q does not match module filename %q", name, expectedModule), "module": name, "expected_module": expectedModule})
+				}
 			}
 		} else {
 			// The builder derives a missing VB_Name from the source filename.

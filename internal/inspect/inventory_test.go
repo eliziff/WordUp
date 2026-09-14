@@ -183,6 +183,37 @@ func TestCheckInventoryReportsModuleNameMismatch(t *testing.T) {
 	t.Fatalf("module name mismatch diagnostic missing: %#v", result["diagnostics"])
 }
 
+func TestCheckInventoryReportsInvalidVBNameAttribute(t *testing.T) {
+	for name, source := range map[string]string{
+		"invalid identifier": "Attribute VB_Name = \"Bad-Name\"\nOption Explicit\n",
+		"malformed value":    "Attribute VB_Name = BadName\nOption Explicit\n",
+	} {
+		t.Run(name, func(t *testing.T) {
+			root := filepath.Join(t.TempDir(), "workspace")
+			if _, err := project.New("InvalidVBName", root); err != nil {
+				t.Fatal(err)
+			}
+			if err := project.Write(root, "vba/Good.bas", []byte(source), ""); err != nil {
+				t.Fatal(err)
+			}
+			w, err := project.Open(root)
+			if err != nil {
+				t.Fatal(err)
+			}
+			result, err := Check(w)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, diagnostic := range result["diagnostics"].([]map[string]any) {
+				if diagnostic["file"] == "vba/Good.bas" && diagnostic["message"] == "invalid VB_Name attribute" {
+					return
+				}
+			}
+			t.Fatalf("invalid VB_Name diagnostic missing: %#v", result["diagnostics"])
+		})
+	}
+}
+
 func TestCheckInventoryReportsInvalidModuleFilename(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "workspace")
 	if _, err := project.New("InvalidModule", root); err != nil {

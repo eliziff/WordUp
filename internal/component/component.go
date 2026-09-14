@@ -620,8 +620,14 @@ func rejectIdentifierCollisions(root, componentID string, files []File) error {
 		if !office.ValidIdentifier(expectedModule) {
 			return fmt.Errorf("component %s source %s derives invalid VBA module name %q", componentID, file.Path, expectedModule)
 		}
-		if declared, line := vbaModuleName(strings.Split(strings.ReplaceAll(file.Text, "\r\n", "\n"), "\n")); declared != "" && !strings.EqualFold(declared, expectedModule) {
-			return fmt.Errorf("component %s VB_Name %q in %s:%d does not match module filename %q", componentID, declared, file.Path, line, expectedModule)
+		declared, line, present := moduleNameAttribute(strings.Split(strings.ReplaceAll(file.Text, "\r\n", "\n"), "\n"))
+		if present {
+			if declared == "" || !office.ValidIdentifier(declared) {
+				return fmt.Errorf("component %s has invalid VB_Name attribute in %s:%d", componentID, file.Path, line)
+			}
+			if !strings.EqualFold(declared, expectedModule) {
+				return fmt.Errorf("component %s VB_Name %q in %s:%d does not match module filename %q", componentID, declared, file.Path, line, expectedModule)
+			}
 		}
 		for _, symbol := range exportedSymbols(file.Path, file.Text) {
 			key := strings.ToLower(symbol.Name)
@@ -779,33 +785,47 @@ func exportedSymbols(path, source string) []exportedSymbol {
 }
 
 func vbaModuleName(lines []string) (string, int) {
-	for index, raw := range lines {
-		line := strings.TrimSpace(raw)
-		lower := strings.ToLower(line)
-		if !strings.HasPrefix(lower, "attribute vb_name") {
-			continue
-		}
-		equal := strings.IndexByte(line, '=')
-		if equal < 0 {
-			continue
-		}
-		value := strings.TrimSpace(line[equal+1:])
-		if len(value) < 2 || value[0] != '"' || value[len(value)-1] != '"' {
-			continue
-		}
-		name := value[1 : len(value)-1]
-		if office.ValidIdentifier(name) {
-			return name, index + 1
-		}
+	name, line, present := moduleNameAttribute(lines)
+	if present && office.ValidIdentifier(name) {
+		return name, line
 	}
 	return "", 0
 }
 
-// ModuleName returns the exported VBA module name and its Attribute line.
-// Callers use it for source-only diagnostics before Word compilation.
+// moduleNameAttribute finds the first VB_Name attribute and reports malformed
+// or invalid values as present with an empty/invalid name. Callers that need
+// to align with the builder must reject a present invalid attribute instead of
+// silently deriving a second name from the source filename.
+func moduleNameAttribute(lines []string) (string, int, bool) {
+	for index, raw := range lines {
+		line := strings.TrimSpace(raw)
+		lower := strings.ToLower(line)
+		const prefix = "attribute vb_name"
+		if !strings.HasPrefix(lower, prefix) {
+			continue
+		}
+		rest := strings.TrimSpace(line[len(prefix):])
+		if !strings.HasPrefix(rest, "=") {
+			continue
+		}
+		value := strings.TrimSpace(rest[1:])
+		if len(value) < 2 || value[0] != '"' {
+			return "", index + 1, true
+		}
+		close := strings.IndexByte(value[1:], '"')
+		if close < 0 {
+			return "", index + 1, true
+		}
+		return value[1 : close+1], index + 1, true
+	}
+	return "", 0, false
+}
+
+// ModuleName returns the first VBA VB_Name value and its Attribute line.
+// present remains true for malformed or invalid values so source-only callers
+// can report the error instead of silently deriving a filename-based name.
 func ModuleName(source string) (string, int, bool) {
-	name, line := vbaModuleName(strings.Split(strings.ReplaceAll(source, "\r\n", "\n"), "\n"))
-	return name, line, name != ""
+	return moduleNameAttribute(strings.Split(strings.ReplaceAll(source, "\r\n", "\n"), "\n"))
 }
 
 func vbaCodeLine(line string) string {
