@@ -422,6 +422,8 @@ Option Explicit
 
 var sourceDirectories = []string{"package", "vba", "forms", "assets"}
 
+const componentLockSource = ".wordwright/components.json"
+
 func (w *Workspace) SourceFiles() (map[string][]byte, error) {
 	out := map[string][]byte{}
 	total := 0
@@ -513,7 +515,7 @@ func sourceStamps(root string) (map[string]fileStamp, error) {
 		}
 		result[rel] = fileStamp{Size: info.Size(), ModifiedNS: info.ModTime().UnixNano(), Hash: hash}
 	}
-	rel := ".wordwright/components.json"
+	rel := componentLockSource
 	path := filepath.Join(root, filepath.FromSlash(rel))
 	if info, err := os.Stat(path); err == nil {
 		hash, hashErr := fileHash(path)
@@ -570,6 +572,11 @@ func (w *Workspace) buildSourceFiles() (map[string][]byte, error) {
 		if readErr != nil {
 			return nil, readErr
 		}
+		if lock, lockErr := Read(w.Root, componentLockSource); lockErr == nil {
+			files[componentLockSource] = lock
+		} else if !os.IsNotExist(lockErr) {
+			return nil, lockErr
+		}
 		w.sourceMemo, w.sourceStamp = files, stamps
 		return files, nil
 	}
@@ -578,7 +585,7 @@ func (w *Workspace) buildSourceFiles() (map[string][]byte, error) {
 		files[path] = data
 	}
 	for path, current := range stamps {
-		if strings.HasPrefix(path, ".wordwright/") {
+		if strings.HasPrefix(path, ".wordwright/") && path != componentLockSource {
 			continue
 		}
 		if prior, ok := w.sourceStamp[path]; ok && prior == current {

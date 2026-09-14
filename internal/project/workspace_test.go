@@ -84,6 +84,13 @@ func TestSourceBuildCacheAndTamper(t *testing.T) {
 	if err != nil || !r.Cached {
 		t.Fatalf("cache miss: %v", err)
 	}
+	if err = Write(w.Root, componentLockSource, []byte(`{"schema":1,"components":{}}`), ""); err != nil {
+		t.Fatal(err)
+	}
+	r, err = w.Build("")
+	if err != nil || r.Cached {
+		t.Fatalf("component lock change reused a persisted build: %v", err)
+	}
 	const sourcePath = "vba/Answer.bas"
 	sourceInfo, err := os.Stat(filepath.Join(w.Root, filepath.FromSlash(sourcePath)))
 	if err != nil {
