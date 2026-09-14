@@ -25,15 +25,15 @@ Its packaged `structure.resolve` sweep likewise completed all 109 documents with
 
 An offline import/build preservation sweep over the same 109 DOCX inputs also completed with zero import failures, zero build failures, and zero unexpected original-part changes or omissions (53.5 s wall time). Every original OPC part outside the explicitly generated VBA/package-wiring set—including document XML, styles, numbering, fonts, notes, headers/footers, fields, media and custom XML—was byte-preserved; ZIP member slash spelling was normalized only for comparison.
 
-The current Windows x64 and ARM64 fidelity-38 package candidates each contain 252 manifest-hashed files with zero hash omissions, zero debug-symbol files and zero hits for the developer's absolute workspace path. The release builder now disables analysis-helper debug symbols and rejects any staged PDB, preserving this as a packaging invariant rather than a one-off audit.
+The current Windows x64 and ARM64 fidelity-39 package candidates each contain 252 manifest-hashed files with zero hash omissions, zero debug-symbol files and zero hits for the developer's absolute workspace path. The release builder now disables analysis-helper debug symbols and rejects any staged PDB, preserving this as a packaging invariant rather than a one-off audit.
 
-The exact x64 fidelity-38 candidate's disposable `--execute selftest` was attempted and failed in 196 ms with `native_session_restricted`: this Windows logon session refuses hidden Word creation (`CreateProcessW`: logon session does not exist). No native pass is claimed until that host boundary is cleared.
+The exact x64 fidelity-39 candidate's disposable `--execute selftest` was attempted and failed in 197 ms with `native_session_restricted`: this Windows logon session refuses hidden Word creation (`CreateProcessW`: logon session does not exist). No native pass is claimed until that host boundary is cleared.
 
 The opt-in disposable signing acceptance was also attempted with the installed Windows SDK SignTool. Certificate creation failed before signing with the same restricted-session class of host failure (`New-SelfSignedCertificate`, `0x80070002`); the test left no WordUp certificate in the current-user store. SignTool and Office SIP acceptance therefore remain unverified on this session.
 
-The same fidelity-38 package passed an outside-repository package-only smoke run: `new`, `check` and uncached `build` all returned zero, with valid OPC output, 16.4 ms build time, and `vba_compiled=false` correctly retained because Word was not executed.
+The same fidelity-39 package passed an outside-repository package-only smoke run with all bundled components: `new`, `check` and uncached `build` all returned zero, with zero check diagnostics, valid OPC output, 38.4 ms build time, and `vba_compiled=false` correctly retained because Word was not executed.
 
-The fidelity-38 package-only component smoke also listed the bundled catalog, installed `structure.detect`, and returned `component.status` as clean/compatible with `component.diff` equal to true. This is installation/hash evidence; native VBA compilation remains blocked by the host boundary above.
+The fidelity-39 package-only component smoke installed all eight bundled components; every status was clean/compatible and every `component.diff` returned `equal=true`. This is installation/hash evidence; native VBA compilation remains blocked by the host boundary above.
 
 The structure component now treats lowercase Roman/letter markers consistently across Go and VBA: `i.` retains both Roman and lowercase-alpha interpretations, while `a.` remains a lowercase-alpha candidate. Focused Go/component tests pass, and the rebuilt fidelity-39 x64/ARM64 packages each retain 252/252 valid manifest hashes with no PDBs or private paths. Packaged all-component smoke found zero check diagnostics and a valid OPC build; native VBA execution remains unclaimed.
 
