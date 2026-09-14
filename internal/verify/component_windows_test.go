@@ -205,6 +205,9 @@ Public Function CheckHotkeys() As String
     stage = "register"
     WU_RegisterHotkey key, "Proof.HotkeyTarget"
     If Not (Application.CustomizationContext Is prior) Then Err.Raise 5, , "registration changed caller context"
+    stage = "status"
+    If Not WU_HotkeyRegistered(key, "Proof.HotkeyTarget") Then Err.Raise 5, , "status did not find template binding from caller context"
+    If Not (Application.CustomizationContext Is prior) Then Err.Raise 5, , "status changed caller context"
     stage = "reregister"
     WU_RegisterHotkey key, "Proof.HotkeyTarget"
     Application.CustomizationContext = ThisDocument
