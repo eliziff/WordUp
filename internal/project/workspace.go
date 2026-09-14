@@ -527,12 +527,19 @@ func fingerprint(files map[string][]byte, stamps map[string]fileStamp) string {
 
 func sourceStamps(root string, previous map[string]fileStamp) (map[string]fileStamp, error) {
 	result := map[string]fileStamp{}
-	record := func(rel, path string, info os.FileInfo) error {
+	var sourceBytes int64
+	record := func(rel, path string, info os.FileInfo, countSource bool) error {
 		if !info.Mode().IsRegular() {
 			return fmt.Errorf("workspace source is not a regular file: %s", rel)
 		}
 		if info.Size() > office.Limit {
 			return fmt.Errorf("file budget exceeded: %s", rel)
+		}
+		if countSource {
+			if sourceBytes > office.Limit-info.Size() {
+				return fmt.Errorf("workspace source budget exceeded")
+			}
+			sourceBytes += info.Size()
 		}
 		changedNS, reliable := fileChangeStamp(path)
 		current := fileStamp{Size: info.Size(), ModifiedNS: info.ModTime().UnixNano(), ChangedNS: changedNS}
@@ -557,14 +564,14 @@ func sourceStamps(root string, previous map[string]fileStamp) (map[string]fileSt
 		if err != nil {
 			return nil, err
 		}
-		if err := record(rel, path, info); err != nil {
+		if err := record(rel, path, info, false); err != nil {
 			return nil, err
 		}
 	}
 	rel := componentLockSource
 	path := filepath.Join(root, filepath.FromSlash(rel))
 	if info, err := workspaceFileInfo(path, rel); err == nil {
-		if hashErr := record(rel, path, info); hashErr != nil {
+		if hashErr := record(rel, path, info, false); hashErr != nil {
 			return nil, hashErr
 		}
 	} else if !os.IsNotExist(err) {
@@ -591,7 +598,7 @@ func sourceStamps(root string, previous map[string]fileStamp) (map[string]fileSt
 				if infoErr != nil {
 					return infoErr
 				}
-				if hashErr := record(filepath.ToSlash(rel), path, info); hashErr != nil {
+				if hashErr := record(filepath.ToSlash(rel), path, info, true); hashErr != nil {
 					return hashErr
 				}
 			}

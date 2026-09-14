@@ -342,6 +342,33 @@ func TestSourceStampsRejectsOversizedSourceBeforeHashing(t *testing.T) {
 	}
 }
 
+func TestSourceStampsRejectsAggregateSourceBudgetBeforeHashing(t *testing.T) {
+	w := newWorkspace(t)
+	for name, size := range map[string]int64{
+		"first.bin":  int64(office.Limit / 2),
+		"second.bin": int64(office.Limit/2) + 1,
+	} {
+		path := filepath.Join(w.Root, "assets", name)
+		if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
+			t.Fatal(err)
+		}
+		file, err := os.Create(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := file.Truncate(size); err != nil {
+			file.Close()
+			t.Fatal(err)
+		}
+		if err := file.Close(); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := sourceStamps(w.Root, nil); err == nil || !strings.Contains(err.Error(), "workspace source budget exceeded") {
+		t.Fatalf("aggregate source budget was not enforced before hashing: %v", err)
+	}
+}
+
 func TestSpecimenWorkspaceRoundTripAndControlledEdit(t *testing.T) {
 	src := os.Getenv("WORDUP_SPECIMEN")
 	if src == "" {
