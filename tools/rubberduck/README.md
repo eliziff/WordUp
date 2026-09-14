@@ -42,11 +42,16 @@ and the two verified inspections are accepted. Input lines are bounded to 4 Mi
 characters; results identify source-only scope, original source hashes and mapped
 file locations. No source files are opened or modified by this worker.
 The proof starts the real executable and checks errors followed by successful
-analysis in the same process. Main application wiring, process-job containment,
-retrievable large results and release packaging remain unfinished.
+analysis in the same process. WordUp wires this worker through `vba.analyze`, reuses a
+single bounded helper process with an idle expiry, and packages the helper in the
+Windows distribution. The operation returns source hashes and mapped locations. Large
+result retrieval, broader inspection selection, and release source/reproducibility
+review remain explicit gates.
 
 The agent operation `vba.analyze` accepts `paths` to selected workspace modules;
-WordUp reads their source directly. Place the isolated output from
+WordUp reads their source directly. The packaged acceptance test runs this operation
+from a copied distribution with only Windows directories on `PATH`. For a local helper
+build, place the isolated output from
 `bin/analysis/Release/net462` beside WordUp under `analysis/` to exercise the API.
 This output is separate from the proof's test dependencies. The API currently
 rejects document/form modules and reports external references as unresolved;
@@ -66,8 +71,10 @@ to its absolute `MSWORD.OLB` path before running the proof. That check resolves
 `Word.Document` and `Document.Name` twice and rejects a mismatched library identity.
 
 Remaining integration: workspace manifest/host/designer metadata, transitive
-library coverage, inspection selection, incremental invalidation, bounded protocol
-results and packaging/license audit. Type reflection inherits upstream's
+library coverage, broader inspection selection, incremental invalidation and
+bounded protocol results. The Windows packager already carries the helper and its
+recorded notices; source-delivery and reproducible-build review remain release
+gates. Type reflection inherits upstream's
 best-effort handling of individual library entries; it is not native compilation.
 Do not report deep `check` or full Rubberduck integration from this proof alone.
 
