@@ -39,6 +39,23 @@ func TestResolveDoesNotTreatOneBoldWordAsHeadingEmphasis(t *testing.T) {
 	}
 }
 
+func TestResolveRetainsNumberingFormattingConflict(t *testing.T) {
+	body := map[string]any{"context": "body", "text": "Ordinary body paragraph", "style_id": "BodyText"}
+	row := map[string]any{
+		"context":                    "body",
+		"text":                       "1. Directly formatted heading",
+		"style_id":                   "BodyText",
+		"numbering_evidence":         map[string]any{"level": 1, "family": "decimal"},
+		"direct_formatting_evidence": map[string]int{"text_units": 32, "bold_units": 32},
+	}
+	Resolve([]map[string]any{body, row})
+	resolved := row["resolved_structure"].(map[string]any)
+	contradictions, ok := resolved["contradictions"].([]string)
+	if !ok || len(contradictions) != 1 || resolved["ambiguous"] != true {
+		t.Fatalf("numbering/formatting conflict was dropped: %#v", resolved)
+	}
+}
+
 func TestResolveRetainsAlternativesScoreAndContradictions(t *testing.T) {
 	row := map[string]any{
 		"context":                "body",

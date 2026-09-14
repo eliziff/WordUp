@@ -33,6 +33,7 @@ type silverParagraph struct {
 	// contradiction is a presence contract: the detector's detailed wording
 	// is evidence, not a second model-authored taxonomy.
 	Ambiguous     string `xml:"ambiguous,attr"`
+	Ambiguity     string `xml:"ambiguity,attr"`
 	Contradiction string `xml:"contradiction,attr"`
 }
 
@@ -59,6 +60,7 @@ func CompareStructureSilver(root, reference string, limit int) (map[string]any, 
 	roleConfusions := map[string]int{}
 	roleConfusionStyles := map[string]map[string]int{}
 	roleExamples := map[string]any{}
+	uncertaintyExamples := map[string]any{}
 	parentMismatches := map[string]int{}
 	for _, expectedDocument := range silver.Documents {
 		path, err := project.Under(root, filepath.ToSlash(expectedDocument.Source))
@@ -128,15 +130,19 @@ func CompareStructureSilver(root, reference string, limit int) (map[string]any, 
 					mismatchFields["level"]++
 				}
 			}
-			if expected.Ambiguous != "" {
-				want, parseErr := strconv.ParseBool(strings.TrimSpace(expected.Ambiguous))
-				if parseErr != nil {
-					return nil, fmt.Errorf("silver %q paragraph %s has invalid ambiguous=%q", expectedDocument.Source, id, expected.Ambiguous)
-				}
+			ambiguity := expected.Ambiguous
+			if ambiguity == "" {
+				ambiguity = expected.Ambiguity
+			}
+			if ambiguity != "" {
 				actualAmbiguous, _ := got["ambiguous"].(bool)
-				if compareStructureValue(&mismatches, limit, expectedDocument.Source, id, "ambiguous", want, actualAmbiguous) {
+				if !ambiguitySatisfied(ambiguity, row, got) {
 					mismatchCount++
 					mismatchFields["ambiguous"]++
+					if _, exists := uncertaintyExamples["ambiguous"]; !exists {
+						uncertaintyExamples["ambiguous"] = structureEvidenceExample(expectedDocument.Source, id, row, got, true, actualAmbiguous)
+					}
+					appendStructureMismatch(&mismatches, limit, expectedDocument.Source, id, "ambiguous", true, actualAmbiguous)
 				}
 			}
 			if expected.Contradiction != "" {
@@ -147,6 +153,9 @@ func CompareStructureSilver(root, reference string, limit int) (map[string]any, 
 				if compareStructureValue(&mismatches, limit, expectedDocument.Source, id, "contradiction", want, actual) {
 					mismatchCount++
 					mismatchFields["contradiction"]++
+					if _, exists := uncertaintyExamples["contradiction"]; !exists {
+						uncertaintyExamples["contradiction"] = structureEvidenceExample(expectedDocument.Source, id, row, got, want, actual)
+					}
 				}
 			}
 			expectedParent := expected.Parent
@@ -178,14 +187,117 @@ func CompareStructureSilver(root, reference string, limit int) (map[string]any, 
 		"schema": silver.Schema, "silver_status": silver.Status,
 		"documents": len(silver.Documents), "paragraphs_compared": compared,
 		"mismatches": mismatches, "mismatch_count": mismatchCount,
-		"mismatch_fields": mismatchFields, "role_confusions": roleConfusions, "role_confusion_styles": roleConfusionStyles, "role_confusion_examples": roleExamples, "parent_mismatches": parentMismatches,
+		"mismatch_fields": mismatchFields, "role_confusions": roleConfusions, "role_confusion_styles": roleConfusionStyles, "role_confusion_examples": roleExamples, "uncertainty_examples": uncertaintyExamples, "parent_mismatches": parentMismatches,
 		"exact": mismatchCount == 0,
 	}, nil
+}
+
+func structureEvidenceExample(document, id string, row, resolved map[string]any, expected, actual any) map[string]any {
+	return map[string]any{
+		"document":                 document,
+		"source_id":                id,
+		"xml_path":                 row["xml_path"],
+		"xml_start":                row["xml_start"],
+		"xml_end":                  row["xml_end"],
+		"expected":                 expected,
+		"actual":                   actual,
+		"style_id":                 row["style_id"],
+		"style_chain":              styleNames(row),
+		"outline_evidence":         row["outline_evidence"],
+		"numbering_evidence":       row["numbering_evidence"],
+		"style_family_evidence":    row["style_family_evidence"],
+		"paragraph_properties_xml": row["paragraph_properties_xml"],
+		"resolved_evidence":        resolved["evidence"],
+		"resolved_alternatives":    resolved["alternatives"],
+		"resolved_contradictions":  resolved["contradictions"],
+	}
 }
 
 func styleNames(row map[string]any) []string {
 	names, _ := row["style_names"].([]string)
 	return names
+}
+
+func ambiguitySatisfied(expected string, row, resolved map[string]any) bool {
+	value := strings.TrimSpace(strings.ToLower(expected))
+	if parsed, err := strconv.ParseBool(value); err == nil {
+		actual, _ := resolved["ambiguous"].(bool)
+		return parsed == actual
+	}
+	if value == "none" || value == "absent" {
+		actual, _ := resolved["ambiguous"].(bool)
+		return !actual
+	}
+	labels := strings.FieldsFunc(value, func(r rune) bool { return r == ',' || r == ';' || r == ' ' })
+	if len(labels) == 0 {
+		return false
+	}
+	marker, direct, unknown := false, false, false
+	for _, label := range labels {
+		switch {
+		case strings.Contains(label, "marker"), strings.Contains(label, "roman"):
+			marker = true
+		case strings.Contains(label, "format"):
+			direct = true
+		default:
+			unknown = true
+		}
+	}
+	if unknown {
+		actual, _ := resolved["ambiguous"].(bool)
+		return actual
+	}
+	if marker && resolved["alternatives"] == nil {
+		return false
+	}
+	if direct && !directFormattingEvidence(row) {
+		return false
+	}
+	return true
+}
+
+func directFormattingEvidence(row map[string]any) bool {
+	for _, key := range []string{"direct_formatting_evidence", "paragraph_mark_formatting"} {
+		switch values := row[key].(type) {
+		case map[string]any:
+			if formattingMapHasValue(values) {
+				return true
+			}
+		case map[string]int:
+			for _, value := range values {
+				if value > 0 {
+					return true
+				}
+			}
+		case map[string]bool:
+			for _, value := range values {
+				if value {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+func formattingMapHasValue(values map[string]any) bool {
+	for _, value := range values {
+		switch typed := value.(type) {
+		case bool:
+			if typed {
+				return true
+			}
+		case int:
+			if typed > 0 {
+				return true
+			}
+		case float64:
+			if typed > 0 {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func compareStructureValue(out *[]map[string]any, limit int, document, id, field string, expected, actual any) bool {

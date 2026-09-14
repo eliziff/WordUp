@@ -72,6 +72,33 @@ func TestStructureResolvesParagraphNumberingDefinition(t *testing.T) {
 	}
 }
 
+func TestStructureRetainsDisabledNumberingContradiction(t *testing.T) {
+	p := office.BlankPackage()
+	p.Files["word/document.xml"] = []byte(`<w:document xmlns:w="` + office.W + `"><w:body><w:p><w:pPr><w:outlineLvl w:val="1"/><w:numPr><w:ilvl w:val="0"/><w:numId w:val="0"/></w:numPr></w:pPr><w:r><w:t>Heading without numbering</w:t></w:r></w:p></w:body></w:document>`)
+	b, err := p.Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(t.TempDir(), "disabled-numbering.docx")
+	if err = os.WriteFile(path, b, 0600); err != nil {
+		t.Fatal(err)
+	}
+	result, err := StructureResolved(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	row := result["paragraphs"].([]map[string]any)[0]
+	numbering, ok := row["numbering_evidence"].(map[string]any)
+	if !ok || numbering["disabled"] != true || numbering["num_id"] != "0" {
+		t.Fatalf("explicit disabled numbering was dropped: %v", row)
+	}
+	resolved := row["resolved_structure"].(map[string]any)
+	contradictions, ok := resolved["contradictions"].([]string)
+	if !ok || len(contradictions) != 1 {
+		t.Fatalf("heading/numbering contradiction was not retained: %v", resolved)
+	}
+}
+
 func TestStructureReportsConflictingDuplicateStyleIDs(t *testing.T) {
 	p := office.BlankPackage()
 	p.Files["word/styles.xml"] = []byte(`<w:styles xmlns:w="` + office.W + `"><w:style w:type="paragraph" w:styleId="Duplicate"><w:pPr><w:outlineLvl w:val="1"/></w:pPr></w:style><w:style w:type="paragraph" w:styleId="Duplicate"><w:pPr><w:outlineLvl w:val="8"/></w:pPr></w:style></w:styles>`)

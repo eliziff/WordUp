@@ -561,6 +561,14 @@ func StructureReference(file string) (map[string]any, error) {
 					evidence["unresolved"] = true
 				}
 				item["numbering_evidence"] = evidence
+			} else if numID == "0" && numIDSpecified {
+				// Word uses an explicit numId=0 to disable numbering. Keep that
+				// fact instead of dropping it: a heading style/outline paired
+				// with disabled numbering is useful contradiction evidence.
+				item["numbering_evidence"] = map[string]any{
+					"num_id": numID, "level": ilvl + 1, "disabled": true,
+					"provenance": "package XML", "origin": numberingOrigin,
+				}
 			}
 			if outline != "" {
 				level, e := strconv.Atoi(outline)

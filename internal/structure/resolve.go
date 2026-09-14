@@ -72,12 +72,23 @@ func Resolve(rows []map[string]any) map[string]any {
 		}
 		numbered := false
 		if numbering, ok := row["numbering_evidence"].(map[string]any); ok && numbering["family"] != "bullet" {
-			numbered = true
-			if n, ok := intValue(numbering["level"]); ok && level == 0 {
-				level = n
+			if numbering["disabled"] == true {
+				if level > 0 || headingStyle(style) || headingLevelFromStyle(row) > 0 {
+					row["structure_contradiction"] = "heading evidence conflicts with explicit numId=0 (numbering disabled)"
+				}
+				evidence = append(evidence, "numbering-disabled")
+			} else {
+				numbered = true
+				if n, ok := intValue(numbering["level"]); ok {
+					if level == 0 {
+						level = n
+					} else if level != n {
+						row["structure_contradiction"] = fmt.Sprintf("heading level %d conflicts with numbering level %d", level, n)
+					}
+				}
+				score += 12
+				evidence = append(evidence, "native-numbering")
 			}
-			score += 12
-			evidence = append(evidence, "native-numbering")
 		}
 		if sequence, ok := row["sequence_evidence"].(Assignment); ok && sequence.Action != "violation" {
 			if level == 0 {
@@ -109,6 +120,13 @@ func Resolve(rows []map[string]any) map[string]any {
 		if emphasized {
 			score += 8
 			evidence = append(evidence, "emphasis")
+			familyCoherent := false
+			if family, ok := row["style_family_evidence"].(map[string]any); ok {
+				familyCoherent = family["coherent"] == true
+			}
+			if numbered && !familyCoherent && !headingStyle(style) && !hasNativeHeading(row) {
+				row["structure_contradiction"] = "numbering conflicts with direct-format heading evidence"
+			}
 		}
 		if upperShare(text) >= .8 {
 			score += 8
