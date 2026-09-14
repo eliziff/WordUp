@@ -43,11 +43,11 @@ func TestMarkerChoicesPreserveAmbiguity(t *testing.T) {
 func TestNamedHeadingDashVariants(t *testing.T) {
 	for _, text := range []string{"Part I \u2013 Introduction", "Part II - Background", "Part IV \u2014Contractual Rights"} {
 		got := MarkerChoices(text)
-		if len(got) == 0 || got[0].Family != "roman_named_section" {
+		if len(got) == 0 || got[0].Family != "roman_part_named_section" {
 			t.Fatal(text, got)
 		}
 	}
-	if got := MarkerChoices("Part iv - Lowercase Roman"); len(got) != 1 || got[0].Family != "roman_named_section" || got[0].Value != 4 {
+	if got := MarkerChoices("Part iv - Lowercase Roman"); len(got) != 1 || got[0].Family != "roman_part_named_section" || got[0].Value != 4 {
 		t.Fatalf("lowercase named Roman marker was not recognized: %#v", got)
 	}
 }
@@ -67,5 +67,17 @@ func TestNamedHeadingPrefixesCreateNestedFamilies(t *testing.T) {
 	})
 	if len(got) != 2 || got[0].Level != 1 || got[1].Level != 2 {
 		t.Fatalf("named prefixes collapsed into one ladder family: %#v", got)
+	}
+}
+
+func TestPartAndChapterKeepSeparateFamilies(t *testing.T) {
+	part := MarkerChoices("Part II - Introduction")
+	chapter := MarkerChoices("Chapter II - Scope")
+	if len(part) != 1 || len(chapter) != 1 || part[0].Family == chapter[0].Family {
+		t.Fatalf("named prefixes were merged: part=%#v chapter=%#v", part, chapter)
+	}
+	got := HeadingLadder([][]Interpretation{part, chapter, MarkerChoices("Chapter III - Detail")})
+	if got[0].Level != 1 || got[1].Level != 2 || got[2].Level != 2 {
+		t.Fatalf("separate named ladders did not nest predictably: %#v", got)
 	}
 }

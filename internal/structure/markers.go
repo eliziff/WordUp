@@ -24,11 +24,10 @@ func MarkerChoices(text string) []Interpretation {
 	namedPrefix, value, punct := "", parts[1], strings.TrimSpace(parts[2])
 	if named {
 		namedPrefix, value, punct = strings.ToLower(parts[1]), parts[2], strings.TrimSpace(parts[3])
-		if namedPrefix == "part" || namedPrefix == "chapter" {
-			punct = "named_section"
-		} else {
-			punct = namedPrefix + "_named_section"
-		}
+		// Keep each named prefix in its own ladder family. A document can
+		// legitimately nest Part, Chapter, and Appendix sequences; merging
+		// them makes a restart look like a malformed counter.
+		punct = namedPrefix + "_named_section"
 	}
 	if n, err := strconv.Atoi(value); err == nil {
 		if n > 0 {

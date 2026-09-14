@@ -1,7 +1,7 @@
 Attribute VB_Name = "WordUpStructure"
 Option Explicit
 
-' WordUp structure contract 1.2.1. MIT licensed; editable and dependency-free.
+' WordUp structure contract 1.2.2. MIT licensed; editable and dependency-free.
 ' Detection is separate from publication-specific style mapping.
 Public Const WU_ROLE As Long = 0
 Public Const WU_LEVEL As Long = 1
@@ -393,13 +393,10 @@ End Function
 Private Function WU_MarkerFamily(ByVal marker As String) As String
     Dim lowerMarker As String, namedKind As String, at As Long
     lowerMarker = LCase$(marker)
-    If Left$(lowerMarker, 5) = "part:" Then
-        WU_MarkerFamily = "named_section": Exit Function
-    End If
     If Left$(lowerMarker, 6) = "named:" Then
         at = InStr(7, lowerMarker, ":")
         If at > 0 Then namedKind = Mid$(lowerMarker, 7, at - 7)
-        If namedKind = "part" Or namedKind = "chapter" Or Len(namedKind) = 0 Then
+        If Len(namedKind) = 0 Then
             WU_MarkerFamily = "named_section"
         Else
             WU_MarkerFamily = "named_" & namedKind & "_section"
