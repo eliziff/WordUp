@@ -29,6 +29,8 @@ The current Windows x64 and ARM64 fidelity-38 package candidates each contain 25
 
 The exact x64 fidelity-38 candidate's disposable `--execute selftest` was attempted and failed in 196 ms with `native_session_restricted`: this Windows logon session refuses hidden Word creation (`CreateProcessW`: logon session does not exist). No native pass is claimed until that host boundary is cleared.
 
+The opt-in disposable signing acceptance was also attempted with the installed Windows SDK SignTool. Certificate creation failed before signing with the same restricted-session class of host failure (`New-SelfSignedCertificate`, `0x80070002`); the test left no WordUp certificate in the current-user store. SignTool and Office SIP acceptance therefore remain unverified on this session.
+
 The same fidelity-38 package passed an outside-repository package-only smoke run: `new`, `check` and uncached `build` all returned zero, with valid OPC output, 16.4 ms build time, and `vba_compiled=false` correctly retained because Word was not executed.
 
 The fidelity-38 package-only component smoke also listed the bundled catalog, installed `structure.detect`, and returned `component.status` as clean/compatible with `component.diff` equal to true. This is installation/hash evidence; native VBA compilation remains blocked by the host boundary above.
