@@ -396,6 +396,10 @@ func StyleReference(file string) (map[string]any, error) {
 		out["numbering_xml"] = string(numbering)
 		out["numbering_sha256"] = office.Hash(numbering)
 	}
+	if fontTable := p.Files["word/fontTable.xml"]; len(fontTable) > 0 {
+		out["font_table_xml"] = string(fontTable)
+		out["font_table_sha256"] = office.Hash(fontTable)
+	}
 	out["paragraph_observations"] = text
 	// Headers, footers, notes, comments, and glossary entries carry real
 	// journal/template formatting too. Keep them in separate, part-qualified
