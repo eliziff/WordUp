@@ -2,8 +2,7 @@
 
 The user describes the result. If an expected artifact will help test it,
 mechanically copy the starting XML captured from Word and edit only the intended
-differences. That edited XML is model-authored silver. Do not retype unchanged
-text, flatten runs, create annotation sidecars, or write per-paragraph rationales.
+differences. That edited XML is model-authored silver.
 For a smaller change, an ordinary assertion may be enough.
 
 Run the feature on the same starting document and capture the resulting XML
