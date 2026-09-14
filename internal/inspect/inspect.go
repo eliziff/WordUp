@@ -498,6 +498,14 @@ func CheckWithConstants(w *project.Workspace, constants map[string]any) (map[str
 				}
 				diagnostics = append(diagnostics, map[string]any{"severity": severity, "file": n, "message": "Ribbon schema validation did not pass", "validation": validation})
 			}
+			if _, callbackErr := office.RibbonCallbacks(b); callbackErr != nil {
+				diagnostics = append(diagnostics, map[string]any{
+					"severity": "error",
+					"file":     n,
+					"message":  callbackErr.Error(),
+					"engine":   "Office RibbonX callback mapping",
+				})
+			}
 		}
 		ids := map[string]bool{}
 		for _, s := range spans {
