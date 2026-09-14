@@ -157,9 +157,16 @@ func TextObservations(p *office.Package) ([]map[string]any, error) {
 // XML. Keeping the part name in every locator lets callers compare a header,
 // footer, note, or glossary paragraph directly against the source package.
 func textObservationsPart(p *office.Package, part string) ([]map[string]any, error) {
+	rows, _, err := textObservationsPartWithSpans(p, part, nil)
+	return rows, err
+}
+
+// textObservationsPartWithSpans lets callers that already need exact source
+// spans pay for one XML token pass instead of reparsing the same story.
+func textObservationsPartWithSpans(p *office.Package, part string, supplied []office.XMLSpan) ([]map[string]any, []office.XMLSpan, error) {
 	b := p.Files[part]
 	if len(b) == 0 {
-		return []map[string]any{}, nil
+		return []map[string]any{}, supplied, nil
 	}
 	type relationship struct {
 		target, kind, mode string
@@ -169,7 +176,7 @@ func textObservationsPart(p *office.Package, part string) ([]map[string]any, err
 	if raw := p.Files[relationshipPart]; len(raw) > 0 {
 		relationshipSpans, err := office.XMLSpans(raw)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		for _, span := range relationshipSpans {
 			if span.Name.Space != office.RelNS || span.Name.Local != "Relationship" || span.Depth != 1 {
@@ -195,9 +202,13 @@ func textObservationsPart(p *office.Package, part string) ([]map[string]any, err
 			}
 		}
 	}
-	spans, e := office.XMLSpans(b)
-	if e != nil {
-		return nil, e
+	spans := supplied
+	if spans == nil {
+		var e error
+		spans, e = office.XMLSpans(b)
+		if e != nil {
+			return nil, nil, e
+		}
 	}
 	type contentControl struct {
 		start, end int
@@ -344,7 +355,7 @@ func textObservationsPart(p *office.Package, part string) ([]map[string]any, err
 					}
 					value, err := textElement(b[y.Start:y.End])
 					if err != nil {
-						return nil, err
+						return nil, nil, err
 					}
 					units += len(utf16.Encode([]rune(value)))
 				}
@@ -374,7 +385,7 @@ func textObservationsPart(p *office.Package, part string) ([]map[string]any, err
 			case "instrText":
 				value, err := textElement(b[x.Start:x.End])
 				if err != nil {
-					return nil, err
+					return nil, nil, err
 				}
 				fields = append(fields, map[string]any{"kind": "instruction", "instruction": value, "xml_start": x.Start, "xml_end": x.End})
 			case "fldChar":
@@ -418,7 +429,7 @@ func textObservationsPart(p *office.Package, part string) ([]map[string]any, err
 			if x.Name.Local == "t" {
 				value, err := textElement(b[x.Start:x.End])
 				if err != nil {
-					return nil, err
+					return nil, nil, err
 				}
 				text.WriteString(value)
 			}
@@ -470,7 +481,7 @@ func textObservationsPart(p *office.Package, part string) ([]map[string]any, err
 				case "t":
 					value, err := textElement(b[x.Start:x.End])
 					if err != nil {
-						return nil, err
+						return nil, nil, err
 					}
 					runText.WriteString(value)
 				case "tab":
@@ -559,10 +570,10 @@ func textObservationsPart(p *office.Package, part string) ([]map[string]any, err
 		}
 		out = append(out, observation)
 		if len(out) > 10000 {
-			return nil, fmt.Errorf("paragraph observation budget exceeded")
+			return nil, nil, fmt.Errorf("paragraph observation budget exceeded")
 		}
 	}
-	return out, nil
+	return out, spans, nil
 }
 func StyleReference(file string) (map[string]any, error) {
 	b, e := project.Read(filepath.Dir(file), filepath.Base(file))
@@ -594,7 +605,14 @@ func StyleReference(file string) (map[string]any, error) {
 		return nil, e
 	}
 	out["content_types"] = contentTypes
-	text, e := TextObservations(p)
+	var documentSpans []office.XMLSpan
+	if document := p.Files["word/document.xml"]; len(document) > 0 {
+		documentSpans, e = office.XMLSpans(document)
+		if e != nil {
+			return nil, e
+		}
+	}
+	text, _, e := textObservationsPartWithSpans(p, "word/document.xml", documentSpans)
 	if e != nil {
 		return nil, e
 	}
@@ -622,10 +640,7 @@ func StyleReference(file string) (map[string]any, error) {
 	out["paragraph_observations"] = text
 	if document := p.Files["word/document.xml"]; len(document) > 0 {
 		out["document_xml_sha256"] = office.Hash(document)
-		spans, err := office.XMLSpans(document)
-		if err != nil {
-			return nil, err
-		}
+		spans := documentSpans
 		sections := make([]map[string]any, 0)
 		for _, span := range spans {
 			if span.Name.Space != office.W || span.Name.Local != "sectPr" {

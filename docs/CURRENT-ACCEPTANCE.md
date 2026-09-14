@@ -83,6 +83,8 @@ The fidelity-63 source keeps `check` on the resident Engine workspace so stamp-v
 
 The fidelity-64 source extends the same resident snapshot to `files` and literal `search`, while keeping the component lock out of their existing user-facing file list. The focused regression proves unchanged requests retain the workspace and source additions become searchable on the next request; full Go verification remains green. Native behavior remains unclaimed because the recorded restricted-session Word boundary has not changed.
 
+The fidelity-65 source reuses the exact main-story XML span pass between text observations and structure/section analysis instead of tokenizing `word/document.xml` twice. The retained 109-document `structure.resolve` corpus still resolves all 22,789 paragraphs with zero errors; one run fell from 7.755 s total (1.123 s slowest document) to 3.112 s total (141.7 ms slowest). This is an offline corpus observation, not a universal latency guarantee, and native behavior remains unclaimed because the recorded restricted-session Word boundary has not changed.
+
 ## Remaining completion gates
 
 The Rizzuto comment discrepancy is fixed by restoring character-collection traversal; tracked-formatting visibility is preserved explicitly. The selected-options baseline passes (`workspaces/alr-baseline/reports/full-rizzuto-with-alignment.json`, 67.914 s), and the complete output comparison passes with `equal=true`, `byte_identical=false`. Reopening saved Flat OPC was rejected as a shortcut because Word added font metadata; the final baseline ran the unchanged original on the original input instead.

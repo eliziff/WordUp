@@ -271,7 +271,11 @@ func StructureReference(file string) (map[string]any, error) {
 	if err != nil {
 		return nil, err
 	}
-	rows, err := TextObservations(p)
+	documentSpans, err := office.XMLSpans(p.Files["word/document.xml"])
+	if err != nil {
+		return nil, err
+	}
+	rows, _, err := textObservationsPartWithSpans(p, "word/document.xml", documentSpans)
 	if err != nil {
 		return nil, err
 	}
@@ -402,10 +406,7 @@ func StructureReference(file string) (map[string]any, error) {
 			}
 		}
 	}
-	spans, err := office.XMLSpans(p.Files["word/document.xml"])
-	if err != nil {
-		return nil, err
-	}
+	spans := documentSpans
 	ancestors := []office.XMLSpan{}
 	numberingStates := map[string]*numberingState{}
 	row := 0
