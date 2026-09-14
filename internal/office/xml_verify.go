@@ -1,6 +1,9 @@
 package office
 
-import "fmt"
+import (
+	"bytes"
+	"fmt"
+)
 
 const flatOPCNamespace = "http://schemas.microsoft.com/office/2006/xmlPackage"
 
@@ -68,6 +71,19 @@ func VerifyXML(expected, actual []byte, mode string) (map[string]any, error) {
 	}
 	if mode != "exact" && mode != "semantic" {
 		return nil, fmt.Errorf("comparison must be exact or semantic")
+	}
+	// Exact bytes are the common parity-fixture success path. Validate once,
+	// then return the same evidence shape without tokenizing both copies.
+	if bytes.Equal(expected, actual) {
+		if _, err := XMLSpans(expected); err != nil {
+			return nil, err
+		}
+		hash := Hash(expected)
+		return map[string]any{
+			"equal": true, "reference_sha256": hash, "candidate_sha256": hash,
+			"byte_identical": true, "comparison": mode, "matches_expected": true,
+			"policy": XMLComparePolicy{},
+		}, nil
 	}
 	for _, data := range [][]byte{expected, actual} {
 		if _, err := XMLSpans(data); err != nil {
