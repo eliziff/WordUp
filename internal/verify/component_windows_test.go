@@ -140,9 +140,16 @@ Public Sub WU_Command_proof_button()
     WU_Dispatched = True
 End Sub
 Public Function CheckRibbonAndProgress() As String
-    Dim control As New ProofControl
+    Dim control As New ProofControl, i As Long, started As Single, elapsed As Single
     ProofProgress_ResetProgress
     If ProofProgress_CancelRequested Then Err.Raise 5, , "reset left cancellation requested"
+    started = Timer
+    For i = 1 To 10000
+        If ProofProgress_CancelRequested Then Err.Raise 5, , "checkpoint invented cancellation"
+    Next i
+    elapsed = Timer - started
+    If elapsed < 0 Then elapsed = elapsed + 86400
+    If elapsed * 1000 > 250 Then Err.Raise 5, , "10000 cancellation checkpoints exceeded 250 ms: " & CStr(elapsed * 1000)
     ProofProgress_RequestCancel
     If Not ProofProgress_CancelRequested Then Err.Raise 5, , "cancellation request was lost"
     control.Id = "proof-button"
