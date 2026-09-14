@@ -80,8 +80,11 @@ func CompareStructureSilver(root, reference string, limit int) (map[string]any, 
 			actual[row["source_id"].(string)] = row
 		}
 		for _, expected := range expectedDocument.Paragraphs {
+			// An explicit XML path is the disambiguator for malformed documents
+			// whose paragraph IDs repeat. Preserve the compact paraId lookup for
+			// existing silver that omits xml_path.
 			id := "word/document.xml#" + expected.XMLPath
-			if expected.ParagraphID != "" {
+			if expected.XMLPath == "" && expected.ParagraphID != "" {
 				id = "word/document.xml#paraId=" + expected.ParagraphID
 			}
 			row, ok := actual[id]

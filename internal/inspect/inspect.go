@@ -210,6 +210,18 @@ func textObservationsPartWithSpans(p *office.Package, part string, supplied []of
 			return nil, nil, e
 		}
 	}
+	// Word normally gives every paragraph a unique w14:paraId. Treat a
+	// repeated ID as malformed identity evidence instead of letting a later
+	// paragraph overwrite an earlier row in a source-ID map. Duplicates fall
+	// back to their stable XML path below; the original ID remains visible.
+	paragraphIDCounts := map[string]int{}
+	for _, span := range spans {
+		if span.Name.Space == office.W && span.Name.Local == "p" {
+			if id := span.Attribute("http://schemas.microsoft.com/office/word/2010/wordml", "paraId"); id != "" {
+				paragraphIDCounts[strings.ToLower(id)]++
+			}
+		}
+	}
 	type contentControl struct {
 		start, end int
 		item       map[string]any
@@ -529,8 +541,11 @@ func textObservationsPartWithSpans(p *office.Package, part string, supplied []of
 		paragraphID := s.Attribute("http://schemas.microsoft.com/office/word/2010/wordml", "paraId")
 		xmlPath := fmt.Sprintf("(//w:p)[%d]", len(out)+1)
 		sourceID := part + "#" + xmlPath
-		if paragraphID != "" {
+		duplicateParagraphID := false
+		if paragraphID != "" && paragraphIDCounts[strings.ToLower(paragraphID)] == 1 {
 			sourceID = part + "#paraId=" + paragraphID
+		} else if paragraphID != "" {
+			duplicateParagraphID = true
 		}
 		observation := map[string]any{
 			"text": text.String(), "style_id": style, "paragraph_properties_xml": props, "run_properties": runs,
@@ -540,6 +555,9 @@ func textObservationsPartWithSpans(p *office.Package, part string, supplied []of
 			"paragraph_id": paragraphID,
 			"source_id":    sourceID,
 			"references":   references,
+		}
+		if duplicateParagraphID {
+			observation["paragraph_id_ambiguous"] = true
 		}
 		if len(revisions) > 0 {
 			observation["revision_evidence"] = revisions
