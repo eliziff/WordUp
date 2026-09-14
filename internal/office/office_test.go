@@ -453,6 +453,28 @@ func TestBuildingBlocksPreserveExistingGlossaryDefinitions(t *testing.T) {
 	}
 }
 
+func TestBuildingBlocksRejectCaseCollisions(t *testing.T) {
+	p := BlankPackage()
+	before, err := p.Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = AddBuildingBlocks(p, []BuildingBlock{
+		{Name: "Snippet", Blocks: []Block{{Text: "one"}}},
+		{Name: "snippet", Blocks: []Block{{Text: "two"}}},
+	}, nil)
+	if err == nil {
+		t.Fatal("case-colliding building blocks were accepted")
+	}
+	after, err := p.Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(before, after) {
+		t.Fatal("failed building-block collision mutated the package")
+	}
+}
+
 func TestComposeFailureDoesNotMutatePackage(t *testing.T) {
 	p := BlankPackage()
 	p.Files[RelPart("word/document.xml")] = []byte(`<Relationships xmlns="` + RelNS + `"><Relationship Id="wwheader" Type="other" Target="existing.xml"/></Relationships>`)

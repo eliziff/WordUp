@@ -1184,10 +1184,16 @@ func addBuildingBlocks(p *Package, blocks []BuildingBlock, asset func(string) ([
 		return e
 	}
 	c := &composer{p: p, source: part, asset: asset, next: nextDocumentID(p)}
+	seenNames := map[string]bool{}
 	for _, block := range blocks {
 		if block.Name == "" {
 			return fmt.Errorf("saved part name required")
 		}
+		nameKey := strings.ToLower(block.Name)
+		if seenNames[nameKey] {
+			return fmt.Errorf("duplicate saved part name %q", block.Name)
+		}
+		seenNames[nameKey] = true
 		body, e := c.blocks(block.Blocks)
 		if e != nil {
 			return e
@@ -1219,7 +1225,7 @@ func addBuildingBlocks(p *Package, blocks []BuildingBlock, asset func(string) ([
 				continue
 			}
 			for _, n := range spans {
-				if n.Start > sp.Start && n.End < sp.End && n.Name.Local == "name" && n.Depth == sp.Depth+2 && n.Attribute(W, "val") == block.Name {
+				if n.Start > sp.Start && n.End < sp.End && n.Name.Local == "name" && n.Depth == sp.Depth+2 && strings.EqualFold(n.Attribute(W, "val"), block.Name) {
 					b = bytes.Join([][]byte{b[:sp.Start], []byte(node), b[sp.End:]}, nil)
 					replaced = true
 					break
