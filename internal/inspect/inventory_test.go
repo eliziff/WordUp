@@ -152,3 +152,27 @@ func TestCheckInventoryReportsModuleNameMismatch(t *testing.T) {
 	}
 	t.Fatalf("module name mismatch diagnostic missing: %#v", result["diagnostics"])
 }
+
+func TestCheckInventoryReportsInvalidModuleFilename(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "workspace")
+	if _, err := project.New("InvalidModule", root); err != nil {
+		t.Fatal(err)
+	}
+	if err := project.Write(root, "vba/Bad-Name.bas", []byte("Option Explicit\nPublic Sub Run()\nEnd Sub\n"), ""); err != nil {
+		t.Fatal(err)
+	}
+	w, err := project.Open(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := Check(w)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, diagnostic := range result["diagnostics"].([]map[string]any) {
+		if diagnostic["file"] == "vba/Bad-Name.bas" && diagnostic["message"] == `VBA source filename does not derive a valid module name "Bad-Name"` {
+			return
+		}
+	}
+	t.Fatalf("invalid module filename diagnostic missing: %#v", result["diagnostics"])
+}

@@ -408,6 +408,13 @@ func CheckInventory(root string, files map[string][]byte, diagnostics *[]map[str
 	for _, path := range orderedPaths {
 		ext := pathpkg.Ext(path)
 		expectedModule := strings.TrimSuffix(strings.TrimPrefix(path, "vba/"), ext)
+		if !office.ValidIdentifier(expectedModule) {
+			*diagnostics = append(*diagnostics, map[string]any{
+				"severity": "error", "file": path,
+				"message":         fmt.Sprintf("VBA source filename does not derive a valid module name %q", expectedModule),
+				"expected_module": expectedModule,
+			})
+		}
 		if name, line, ok := component.ModuleName(string(files[path])); ok {
 			row := map[string]any{"file": path, "module": name, "line": line}
 			moduleNames = append(moduleNames, row)
