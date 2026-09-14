@@ -868,6 +868,23 @@ func nativePausedInspection(t *testing.T, direct bool) {
 	if stack["truncated"] != false || stack["close_error"] != nil || (!direct && !strings.Contains(frames, "cmdFail_Click")) || (direct && (!strings.Contains(frames, "Launch.FailDirect") || !strings.Contains(frames, "Launch.NestedRun") || strings.Count(frames, "Launch.Recurse") != 33)) {
 		t.Fatalf("missing paused stack or failed cleanup: %v", stack)
 	}
+	probe := "ActiveDocument.Paragraphs.Count"
+	symbols := []string{"missingVariable"}
+	if direct {
+		probe = "counter"
+		symbols = append([]string{"counter", "depth"}, symbols...)
+	}
+	immediate := call(native.Operation{Op: "ui.vba.immediate", Value: probe}).(map[string]any)
+	expression, _ := immediate["expression"].(map[string]any)
+	if expression["available"] != true || expression["result_text"] == "" {
+		t.Fatalf("paused Immediate result unavailable: %v", immediate)
+	}
+	locals := call(native.Operation{Op: "ui.vba.locals", Named: map[string]any{"symbols": symbols}}).(map[string]any)
+	rows, _ := locals["symbols"].([]any)
+	unavailable, _ := locals["unavailable_symbols"].([]any)
+	if len(rows) != len(symbols) || len(unavailable) == 0 {
+		t.Fatalf("paused locals did not report per-symbol availability: %v", locals)
+	}
 
 	started := time.Now()
 	reset := call(native.Operation{Op: "ui.vba.reset"}).(map[string]any)
