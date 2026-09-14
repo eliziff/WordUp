@@ -420,6 +420,21 @@ func TestFootnoteEmptyParagraphAndRelationships(t *testing.T) {
 		t.Fatal("link relationship attached to wrong part")
 	}
 }
+
+func TestComposePreservesExistingFootnotesAndAllocatesNewIDs(t *testing.T) {
+	p := BlankPackage()
+	p.Files["word/footnotes.xml"] = []byte(`<w:footnotes xmlns:w="` + W + `"><w:footnote w:type="separator" w:id="-1"><w:p><w:r><w:separator/></w:r></w:p></w:footnote><w:footnote w:id="7"><w:p><w:r><w:rPr><w:i/></w:rPr><w:t>Existing note</w:t></w:r></w:p></w:footnote></w:footnotes>`)
+	if err := Compose(p, ContentRecipe{Blocks: []Block{{Inlines: []Inline{{Text: "Body"}, {Footnote: []Block{{Inlines: []Inline{{Text: "New note"}}}}}}}}}, nil); err != nil {
+		t.Fatal(err)
+	}
+	footnotes := string(p.Files["word/footnotes.xml"])
+	if !strings.Contains(footnotes, `w:id="7"`) || !strings.Contains(footnotes, "Existing note") || !strings.Contains(footnotes, `<w:i/>`) {
+		t.Fatalf("existing footnote was not preserved: %s", footnotes)
+	}
+	if !strings.Contains(footnotes, `w:id="8"`) || !strings.Contains(string(p.Files["word/document.xml"]), `w:id="8"`) {
+		t.Fatalf("new footnote did not allocate the next ID: %s", footnotes)
+	}
+}
 func TestBlankPackageHasDOCXContentType(t *testing.T) {
 	p := BlankPackage()
 	if !strings.Contains(string(p.Files["[Content_Types].xml"]), "wordprocessingml.document.main+xml") {

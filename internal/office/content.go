@@ -677,12 +677,14 @@ type BuildingBlock struct {
 	Blocks      []Block `json:"blocks"`
 }
 type composer struct {
-	p      *Package
-	source string
-	asset  func(string) ([]byte, error)
-	next   int
-	notes  []string
-	depth  int
+	p          *Package
+	source     string
+	asset      func(string) ([]byte, error)
+	next       int
+	nextNoteID int
+	noteIDs    bool
+	notes      []string
+	depth      int
 }
 
 func (c *composer) textRun(text string, style string, spec map[string]any) (string, error) {
@@ -740,8 +742,15 @@ func (c *composer) inline(in Inline) (string, error) {
 		if c.source != "word/document.xml" {
 			return "", fmt.Errorf("footnotes in saved parts/headers need explicit relationship-aware XML")
 		}
-		id := len(c.notes) + 1
-		c.notes = append(c.notes, "")
+		if !c.noteIDs {
+			next, err := nextFootnoteID(c.p)
+			if err != nil {
+				return "", err
+			}
+			c.nextNoteID, c.noteIDs = next, true
+		}
+		id := c.nextNoteID
+		c.nextNoteID++
 		prior := c.source
 		c.source = "word/footnotes.xml"
 		body, e := c.blocks(in.Footnote)
@@ -779,7 +788,7 @@ func (c *composer) inline(in Inline) (string, error) {
 		} else {
 			body = body[:pos] + mark + body[pos:]
 		}
-		c.notes[id-1] = fmt.Sprintf(`<w:footnote w:id="%d">%s</w:footnote>`, id, body)
+		c.notes = append(c.notes, fmt.Sprintf(`<w:footnote w:id="%d">%s</w:footnote>`, id, body))
 		return fmt.Sprintf(`<w:r><w:rPr><w:rStyle w:val="FootnoteReference"/></w:rPr><w:footnoteReference w:id="%d"/></w:r>`, id), nil
 	}
 	if in.Image != "" {
@@ -1075,7 +1084,22 @@ func Compose(p *Package, r ContentRecipe, asset func(string) ([]byte, error)) er
 	}
 	p.Files["word/document.xml"] = []byte(`<?xml version="1.0" encoding="UTF-8"?><w:document xmlns:w="` + W + `" xmlns:r="` + R + `"><w:body>` + body + section + `</w:body></w:document>`)
 	if len(c.notes) > 0 {
-		p.Files["word/footnotes.xml"] = []byte(`<w:footnotes xmlns:w="` + W + `" xmlns:r="` + R + `"><w:footnote w:type="separator" w:id="-1"><w:p><w:r><w:separator/></w:r></w:p></w:footnote><w:footnote w:type="continuationSeparator" w:id="0"><w:p><w:r><w:continuationSeparator/></w:r></w:p></w:footnote>` + strings.Join(c.notes, "") + `</w:footnotes>`)
+		if existing := p.Files["word/footnotes.xml"]; len(existing) > 0 {
+			spans, err := XMLSpans(existing)
+			if err != nil {
+				return err
+			}
+			if len(spans) == 0 || spans[0].Name.Local != "footnotes" || spans[0].CloseStart <= 0 {
+				return fmt.Errorf("invalid existing footnotes part")
+			}
+			updated := make([]byte, 0, len(existing)+len(strings.Join(c.notes, "")))
+			updated = append(updated, existing[:spans[0].CloseStart]...)
+			updated = append(updated, strings.Join(c.notes, "")...)
+			updated = append(updated, existing[spans[0].CloseStart:]...)
+			p.Files["word/footnotes.xml"] = updated
+		} else {
+			p.Files["word/footnotes.xml"] = []byte(`<w:footnotes xmlns:w="` + W + `" xmlns:r="` + R + `"><w:footnote w:type="separator" w:id="-1"><w:p><w:r><w:separator/></w:r></w:p></w:footnote><w:footnote w:type="continuationSeparator" w:id="0"><w:p><w:r><w:continuationSeparator/></w:r></w:p></w:footnote>` + strings.Join(c.notes, "") + `</w:footnotes>`)
+		}
 		if e := p.ContentType("word/footnotes.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml"); e != nil {
 			return e
 		}
@@ -1084,6 +1108,35 @@ func Compose(p *Package, r ContentRecipe, asset func(string) ([]byte, error)) er
 		}
 	}
 	return nil
+}
+
+func nextFootnoteID(p *Package) (int, error) {
+	b := p.Files["word/footnotes.xml"]
+	if len(b) == 0 {
+		return 1, nil
+	}
+	spans, err := XMLSpans(b)
+	if err != nil {
+		return 0, err
+	}
+	maxID := 0
+	for _, span := range spans {
+		if span.Name.Space != W || span.Name.Local != "footnote" || span.Depth != 1 {
+			continue
+		}
+		value := span.Attribute(W, "id")
+		if value == "" {
+			return 0, fmt.Errorf("existing footnote has no id")
+		}
+		id, err := strconv.Atoi(value)
+		if err != nil {
+			return 0, fmt.Errorf("invalid existing footnote id %q", value)
+		}
+		if id > maxID {
+			maxID = id
+		}
+	}
+	return maxID + 1, nil
 }
 func AddBuildingBlocks(p *Package, blocks []BuildingBlock, asset func(string) ([]byte, error)) error {
 	if len(blocks) == 0 {
