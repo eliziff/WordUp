@@ -77,12 +77,16 @@ type Package struct {
 	Original []byte
 	Files    map[string][]byte
 	archive  *zip.Reader
-	hashes   map[string]string
+	// archiveLogical maps the original ZIP member spelling to the canonical
+	// slash-separated key used by Files. Keep the original spelling when an
+	// unrelated part changes so untouched members remain byte-preserved.
+	archiveLogical map[string]string
+	hashes         map[string]string
 }
 
 // WithFiles reuses immutable ZIP metadata with a caller-owned part map.
 func (p *Package) WithFiles(files map[string][]byte) *Package {
-	return &Package{Original: p.Original, Files: files, archive: p.archive, hashes: p.hashes}
+	return &Package{Original: p.Original, Files: files, archive: p.archive, archiveLogical: p.archiveLogical, hashes: p.hashes}
 }
 
 func Hash(b []byte) string { s := sha256.Sum256(b); return hex.EncodeToString(s[:]) }
@@ -112,16 +116,17 @@ func ReadPackage(data []byte) (*Package, error) {
 	if len(z.File) > 65536 {
 		return nil, fmt.Errorf("too many package entries")
 	}
-	p := &Package{Original: data, Files: map[string][]byte{}, archive: z, hashes: map[string]string{}}
+	p := &Package{Original: data, Files: map[string][]byte{}, archive: z, archiveLogical: map[string]string{}, hashes: map[string]string{}}
 	names := map[string]bool{}
 	var total uint64
 	for _, f := range z.File {
 		if f.FileInfo().IsDir() {
 			continue
 		}
-		name := strings.ReplaceAll(f.Name, "\\", "/")
+		originalName := f.Name
+		name := strings.ReplaceAll(originalName, "\\", "/")
 		if !SafePart(name) || f.Mode()&os.ModeSymlink != 0 {
-			return nil, fmt.Errorf("unsafe package part %q", f.Name)
+			return nil, fmt.Errorf("unsafe package part %q", originalName)
 		}
 		key := strings.ToLower(name)
 		if names[key] {
@@ -144,8 +149,8 @@ func ReadPackage(data []byte) (*Package, error) {
 		if len(b) > Limit || uint64(len(b)) != f.UncompressedSize64 {
 			return nil, fmt.Errorf("invalid ZIP entry size")
 		}
-		f.Name = name
 		p.Files[name] = b
+		p.archiveLogical[originalName] = name
 		p.hashes[name] = Hash(b)
 	}
 	if _, ok := p.Files["[Content_Types].xml"]; !ok {
@@ -188,6 +193,14 @@ func (p *Package) BytesChanged(changed []string) ([]byte, error) {
 }
 
 func (p *Package) bytes(knownChanges map[string]bool) ([]byte, error) {
+	logicalName := func(f *zip.File) string {
+		if p.archiveLogical != nil {
+			if name, ok := p.archiveLogical[f.Name]; ok {
+				return name
+			}
+		}
+		return f.Name
+	}
 	if p.archive != nil && len(p.Files) == len(p.archive.File) {
 		if knownChanges != nil && len(knownChanges) == 0 {
 			return append([]byte(nil), p.Original...), nil
@@ -195,7 +208,7 @@ func (p *Package) bytes(knownChanges map[string]bool) ([]byte, error) {
 		if knownChanges == nil {
 			equal := true
 			for _, f := range p.archive.File {
-				b, ok := p.Files[f.Name]
+				b, ok := p.Files[logicalName(f)]
 				if !ok {
 					equal = false
 					break
@@ -224,15 +237,16 @@ func (p *Package) bytes(knownChanges map[string]bool) ([]byte, error) {
 	done := map[string]bool{}
 	if p.archive != nil {
 		for _, f := range p.archive.File {
-			b, ok := p.Files[f.Name]
+			name := logicalName(f)
+			b, ok := p.Files[name]
 			if !ok {
 				continue
 			}
-			if knownChanges != nil && !knownChanges[f.Name] {
+			if knownChanges != nil && !knownChanges[name] {
 				if e := z.Copy(f); e != nil {
 					return nil, e
 				}
-				done[f.Name] = true
+				done[name] = true
 				continue
 			}
 			r, e := f.Open()
@@ -248,7 +262,7 @@ func (p *Package) bytes(knownChanges map[string]bool) ([]byte, error) {
 				if e = z.Copy(f); e != nil {
 					return nil, e
 				}
-				done[f.Name] = true
+				done[name] = true
 			}
 		}
 	}

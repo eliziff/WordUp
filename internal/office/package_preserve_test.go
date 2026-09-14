@@ -1,6 +1,7 @@
 package office
 
 import (
+	"archive/zip"
 	"bytes"
 	"testing"
 )
@@ -77,4 +78,49 @@ func TestKnownChangedPartsSkipReadsWithoutTrustingIncompleteSet(t *testing.T) {
 	if !bytes.Equal(fast, ordinary) {
 		t.Fatal("known-change serialization differs from checked serialization")
 	}
+}
+
+func TestChangedPackagePreservesOriginalBackslashMemberNames(t *testing.T) {
+	var raw bytes.Buffer
+	z := zip.NewWriter(&raw)
+	entries := map[string][]byte{
+		"[Content_Types].xml": []byte(`<Types xmlns="` + CT + `"/>`),
+		`customXml\item1.xml`: []byte("opaque"),
+		"word/document.xml":   []byte("before"),
+	}
+	for name, data := range entries {
+		w, err := z.Create(name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err = w.Write(data); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := z.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	p, err := ReadPackage(raw.Bytes())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := string(p.Files["customXml/item1.xml"]); got != "opaque" {
+		t.Fatalf("logical backslash member lookup = %q", got)
+	}
+	p.Files["word/document.xml"] = []byte("after")
+	out, err := p.BytesChanged([]string{"word/document.xml"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	zr, err := zip.NewReader(bytes.NewReader(out), int64(len(out)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, f := range zr.File {
+		if f.Name == `customXml\item1.xml` {
+			return
+		}
+	}
+	t.Fatal("changed package rewrote untouched backslash member name")
 }
