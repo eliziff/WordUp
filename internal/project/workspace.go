@@ -824,6 +824,15 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 	if e != nil {
 		return nil, e
 	}
+	// sourceStamps has already paid the hash cost for every source file. Keep
+	// that result available to each build decision so a non-cache edit does
+	// not hash the same package, VBA, or form bytes again.
+	sourceHash := func(name string, data []byte) string {
+		if stamp, ok := sourceSnapshot[name]; ok && stamp.Hash != "" {
+			return stamp.Hash
+		}
+		return office.Hash(data)
+	}
 	var manifest Manifest
 	if e = ReadJSON(files["project.json"], &manifest); e != nil {
 		return nil, e
@@ -878,13 +887,7 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 				return nil, fmt.Errorf("package source paths collide after case normalization: %s", part)
 			}
 			packageFiles[part] = b
-			currentHash := ""
-			if stamp, ok := sourceSnapshot[n]; ok {
-				currentHash = stamp.Hash
-			}
-			if currentHash == "" {
-				currentHash = office.Hash(b)
-			}
+			currentHash := sourceHash(n, b)
 			packageHashes[part] = currentHash
 			expected := w.Index.Files[n]
 			if expected == "" {
@@ -982,13 +985,7 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 		}
 		seen[strings.ToLower(name)] = true
 		source := office.Normalize(string(files[n]))
-		currentHash := ""
-		if stamp, ok := sourceSnapshot[n]; ok {
-			currentHash = stamp.Hash
-		}
-		if currentHash == "" {
-			currentHash = office.Hash(files[n])
-		}
+		currentHash := sourceHash(n, files[n])
 		if w.Index.Files[n] != currentHash {
 			changed = true
 		}
@@ -1003,7 +1000,7 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 				}
 				continue
 			}
-			if w.Index.Files[rel] == office.Hash(raw) {
+			if w.Index.Files[rel] == sourceHash(rel, raw) {
 				if _, e := v.CFB.Stream(name + "/f"); e == nil {
 					continue
 				}
@@ -1065,7 +1062,7 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 		}
 	}
 	if changed {
-		if b, ok := files["package/word/vbaProject.bin"]; ok && office.Hash(b) != w.Index.Files["package/word/vbaProject.bin"] {
+		if b, ok := files["package/word/vbaProject.bin"]; ok && sourceHash("package/word/vbaProject.bin", b) != w.Index.Files["package/word/vbaProject.bin"] {
 			return nil, fmt.Errorf("both binary VBA and source changed; choose one authoritative edit path")
 		}
 		vb, e := v.Rewrite(mods, formStreams)
