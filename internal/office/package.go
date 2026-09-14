@@ -214,6 +214,7 @@ func (p *Package) BytesChanged(changed []string) ([]byte, error) {
 }
 
 func (p *Package) bytes(knownChanges map[string]bool) ([]byte, error) {
+	currentHashes := map[string]string{}
 	logicalName := func(f *zip.File) string {
 		if p.archiveLogical != nil {
 			if name, ok := p.archiveLogical[f.Name]; ok {
@@ -233,6 +234,15 @@ func (p *Package) bytes(knownChanges map[string]bool) ([]byte, error) {
 				if !ok {
 					equal = false
 					break
+				}
+				if original, ok := p.hashes[logicalName(f)]; ok {
+					current := Hash(b)
+					currentHashes[logicalName(f)] = current
+					if current != original {
+						equal = false
+						break
+					}
+					continue
 				}
 				r, e := f.Open()
 				if e != nil {
@@ -269,6 +279,22 @@ func (p *Package) bytes(knownChanges map[string]bool) ([]byte, error) {
 				}
 				done[name] = true
 				continue
+			}
+			if knownChanges == nil {
+				if original, ok := p.hashes[name]; ok {
+					current, hashed := currentHashes[name]
+					if !hashed {
+						current = Hash(b)
+						currentHashes[name] = current
+					}
+					if current == original {
+						if e := z.Copy(f); e != nil {
+							return nil, e
+						}
+						done[name] = true
+					}
+					continue
+				}
 			}
 			r, e := f.Open()
 			if e != nil {
