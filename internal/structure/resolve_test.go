@@ -7,6 +7,7 @@ func TestResolveKeepsOutlineAndDemotesOrdinaryList(t *testing.T) {
 		{"context": "body", "text": "I. INTRODUCTION", "style_id": "Heading1", "outline_evidence": map[string]any{"level": 1}, "marker_interpretations": []Interpretation{{Family: "roman", Value: 1}}, "sequence_evidence": Assignment{Family: "roman", Value: 1, Level: 1, Action: "open_level"}},
 		{"context": "body", "text": "1. Buy milk.", "style_id": "ListParagraph", "marker_interpretations": []Interpretation{{Family: "integer", Value: 1}}, "sequence_evidence": Assignment{Family: "integer", Value: 1, Level: 2, Action: "open_level"}},
 		{"context": "table", "text": "A. Table value", "style_id": "Heading1"},
+		{"context": "body", "text": "AUTOMATICALLY NUMBERED HEADING", "style_id": "Heading2", "numbering_evidence": map[string]any{"level": 2, "family": "upperLetter"}},
 	}
 	Resolve(rows)
 	if rows[0]["resolved_structure"].(map[string]any)["role"] != "heading" {
@@ -17,6 +18,9 @@ func TestResolveKeepsOutlineAndDemotesOrdinaryList(t *testing.T) {
 	}
 	if rows[2]["resolved_structure"].(map[string]any)["role"] != "table" {
 		t.Fatal(rows[2])
+	}
+	if rows[3]["resolved_structure"].(map[string]any)["role"] != "heading" || rows[3]["resolved_structure"].(map[string]any)["level"] != 2 {
+		t.Fatal(rows[3])
 	}
 }
 

@@ -49,3 +49,25 @@ func TestStructureEvidenceInheritanceOverrideAndContainment(t *testing.T) {
 		t.Fatal("overclaimed hierarchy")
 	}
 }
+
+func TestStructureResolvesParagraphNumberingDefinition(t *testing.T) {
+	p := office.BlankPackage()
+	p.Files["word/document.xml"] = []byte(`<w:document xmlns:w="` + office.W + `"><w:body><w:p><w:pPr><w:numPr><w:ilvl w:val="1"/><w:numId w:val="7"/></w:numPr></w:pPr><w:r><w:t>Numbered</w:t></w:r></w:p></w:body></w:document>`)
+	p.Files["word/numbering.xml"] = []byte(`<w:numbering xmlns:w="` + office.W + `"><w:abstractNum w:abstractNumId="3"><w:lvl w:ilvl="1"><w:start w:val="2"/><w:numFmt w:val="lowerLetter"/><w:lvlText w:val="%2."/></w:lvl></w:abstractNum><w:num w:numId="7"><w:abstractNumId w:val="3"/><w:lvlOverride w:ilvl="1"><w:startOverride w:val="4"/></w:lvlOverride></w:num></w:numbering>`)
+	b, err := p.Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(t.TempDir(), "numbering.docx")
+	if err = os.WriteFile(path, b, 0600); err != nil {
+		t.Fatal(err)
+	}
+	result, err := StructureReference(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	evidence := result["paragraphs"].([]map[string]any)[0]["numbering_evidence"].(map[string]any)
+	if evidence["level"] != 2 || evidence["family"] != "lowerLetter" || evidence["label_pattern"] != "%2." || evidence["start"] != 4 || evidence["start_override"] != true {
+		t.Fatalf("unresolved numbering evidence: %v", evidence)
+	}
+}

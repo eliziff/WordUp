@@ -47,6 +47,13 @@ func Resolve(rows []map[string]any) map[string]any {
 			score += 25
 			evidence = append(evidence, "marker-grammar")
 		}
+		if numbering, ok := row["numbering_evidence"].(map[string]any); ok && numbering["family"] != "bullet" {
+			if n, ok := intValue(numbering["level"]); ok && level == 0 {
+				level = n
+			}
+			score += 12
+			evidence = append(evidence, "native-numbering")
+		}
 		if sequence, ok := row["sequence_evidence"].(Assignment); ok && sequence.Action != "violation" {
 			if level == 0 {
 				level = sequence.Level

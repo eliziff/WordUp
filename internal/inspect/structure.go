@@ -10,6 +10,108 @@ import (
 	"strings"
 )
 
+type numberingLevel struct {
+	Family, Pattern string
+	Start           int
+}
+
+type numberingDefinition struct {
+	AbstractID string
+	Levels     map[int]numberingLevel
+	Overrides  map[int]int
+}
+
+func numberingDefinitions(p *office.Package) (map[string]numberingDefinition, error) {
+	b := p.Files["word/numbering.xml"]
+	if len(b) == 0 {
+		return map[string]numberingDefinition{}, nil
+	}
+	spans, err := office.XMLSpans(b)
+	if err != nil {
+		return nil, err
+	}
+	abstracts := map[string]map[int]numberingLevel{}
+	definitions := map[string]numberingDefinition{}
+	for i, s := range spans {
+		if s.Name.Space != office.W || s.Depth != 1 {
+			continue
+		}
+		switch s.Name.Local {
+		case "abstractNum":
+			levels := map[int]numberingLevel{}
+			for j, level := range spans[i+1:] {
+				if level.Start >= s.End {
+					break
+				}
+				if level.Name.Space != office.W || level.Name.Local != "lvl" || level.Depth != s.Depth+1 {
+					continue
+				}
+				ilvl, parseErr := strconv.Atoi(level.Attribute(office.W, "ilvl"))
+				if parseErr != nil {
+					continue
+				}
+				item := numberingLevel{Start: 1}
+				for _, x := range spans[i+1+j+1:] {
+					if x.Start >= level.End {
+						break
+					}
+					if x.Name.Space != office.W {
+						continue
+					}
+					switch x.Name.Local {
+					case "start":
+						if n, e := strconv.Atoi(x.Attribute(office.W, "val")); e == nil {
+							item.Start = n
+						}
+					case "numFmt":
+						item.Family = x.Attribute(office.W, "val")
+					case "lvlText":
+						item.Pattern = x.Attribute(office.W, "val")
+					}
+				}
+				levels[ilvl] = item
+			}
+			abstracts[s.Attribute(office.W, "abstractNumId")] = levels
+		case "num":
+			definition := numberingDefinition{Levels: map[int]numberingLevel{}, Overrides: map[int]int{}}
+			for j, x := range spans[i+1:] {
+				if x.Start >= s.End {
+					break
+				}
+				if x.Name.Space != office.W {
+					continue
+				}
+				if x.Name.Local == "abstractNumId" && x.Depth == s.Depth+1 {
+					definition.AbstractID = x.Attribute(office.W, "val")
+				}
+				if x.Name.Local != "lvlOverride" || x.Depth != s.Depth+1 {
+					continue
+				}
+				ilvl, parseErr := strconv.Atoi(x.Attribute(office.W, "ilvl"))
+				if parseErr != nil {
+					continue
+				}
+				for _, override := range spans[i+1+j+1:] {
+					if override.Start >= x.End {
+						break
+					}
+					if override.Name.Space == office.W && override.Name.Local == "startOverride" {
+						if n, e := strconv.Atoi(override.Attribute(office.W, "val")); e == nil {
+							definition.Overrides[ilvl] = n
+						}
+					}
+				}
+			}
+			definitions[s.Attribute(office.W, "numId")] = definition
+		}
+	}
+	for id, definition := range definitions {
+		definition.Levels = abstracts[definition.AbstractID]
+		definitions[id] = definition
+	}
+	return definitions, nil
+}
+
 // StructureReference resolves paragraph outline inheritance without starting Word.
 // It retains the raw evidence; an outline claim is not editorial acceptance.
 func StructureReference(file string) (map[string]any, error) {
@@ -26,6 +128,10 @@ func StructureReference(file string) (map[string]any, error) {
 		return nil, err
 	}
 	styles, err := office.XMLSpans(p.Files["word/styles.xml"])
+	if err != nil {
+		return nil, err
+	}
+	numbering, err := numberingDefinitions(p)
 	if err != nil {
 		return nil, err
 	}
@@ -135,6 +241,41 @@ func StructureReference(file string) (map[string]any, error) {
 					outline = x.Attribute(office.W, "val")
 					origin = "direct paragraph formatting"
 				}
+			}
+			numID, ilvl := "", 0
+			for _, x := range spans[i+1:] {
+				if x.Start >= s.End {
+					break
+				}
+				if x.Name.Space != office.W || x.Depth != s.Depth+3 {
+					continue
+				}
+				switch x.Name.Local {
+				case "numId":
+					numID = x.Attribute(office.W, "val")
+				case "ilvl":
+					if n, parseErr := strconv.Atoi(x.Attribute(office.W, "val")); parseErr == nil {
+						ilvl = n
+					}
+				}
+			}
+			if numID != "" && numID != "0" {
+				evidence := map[string]any{"num_id": numID, "level": ilvl + 1, "provenance": "package XML"}
+				if definition, ok := numbering[numID]; ok {
+					evidence["abstract_num_id"] = definition.AbstractID
+					if level, exists := definition.Levels[ilvl]; exists {
+						evidence["family"] = level.Family
+						evidence["label_pattern"] = level.Pattern
+						evidence["start"] = level.Start
+					}
+					if start, overridden := definition.Overrides[ilvl]; overridden {
+						evidence["start"] = start
+						evidence["start_override"] = true
+					}
+				} else {
+					evidence["unresolved"] = true
+				}
+				item["numbering_evidence"] = evidence
 			}
 			if outline != "" {
 				level, e := strconv.Atoi(outline)
