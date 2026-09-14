@@ -7,6 +7,13 @@ import (
 	"github.com/eliziff/WordUp/internal/project"
 )
 
+func TestRibbonDeclarationShapeDefersContinuedSignature(t *testing.T) {
+	actual := Symbol{Kind: "Sub", Declaration: "Public Sub Action(_"}
+	if mismatch := ribbonDeclarationMismatch("Public Sub Action(control As IRibbonControl)", actual); mismatch != "" {
+		t.Fatalf("continued declaration was treated as a mismatch: %s", mismatch)
+	}
+}
+
 func TestCheckInventoryReportsWiringAndModifiedComponent(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "workspace")
 	if _, err := project.New("Inventory", root); err != nil {

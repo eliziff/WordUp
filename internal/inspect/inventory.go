@@ -68,6 +68,12 @@ func ribbonDeclarationMismatch(expected string, actual Symbol) string {
 	if !strings.EqualFold(actual.Kind, "Sub") {
 		return fmt.Sprintf("declared as %s; Ribbon callbacks must be Public Sub", actual.Kind)
 	}
+	// Symbols currently records the first declaration line. A continued VBA
+	// signature is not enough evidence for an arity warning, so defer it to
+	// native compile rather than guessing.
+	if strings.Contains(actual.Declaration, "(") && !strings.Contains(actual.Declaration, ")") {
+		return ""
+	}
 	want, got := declarationParameters(expected), declarationParameters(actual.Declaration)
 	if len(want) != len(got) {
 		return fmt.Sprintf("expects %d parameters but declaration has %d", len(want), len(got))
