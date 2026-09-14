@@ -2,10 +2,83 @@ package agent
 
 import (
 	"context"
-	"github.com/eliziff/WordUp/internal/project"
 	"path/filepath"
 	"testing"
+
+	"github.com/eliziff/WordUp/internal/office"
+	"github.com/eliziff/WordUp/internal/project"
 )
+
+func TestResidentProjectCheckReusesSourceSnapshot(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "source")
+	if _, err := project.New("ResidentCheck", root); err != nil {
+		t.Fatal(err)
+	}
+	e := &Engine{Root: root}
+	defer e.Close()
+	if _, err := e.Call(context.Background(), "check", Parameters{}); err != nil {
+		t.Fatal(err)
+	}
+	workspace := e.workspace
+	if workspace == nil {
+		t.Fatal("check did not retain its resident source snapshot")
+	}
+	if _, err := e.Call(context.Background(), "check", Parameters{}); err != nil {
+		t.Fatal(err)
+	}
+	if e.workspace != workspace {
+		t.Fatal("unchanged check reopened the workspace")
+	}
+	if err := project.Write(root, "vba/Added.bas", []byte("Attribute VB_Name = \"Added\"\nPublic Sub AddedMacro()\nEnd Sub\n"), ""); err != nil {
+		t.Fatal(err)
+	}
+	result, err := e.Call(context.Background(), "check", Parameters{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if e.workspace != workspace {
+		t.Fatal("source edit discarded the resident workspace")
+	}
+	if parsed, ok := result.(map[string]any)["syntax_modules_parsed"].(int); !ok || parsed != 2 {
+		t.Fatalf("source edit did not refresh the resident snapshot: %#v", result)
+	}
+}
+
+func TestResidentProjectCheckRefreshesWorkspaceMetadata(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "source")
+	if _, err := project.New("MetadataCheck", root); err != nil {
+		t.Fatal(err)
+	}
+	e := &Engine{Root: root}
+	defer e.Close()
+	if _, err := e.Call(context.Background(), "check", Parameters{}); err != nil {
+		t.Fatal(err)
+	}
+	first := e.workspace
+	projectJSON, err := project.Read(root, "project.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	updated := []byte("{\n  \"name\": \"MetadataCheckRenamed\"\n}\n")
+	if err := project.Write(root, "project.json", updated, projectJSONHash(projectJSON)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := e.Call(context.Background(), "check", Parameters{}); err != nil {
+		t.Fatal(err)
+	}
+	if e.workspace != first {
+		t.Fatal("metadata edit discarded the resident workspace instead of refreshing it")
+	}
+	if e.workspace.Manifest.Name != "MetadataCheckRenamed" {
+		t.Fatalf("workspace metadata was not refreshed: %#v", e.workspace.Manifest)
+	}
+}
+
+func projectJSONHash(b []byte) string {
+	// Keep this test independent of the agent's file-writing path while still
+	// exercising its optimistic-concurrency guard.
+	return office.Hash(b)
+}
 
 func TestProjectCheckUsesRequestedConditionalConstants(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "source")

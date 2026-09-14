@@ -481,6 +481,15 @@ func (w *Workspace) SourceFilesCached() (map[string][]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	if metadataChanged(w.sourceStamp, stamps) {
+		if err := w.reloadMetadata(); err != nil {
+			return nil, err
+		}
+		stamps, err = sourceStamps(w.Root, nil)
+		if err != nil {
+			return nil, err
+		}
+	}
 	return w.buildSourceFiles(stamps)
 }
 
@@ -587,6 +596,34 @@ func sourceStamps(root string, previous map[string]fileStamp) (map[string]fileSt
 		}
 	}
 	return result, nil
+}
+
+var workspaceMetadataPaths = [...]string{"project.json", ".wordwright/base.opc", ".wordwright/index.json"}
+
+func metadataChanged(previous, current map[string]fileStamp) bool {
+	if previous == nil {
+		return false
+	}
+	for _, path := range workspaceMetadataPaths {
+		before, beforeOK := previous[path]
+		after, afterOK := current[path]
+		if !beforeOK || !afterOK || before.Size != after.Size || before.ModifiedNS != after.ModifiedNS || before.ChangedNS != after.ChangedNS {
+			return true
+		}
+	}
+	return false
+}
+
+func (w *Workspace) reloadMetadata() error {
+	fresh, err := Open(w.Root)
+	if err != nil {
+		return err
+	}
+	w.Manifest, w.Index, w.Baseline = fresh.Manifest, fresh.Index, fresh.Baseline
+	w.baselineVBA, w.baselineHashes = nil, nil
+	w.buildMemo = nil
+	w.sourceMemo, w.sourceStamp = nil, nil
+	return nil
 }
 
 func (w *Workspace) buildSourceFiles(stamps map[string]fileStamp) (map[string][]byte, error) {
@@ -770,6 +807,15 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 	}
 	if sourceSnapshot == nil {
 		sourceSnapshot, e = sourceStamps(w.Root, w.sourceStamp)
+		if e != nil {
+			return nil, e
+		}
+	}
+	if metadataChanged(w.sourceStamp, sourceSnapshot) {
+		if e = w.reloadMetadata(); e != nil {
+			return nil, e
+		}
+		sourceSnapshot, e = sourceStamps(w.Root, nil)
 		if e != nil {
 			return nil, e
 		}
