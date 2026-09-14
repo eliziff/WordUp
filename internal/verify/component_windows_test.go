@@ -81,7 +81,8 @@ const structureProof = `Attribute VB_Name = "StructureProof"
 Option Explicit
 Public Function Check() As Variant
     Dim d As Document, r As Variant, before As String, mixed As Range
-    Dim i As Long, lines(1 To 1400) As String, started As Single, elapsed As Single
+    Dim i As Long, manuscript(1 To 400) As String, stress(1 To 1400) As String
+    Dim started As Single, manuscriptElapsed As Single, stressElapsed As Single
     Set d = Documents.Add
     d.Content.Text = "First heading" & vbCr & "Second heading" & vbCr & "Ordinary body sentence." & vbCr & "Mixed emphasis text" & vbCr & "THIRD HEADING"
     d.Content.Style = wdStyleNormal
@@ -107,17 +108,27 @@ Public Function Check() As Variant
     d.Paragraphs(2).OutlineLevel = 2
     r = WU_DetectStructure(d)
     If InStr(r(4, WU_EVIDENCE), "coherent-style-family") > 0 Then Err.Raise 5, , "conflicting style votes accepted"
-    For i = 1 To 1400: lines(i) = "Ordinary manuscript text with no heading evidence.": Next i
-    d.Content.Text = Join(lines, vbCr)
+    For i = 1 To 400: manuscript(i) = String$(149, "x") & ".": Next i
+    d.Content.Text = Join(manuscript, vbCr)
     d.Content.Style = wdStyleNormal
     d.Content.ParagraphFormat.OutlineLevel = wdOutlineLevelBodyText
     started = Timer
     r = WU_DetectStructure(d)
-    elapsed = Timer - started
-    If elapsed < 0 Then elapsed = elapsed + 86400
+    manuscriptElapsed = Timer - started
+    If manuscriptElapsed < 0 Then manuscriptElapsed = manuscriptElapsed + 86400
+    If manuscriptElapsed * 1000 > 500 Then Err.Raise 5, , "60000-character detection exceeded 500 ms"
+    For i = 1 To 1400: stress(i) = "Ordinary manuscript text with no heading evidence.": Next i
+    d.Content.Text = Join(stress, vbCr)
+    d.Content.Style = wdStyleNormal
+    d.Content.ParagraphFormat.OutlineLevel = wdOutlineLevelBodyText
+    started = Timer
+    r = WU_DetectStructure(d)
+    stressElapsed = Timer - started
+    If stressElapsed < 0 Then stressElapsed = stressElapsed + 86400
     If UBound(r, 1) < 1399 Then Err.Raise 5, , "missing manuscript paragraphs"
+    If stressElapsed * 1000 > 1000 Then Err.Raise 5, , "1400-paragraph stress detection exceeded one second"
     d.Close SaveChanges:=wdDoNotSaveChanges
-    Check = Array("PASS", CDbl(elapsed) * 1000)
+    Check = Array("PASS", CDbl(manuscriptElapsed) * 1000, CDbl(stressElapsed) * 1000)
 End Function
 `
 
