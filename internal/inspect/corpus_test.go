@@ -3,7 +3,6 @@ package inspect
 import (
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 )
@@ -22,7 +21,7 @@ func TestSubmissionCorpus(t *testing.T) {
 	if len(files) != 109 {
 		t.Fatalf("expected 109 retained manuscripts, got %d", len(files))
 	}
-	passed, rejected, paragraphs := 0, 0, 0
+	passed, paragraphs := 0, 0
 	var total, slowest time.Duration
 	var slowestFile string
 	for _, file := range files {
@@ -35,11 +34,7 @@ func TestSubmissionCorpus(t *testing.T) {
 			slowestFile = filepath.Base(file)
 		}
 		if err != nil {
-			if !strings.HasSuffix(file, "--3a668c4999c4.docx") || !strings.Contains(err.Error(), "unsafe package part") {
-				t.Errorf("unexpected rejection of %s: %v", filepath.Base(file), err)
-			}
-			rejected++
-			t.Logf("REJECTED %s: %v", filepath.Base(file), err)
+			t.Errorf("unexpected rejection of %s: %v", filepath.Base(file), err)
 			continue
 		}
 		passed++
@@ -63,8 +58,8 @@ func TestSubmissionCorpus(t *testing.T) {
 			}
 		}
 	}
-	t.Logf("documents=%d resolved=%d rejected=%d paragraphs=%d total=%s slowest=%s file=%s", len(files), passed, rejected, paragraphs, total, slowest, slowestFile)
-	if rejected > 1 {
-		t.Fatalf("unexpected rejected manuscripts: %d", rejected)
+	t.Logf("documents=%d resolved=%d paragraphs=%d total=%s slowest=%s file=%s", len(files), passed, paragraphs, total, slowest, slowestFile)
+	if passed != len(files) {
+		t.Fatalf("resolved %d of %d manuscripts", passed, len(files))
 	}
 }

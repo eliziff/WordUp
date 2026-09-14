@@ -119,10 +119,11 @@ func ReadPackage(data []byte) (*Package, error) {
 		if f.FileInfo().IsDir() {
 			continue
 		}
-		if !SafePart(f.Name) || f.Mode()&os.ModeSymlink != 0 {
+		name := strings.ReplaceAll(f.Name, "\\", "/")
+		if !SafePart(name) || f.Mode()&os.ModeSymlink != 0 {
 			return nil, fmt.Errorf("unsafe package part %q", f.Name)
 		}
-		key := strings.ToLower(f.Name)
+		key := strings.ToLower(name)
 		if names[key] {
 			return nil, fmt.Errorf("case-colliding or duplicate ZIP part")
 		}
@@ -143,8 +144,9 @@ func ReadPackage(data []byte) (*Package, error) {
 		if len(b) > Limit || uint64(len(b)) != f.UncompressedSize64 {
 			return nil, fmt.Errorf("invalid ZIP entry size")
 		}
-		p.Files[f.Name] = b
-		p.hashes[f.Name] = Hash(b)
+		f.Name = name
+		p.Files[name] = b
+		p.hashes[name] = Hash(b)
 	}
 	if _, ok := p.Files["[Content_Types].xml"]; !ok {
 		return nil, fmt.Errorf("not an Open Packaging Conventions file")

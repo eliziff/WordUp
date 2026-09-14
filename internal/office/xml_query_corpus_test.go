@@ -4,7 +4,6 @@ import (
 	"context"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 )
@@ -20,7 +19,7 @@ func TestQueryXMLRetainedCorpus(t *testing.T) {
 	if err != nil || len(files) != 109 {
 		t.Fatalf("expected 109 retained documents, found %d: %v", len(files), err)
 	}
-	passed, rejected, paragraphs := 0, 0, 0
+	passed, paragraphs := 0, 0
 	var slowest time.Duration
 	started := time.Now()
 	for _, file := range files {
@@ -30,10 +29,6 @@ func TestQueryXMLRetainedCorpus(t *testing.T) {
 		}
 		pkg, err := ReadPackage(data)
 		if err != nil {
-			if strings.HasSuffix(file, "--3a668c4999c4.docx") && strings.Contains(err.Error(), "unsafe package part") {
-				rejected++
-				continue
-			}
 			t.Fatalf("%s: %v", filepath.Base(file), err)
 		}
 		xml := pkg.Files["word/document.xml"]
@@ -56,8 +51,8 @@ func TestQueryXMLRetainedCorpus(t *testing.T) {
 		passed++
 		paragraphs += expected
 	}
-	if passed != 108 || rejected != 1 {
-		t.Fatalf("corpus disposition changed: %d parsed, %d rejected", passed, rejected)
+	if passed != len(files) {
+		t.Fatalf("parsed %d of %d documents", passed, len(files))
 	}
-	t.Logf("%d parsed, %d known unsafe ZIP rejected; %d paragraphs; total %s; slowest query %s", passed, rejected, paragraphs, time.Since(started), slowest)
+	t.Logf("%d parsed; %d paragraphs; total %s; slowest query %s", passed, paragraphs, time.Since(started), slowest)
 }
