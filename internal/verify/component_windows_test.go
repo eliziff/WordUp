@@ -105,7 +105,7 @@ Public Function Check() As Variant
     If r(0, WU_PARENT) <> 0 Or r(2, WU_AMBIGUOUS) <> False Then Err.Raise 5, , "uninitialized contract values"
     If d.Content.Text <> before Or Not d.Saved Then Err.Raise 5, , "detector changed document"
     Set markerDoc = Documents.Add
-    markerDoc.Content.Text = "I. Introduction" & vbCr & "A. Appendix" & vbCr
+    markerDoc.Content.Text = "I) Introduction" & vbCr & "Part IV – Scope" & vbCr
     markerResult = WU_DetectStructure(markerDoc)
     If markerResult(0, WU_AMBIGUOUS) <> True Or InStr(CStr(markerResult(0, WU_ALTERNATIVES)), "roman:") = 0 Or InStr(CStr(markerResult(0, WU_ALTERNATIVES)), "upper_alpha:") = 0 Then Err.Raise 5, , "ambiguous Roman/alpha marker was collapsed"
     markerDoc.Close SaveChanges:=wdDoNotSaveChanges

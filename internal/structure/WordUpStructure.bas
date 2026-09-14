@@ -209,7 +209,7 @@ Private Sub WU_ResolveMarkerLadder(ByRef result As Variant, ByVal count As Long)
 End Sub
 
 Public Function WU_ParseMarker(ByVal text As String) As String
-    Dim at As Long, prefix As String, namedKind As String, rest As String, i As Long, c As String, lowerText As String
+    Dim at As Long, dashAt As Long, prefix As String, namedKind As String, rest As String, i As Long, c As String, lowerText As String, candidate As Variant
     text = Trim$(Replace(Replace(text, vbTab, " "), ChrW(160), " "))
     lowerText = LCase$(text)
     If WU_IsNamedHeading(lowerText) Then
@@ -222,9 +222,25 @@ Public Function WU_ParseMarker(ByVal text As String) As String
             If IsNumeric(prefix) Or WU_WordNumber(prefix) > 0 Or WU_IsRoman(prefix) Or (Len(prefix) = 1 And LCase$(prefix) >= "a" And LCase$(prefix) <= "z") Then WU_ParseMarker = "named:" & LCase$(namedKind) & ":" & prefix: Exit Function
         End If
     End If
-    at = InStr(text, "."): If at < 2 Or at > 8 Then Exit Function
-    prefix = Left$(text, at - 1): rest = Mid$(text, at + 1)
-    If Left$(rest, 1) <> " " Or Len(Trim$(rest)) = 0 Then Exit Function
+    at = InStr(text, ".")
+    If at >= 2 And at <= 8 And Left$(Mid$(text, at + 1), 1) = " " Then
+        prefix = Left$(text, at - 1): rest = Mid$(text, at + 1)
+    Else
+        at = InStr(text, ")")
+        If at >= 2 And at <= 8 And Left$(Mid$(text, at + 1), 1) = " " Then
+            prefix = Left$(text, at - 1): rest = Mid$(text, at + 1)
+        Else
+            at = 0
+            For Each candidate In Array("-", ChrW(&H2013), ChrW(&H2014))
+                dashAt = InStr(text, CStr(candidate))
+                If dashAt >= 2 And dashAt <= 8 And Left$(Mid$(text, dashAt + 1), 1) = " " Then
+                    at = dashAt: prefix = Trim$(Left$(text, at - 1)): rest = Mid$(text, at + 1): Exit For
+                End If
+            Next candidate
+            If at = 0 Then Exit Function
+        End If
+    End If
+    If Len(Trim$(rest)) = 0 Or InStr(prefix, " ") > 0 Then Exit Function
     If IsNumeric(prefix) Then WU_ParseMarker = prefix: Exit Function
     If Len(prefix) = 1 And prefix >= "A" And prefix <= "Z" Then WU_ParseMarker = prefix: Exit Function
     For i = 1 To Len(prefix): c = Mid$(prefix, i, 1): If InStr(1, "IVXLCDM", c, vbBinaryCompare) = 0 Then Exit Function
