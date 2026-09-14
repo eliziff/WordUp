@@ -562,10 +562,13 @@ func sourceStamps(root string) (map[string]fileStamp, error) {
 	return result, nil
 }
 
-func (w *Workspace) buildSourceFiles() (map[string][]byte, error) {
-	stamps, err := sourceStamps(w.Root)
-	if err != nil {
-		return nil, err
+func (w *Workspace) buildSourceFiles(stamps map[string]fileStamp) (map[string][]byte, error) {
+	if stamps == nil {
+		var err error
+		stamps, err = sourceStamps(w.Root)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if w.sourceMemo == nil {
 		files, readErr := w.SourceFiles()
@@ -691,12 +694,16 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 		output = filepath.Join(w.Root, "dist", w.Manifest.Name+".dotm")
 	}
 	var e error
+	var sourceSnapshot map[string]fileStamp
 	output, e = filepath.Abs(output)
 	if e != nil {
 		return nil, e
 	}
 	if memo := w.buildMemo; memo != nil && memo.Output == output {
 		sources, sourceErr := sourceStamps(w.Root)
+		if sourceErr == nil {
+			sourceSnapshot = sources
+		}
 		artifact, artifactErr := stamp(output)
 		evidence, evidenceErr := stamp(filepath.Join(w.Root, "reports", "build.json"))
 		if sourceErr == nil && artifactErr == nil && evidenceErr == nil && maps.Equal(sources, memo.Sources) && artifact == memo.Artifact && evidence == memo.Evidence {
@@ -724,7 +731,13 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 		}
 		w.buildMemo = nil
 	}
-	files, e := w.buildSourceFiles()
+	if sourceSnapshot == nil {
+		sourceSnapshot, e = sourceStamps(w.Root)
+		if e != nil {
+			return nil, e
+		}
+	}
+	files, e := w.buildSourceFiles(sourceSnapshot)
 	if e != nil {
 		return nil, e
 	}
