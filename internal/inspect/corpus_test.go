@@ -14,6 +14,7 @@ func TestSubmissionCorpus(t *testing.T) {
 	if root == "" {
 		t.Skip("set WORDUP_CORPUS to retained documents directory")
 	}
+	root = resolveCorpusRoot(root)
 	files, err := filepath.Glob(filepath.Join(root, "*.docx"))
 	if err != nil {
 		t.Fatal(err)
@@ -62,4 +63,26 @@ func TestSubmissionCorpus(t *testing.T) {
 	if passed != len(files) {
 		t.Fatalf("resolved %d of %d manuscripts", passed, len(files))
 	}
+}
+
+// go test runs a package test binary from that package's directory, so a
+// repo-relative corpus path must be resolved against its ancestors rather
+// than interpreted relative to internal/inspect.
+func resolveCorpusRoot(root string) string {
+	if filepath.IsAbs(root) {
+		return root
+	}
+	if cwd, err := os.Getwd(); err == nil {
+		for dir := cwd; ; dir = filepath.Dir(dir) {
+			candidate := filepath.Join(dir, root)
+			if info, statErr := os.Stat(candidate); statErr == nil && info.IsDir() {
+				return candidate
+			}
+			parent := filepath.Dir(dir)
+			if parent == dir {
+				break
+			}
+		}
+	}
+	return root
 }

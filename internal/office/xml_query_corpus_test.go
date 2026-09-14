@@ -15,6 +15,7 @@ func TestQueryXMLRetainedCorpus(t *testing.T) {
 	if root == "" {
 		t.Skip("set WORDUP_CORPUS to retained submissions/documents")
 	}
+	root = resolveCorpusRoot(root)
 	files, err := filepath.Glob(filepath.Join(root, "*.docx"))
 	if err != nil || len(files) != 109 {
 		t.Fatalf("expected 109 retained documents, found %d: %v", len(files), err)
@@ -55,4 +56,23 @@ func TestQueryXMLRetainedCorpus(t *testing.T) {
 		t.Fatalf("parsed %d of %d documents", passed, len(files))
 	}
 	t.Logf("%d parsed; %d paragraphs; total %s; slowest query %s", passed, paragraphs, time.Since(started), slowest)
+}
+
+func resolveCorpusRoot(root string) string {
+	if filepath.IsAbs(root) {
+		return root
+	}
+	if cwd, err := os.Getwd(); err == nil {
+		for dir := cwd; ; dir = filepath.Dir(dir) {
+			candidate := filepath.Join(dir, root)
+			if info, statErr := os.Stat(candidate); statErr == nil && info.IsDir() {
+				return candidate
+			}
+			parent := filepath.Dir(dir)
+			if parent == dir {
+				break
+			}
+		}
+	}
+	return root
 }
