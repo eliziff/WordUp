@@ -15,12 +15,13 @@ import (
 )
 
 type CompileReport struct {
-	Build      *project.BuildReport `json:"build"`
-	Signing    *signing.Report      `json:"signing"`
-	DurationMS float64              `json:"duration_ms"`
-	Cached     bool                 `json:"cached"`
-	Native     *verify.Report       `json:"native,omitempty"`
-	Error      any                  `json:"error,omitempty"`
+	Build         *project.BuildReport `json:"build"`
+	Signing       *signing.Report      `json:"signing"`
+	DurationMS    float64              `json:"duration_ms"`
+	Cached        bool                 `json:"cached"`
+	Native        *verify.Report       `json:"native,omitempty"`
+	RetainedStage string               `json:"retained_stage,omitempty"`
+	Error         any                  `json:"error,omitempty"`
 }
 
 func (e *Engine) compile(ctx context.Context, w *project.Workspace, output string, opts signing.Options) (report *CompileReport, retErr error) {
@@ -68,23 +69,25 @@ func (e *Engine) compile(ctx context.Context, w *project.Workspace, output strin
 		return nil, err
 	}
 	// Keep failed candidates and visual diagnostics available to the agent.
+	r := &CompileReport{RetainedStage: stage}
 	defer func() {
+		r.DurationMS = float64(time.Since(start).Microseconds()) / 1000
+		r.Error = verify.ErrorValue(retErr)
+		if retErr == nil {
+			r.RetainedStage = ""
+		}
+		if saveErr := project.Write(w.Root, "reports/compile.json", project.JSON(r), ""); retErr == nil {
+			retErr = saveErr
+		}
 		if retErr == nil {
 			_ = os.RemoveAll(stage)
 		}
 	}()
 	build, err := w.Build(filepath.Join(stage, "unsigned.dotm"))
 	if err != nil {
-		return nil, err
+		return r, fmt.Errorf("compile candidate build failed; retained stage: %s: %w", stage, err)
 	}
-	r := &CompileReport{Build: build}
-	defer func() {
-		r.DurationMS = float64(time.Since(start).Microseconds()) / 1000
-		r.Error = verify.ErrorValue(retErr)
-		if saveErr := project.Write(w.Root, "reports/compile.json", project.JSON(r), ""); retErr == nil {
-			retErr = saveErr
-		}
-	}()
+	r.Build = build
 	h, err := e.Host(ctx)
 	if err != nil {
 		return r, err

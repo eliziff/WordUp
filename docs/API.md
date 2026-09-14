@@ -132,7 +132,7 @@ Use authorized `call deploy '@deployment.json'`. The app checks the exact artifa
 
 Authorized `call compile '{}'` builds the current workspace, compiles the complete project in Word, and signs the output. Optional `output` overrides its default path. It automatically creates or reuses a WordUp local certificate. `sign` instead takes an existing unsigned `path` and a new `output`. Advanced `signing` fields are `thumbprint`, `store_location`, `signtool` and `timestamp_url`; all are optional. Microsoft SignTool and the registered Office SIP remain prerequisites.
 
-The signing report distinguishes `signed`, `digest_verified` and certificate trust (`verified`, `trust_error`). A locally self-signed certificate does not automatically become trusted on someone else's computer. Compilation records its native observations in `reports/compile.json`. On failure, staged input and window diagnostics remain available at the report's paths; the prior output is preserved. Unchanged compile results are explicitly labeled `cached`; fresh acceptance is still required for deployment.
+The signing report distinguishes `signed`, `digest_verified` and certificate trust (`verified`, `trust_error`). A locally self-signed certificate does not automatically become trusted on someone else's computer. Compilation records its native observations in `reports/compile.json`; when candidate creation or signing fails, `retained_stage` identifies the preserved staging directory. On failure, staged input and window diagnostics remain available at the report's paths; the prior output is preserved. Unchanged compile results are explicitly labeled `cached`; fresh acceptance is still required for deployment.
 
 ## Images and style references
 
