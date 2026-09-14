@@ -484,6 +484,9 @@ func TestPackageValidationRejectsCaseCollidingParts(t *testing.T) {
 	if err := p.Validate(); err == nil || !strings.Contains(err.Error(), "case-colliding package parts") {
 		t.Fatalf("case-colliding package parts were accepted: %v", err)
 	}
+	if _, err := p.Bytes(); err == nil || !strings.Contains(err.Error(), "case-colliding package parts") {
+		t.Fatalf("low-level package writer bypassed case-collision guard: %v", err)
+	}
 }
 
 func TestComposeFailureDoesNotMutatePackage(t *testing.T) {

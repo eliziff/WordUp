@@ -180,6 +180,9 @@ func ReadPackage(data []byte) (*Package, error) {
 	return p, nil
 }
 func (p *Package) Bytes() ([]byte, error) {
+	if err := validatePackagePartNames(p.Files); err != nil {
+		return nil, err
+	}
 	return p.bytes(nil, nil)
 }
 
@@ -194,6 +197,9 @@ func (p *Package) BytesChanged(changed []string) ([]byte, error) {
 // are still hashed here, so supplying a partial map cannot weaken the changed
 // part completeness check.
 func (p *Package) BytesChangedWithHashes(changed []string, currentHashes map[string]string) ([]byte, error) {
+	if err := validatePackagePartNames(p.Files); err != nil {
+		return nil, err
+	}
 	if p.hashes == nil {
 		return p.Bytes()
 	}
@@ -566,13 +572,8 @@ func (p *Package) HasSignatures() bool {
 	return false
 }
 func (p *Package) Validate() error {
-	partNames := map[string]string{}
-	for name := range p.Files {
-		key := strings.ToLower(name)
-		if prior, exists := partNames[key]; exists && prior != name {
-			return fmt.Errorf("case-colliding package parts %s and %s", prior, name)
-		}
-		partNames[key] = name
+	if err := validatePackagePartNames(p.Files); err != nil {
+		return err
 	}
 	defaults, overrides := map[string]string{}, map[string]string{}
 	ct, e := validationXMLSpans(p.Files["[Content_Types].xml"])
@@ -651,6 +652,24 @@ func (p *Package) Validate() error {
 	}
 	return nil
 }
+
+func validatePackagePartNames(files map[string][]byte) error {
+	partNames := map[string]string{}
+	names := make([]string, 0, len(files))
+	for name := range files {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		key := strings.ToLower(name)
+		if prior, exists := partNames[key]; exists && prior != name {
+			return fmt.Errorf("case-colliding package parts %s and %s", prior, name)
+		}
+		partNames[key] = name
+	}
+	return nil
+}
+
 func BlankPackage() *Package {
 	p := &Package{Files: map[string][]byte{}}
 	p.Files["word/document.xml"] = []byte(`<?xml version="1.0" encoding="UTF-8"?><w:document xmlns:w="` + W + `" xmlns:r="` + R + `"><w:body><w:p/><w:sectPr/></w:body></w:document>`)
