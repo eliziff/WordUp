@@ -406,17 +406,21 @@ func CheckInventory(root string, files map[string][]byte, diagnostics *[]map[str
 	}
 	sort.Strings(orderedPaths)
 	for _, path := range orderedPaths {
+		ext := pathpkg.Ext(path)
+		expectedModule := strings.TrimSuffix(strings.TrimPrefix(path, "vba/"), ext)
 		if name, line, ok := component.ModuleName(string(files[path])); ok {
 			row := map[string]any{"file": path, "module": name, "line": line}
 			moduleNames = append(moduleNames, row)
 			key := strings.ToLower(name)
 			moduleByName[key] = append(moduleByName[key], row)
+			if office.ValidIdentifier(expectedModule) && !strings.EqualFold(name, expectedModule) {
+				*diagnostics = append(*diagnostics, map[string]any{"severity": "error", "file": path, "line": line, "message": fmt.Sprintf("VB_Name %q does not match module filename %q", name, expectedModule), "module": name, "expected_module": expectedModule})
+			}
 		} else {
 			// The builder derives a missing VB_Name from the source filename.
 			// Keep the inventory aligned with that rule instead of silently
 			// dropping otherwise valid source-only modules.
-			ext := pathpkg.Ext(path)
-			name := strings.TrimSuffix(strings.TrimPrefix(path, "vba/"), ext)
+			name := expectedModule
 			if office.ValidIdentifier(name) {
 				row := map[string]any{"file": path, "module": name, "line": 1, "derived": true}
 				moduleNames = append(moduleNames, row)

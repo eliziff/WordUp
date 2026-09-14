@@ -128,3 +128,27 @@ func TestCheckInventoryReportsDerivedModuleName(t *testing.T) {
 	}
 	t.Fatalf("filename-derived module was not inventoried: %#v", modules)
 }
+
+func TestCheckInventoryReportsModuleNameMismatch(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "workspace")
+	if _, err := project.New("ModuleMismatch", root); err != nil {
+		t.Fatal(err)
+	}
+	if err := project.Write(root, "vba/Expected.bas", []byte("Attribute VB_Name = \"Other\"\nOption Explicit\n"), ""); err != nil {
+		t.Fatal(err)
+	}
+	w, err := project.Open(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := Check(w)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, diagnostic := range result["diagnostics"].([]map[string]any) {
+		if diagnostic["file"] == "vba/Expected.bas" && diagnostic["message"] == `VB_Name "Other" does not match module filename "Expected"` {
+			return
+		}
+	}
+	t.Fatalf("module name mismatch diagnostic missing: %#v", result["diagnostics"])
+}
