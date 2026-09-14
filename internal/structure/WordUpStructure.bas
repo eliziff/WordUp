@@ -1,7 +1,7 @@
 Attribute VB_Name = "WordUpStructure"
 Option Explicit
 
-' WordUp structure contract 1.2.2. MIT licensed; editable and dependency-free.
+' WordUp structure contract 1.2.3. MIT licensed; editable and dependency-free.
 ' Detection is separate from publication-specific style mapping.
 Public Const WU_ROLE As Long = 0
 Public Const WU_LEVEL As Long = 1
@@ -364,9 +364,26 @@ End Function
 ' Keep the primary marker for the fast ladder, but expose competing readings
 ' for one-letter Roman/alpha prefixes instead of silently choosing one.
 Private Function WU_MarkerAlternatives(ByVal marker As String) As String
-    Dim value As Long, alphaValue As Long, c As String
+    Dim value As Long, alphaValue As Long, c As String, at As Long, prefix As String, namedKind As String
     If Len(marker) = 0 Then Exit Function
-    If Left$(marker, 6) = "named:" Then
+    If LCase$(Left$(marker, 6)) = "named:" Then
+        at = InStr(7, marker, ":")
+        If at > 0 Then
+            namedKind = Mid$(marker, 7, at - 7): prefix = Mid$(marker, at + 1)
+            If Len(prefix) = 1 Then
+                c = UCase$(prefix)
+                If InStr(1, "IVXLCDM", c, vbBinaryCompare) > 0 Then
+                    value = WU_MarkerValue(marker, "named_" & namedKind & "_section")
+                    alphaValue = AscW(c) - 64
+                    If prefix = LCase$(prefix) Then
+                        WU_MarkerAlternatives = marker & "|roman:" & CStr(value) & "|lower_alpha:" & CStr(alphaValue)
+                    Else
+                        WU_MarkerAlternatives = marker & "|roman:" & CStr(value) & "|upper_alpha:" & CStr(alphaValue)
+                    End If
+                    Exit Function
+                End If
+            End If
+        End If
         WU_MarkerAlternatives = marker
         Exit Function
     End If
