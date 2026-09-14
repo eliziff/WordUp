@@ -3,6 +3,8 @@ package project
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -568,6 +570,19 @@ func stamp(path string) (fileStamp, error) {
 	return fileStamp{Size: info.Size(), ModifiedNS: info.ModTime().UnixNano()}, nil
 }
 
+func fileHash(path string) (string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+	hash := sha256.New()
+	if _, err = io.Copy(hash, file); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(hash.Sum(nil)), nil
+}
+
 func (w *Workspace) Build(output string) (*BuildReport, error) {
 	start := time.Now()
 	if output == "" {
@@ -583,10 +598,12 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 		artifact, artifactErr := stamp(output)
 		evidence, evidenceErr := stamp(filepath.Join(w.Root, "reports", "build.json"))
 		if sourceErr == nil && artifactErr == nil && evidenceErr == nil && maps.Equal(sources, memo.Sources) && artifact == memo.Artifact && evidence == memo.Evidence {
-			report := memo.Report
-			report.Cached = true
-			report.DurationMS = float64(time.Since(start).Microseconds()) / 1000
-			return &report, nil
+			if actualHash, hashErr := fileHash(output); hashErr == nil && actualHash == memo.Report.SHA256 {
+				report := memo.Report
+				report.Cached = true
+				report.DurationMS = float64(time.Since(start).Microseconds()) / 1000
+				return &report, nil
+			}
 		}
 		// Something outside this Workspace changed. Reload the immutable
 		// package and import index before doing real work so a resident agent

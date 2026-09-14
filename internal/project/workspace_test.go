@@ -103,7 +103,16 @@ func TestSourceBuildCacheAndTamper(t *testing.T) {
 	if err != nil || r.Cached || r.ToolSHA256 != ExecutableSHA256() {
 		t.Fatalf("same-version writer cache survived: %+v %v", r, err)
 	}
-	if err = os.WriteFile(r.Artifact, []byte("tampered"), 0600); err != nil {
+	artifactInfo, err := os.Stat(r.Artifact)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tampered := append([]byte(nil), b...)
+	tampered[0] ^= 1
+	if err = os.WriteFile(r.Artifact, tampered, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.Chtimes(r.Artifact, artifactInfo.ModTime(), artifactInfo.ModTime()); err != nil {
 		t.Fatal(err)
 	}
 	r, err = w.Build("")
