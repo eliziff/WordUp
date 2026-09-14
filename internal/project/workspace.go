@@ -333,16 +333,10 @@ func importPackage(p *office.Package, sourceName, destination string) (map[strin
 			return nil, e
 		}
 	}
-	for _, d := range []string{"assets", "tests", "forms", "styles", "content", "building_blocks", "references", "reports", "dist"} {
+	for _, d := range []string{"assets", "tests", "forms", "references", "reports", "dist"} {
 		if e := os.MkdirAll(filepath.Join(destination, d), 0700); e != nil {
 			return nil, e
 		}
-	}
-	if e := put("styles/recipe.json", JSON(office.StyleRecipe{})); e != nil {
-		return nil, e
-	}
-	if e := put("building_blocks/recipe.json", []byte("[]\n")); e != nil {
-		return nil, e
 	}
 	if e := Write(destination, ".wordwright/base.opc", p.Original, ""); e != nil {
 		return nil, e
@@ -771,43 +765,6 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 			return nil, e
 		}
 	}
-	if b := files["styles/recipe.json"]; len(b) > 0 {
-		var r office.StyleRecipe
-		if e = ReadJSON(b, &r); e != nil {
-			return nil, e
-		}
-		if e = office.ApplyStyles(p, r); e != nil {
-			return nil, e
-		}
-	}
-	asset := func(name string) ([]byte, error) {
-		if !strings.HasPrefix(name, "assets/") || !office.SafePart(name) {
-			return nil, fmt.Errorf("asset must be under assets/")
-		}
-		b, ok := files[name]
-		if !ok {
-			return nil, fmt.Errorf("missing asset %s", name)
-		}
-		return b, nil
-	}
-	if b := files["content/recipe.json"]; len(b) > 0 {
-		var r office.ContentRecipe
-		if e = ReadJSON(b, &r); e != nil {
-			return nil, e
-		}
-		if e = office.Compose(p, r, asset); e != nil {
-			return nil, e
-		}
-	}
-	if b := files["building_blocks/recipe.json"]; len(b) > 0 {
-		var r []office.BuildingBlock
-		if e = ReadJSON(b, &r); e != nil {
-			return nil, e
-		}
-		if e = office.AddBuildingBlocks(p, r, asset); e != nil {
-			return nil, e
-		}
-	}
 	modified := []string{}
 	for n, b := range p.Files {
 		if original[n] != office.Hash(b) {
@@ -914,7 +871,7 @@ Use the wordup executable. No module imports, VBE typing, or Python setup.
 - New .bas files become standard modules; new .cls files become classes; .vba files are UserForm code.
 - forms/<name>.json describes persistent native MSForms design, in points. Existing unsupported controls remain opaque.
 - package/ is the full original Open XML package, including RibbonX XML, embedded assets and native saved parts. Do not rewrite the ZIP by hand.
-- styles/recipe.json adds/patches native styles and numbering. content/recipe.json REPLACES the document body. building_blocks/recipe.json adds/updates saved parts.
+- Edit package XML directly or use native Word operations for document content, styles, numbering and saved building blocks.
 - build performs deterministic package and binary checks; it is not a VBA compiler.
 - native execution is local Microsoft Word, never an emulator. Authorize execution only for code the user intends to run. The private desktop is UI separation, NOT a security sandbox.
 - Wrap each user-facing editing action in one Application.UndoRecord custom record. For bulk edits, save Application.ScreenUpdating, set it False, and restore the saved value in shared success/error cleanup. Always close an opened undo record; do not blindly restore True when a caller already disabled updates. Read-only actions need no undo record. Test that one undo restores the edited content and that failures restore application state. Capture WordOpenXML outside the editing action and its undo record: a native opening-layout test demonstrated that exporting it during the record disrupted undo grouping.
@@ -926,6 +883,6 @@ Use the wordup executable. No module imports, VBE typing, or Python setup.
 - xml.snapshot records exact WordOpenXML without saving. Preserve this evidence, but do not assume repeated exports have identical run boundaries: Word pagination can change serialization without a macro. Use explicit behavior assertions; xml.compare is available when exact structure is the intended invariant.
 - Failed native suite steps automatically capture owned-window diagnostics and screenshots. Read the errors and images before changing code; do not ask the user to reproduce the failure manually.
 - Mac static checks and Windows native tests are not Mac execution evidence.
-- Raw XML, native object-model calls and arbitrary VBA stay available beyond the convenience recipes. Unsupported serialization must error rather than substitute an approximation.
+- Raw XML, native object-model calls and arbitrary VBA are the authoring surface. Unsupported serialization must error rather than substitute an approximation.
 - For legal heading/numbering/footnote primitives, consult https://github.com/eliziff/legal-structure-parser. For PDF geometry, reading order and source witnesses, consult https://github.com/eliziff/legal-pdf-parser. These are optional reusable tools, not WordUp runtime dependencies. Prefer native Word evidence, preserve source offsets, and record revisions/licenses for adapted code.
 `

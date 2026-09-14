@@ -134,7 +134,7 @@ func TestGitNoOpBuildAndIndependentModuleMerge(t *testing.T) {
 		t.Fatal(err)
 	}
 	git("init", "-q", "-b", "baseline")
-	git("add", ".gitattributes", ".gitignore", "project.json", "vba", "package", "forms", "styles", "content", "building_blocks", ".wordwright", "tests", "assets")
+	git("add", ".gitattributes", ".gitignore", "project.json", "vba", "package", "forms", ".wordwright", "tests", "assets")
 	git("commit", "-qm", "baseline")
 	for i := 0; i < 2; i++ {
 		if _, err := w.Build(""); err != nil {

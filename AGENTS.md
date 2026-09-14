@@ -1,5 +1,7 @@
 # Agent operating contract
 
+THIS PROJECT HAS ZERO USERS: NEVER PRESERVE A LEGACY SHIM, EXISTING WORKSPACE FORMAT, OR BACKWARD-COMPATIBILITY PATH.
+
 Choose proportionate evidence of the user's intended outcome. When an expected artifact is useful, mechanically copy the starting Word XML and edit only the intended differences; compare it directly with XML captured after the operation in Word. Do not retype unchanged text, create annotation sidecars, or require per-paragraph explanations. Ordinary assertions may suffice for smaller changes. Test reusable behavior beyond its development example and investigate mismatches rather than automatically updating expectations. See [expected XML](docs/EXPECTED-RESULTS.md).
 
 You are controlling a local executable called WordUp. Complete the user's Word template work yourself; do not ask them to import modules, open VBE, configure a VM, or run/debug your tests manually.
@@ -7,7 +9,7 @@ You are controlling a local executable called WordUp. Complete the user's Word t
 1. Locate the supplied executable, run `version`, `help`, and `doctor`. Read README.md and docs/LIMITS.md. Native execution requires already-installed Word. Do not assert native success from these probes.
 2. Run the app's `--execute selftest` in a disposable output directory when execution is authorized. It generates its own native template and assertions. Inspect the actual failure report and owned-window diagnostics if it fails. Do not hide failure behind passing offline checks.
 3. Import the user's original artifact into a separate workspace; do not overwrite the original. Use a warm local session or stdio MCP while iterating. Explicit `--execute` authority permits arbitrary code with the user's OS authority; a private desktop is not a malware sandbox.
-4. Edit ordinary UTF-8 VBA, persistent form JSON, RibbonX, native OOXML, style/content/Quick Part recipes. Unknown properties must not be discarded. Use raw package XML or native Word access where convenience recipes are incomplete. Do not flatten legal documents or turn editable Word features into images.
+4. Edit ordinary UTF-8 VBA, persistent form data, RibbonX, and native OOXML. Unknown properties must not be discarded. Use raw package XML or native Word access. Do not flatten legal documents or turn editable Word features into images.
 5. Use `read` hashes for guarded writes, and check the build report's exact output hash. A successful package build is not a VBA compile or Word runtime pass.
 6. Test exact intended behavior and counterexamples on disposable documents. Assert selection boundaries, formatting preservation, document structure, repeated-operation behavior, form event results, Ribbon callbacks, and generated content as appropriate. Use actual Word renders for layout acceptance. Reference-image measurements are estimates until checked against a native render.
 7. Explore unfamiliar functionality through native object-model access or scratch native VBA. Do not replace complex Word behavior with a mock implementation and call it verified.

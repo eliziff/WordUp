@@ -94,7 +94,7 @@ func TestSourceBuildCacheAndTamper(t *testing.T) {
 		t.Fatal("wrong artifact hash")
 	}
 }
-func TestGuardedWritesAndUnknownProperties(t *testing.T) {
+func TestGuardedWrites(t *testing.T) {
 	w := newWorkspace(t)
 	old, err := Read(w.Root, "vba/ThisDocument.cls")
 	if err != nil {
@@ -111,12 +111,6 @@ func TestGuardedWritesAndUnknownProperties(t *testing.T) {
 		if _, err = Under(w.Root, p); err == nil {
 			t.Fatalf("accepted %s", p)
 		}
-	}
-	if err = Write(w.Root, "styles/recipe.json", []byte(`{"styles":[{"id":"X","name":"X","run":{"invented_property":42}}]}`), ""); err != nil {
-		t.Fatal(err)
-	}
-	if _, err = w.Build(""); err == nil {
-		t.Fatal("unknown style property silently dropped")
 	}
 }
 func TestSpecimenWorkspaceRoundTripAndControlledEdit(t *testing.T) {

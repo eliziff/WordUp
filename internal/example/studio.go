@@ -22,10 +22,9 @@ func Studio(root string) (*project.BuildReport, error) {
 	writes := map[string][]byte{"project.json": project.JSON(w.Manifest), "vba/Studio.bas": []byte(source), "vba/PlatformProbe.bas": []byte(compat.ProbeSource()), "vba/StudioForm.vba": []byte(formSource)}
 	design := office.Design{Name: "StudioForm", Mode: "replace", Properties: map[string]any{"Caption": "WordUp Studio", "Width": 360, "Height": 240}, Controls: []office.ControlDesign{{Name: "Pages", Type: "MultiPage", Properties: map[string]any{"Left": 12, "Top": 12, "Width": 330, "Height": 170}, Pages: []office.ControlDesign{{Name: "Operations", Type: "Page", Properties: map[string]any{"Caption": "Text operations"}, Controls: []office.ControlDesign{{Name: "txtInput", Type: "TextBox", Properties: map[string]any{"Left": 12, "Top": 12, "Width": 270, "Height": 28, "Value": "Editable native control — café"}}, {Name: "cmdNormalize", Type: "CommandButton", Properties: map[string]any{"Left": 12, "Top": 52, "Width": 120, "Height": 24, "Caption": "Normalize selection"}}}}, {Name: "Metadata", Type: "Page", Properties: map[string]any{"Caption": "Metadata"}, Controls: []office.ControlDesign{{Name: "lblNative", Type: "Label", Properties: map[string]any{"Left": 12, "Top": 12, "Width": 270, "Height": 36, "Caption": "This form is stored in the template."}}}}}}, {Name: "cmdClose", Type: "CommandButton", Properties: map[string]any{"Left": 258, "Top": 192, "Width": 84, "Height": 24, "Caption": "Close"}}}}
 	writes["forms/StudioForm.json"] = project.JSON(design)
-	writes["styles/recipe.json"] = project.JSON(office.StyleRecipe{Styles: []office.StyleSpec{{ID: "StudioTitle", Name: "Studio Title", BasedOn: "Normal", Next: "StudioBody", Run: map[string]any{"font": "Times New Roman", "size_pt": 22, "bold": true}, Paragraph: map[string]any{"after_pt": 12, "keep_next": true}}, {ID: "StudioBody", Name: "Studio Body", BasedOn: "Normal", Run: map[string]any{"font": "Times New Roman", "size_pt": 11}, Paragraph: map[string]any{"after_pt": 8}}, {ID: "StudioNote", Name: "Studio Note", BasedOn: "StudioBody", Run: map[string]any{"size_pt": 10, "italic": true}, Paragraph: map[string]any{"left_pt": 18, "right_pt": 18, "after_pt": 8}}}})
+	styles := office.StyleRecipe{Styles: []office.StyleSpec{{ID: "StudioTitle", Name: "Studio Title", BasedOn: "Normal", Next: "StudioBody", Run: map[string]any{"font": "Times New Roman", "size_pt": 22, "bold": true}, Paragraph: map[string]any{"after_pt": 12, "keep_next": true}}, {ID: "StudioBody", Name: "Studio Body", BasedOn: "Normal", Run: map[string]any{"font": "Times New Roman", "size_pt": 11}, Paragraph: map[string]any{"after_pt": 8}}, {ID: "StudioNote", Name: "Studio Note", BasedOn: "StudioBody", Run: map[string]any{"size_pt": 10, "italic": true}, Paragraph: map[string]any{"left_pt": 18, "right_pt": 18, "after_pt": 8}}}}
 	content := office.ContentRecipe{Page: &office.PageSpec{WidthPT: 612, HeightPT: 792, MarginsPT: map[string]float64{"top": 54, "bottom": 54, "left": 54, "right": 54, "header": 24, "footer": 24}, Header: []office.Block{{Text: "WORDUP / NATIVE TEMPLATE", Run: map[string]any{"size_pt": 8}}}, Footer: []office.Block{{Inlines: []office.Inline{{Text: "Page "}, {Field: "PAGE", Text: "1"}}, Paragraph: map[string]any{"alignment": "right"}}}}, Blocks: []office.Block{{Text: "Editorial Studio", Style: "StudioTitle"}, {Type: "content_control", Tag: "author", Title: "Author", Blocks: []office.Block{{Text: "Author name", Style: "StudioBody"}}}, {Style: "StudioBody", Inlines: []office.Inline{{Text: "A native template, not a screenshot. Edit the styles, form, Ribbon and VBA as source."}, {Footnote: []office.Block{{Text: "This is a native Word footnote with its own reference marker.", Run: map[string]any{"size_pt": 9}}}}}}, {Type: "table", ColumnsPT: []float64{144, 360}, HeaderRows: 1, Rows: [][]office.Cell{{{Text: "Component"}, {Text: "Editable source"}}, {{Text: "VBA and forms"}, {Text: "Text modules and persistent native MSForms storage"}}, {{Text: "Document design"}, {Text: "Named styles, content controls, footnotes and saved parts"}}}}, {Text: "A reusable editorial note is also saved in Quick Parts.", Style: "StudioNote"}}}
-	writes["content/recipe.json"] = project.JSON(content)
-	writes["building_blocks/recipe.json"] = project.JSON([]office.BuildingBlock{{Name: "Studio Editorial Note", Category: "WordUp", Gallery: "autoTxt", Blocks: []office.Block{{Text: "Editorial note: replace with a reusable observation.", Style: "StudioNote"}}}})
+	blocks := []office.BuildingBlock{{Name: "Studio Editorial Note", Category: "WordUp", Gallery: "autoTxt", Blocks: []office.Block{{Text: "Editorial note: replace with a reusable observation.", Style: "StudioNote"}}}}
 	writes["tests/suite.json"] = project.JSON(WindowsSuite())
 	writes["tests/mac-suite.json"] = project.JSON(MacSuite())
 	for path, b := range writes {
@@ -33,9 +32,19 @@ func Studio(root string) (*project.BuildReport, error) {
 			return nil, e
 		}
 	}
-	// RibbonX is a real package part and relationship, not a mocked web toolbar.
+	// Materialize the fixture as ordinary package source. The workspace build has
+	// no recipe format or second interpretation of the desired document.
 	p, e := office.ReadPackage(w.Baseline.Original)
 	if e != nil {
+		return nil, e
+	}
+	if e = office.ApplyStyles(p, styles); e != nil {
+		return nil, e
+	}
+	if e = office.Compose(p, content, nil); e != nil {
+		return nil, e
+	}
+	if e = office.AddBuildingBlocks(p, blocks, nil); e != nil {
 		return nil, e
 	}
 	p.Files["customUI/customUI14.xml"] = []byte(ribbon)
@@ -45,8 +54,11 @@ func Studio(root string) (*project.BuildReport, error) {
 	if e = p.Relationship("", "rIdStudioRibbon", "http://schemas.microsoft.com/office/2007/relationships/ui/extensibility", "customUI/customUI14.xml", ""); e != nil {
 		return nil, e
 	}
-	for _, path := range []string{"customUI/customUI14.xml", "[Content_Types].xml", "_rels/.rels"} {
-		if e = project.Write(root, "package/"+path, p.Files[path], ""); e != nil {
+	for path, data := range p.Files {
+		if office.Hash(data) == office.Hash(w.Baseline.Files[path]) {
+			continue
+		}
+		if e = project.Write(root, "package/"+path, data, ""); e != nil {
 			return nil, e
 		}
 	}

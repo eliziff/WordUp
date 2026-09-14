@@ -56,7 +56,7 @@ For reference-driven template work, use the [WordUp template-builder agent skill
 For legal-document projects, agents can reuse [Legal Structure Parser](https://github.com/eliziff/legal-structure-parser) and [Legal PDF Parser](https://github.com/eliziff/legal-pdf-parser). WordUp's generated agent instructions link to both. They are optional development tools; the executable and delivered templates do not require them. See [reuse guidance](docs/REUSE.md).
 
 ```text
-project.json                   Project metadata, component kinds, references
+project.json                   Project metadata still required by the writer
 .wordwright/base.opc           Immutable, hash-checked original package
 .wordwright/index.json         Baseline source hashes
 vba/*.bas                      Standard VBA modules
@@ -64,10 +64,7 @@ vba/*.cls                      Classes and the document module
 vba/*.vba                      UserForm event code
 forms/<name>.json              Persistent native MSForms design, in points
 package/                       Full native OPC parts, including RibbonX and assets
-styles/recipe.json             Named style and numbering changes
-content/recipe.json            Native document-body composition
-building_blocks/recipe.json    Reusable native saved parts
-assets/                        Images used by recipes
+assets/                        Images and other editable package inputs
 references/                    Agent reference material
 reports/                       Machine-readable build and acceptance results
 tests/suite.json               Native observable assertions
@@ -75,7 +72,7 @@ tests/suite.json               Native observable assertions
 
 The original file is not used as a scratchpad. The workspace preserves untouched package parts. A no-change import/build of a development specimen was byte-identical. Source changes rebuild the native CFB/VBA project and compressed streams; they do not automate typing into VBE. Ordinary module/form source builds therefore do not require enabling VBIDE trust access.
 
-**`content/recipe.json` replaces the document body.** Do not introduce it when only styles or macros should change. For existing complex documents, edit their original XML surgically or use native Word operations on a test copy. A convenience recipe is not a full replacement for Word's object model.
+Edit document content, styles, numbering and saved parts in the package XML or through native Word operations on a disposable copy. The source tree records the actual document, not a second partial description of it.
 
 ## Native Windows execution design
 
