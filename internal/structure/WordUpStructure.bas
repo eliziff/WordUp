@@ -327,8 +327,8 @@ Public Function WU_ParseMarker(ByVal text As String) As String
     End If
     If Len(Trim$(rest)) = 0 Or InStr(prefix, " ") > 0 Then Exit Function
     If IsNumeric(prefix) Then WU_ParseMarker = prefix: Exit Function
-    If Len(prefix) = 1 And prefix >= "A" And prefix <= "Z" Then WU_ParseMarker = prefix: Exit Function
-    For i = 1 To Len(prefix): c = Mid$(prefix, i, 1): If InStr(1, "IVXLCDM", c, vbBinaryCompare) = 0 Then Exit Function
+    If Len(prefix) = 1 And LCase$(prefix) >= "a" And LCase$(prefix) <= "z" Then WU_ParseMarker = prefix: Exit Function
+    For i = 1 To Len(prefix): c = UCase$(Mid$(prefix, i, 1)): If InStr(1, "IVXLCDM", c, vbBinaryCompare) = 0 Then Exit Function
     Next i
     WU_ParseMarker = prefix
 End Function
@@ -347,7 +347,11 @@ Private Function WU_MarkerAlternatives(ByVal marker As String) As String
         If InStr(1, "IVXLCDM", c, vbBinaryCompare) > 0 Then
             value = WU_MarkerValue(marker, "roman")
             alphaValue = AscW(c) - 64
-            WU_MarkerAlternatives = marker & "|roman:" & CStr(value) & "|upper_alpha:" & CStr(alphaValue)
+            If marker = LCase$(marker) Then
+                WU_MarkerAlternatives = marker & "|roman:" & CStr(value) & "|lower_alpha:" & CStr(alphaValue)
+            Else
+                WU_MarkerAlternatives = marker & "|roman:" & CStr(value) & "|upper_alpha:" & CStr(alphaValue)
+            End If
             Exit Function
         End If
         If c >= "A" And c <= "Z" Then
@@ -375,8 +379,8 @@ Private Function WU_MarkerFamily(ByVal marker As String) As String
         Exit Function
     ElseIf IsNumeric(marker) Then
         WU_MarkerFamily = "decimal"
-    ElseIf Len(marker) = 1 And InStr(1, "IVXLCDM", marker, vbBinaryCompare) = 0 Then
-        WU_MarkerFamily = "alpha"
+    ElseIf Len(marker) = 1 And InStr(1, "IVXLCDM", UCase$(marker), vbBinaryCompare) = 0 Then
+        If marker = LCase$(marker) Then WU_MarkerFamily = "lower_alpha" Else WU_MarkerFamily = "upper_alpha"
     Else
         WU_MarkerFamily = "roman"
     End If
@@ -391,7 +395,8 @@ Private Function WU_MarkerValue(ByVal marker As String, ByVal family As String) 
         marker = UCase$(marker): family = "roman"
     End If
     If family = "decimal" Then WU_MarkerValue = CLng(marker): Exit Function
-    If family = "alpha" Then WU_MarkerValue = AscW(marker) - 64: Exit Function
+    If family = "lower_alpha" Or family = "upper_alpha" Then WU_MarkerValue = AscW(UCase$(marker)) - 64: Exit Function
+    marker = UCase$(marker)
     Dim i As Long, n As Long, last As Long, current As Long
     For i = Len(marker) To 1 Step -1
         current = InStr(1, "IVXLCDM", Mid$(marker, i, 1), vbBinaryCompare)

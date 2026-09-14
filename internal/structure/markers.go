@@ -42,8 +42,9 @@ func MarkerChoices(text string) []Interpretation {
 	out := []Interpretation{}
 	roman := true
 	total, prior := 0, 0
+	romanValue := strings.ToUpper(value)
 	for i := len(value) - 1; i >= 0; i-- {
-		n := map[byte]int{'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}[value[i]]
+		n := map[byte]int{'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}[romanValue[i]]
 		if n == 0 {
 			roman = false
 			break

@@ -28,6 +28,10 @@ func TestMarkerChoicesPreserveAmbiguity(t *testing.T) {
 	if len(got) != 2 || got[0].Family != "roman_." || got[1].Family != "upper_alpha_." {
 		t.Fatal(got)
 	}
+	lower := MarkerChoices("i. introduction")
+	if len(lower) != 2 || lower[0].Family != "roman_." || lower[1].Family != "lower_alpha_." {
+		t.Fatalf("lowercase Roman/alpha ambiguity was lost: %#v", lower)
+	}
 	if len(MarkerChoices("1.5 percent")) != 0 {
 		t.Fatal("decimal treated as marker")
 	}
