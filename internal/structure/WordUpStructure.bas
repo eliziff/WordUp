@@ -1,7 +1,7 @@
 Attribute VB_Name = "WordUpStructure"
 Option Explicit
 
-' WordUp structure contract 1.2.7. MIT licensed; editable and dependency-free.
+' WordUp structure contract 1.2.8. MIT licensed; editable and dependency-free.
 ' Detection is separate from publication-specific style mapping.
 Public Const WU_ROLE As Long = 0
 Public Const WU_LEVEL As Long = 1
@@ -322,13 +322,22 @@ Private Sub WU_ResolveMarkerLadder(ByRef result As Variant, ByVal count As Long)
 End Sub
 
 Public Function WU_ParseMarker(ByVal text As String) As String
-    Dim at As Long, dashAt As Long, prefix As String, namedKind As String, rest As String, i As Long, c As String, lowerText As String, candidate As Variant
+    Dim at As Long, dashAt As Long, prefix As String, namedKind As String, rest As String, i As Long, c As String, lowerText As String, candidate As Variant, periodOrClose As Boolean
     text = Trim$(Replace(Replace(text, vbTab, " "), ChrW(160), " "))
     lowerText = LCase$(text)
     If WU_IsNamedHeading(lowerText) Then
         at = InStr(text, ":"): If at = 0 Then at = InStr(text, " - ")
         If at = 0 Then at = InStr(text, ChrW(&H2013))
         If at = 0 Then at = InStr(text, ChrW(&H2014))
+        If at = 0 And Left$(lowerText, 5) <> "part " And Left$(lowerText, 8) <> "chapter " Then
+            at = InStr(text, ".")
+            If at > 0 Then periodOrClose = True
+        End If
+        If at = 0 And Left$(lowerText, 5) <> "part " And Left$(lowerText, 8) <> "chapter " Then
+            at = InStr(text, ")")
+            If at > 0 Then periodOrClose = True
+        End If
+        If periodOrClose And (at >= Len(text) Or Mid$(text, at + 1, 1) <> " ") Then at = 0
         If at > 1 Then
             namedKind = Left$(text, InStr(text, " ") - 1)
             prefix = Trim$(Mid$(text, InStr(text, " ") + 1, at - InStr(text, " ") - 1))

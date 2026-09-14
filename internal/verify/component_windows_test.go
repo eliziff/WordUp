@@ -108,6 +108,9 @@ Public Function Check() As Variant
     markerDoc.Content.Text = "I) Introduction" & vbCr & "Part IV – Scope" & vbCr
     markerResult = WU_DetectStructure(markerDoc)
     If markerResult(0, WU_AMBIGUOUS) <> True Or InStr(CStr(markerResult(0, WU_ALTERNATIVES)), "roman:") = 0 Or InStr(CStr(markerResult(0, WU_ALTERNATIVES)), "upper_alpha:") = 0 Then Err.Raise 5, , "ambiguous Roman/alpha marker was collapsed"
+    markerDoc.Content.Text = "Article 1. Definitions" & vbCr
+    markerResult = WU_DetectStructure(markerDoc)
+    If CStr(markerResult(0, WU_MARKER)) <> "named:article:1" Then Err.Raise 5, , "period-delimited named marker was not retained"
     markerDoc.Close SaveChanges:=wdDoNotSaveChanges
     d.Paragraphs(2).OutlineLevel = 2
     r = WU_DetectStructure(d)

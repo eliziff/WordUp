@@ -7,6 +7,7 @@ import (
 )
 
 var namedHeadingPrefix = regexp.MustCompile(`^\s*((?i:part|chapter|theme|section|article|appendix|schedule|division|book|title))\s+((?i:[IVXLCDM]){1,7}|[A-Za-z]|[0-9]{1,3}|(?i:one|two|three|four|five|six|seven|eight|nine|ten))\s*([:\-\x{2013}\x{2014}])\s*(.+)$`)
+var namedPeriodHeadingPrefix = regexp.MustCompile(`^\s*((?i:theme|section|article|appendix|schedule|division|book|title))\s+((?i:[IVXLCDM]){1,7}|[A-Za-z]|[0-9]{1,3}|(?i:one|two|three|four|five|six|seven|eight|nine|ten))\s*([.)])\s+(.+)$`)
 
 var headingPrefix = regexp.MustCompile(`^\s*(?:(?i:part|chapter)\s+)?((?i:[IVXLCDM]){1,7}|[A-Za-z]|[0-9]{1,3})([.)]|\s*[-\x{2013}\x{2014}])\s+(.+)$`)
 var parenthesizedHeadingPrefix = regexp.MustCompile(`^\s*\(((?i:[IVXLCDM]){1,7}|[A-Za-z]|[0-9]{1,3})\)\s+(.+)$`)
@@ -17,6 +18,10 @@ func MarkerChoices(text string) []Interpretation {
 	parts := namedHeadingPrefix.FindStringSubmatch(text)
 	named := parts != nil
 	parenthesized := false
+	if !named {
+		parts = namedPeriodHeadingPrefix.FindStringSubmatch(text)
+		named = parts != nil
+	}
 	if !named {
 		parts = headingPrefix.FindStringSubmatch(text)
 		if parts == nil {

@@ -57,10 +57,21 @@ func TestNamedHeadingDashVariants(t *testing.T) {
 }
 
 func TestGenericNamedHeadingPrefixes(t *testing.T) {
-	for _, text := range []string{"Theme 1: Pricing", "Section II - Scope", "Appendix A: Sources"} {
-		if got := MarkerChoices(text); len(got) == 0 {
-			t.Fatalf("named heading prefix was not recognized: %q", text)
+	wants := map[string]string{
+		"Theme 1: Pricing":       "numeric_theme_named_section",
+		"Section II - Scope":     "roman_section_named_section",
+		"Appendix A: Sources":    "upper_alpha_appendix_named_section",
+		"Article 1. Definitions": "numeric_article_named_section",
+		"Schedule A) Sources":    "upper_alpha_schedule_named_section",
+	}
+	for text, wantFamily := range wants {
+		got := MarkerChoices(text)
+		if len(got) != 1 || got[0].Family != wantFamily {
+			t.Fatalf("named heading prefix mismatch for %q: %#v", text, got)
 		}
+	}
+	if got := MarkerChoices("Article 1.5 percent"); len(got) != 0 {
+		t.Fatalf("decimal prose was treated as a named marker: %#v", got)
 	}
 }
 
