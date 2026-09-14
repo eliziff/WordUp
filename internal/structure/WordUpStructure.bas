@@ -34,6 +34,7 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
     Dim hasLists As Boolean, hasTables As Boolean, plausible As Boolean
     Dim headingStyle As Boolean, keepNext As Boolean, upperText As Boolean
     Dim story As Range, pieces As Variant, position As Long, startPosition As Long, endPosition As Long
+    Dim storyTextAligned As Boolean
     Dim starts() As Long, ends() As Long, texts() As String
     Dim centered() As Boolean, frontEmphasis() As Boolean, frontRoles() As String
     Set story = document.StoryRanges(wdMainTextStory): Set paragraphs = story.Paragraphs
@@ -43,8 +44,12 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
     ReDim result(0 To count - 1, 0 To WU_COLUMNS - 1)
     ReDim centered(0 To count - 1): ReDim frontEmphasis(0 To count - 1): ReDim frontRoles(0 To count - 1)
     hasLists = (document.Lists.count > 0): hasTables = (document.Tables.count > 0)
+    storyTextAligned = False
     If Not hasTables Then
-        pieces = Split(story.text, vbCr): position = story.Start
+        pieces = Split(story.text, vbCr)
+        storyTextAligned = (UBound(pieces) + 1 = count)
+        If Not storyTextAligned Then GoTo SkipStoryTextCache
+        position = story.Start
         ReDim starts(0 To count - 1): ReDim ends(0 To count - 1)
         ReDim texts(0 To count - 1)
         For i = 0 To count - 1
@@ -53,11 +58,12 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
             texts(i) = WU_CleanText(rawText)
         Next i
     End If
+SkipStoryTextCache:
     i = 0
     For Each paragraph In paragraphs
         i = i + 1
         Set scope = Nothing
-        If hasTables Then
+        If hasTables Or Not storyTextAligned Then
             Set scope = paragraph.Range: rawText = scope.text
             startPosition = scope.Start: endPosition = scope.End
             text = WU_CleanText(rawText): style = CStr(paragraph.Style)
