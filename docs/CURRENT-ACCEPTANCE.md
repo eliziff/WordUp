@@ -35,6 +35,8 @@ The fidelity-38 package-only component smoke also listed the bundled catalog, in
 
 The same packaged x64 executable was then exercised from a disposable workspace with all eight bundled components. Every add was clean/compatible and every `component.diff` returned `equal=true`; the workspace `check` found zero diagnostics across nine parsed VBA modules, and an uncached build completed in 21.8 ms with a valid OPC package. `vba_compiled=false` remains explicit because this run did not execute Word. The workspace was removed after the run.
 
+The packaged reference inspector read the retained Alberta style-guide DOCX in 158.5 ms (37 parts, 332 stored style definitions, 1,972 paragraph observations and 8 section observations). In the same warm local session, a blank-workspace build was valid in 16.8 ms and eight repeated cached builds had a 1.1 ms median (one 116.2 ms cold file-cache outlier); a guarded source edit rebuilt validly in 16.5 ms. These are offline/package timings, not native Word timings.
+
 ## Remaining completion gates
 
 The Rizzuto comment discrepancy is fixed by restoring character-collection traversal; tracked-formatting visibility is preserved explicitly. The selected-options baseline passes (`workspaces/alr-baseline/reports/full-rizzuto-with-alignment.json`, 67.914 s), and the complete output comparison passes with `equal=true`, `byte_identical=false`. Reopening saved Flat OPC was rejected as a shortcut because Word added font metadata; the final baseline ran the unchanged original on the original input instead.
