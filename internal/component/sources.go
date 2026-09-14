@@ -6,17 +6,19 @@ Option Explicit
 ' cannot reliably propagate an unhandled macro error across its COM boundary.
 ' The caller's handler must save Err before calling End, then re-raise it.
 Public Sub WU_BeginSafeEdit(ByRef updating As Boolean, ByRef opened As Boolean, Optional ByVal label As String = "WordUp edit")
-    Dim failure As Long, failureSource As String, failureText As String
+    Dim captured As Boolean, failure As Long, failureSource As String, failureText As String
+    opened = False
     On Error GoTo Failed
     updating = Application.ScreenUpdating
+    captured = True
     Application.ScreenUpdating = False
-    opened = False
     Application.UndoRecord.StartCustomRecord label: opened = True
     Exit Sub
 Failed:
     failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
     On Error Resume Next
-    Application.ScreenUpdating = updating
+    If captured Then Application.ScreenUpdating = updating
+    opened = False
     On Error GoTo 0
     Err.Raise failure, failureSource, failureText
 End Sub

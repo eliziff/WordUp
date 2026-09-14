@@ -108,6 +108,9 @@ func builtin() []Manifest {
 		if items[i].ID == "command.hotkey" {
 			items[i].Version = "1.0.5"
 		}
+		if items[i].ID == "operation.safe-edit" {
+			items[i].Version = "1.0.1"
+		}
 		if items[i].ID == "command.context-menu" {
 			items[i].Version = "1.0.4"
 		}
