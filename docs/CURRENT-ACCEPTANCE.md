@@ -21,6 +21,8 @@ The 109-document formatting/evidence sweep initially exposed one real parser def
 
 The same fidelity-37 candidate's adjacent `structure.inspect` sweep also completed all 109 documents with zero errors and 22,789 paragraph rows (30.4 ms median, 156.8 ms maximum, 3.61 s engine time).
 
+Its packaged `structure.resolve` sweep likewise completed all 109 documents with zero errors and 22,789 resolved paragraph rows (32.3 ms median, 151.8 ms maximum, 3.77 s engine time).
+
 The current Windows x64 and ARM64 fidelity-37 package candidates each contain 252 manifest-hashed files with zero hash omissions, zero debug-symbol files and zero hits for the developer's absolute workspace path. The release builder now disables analysis-helper debug symbols and rejects any staged PDB, preserving this as a packaging invariant rather than a one-off audit.
 
 The exact x64 fidelity-37 candidate's disposable `--execute selftest` was attempted and failed in 195 ms with `native_session_restricted`: this Windows logon session refuses hidden Word creation (`CreateProcessW`: logon session does not exist). No native pass is claimed until that host boundary is cleared.
