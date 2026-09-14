@@ -73,6 +73,9 @@ func builtin() []Manifest {
 		if items[i].ID == "ui.progress-cancel" {
 			items[i].Version = "1.0.1"
 		}
+		if items[i].ID == "ui.ribbon-command" {
+			items[i].Version = "1.0.1"
+		}
 		if items[i].ID == "document.style-converter" {
 			items[i].Version = "1.0.1"
 		}

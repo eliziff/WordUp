@@ -64,7 +64,12 @@ End Function
 const ribbonSource = `Attribute VB_Name = "WordUpRibbon"
 Option Explicit
 Public Sub WU_RibbonCommand(ByVal control As Object)
-    Application.Run "WU_Command_" & Replace(control.Id, "-", "_")
+    Dim controlID As String, macroName As String
+    If control Is Nothing Then Err.Raise 91, "WU_RibbonCommand", "control is required"
+    controlID = CStr(control.Id)
+    If Len(controlID) = 0 Then Err.Raise 5, "WU_RibbonCommand", "control id is required"
+    macroName = "WU_Command_" & Replace(Replace(controlID, "-", "_"), ".", "_")
+    Application.Run "'" & ThisDocument.Name & "'!" & macroName
 End Sub
 `
 
