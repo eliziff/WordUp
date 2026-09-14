@@ -120,9 +120,9 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
         result(i - 1, WU_AMBIGUOUS) = (InStr(1, alternatives, "|", vbBinaryCompare) > 0)
         If result(i - 1, WU_AMBIGUOUS) Then WU_AddEvidence evidence, "ambiguous-marker": result(i - 1, WU_EVIDENCE) = evidence
     Next paragraph
+    WU_ClassifyFrontMatter result, count, centered, frontEmphasis, frontRoles
     WU_ResolveStyleFamilies result, count
     WU_ResolveMarkerLadder result, count
-    WU_ClassifyFrontMatter result, count, centered, frontEmphasis, frontRoles
     For i = 0 To count - 1
         score = CLng(result(i, WU_CONFIDENCE)): level = CLng(result(i, WU_LEVEL)): semanticRole = vbNullString
         If result(i, WU_CONTEXT) <> "body" Then
