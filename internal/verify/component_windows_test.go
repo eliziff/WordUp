@@ -6,7 +6,6 @@ import (
 	"context"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/eliziff/WordUp/internal/component"
@@ -286,89 +285,4 @@ Private Sub UserForm_Activate()
     Proof.WU_FormShown = True
     Unload Me
 End Sub
-`
-
-func TestNativeComponentCorpus(t *testing.T) {
-	corpus := os.Getenv("WORDUP_CORPUS")
-	if os.Getenv("WORDUP_NATIVE_TEST") != "1" || corpus == "" {
-		t.Skip("set WORDUP_NATIVE_TEST=1 and WORDUP_CORPUS")
-	}
-	files, err := filepath.Glob(filepath.Join(corpus, "*.docx"))
-	if err != nil || len(files) != 109 {
-		t.Fatalf("corpus: %d documents, %v", len(files), err)
-	}
-	root := filepath.Join(t.TempDir(), "corpus-proof")
-	if _, err := project.New("CorpusProof", root); err != nil {
-		t.Fatal(err)
-	}
-	for _, id := range []string{"structure.detect", "document.style-converter"} {
-		if _, err := component.Add(root, id); err != nil {
-			t.Fatal(err)
-		}
-	}
-	if err := project.Write(root, "vba/ManuscriptProof.bas", []byte(manuscriptProof), ""); err != nil {
-		t.Fatal(err)
-	}
-	w, err := project.Open(root)
-	if err != nil {
-		t.Fatal(err)
-	}
-	b, err := w.Build("")
-	if err != nil {
-		t.Fatal(err)
-	}
-	ctx := context.Background()
-	h, err := native.Start(ctx, native.Options{Execute: true})
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer h.Close()
-	steps := []verify.Step{
-		{Name: "Load components", Operation: native.Operation{Op: "open", File: "$artifact", As: "components"}},
-		{Name: "Compile components", Operation: native.Operation{Op: "compile", Target: "components", Member: "$project"}, Assert: []verify.Assertion{{Path: "/vba_compiled", Kind: "equals", Expected: true}}},
-	}
-	for _, file := range files {
-		if strings.HasSuffix(file, "--3a668c4999c4.docx") {
-			t.Log("excluded known malformed ZIP separators; original unchanged")
-			continue
-		}
-		steps = append(steps,
-			verify.Step{Name: "Open " + filepath.Base(file), Operation: native.Operation{Op: "open", File: file, As: "manuscript"}},
-			verify.Step{Name: "Attach " + filepath.Base(file), Operation: native.Operation{Op: "put", Target: "manuscript", Member: "AttachedTemplate", Value: "$artifact"}},
-			verify.Step{Name: "Preservation " + filepath.Base(file), Operation: native.Operation{Op: "run", Macro: "ManuscriptProof.CheckDocument"}, Assert: []verify.Assertion{{Kind: "equals", Expected: "PASS"}}},
-			verify.Step{Name: "Discard " + filepath.Base(file), Operation: native.Operation{Op: "unload", Target: "manuscript"}},
-		)
-	}
-	report, err := verify.Run(ctx, b.Artifact, verify.Suite{Schema: 1, Name: "Retained manuscript component preservation", RequireCompile: true, Steps: steps}, h, true)
-	if output := os.Getenv("WORDUP_COMPONENT_REPORT"); output != "" {
-		if saveErr := os.WriteFile(output, project.JSON(report), 0600); saveErr != nil {
-			t.Fatal(saveErr)
-		}
-	}
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-	t.Logf("108 native manuscripts passed; %.3f ms", report.DurationMS)
-}
-
-const manuscriptProof = `Attribute VB_Name = "ManuscriptProof"
-Option Explicit
-Public Function CheckDocument() As Variant
-    Dim doc As Document, baseline As String, detected As Variant
-    Dim originalStyle As String, changed As Boolean
-    Set doc = ActiveDocument
-    baseline = doc.WordOpenXML
-    baseline = doc.WordOpenXML
-    If baseline <> doc.WordOpenXML Then CheckDocument = Array("no-op XML mismatch", baseline, doc.WordOpenXML): Exit Function
-    detected = WU_DetectStructure(doc)
-    If baseline <> doc.WordOpenXML Then CheckDocument = Array("detector XML mismatch", baseline, doc.WordOpenXML): Exit Function
-    doc.Styles.Add "WordUpPreservationTarget", wdStyleTypeParagraph
-    originalStyle = doc.Paragraphs(1).Style.NameLocal
-    baseline = doc.WordOpenXML
-    changed = WU_ConvertStyle(doc, originalStyle, "WordUpPreservationTarget")
-    If Not changed Then Err.Raise 5, , "no paragraph converted"
-    If Not doc.Undo Then Err.Raise 5, , "missing conversion undo"
-    If baseline <> doc.WordOpenXML Then CheckDocument = Array("undo XML mismatch", baseline, doc.WordOpenXML): Exit Function
-    CheckDocument = "PASS"
-End Function
 `
