@@ -54,6 +54,58 @@ func TestRibbonDiagnosticsUseXMLIdentity(t *testing.T) {
 	}
 }
 
+func TestCheckDiagnosticsAreStableAcrossRuns(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "workspace")
+	if _, err := project.New("StableCheck", root); err != nil {
+		t.Fatal(err)
+	}
+	for name, source := range map[string]string{
+		"vba/Zed.bas":  "Attribute VB_Name = \"Zed\"\nOption Explicit\nPublic Sub Shared(\nEnd Sub\n",
+		"vba/Alpha.bas": "Attribute VB_Name = \"Alpha\"\nOption Explicit\nPublic Sub Shared(\nEnd Sub\n",
+	} {
+		if err := project.Write(root, name, []byte(source), ""); err != nil {
+			t.Fatal(err)
+		}
+	}
+	w, err := project.Open(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	first, err := Check(w)
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := Check(w)
+	if err != nil {
+		t.Fatal(err)
+	}
+	firstDiagnostics, ok := first["diagnostics"].([]map[string]any)
+	if !ok {
+		t.Fatalf("first check diagnostics have wrong shape: %#v", first["diagnostics"])
+	}
+	secondDiagnostics, ok := second["diagnostics"].([]map[string]any)
+	if !ok || len(firstDiagnostics) != len(secondDiagnostics) {
+		t.Fatalf("check diagnostics changed shape or count: %#v %#v", first["diagnostics"], second["diagnostics"])
+	}
+	for i := range firstDiagnostics {
+		if string(project.JSON(firstDiagnostics[i])) != string(project.JSON(secondDiagnostics[i])) {
+			t.Fatalf("check diagnostics changed order at %d: %#v vs %#v", i, firstDiagnostics, secondDiagnostics)
+		}
+	}
+	if len(firstDiagnostics) == 0 {
+		t.Fatalf("check did not report the deliberate duplicate procedure: %#v", firstDiagnostics)
+	}
+	fileOrder := []string{}
+	for _, diagnostic := range firstDiagnostics {
+		if file, ok := diagnostic["file"].(string); ok && strings.HasPrefix(file, "vba/") {
+			fileOrder = append(fileOrder, file)
+		}
+	}
+	if len(fileOrder) < 2 || fileOrder[0] != "vba/Alpha.bas" || fileOrder[1] != "vba/Zed.bas" {
+		t.Fatalf("diagnostics were not source-ordered: %v", fileOrder)
+	}
+}
+
 func TestRibbonDiagnosticsReportIncompatibleCallbackReuse(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "workspace")
 	if _, err := project.New("RibbonCallbackCheck", root); err != nil {

@@ -798,12 +798,18 @@ func CheckWithConstants(w *project.Workspace, constants map[string]any) (map[str
 	if e != nil {
 		return nil, e
 	}
+	orderedFiles := make([]string, 0, len(files))
+	for name := range files {
+		orderedFiles = append(orderedFiles, name)
+	}
+	sort.Strings(orderedFiles)
 	symbols := []Symbol{}
 	byName := map[string]bool{}
 	publicDeclarations := map[string][]Symbol{}
 	diagnostics := []map[string]any{}
 	parsedModules, skippedModules := 0, 0
-	for n, b := range files {
+	for _, n := range orderedFiles {
+		b := files[n]
 		if strings.HasPrefix(n, "vba/") {
 			{
 				result, err := vbaparse.ParseWithConstants(string(b), constants)
@@ -831,7 +837,8 @@ func CheckWithConstants(w *project.Workspace, constants map[string]any) (map[str
 			}
 		}
 	}
-	for n, b := range files {
+	for _, n := range orderedFiles {
+		b := files[n]
 		if !strings.HasPrefix(n, "package/") || !strings.HasSuffix(n, ".xml") {
 			continue
 		}
