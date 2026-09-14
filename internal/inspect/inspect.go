@@ -195,6 +195,58 @@ func textObservationsPart(p *office.Package, part string) ([]map[string]any, err
 	if e != nil {
 		return nil, e
 	}
+	type contentControl struct {
+		start, end int
+		item       map[string]any
+	}
+	contentControls := []contentControl{}
+	for i, span := range spans {
+		if span.Name.Space != office.W || span.Name.Local != "sdt" {
+			continue
+		}
+		item := map[string]any{"xml_start": span.Start, "xml_end": span.End}
+		binding := map[string]string{}
+		for _, child := range spans[i+1:] {
+			if child.Start >= span.End {
+				break
+			}
+			if child.Name.Space != office.W || child.Depth != span.Depth+2 {
+				continue
+			}
+			switch child.Name.Local {
+			case "alias":
+				if value := child.Attribute(office.W, "val"); value != "" {
+					item["alias"] = value
+				}
+			case "tag":
+				if value := child.Attribute(office.W, "val"); value != "" {
+					item["tag"] = value
+				}
+			case "id":
+				if value := child.Attribute(office.W, "val"); value != "" {
+					item["id"] = value
+				}
+			case "lock", "appearance":
+				if value := child.Attribute(office.W, "val"); value != "" {
+					item[child.Name.Local] = value
+				}
+			case "showingPlcHdr", "temporary":
+				item[child.Name.Local] = true
+			case "dataBinding":
+				for _, name := range []string{"xpath", "storeItemID", "prefixMappings"} {
+					if value := child.Attribute(office.W, name); value != "" {
+						binding[name] = value
+					}
+				}
+			case "text", "checkbox", "comboBox", "dropDownList", "date", "docPartList", "docPartObj", "picture", "group", "richText", "bibliography", "citation", "equation", "repeatingSection":
+				item["type"] = child.Name.Local
+			}
+		}
+		if len(binding) > 0 {
+			item["data_binding"] = binding
+		}
+		contentControls = append(contentControls, contentControl{start: span.Start, end: span.End, item: item})
+	}
 	out := []map[string]any{}
 	for index, s := range spans {
 		if s.Name.Space != office.W || s.Name.Local != "p" {
@@ -486,6 +538,15 @@ func textObservationsPart(p *office.Package, part string) ([]map[string]any, err
 		}
 		if len(artwork) > 0 {
 			observation["artwork_evidence"] = artwork
+		}
+		controls := []map[string]any{}
+		for _, control := range contentControls {
+			if control.start < s.End && control.end > s.Start {
+				controls = append(controls, control.item)
+			}
+		}
+		if len(controls) > 0 {
+			observation["content_control_evidence"] = controls
 		}
 		if len(paragraphMarkFormatting) > 0 {
 			observation["paragraph_mark_formatting"] = paragraphMarkFormatting

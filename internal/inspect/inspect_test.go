@@ -213,6 +213,30 @@ func TestTextObservationsKeepArtworkEvidenceSourceLocated(t *testing.T) {
 	}
 }
 
+func TestTextObservationsKeepContentControlEvidenceCompact(t *testing.T) {
+	p := office.BlankPackage()
+	p.Files["word/document.xml"] = []byte(`<w:document xmlns:w="` + office.W + `"><w:body><w:sdt><w:sdtPr><w:alias w:val="Author"/><w:tag w:val="author"/><w:id w:val="42"/><w:lock w:val="sdtContentLocked"/><w:dataBinding w:xpath="/author" w:storeItemID="{abc}"/><w:text/></w:sdtPr><w:sdtContent><w:p><w:r><w:t>Author</w:t></w:r></w:p></w:sdtContent></w:sdt></w:body></w:document>`)
+	rows, err := TextObservations(p)
+	if err != nil || len(rows) != 1 {
+		t.Fatalf("content-control observations: %v %v", rows, err)
+	}
+	controls, ok := rows[0]["content_control_evidence"].([]map[string]any)
+	if !ok || len(controls) != 1 {
+		t.Fatalf("content-control evidence missing: %#v", rows[0]["content_control_evidence"])
+	}
+	control := controls[0]
+	if control["alias"] != "Author" || control["tag"] != "author" || control["id"] != "42" || control["lock"] != "sdtContentLocked" || control["type"] != "text" {
+		t.Fatalf("content-control metadata missing: %#v", control)
+	}
+	binding, ok := control["data_binding"].(map[string]string)
+	if !ok || binding["xpath"] != "/author" || binding["storeItemID"] != "{abc}" {
+		t.Fatalf("content-control binding missing: %#v", control["data_binding"])
+	}
+	if _, duplicated := control["text"]; duplicated {
+		t.Fatal("content-control evidence duplicated paragraph text")
+	}
+}
+
 func TestStoryObservationsKeepPartQualifiedLocations(t *testing.T) {
 	p := office.BlankPackage()
 	p.Files["word/header1.xml"] = []byte(`<w:hdr xmlns:w="` + office.W + `"><w:p w14:paraId="ABC" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml"><w:pPr><w:pStyle w:val="Header"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Aptos"/><w:sz w:val="18"/></w:rPr><w:t>Running head</w:t></w:r></w:p></w:hdr>`)
