@@ -135,6 +135,28 @@ func TestBundledVBADeclarations(t *testing.T) {
 	}
 }
 
+func TestHotkeyStatusScopesTemplateContext(t *testing.T) {
+	manifest, err := Get("command.hotkey")
+	if err != nil {
+		t.Fatal(err)
+	}
+	source := manifest.Files[0].Text
+	start := strings.Index(source, "Public Function WU_HotkeyRegistered")
+	if start < 0 {
+		t.Fatal("hotkey status function is not present")
+	}
+	end := strings.Index(source[start:], "End Function")
+	if end < 0 {
+		t.Fatal("hotkey status function has no terminator")
+	}
+	body := source[start : start+end]
+	context := strings.Index(body, "Application.CustomizationContext = ThisDocument")
+	lookup := strings.Index(body, "WU_OwnedHotkey(keyCode)")
+	if context < 0 || lookup < 0 || context > lookup {
+		t.Fatal("hotkey status must inspect bindings in the template customization context")
+	}
+}
+
 func TestAddTracksAndProtectsEditedComponent(t *testing.T) {
 	root := t.TempDir()
 	installed, err := Add(root, "structure.detect")

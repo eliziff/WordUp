@@ -108,11 +108,26 @@ Public Sub WU_RemoveHotkey(ByVal keyCode As Long)
     WU_ChangeHotkey keyCode, "", True
 End Sub
 Public Function WU_HotkeyRegistered(ByVal keyCode As Long, Optional ByVal expectedMacro As String = "") As Boolean
-    Dim binding As KeyBinding
+    Dim prior As Object, binding As KeyBinding
+    Dim failure As Long, failureSource As String, failureText As String
+    On Error GoTo Failed
+    Set prior = Application.CustomizationContext
+    Application.CustomizationContext = ThisDocument
     Set binding = WU_OwnedHotkey(keyCode)
-    If binding Is Nothing Then Exit Function
-    If expectedMacro <> "" Then If StrComp(WU_MacroMember(binding.Command), WU_MacroMember(expectedMacro), vbTextCompare) <> 0 Then Exit Function
+    If binding Is Nothing Then GoTo CleanUp
+    If expectedMacro <> "" Then If StrComp(WU_MacroMember(binding.Command), WU_MacroMember(expectedMacro), vbTextCompare) <> 0 Then GoTo CleanUp
     WU_HotkeyRegistered = True
+CleanUp:
+    On Error Resume Next
+    Err.Clear
+    Application.CustomizationContext = prior
+    If failure = 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
 End Function
 Private Sub WU_ChangeHotkey(ByVal keyCode As Long, ByVal macroName As String, ByVal remove As Boolean)
     Dim prior As Object, binding As KeyBinding
