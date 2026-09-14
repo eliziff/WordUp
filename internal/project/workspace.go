@@ -807,6 +807,7 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 		indexNames[folded] = name
 	}
 	packageFiles := map[string][]byte{}
+	packageHashes := map[string]string{}
 	packageChanged := false
 	for n, b := range files {
 		if strings.HasPrefix(n, "package/") {
@@ -818,18 +819,24 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 				return nil, fmt.Errorf("package source paths collide after case normalization: %s", part)
 			}
 			packageFiles[part] = b
+			currentHash := office.Hash(b)
+			packageHashes[part] = currentHash
 			expected := w.Index.Files[n]
 			if expected == "" {
 				if indexed, ok := indexNames[strings.ToLower("package/"+part)]; ok {
 					expected = w.Index.Files[indexed]
 				}
 			}
-			if expected != office.Hash(b) {
+			if expected != currentHash {
 				packageChanged = true
 			}
 		}
 	}
 	p := w.Baseline.WithFiles(packageFiles)
+	// Keep the list of parts that package composition may rewrite. For every
+	// other baseline part, its immutable hash is already authoritative; this
+	// avoids hashing unchanged media and custom XML again on a source edit.
+	dirtyPackageParts := map[string]bool{}
 	ribbonMerges, mergeErr := workspaceRibbonMerges(w.Root)
 	if mergeErr != nil {
 		return nil, mergeErr
@@ -842,8 +849,13 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 		if err := p.MergeRibbon(merge.Target, fragment); err != nil {
 			return nil, fmt.Errorf("component %s Ribbon merge %s -> %s: %w", merge.Component, merge.Source, merge.Target, err)
 		}
+		dirtyPackageParts[merge.Target] = true
+		dirtyPackageParts["[Content_Types].xml"] = true
+		dirtyPackageParts["_rels/.rels"] = true
 	}
 	if packageChanged {
+		dirtyPackageParts["[Content_Types].xml"] = true
+		dirtyPackageParts["_rels/.rels"] = true
 		if e = p.ConnectRibbons(); e != nil {
 			return nil, e
 		}
@@ -976,22 +988,11 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 		if e = p.SetVBA(vb); e != nil {
 			return nil, e
 		}
-	}
-	modified := []string{}
-	currentHashes := map[string]string{}
-	for n, b := range p.Files {
-		current := office.Hash(b)
-		currentHashes[n] = current
-		if original[n] != current {
-			modified = append(modified, n)
+		for _, part := range []string{"word/vbaProject.bin", "word/vbaData.xml", "word/_rels/document.xml.rels", "[Content_Types].xml"} {
+			dirtyPackageParts[part] = true
 		}
 	}
-	for n := range original {
-		if _, ok := p.Files[n]; !ok {
-			modified = append(modified, "-"+n)
-		}
-	}
-	sort.Strings(modified)
+	modified, currentHashes := packageChanges(p, original, packageHashes, dirtyPackageParts)
 	if len(modified) > 0 && w.Baseline.HasSignatures() {
 		if !w.Manifest.DropSignatures {
 			return nil, fmt.Errorf("edits invalidate a digital signature; set drop_signatures explicitly or use your signing pipeline")
@@ -999,21 +1000,12 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 		if e = dropSignatures(p); e != nil {
 			return nil, e
 		}
-		modified = nil
-		currentHashes = map[string]string{}
-		for n, b := range p.Files {
-			current := office.Hash(b)
-			currentHashes[n] = current
-			if original[n] != current {
-				modified = append(modified, n)
+		for n := range p.Files {
+			if strings.HasSuffix(n, ".rels") || n == "[Content_Types].xml" {
+				dirtyPackageParts[n] = true
 			}
 		}
-		for n := range original {
-			if _, ok := p.Files[n]; !ok {
-				modified = append(modified, "-"+n)
-			}
-		}
-		sort.Strings(modified)
+		modified, currentHashes = packageChanges(p, original, packageHashes, dirtyPackageParts)
 	}
 	if e = p.Validate(); e != nil {
 		return nil, e
@@ -1042,6 +1034,37 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 	}
 	return report, nil
 }
+
+// packageChanges derives the complete changed-part set without rehashing
+// immutable baseline parts. packageHashes covers editable package sources
+// already hashed during source collection; dirty marks parts rewritten by
+// Ribbon/VBA/signature composition and therefore requiring a final hash.
+func packageChanges(p *office.Package, original, packageHashes map[string]string, dirty map[string]bool) ([]string, map[string]string) {
+	modified := []string{}
+	currentHashes := make(map[string]string, len(p.Files))
+	for name, data := range p.Files {
+		current, known := packageHashes[name]
+		if dirty[name] || !known {
+			if baseline, exists := original[name]; exists && !dirty[name] && !known {
+				current = baseline
+			} else {
+				current = office.Hash(data)
+			}
+		}
+		currentHashes[name] = current
+		if original[name] != current {
+			modified = append(modified, name)
+		}
+	}
+	for name := range original {
+		if _, ok := p.Files[name]; !ok {
+			modified = append(modified, "-"+name)
+		}
+	}
+	sort.Strings(modified)
+	return modified, currentHashes
+}
+
 func dropSignatures(p *office.Package) error {
 	removed := map[string]bool{}
 	for n := range p.Files {
