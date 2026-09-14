@@ -142,8 +142,10 @@ package graph (content types and relationship targets), and also returns a compa
 `inventory`: public procedures, UserForm event handlers and their declared
 controls, Ribbon callback bindings (including conservative declaration-shape
 warnings), VBA hotkey/context-menu registrations, and
-the recorded component files with their current hash state. Missing or
-modified wiring is reported in the same diagnostics list. This is an
+the recorded component files with their current hash state. Persistent form
+design JSON is parsed and its filename/name wiring is checked; an unpaired
+design is a warning. Missing or modified wiring is reported in the same
+diagnostics list. This is an
 inventory and static wiring check, not proof that Word compiled or dispatched
 an event; use native `compile` and acceptance steps for that.
 
