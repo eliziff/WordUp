@@ -121,6 +121,7 @@ func winError(api string, e error) error {
 	}
 	return fmt.Errorf("%s: %w", api, e)
 }
+
 func duplicateInheritable(f *os.File) (syscall.Handle, error) {
 	var out syscall.Handle
 	self, _, _ := currentProcess.Call()
@@ -199,7 +200,7 @@ func spawnOnDesktop(exe string, args []string, desktop string, stdin, stdout, st
 	runtime.KeepAlive(command)
 	runtime.KeepAlive(dp)
 	if r == 0 {
-		return result, winError("CreateProcessW", e)
+		return result, fmt.Errorf("CreateProcessW (%s on %s): %w", exe, desktop, e)
 	}
 	result = childProcess{pi.Process, pi.Thread, pi.ProcessId}
 	if job != 0 {
