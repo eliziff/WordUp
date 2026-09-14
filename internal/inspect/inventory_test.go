@@ -73,6 +73,33 @@ func TestCheckInventoryReportsWiringAndModifiedComponent(t *testing.T) {
 	}
 }
 
+func TestCheckInventoryDoesNotTreatStandardModuleAsFormEvents(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "workspace")
+	if _, err := project.New("StandardModule", root); err != nil {
+		t.Fatal(err)
+	}
+	for name, data := range map[string][]byte{
+		"vba/Commands.bas":    []byte("Attribute VB_Name = \"Commands\"\nOption Explicit\nPublic Sub cmdSave_Click()\nEnd Sub\n"),
+		"forms/Commands.json": []byte(`{"name":"Commands","controls":[{"name":"cmdSave","type":"CommandButton"}]}`),
+	} {
+		if err := project.Write(root, name, data, ""); err != nil {
+			t.Fatal(err)
+		}
+	}
+	w, err := project.Open(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := Check(w)
+	if err != nil {
+		t.Fatal(err)
+	}
+	inventory := result["inventory"].(map[string]any)
+	if events := inventory["form_events"].([]map[string]any); len(events) != 0 {
+		t.Fatalf("standard module was inventoried as a form event: %#v", events)
+	}
+}
+
 func TestCheckInventoryReportsDuplicateModuleNames(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "workspace")
 	if _, err := project.New("DuplicateModules", root); err != nil {

@@ -521,7 +521,7 @@ func CheckInventory(root string, files map[string][]byte, diagnostics *[]map[str
 				}
 			}
 			lower := strings.ToLower(symbol.Name)
-			if strings.HasPrefix(lower, "userform_") || (strings.Contains(symbol.Name, "_") && formEventSuffixes[strings.ToLower(symbol.Name[strings.LastIndexByte(symbol.Name, '_')+1:])]) {
+			if strings.EqualFold(pathpkg.Ext(path), ".vba") && (strings.HasPrefix(lower, "userform_") || (strings.Contains(symbol.Name, "_") && formEventSuffixes[strings.ToLower(symbol.Name[strings.LastIndexByte(symbol.Name, '_')+1:])])) {
 				formName := strings.TrimSuffix(pathpkg.Base(path), pathpkg.Ext(path))
 				designPath := "forms/" + formName + ".json"
 				cached, ok := formDesigns[designPath]
@@ -535,9 +535,6 @@ func CheckInventory(root string, files map[string][]byte, diagnostics *[]map[str
 						}
 					}
 					formDesigns[designPath] = cached
-				}
-				if !cached.known && !strings.HasSuffix(strings.ToLower(path), ".vba") && !strings.HasPrefix(lower, "userform_") {
-					continue
 				}
 				formEvents = append(formEvents, formEventRow(path, symbol, cached.control, cached.known))
 				if cached.known && formEvents[len(formEvents)-1]["wiring"] == "control_not_declared" {
