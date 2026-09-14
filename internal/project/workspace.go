@@ -634,14 +634,21 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 		original[n] = office.Hash(b)
 	}
 	packageFiles := map[string][]byte{}
+	packageChanged := false
 	for n, b := range files {
 		if strings.HasPrefix(n, "package/") {
-			packageFiles[strings.TrimPrefix(n, "package/")] = b
+			part := strings.TrimPrefix(n, "package/")
+			packageFiles[part] = b
+			if w.Index.Files[n] != office.Hash(b) {
+				packageChanged = true
+			}
 		}
 	}
 	p := w.Baseline.WithFiles(packageFiles)
-	if e = p.ConnectRibbons(); e != nil {
-		return nil, e
+	if packageChanged {
+		if e = p.ConnectRibbons(); e != nil {
+			return nil, e
+		}
 	}
 	mods := []office.Module{}
 	formStreams := map[string]map[string][]byte{}
