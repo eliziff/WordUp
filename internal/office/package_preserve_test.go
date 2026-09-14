@@ -80,6 +80,25 @@ func TestKnownChangedPartsSkipReadsWithoutTrustingIncompleteSet(t *testing.T) {
 	}
 }
 
+func TestFailedVBAAttachDoesNotMutatePackage(t *testing.T) {
+	p := BlankPackage()
+	p.Files[RelPart("word/document.xml")] = []byte(`<Relationships xmlns="` + RelNS + `"><Relationship Id="rIdVBA" Type="` + VBAProjectRel + `" Target="existing.bin"/></Relationships>`)
+	before, err := p.Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = p.SetVBA([]byte("new project")); err == nil {
+		t.Fatal("VBA relationship collision was not rejected")
+	}
+	after, err := p.Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(before, after) {
+		t.Fatal("failed VBA attach mutated the package")
+	}
+}
+
 func TestChangedPackagePreservesOriginalBackslashMemberNames(t *testing.T) {
 	var raw bytes.Buffer
 	z := zip.NewWriter(&raw)

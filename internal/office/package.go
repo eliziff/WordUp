@@ -29,6 +29,15 @@ const (
 // SetVBA attaches the native project using Word's extension relationship, which
 // is not in the standard OOXML relationship namespace. Retain existing part IDs.
 func (p *Package) SetVBA(data []byte) error {
+	work := p.Clone()
+	if err := work.setVBA(data); err != nil {
+		return err
+	}
+	*p = *work
+	return nil
+}
+
+func (p *Package) setVBA(data []byte) error {
 	p.Files["word/vbaProject.bin"] = data
 	for part, typ := range map[string]string{"word/document.xml": MainDOTM, "word/vbaProject.bin": "application/vnd.ms-office.vbaProject"} {
 		if err := p.ContentType(part, typ); err != nil {
