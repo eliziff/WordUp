@@ -17,6 +17,8 @@ Repository-wide `go test -p 2 ./...` passed on 2026-09-13 after automatic XML sn
 
 The latest offline structure pass resolved all 109 retained DOCX submissions in one warm process (`build/structure-corpus-109-summary.json`): median resolver time was 48.9 ms, maximum 565.3 ms, and total engine time 5.98 s. The 30-document model-authored silver comparison covered 8,060 paragraphs in 1.17 s; evidence-aware ambiguity mismatches are zero, while 38 contradiction and 1,401 role/level/parent disagreements remain explicitly reported. This is corpus evidence and a repair queue, not a claim of generic or publication-specific parity.
 
+The current Windows x64 and ARM64 fidelity-36 package candidates each contain 252 manifest-hashed files with zero hash omissions, zero debug-symbol files and zero hits for the developer's absolute workspace path. The release builder now disables analysis-helper debug symbols and rejects any staged PDB, preserving this as a packaging invariant rather than a one-off audit.
+
 ## Remaining completion gates
 
 The Rizzuto comment discrepancy is fixed by restoring character-collection traversal; tracked-formatting visibility is preserved explicitly. The selected-options baseline passes (`workspaces/alr-baseline/reports/full-rizzuto-with-alignment.json`, 67.914 s), and the complete output comparison passes with `equal=true`, `byte_identical=false`. Reopening saved Flat OPC was rejected as a shortcut because Word added font metadata; the final baseline ran the unchanged original on the original input instead.
