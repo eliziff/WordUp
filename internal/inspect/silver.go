@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 
 	"github.com/eliziff/WordUp/internal/project"
 )
@@ -27,6 +29,11 @@ type silverParagraph struct {
 	Role        string `xml:"role,attr"`
 	Level       int    `xml:"level,attr"`
 	Parent      string `xml:"parent,attr"`
+	// These are optional so existing silver remains valid. When present,
+	// contradiction is a presence contract: the detector's detailed wording
+	// is evidence, not a second model-authored taxonomy.
+	Ambiguous     string `xml:"ambiguous,attr"`
+	Contradiction string `xml:"contradiction,attr"`
 }
 
 // CompareStructureSilver compares silver labels with package-derived resolution.
@@ -119,6 +126,27 @@ func CompareStructureSilver(root, reference string, limit int) (map[string]any, 
 				if compareStructureValue(&mismatches, limit, expectedDocument.Source, id, "level", expected.Level, got["level"]) {
 					mismatchCount++
 					mismatchFields["level"]++
+				}
+			}
+			if expected.Ambiguous != "" {
+				want, parseErr := strconv.ParseBool(strings.TrimSpace(expected.Ambiguous))
+				if parseErr != nil {
+					return nil, fmt.Errorf("silver %q paragraph %s has invalid ambiguous=%q", expectedDocument.Source, id, expected.Ambiguous)
+				}
+				actualAmbiguous, _ := got["ambiguous"].(bool)
+				if compareStructureValue(&mismatches, limit, expectedDocument.Source, id, "ambiguous", want, actualAmbiguous) {
+					mismatchCount++
+					mismatchFields["ambiguous"]++
+				}
+			}
+			if expected.Contradiction != "" {
+				value := strings.TrimSpace(expected.Contradiction)
+				want := !strings.EqualFold(value, "false") && !strings.EqualFold(value, "none") && !strings.EqualFold(value, "absent")
+				contradictions, _ := got["contradictions"].([]string)
+				actual := len(contradictions) > 0
+				if compareStructureValue(&mismatches, limit, expectedDocument.Source, id, "contradiction", want, actual) {
+					mismatchCount++
+					mismatchFields["contradiction"]++
 				}
 			}
 			expectedParent := expected.Parent

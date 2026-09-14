@@ -24,7 +24,7 @@ Feed eligible candidates and style-family evidence into the grammar/sequence res
 
 Manuscripts can contain multiple levels of unnumbered headings and a separate TOC heading. A numbering-only detector cannot recover that hierarchy. Test malformed and missing outlines as well as correctly styled inputs; native outline evidence alone does not prove general recovery.
 
-A useful acceptance corpus includes damaged outline levels, equivalent direct-formatted headings, ambiguous Roman/letter sequences, numbering restarts, quoted instruments, ordinary lists, tables, fields/TOC, mixed inline emphasis and non-ASCII text. Require expected hierarchy and source spans; benchmark analysis separately from editing. Passing a prefix fixture is not acceptance.
+A useful acceptance corpus includes damaged outline levels, equivalent direct-formatted headings, ambiguous Roman/letter sequences, numbering restarts, quoted instruments, ordinary lists, tables, fields/TOC, mixed inline emphasis and non-ASCII text. Require expected hierarchy and source spans; optional silver `ambiguous` and `contradiction` attributes can also require uncertainty evidence without duplicating paragraph text or imposing a second contradiction taxonomy. Benchmark analysis separately from editing. Passing a prefix fixture is not acceptance.
 
 ## Implemented package adapter
 
