@@ -445,6 +445,7 @@ func CheckWithConstants(w *project.Workspace, constants map[string]any) (map[str
 	}
 	symbols := []Symbol{}
 	byName := map[string]bool{}
+	publicDeclarations := map[string][]Symbol{}
 	diagnostics := []map[string]any{}
 	parsedModules, skippedModules := 0, 0
 	for n, b := range files {
@@ -467,6 +468,7 @@ func CheckWithConstants(w *project.Workspace, constants map[string]any) (map[str
 			for _, x := range s {
 				if publicSymbol(x) {
 					byName[strings.ToLower(x.Name)] = true
+					publicDeclarations[strings.ToLower(x.Name)] = append(publicDeclarations[strings.ToLower(x.Name)], x)
 				}
 			}
 			if bytes.Contains(b, []byte{0}) {
@@ -527,12 +529,26 @@ func CheckWithConstants(w *project.Workspace, constants map[string]any) (map[str
 					if i := strings.LastIndex(cb, "."); i >= 0 {
 						cb = cb[i+1:]
 					}
+					expectedDeclaration, expectedKnown := office.RibbonCallbackDeclaration(s.Name.Local, a.Name.Local, a.Value)
 					if !byName[cb] {
 						diagnostic := map[string]any{"severity": "warning", "file": n, "message": "callback not lexically found: " + a.Value + "; dynamic/external routing needs native verification", "callback": a.Value, "control": s.Name.Local, "control_id": s.Attribute("", "id"), "attribute": a.Name.Local, "xml_start": s.Start}
-						if declaration, known := office.RibbonCallbackDeclaration(s.Name.Local, a.Name.Local, a.Value); known {
-							diagnostic["expected_declaration"] = declaration
+						if expectedKnown {
+							diagnostic["expected_declaration"] = expectedDeclaration
 						}
 						diagnostics = append(diagnostics, diagnostic)
+					} else if expectedKnown && len(publicDeclarations[cb]) == 1 {
+						actual := publicDeclarations[cb][0]
+						if mismatch := ribbonDeclarationMismatch(expectedDeclaration, actual); mismatch != "" {
+							diagnostics = append(diagnostics, map[string]any{
+								"severity": "warning", "file": n, "line": actual.Line,
+								"message": "Ribbon callback declaration mismatch: " + mismatch,
+								"engine":  "Ribbon callback declaration shape", "callback": a.Value,
+								"control": s.Name.Local, "control_id": s.Attribute("", "id"),
+								"attribute": a.Name.Local, "xml_start": s.Start,
+								"expected_declaration": expectedDeclaration,
+								"actual_declaration":   actual.Declaration, "vba_module": actual.Module,
+							})
+						}
 					}
 				}
 			}
@@ -545,5 +561,5 @@ func CheckWithConstants(w *project.Workspace, constants map[string]any) (map[str
 		return symbols[i].Module < symbols[j].Module
 	})
 	inventory := CheckInventory(w.Root, files, &diagnostics)
-	return map[string]any{"symbols": symbols, "diagnostics": diagnostics, "compilation_constants": constants, "syntax_modules_parsed": parsedModules, "syntax_modules_skipped": skippedModules, "vba_compiled": false, "word_executed": false, "inventory": inventory, "coverage": "Rubberduck VBA syntax with conditional preprocessing, lexical symbols, XML syntax, Windows RibbonX XSD validation, duplicate IDs and unresolved callback warnings; not a VBA compiler or complete callback/idMso checker"}, nil
+	return map[string]any{"symbols": symbols, "diagnostics": diagnostics, "compilation_constants": constants, "syntax_modules_parsed": parsedModules, "syntax_modules_skipped": skippedModules, "vba_compiled": false, "word_executed": false, "inventory": inventory, "coverage": "Rubberduck VBA syntax with conditional preprocessing, lexical symbols, XML syntax, Windows RibbonX XSD validation, duplicate IDs, callback declaration-shape checks and unresolved callback warnings; not a VBA compiler or complete callback/idMso checker"}, nil
 }

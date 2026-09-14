@@ -14,7 +14,7 @@ XML or establish effective formatting/layout fidelity.
 |---|---|
 | Native Windows authoring and execution | Actual Word compile, VBA runtime, nested persisted forms, Ribbon callbacks, context menu, template hotkey, document contents and saved parts passed. These fixtures do not prove every possible macro. |
 | Forms and custom ActiveX | Common controls, Frame, MultiPage and Page are implemented. Unknown binary data is preserved; unsupported edits fail. Third-party controls and dependencies are not universally supported or bundled. |
-| Ribbon verification | Embedded 2007/2010 XSD validation on Windows, duplicate IDs and lexical callback checks, plus actual tested callbacks. Built-in idMso existence and all callback type signatures are not fully checked. |
+| Ribbon verification | Embedded 2007/2010 XSD validation on Windows, duplicate IDs, callback-name/declaration-shape checks, and actual tested callbacks. Built-in idMso existence and every Office callback type rule are not fully checked. |
 | Native page/UI appearance | Actual Word page renders and owned-window captures have been visually reviewed. Agents must inspect their own outputs; screenshot generation alone does not establish good layout. |
 | UI automation | Named selectors, bounded waits, MSAA/UI Automation and separate async macro/UI lanes. No universal owner-drawn gesture, drag or file-picker support. |
 | Error diagnostics | Scratch error locations, automatic paused module/line capture and reset for recognized English VBA runtime-error dialogs, compiler observations, retained failed candidates and owned-window/XML evidence. Native Call Stack frames and bounded VBE Immediate/locals probes are available for paused frames; symbols Word cannot expose remain individually unavailable. |

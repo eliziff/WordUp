@@ -79,6 +79,45 @@ func TestRibbonDiagnosticsReportIncompatibleCallbackReuse(t *testing.T) {
 	t.Fatal("missing incompatible Ribbon callback diagnostic", r["diagnostics"])
 }
 
+func TestRibbonDiagnosticsCheckCallbackDeclarationShape(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "workspace")
+	if _, err := project.New("RibbonDeclarationCheck", root); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "vba", "Callbacks.bas"), []byte("Attribute VB_Name = \"Callbacks\"\nOption Explicit\nPublic Function BadAction(control As String) As Boolean\n    BadAction = True\nEnd Function\nPublic Sub WrongType(control As String)\nEnd Sub\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	data := `<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui"><ribbon><tabs><tab id="tab"><group id="group"><button id="bad" onAction="BadAction"/><button id="wrong-type" onAction="WrongType"/></group></tab></tabs></ribbon></customUI>`
+	if err := os.WriteFile(filepath.Join(root, "package", "callbacks.xml"), []byte(data), 0600); err != nil {
+		t.Fatal(err)
+	}
+	w, err := project.Open(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r, err := Check(w)
+	if err != nil {
+		t.Fatal(err)
+	}
+	kindMismatch, typeMismatch := false, false
+	for _, diagnostic := range r["diagnostics"].([]map[string]any) {
+		if diagnostic["engine"] != "Ribbon callback declaration shape" {
+			continue
+		}
+		message := diagnostic["message"].(string)
+		if diagnostic["callback"] == "BadAction" && strings.Contains(message, "must be Public Sub") {
+			kindMismatch = true
+		}
+		if diagnostic["callback"] == "WrongType" && strings.Contains(message, "expects IRibbonControl") {
+			typeMismatch = true
+		}
+	}
+	if kindMismatch && typeMismatch {
+		return
+	}
+	t.Fatalf("missing callback declaration shape diagnostics (kind=%v type=%v): %v", kindMismatch, typeMismatch, r["diagnostics"])
+}
+
 func TestParagraphSourceLocationsAndNestedText(t *testing.T) {
 	xml := `<w:document xmlns:w="` + office.W + `" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:x="urn:foreign"><w:body><w:p w14:paraId="1234ABCD"><w:pPr><w:pStyle w:val="Title"/><w:tabs><w:tab w:val="left" w:pos="720"/></w:tabs><w:rPr><w:i/></w:rPr></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Author</w:t><w:tab/><w:t>Name</w:t><w:br/><w:footnoteReference w:id="7"/><x:t>not Word text</x:t><w:drawing><w:txbxContent><w:p><w:pPr><w:pStyle w:val="Textbox"/></w:pPr><w:r><w:t>Nested</w:t></w:r></w:p></w:txbxContent></w:drawing></w:r></w:p><w:p><w:r><w:t>Body &amp; text</w:t></w:r></w:p></w:body></w:document>`
 	p := office.BlankPackage()

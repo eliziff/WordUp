@@ -1,6 +1,7 @@
 package inspect
 
 import (
+	"fmt"
 	"os"
 	pathpkg "path"
 	"regexp"
@@ -10,6 +11,78 @@ import (
 	"github.com/eliziff/WordUp/internal/office"
 	"github.com/eliziff/WordUp/internal/project"
 )
+
+func declarationParameters(declaration string) []string {
+	open, close := strings.IndexByte(declaration, '('), strings.LastIndexByte(declaration, ')')
+	if open < 0 || close <= open {
+		return nil
+	}
+	body := declaration[open+1 : close]
+	if strings.TrimSpace(body) == "" {
+		return []string{}
+	}
+	parameters := []string{}
+	start, depth := 0, 0
+	for i, r := range body {
+		switch r {
+		case '(':
+			depth++
+		case ')':
+			if depth > 0 {
+				depth--
+			}
+		case ',':
+			if depth == 0 {
+				parameters = append(parameters, strings.TrimSpace(body[start:i]))
+				start = i + 1
+			}
+		}
+	}
+	return append(parameters, strings.TrimSpace(body[start:]))
+}
+
+func parameterType(parameter string) string {
+	parameter = strings.TrimSpace(strings.SplitN(parameter, "=", 2)[0])
+	for {
+		lower := strings.ToLower(parameter)
+		removed := false
+		for _, prefix := range []string{"optional ", "byval ", "byref ", "paramarray "} {
+			if strings.HasPrefix(lower, prefix) {
+				parameter = strings.TrimSpace(parameter[len(prefix):])
+				removed = true
+				break
+			}
+		}
+		if !removed {
+			break
+		}
+	}
+	lower := strings.ToLower(parameter)
+	if at := strings.LastIndex(lower, " as "); at >= 0 {
+		return strings.TrimSpace(parameter[at+4:])
+	}
+	return ""
+}
+
+func ribbonDeclarationMismatch(expected string, actual Symbol) string {
+	if !strings.EqualFold(actual.Kind, "Sub") {
+		return fmt.Sprintf("declared as %s; Ribbon callbacks must be Public Sub", actual.Kind)
+	}
+	want, got := declarationParameters(expected), declarationParameters(actual.Declaration)
+	if len(want) != len(got) {
+		return fmt.Sprintf("expects %d parameters but declaration has %d", len(want), len(got))
+	}
+	for i := range want {
+		wantType, gotType := parameterType(want[i]), parameterType(got[i])
+		// Some Office callbacks intentionally leave the ByRef return value
+		// untyped. Treat that slot as a wildcard while still catching a
+		// concrete control/flag/index type mismatch.
+		if wantType != "" && gotType != "" && !strings.EqualFold(wantType, gotType) {
+			return fmt.Sprintf("parameter %d expects %s but declaration uses %s", i+1, wantType, gotType)
+		}
+	}
+	return ""
+}
 
 // These are the event suffixes Word exposes on the standard MSForms controls
 // and UserForm itself. The inventory is deliberately lexical: native compile
