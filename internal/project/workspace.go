@@ -72,6 +72,7 @@ type Workspace struct {
 type fileStamp struct {
 	Size       int64
 	ModifiedNS int64
+	Hash       string
 }
 
 type buildMemo struct {
@@ -485,11 +486,16 @@ func Fingerprint(files map[string][]byte) string {
 func sourceStamps(root string) (map[string]fileStamp, error) {
 	result := map[string]fileStamp{}
 	for _, rel := range []string{"project.json", ".wordwright/base.opc", ".wordwright/index.json"} {
-		info, err := os.Stat(filepath.Join(root, filepath.FromSlash(rel)))
+		path := filepath.Join(root, filepath.FromSlash(rel))
+		info, err := os.Stat(path)
 		if err != nil {
 			return nil, err
 		}
-		result[rel] = fileStamp{Size: info.Size(), ModifiedNS: info.ModTime().UnixNano()}
+		hash, err := fileHash(path)
+		if err != nil {
+			return nil, err
+		}
+		result[rel] = fileStamp{Size: info.Size(), ModifiedNS: info.ModTime().UnixNano(), Hash: hash}
 	}
 	for _, top := range sourceDirectories {
 		base := filepath.Join(root, top)
@@ -512,7 +518,11 @@ func sourceStamps(root string) (map[string]fileStamp, error) {
 				if infoErr != nil {
 					return infoErr
 				}
-				result[filepath.ToSlash(rel)] = fileStamp{Size: info.Size(), ModifiedNS: info.ModTime().UnixNano()}
+				hash, hashErr := fileHash(path)
+				if hashErr != nil {
+					return hashErr
+				}
+				result[filepath.ToSlash(rel)] = fileStamp{Size: info.Size(), ModifiedNS: info.ModTime().UnixNano(), Hash: hash}
 			}
 			return nil
 		})

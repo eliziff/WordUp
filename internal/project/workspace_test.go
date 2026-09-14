@@ -84,6 +84,33 @@ func TestSourceBuildCacheAndTamper(t *testing.T) {
 	if err != nil || !r.Cached {
 		t.Fatalf("cache miss: %v", err)
 	}
+	const sourcePath = "vba/Answer.bas"
+	sourceInfo, err := os.Stat(filepath.Join(w.Root, filepath.FromSlash(sourcePath)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	originalSource, err := Read(w.Root, sourcePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	mutatedSource := append([]byte(nil), originalSource...)
+	mutatedSource[0] = 'o'
+	if err = os.WriteFile(filepath.Join(w.Root, filepath.FromSlash(sourcePath)), mutatedSource, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.Chtimes(filepath.Join(w.Root, filepath.FromSlash(sourcePath)), sourceInfo.ModTime(), sourceInfo.ModTime()); err != nil {
+		t.Fatal(err)
+	}
+	r, err = w.Build("")
+	if err != nil || r.Cached {
+		t.Fatalf("trusted same-size source edit with restored timestamp: %v", err)
+	}
+	if err = os.WriteFile(filepath.Join(w.Root, filepath.FromSlash(sourcePath)), originalSource, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.Chtimes(filepath.Join(w.Root, filepath.FromSlash(sourcePath)), sourceInfo.ModTime(), sourceInfo.ModTime()); err != nil {
+		t.Fatal(err)
+	}
 	r.ToolVersion = "older-writer"
 	if err = Write(w.Root, "reports/build.json", JSON(r), ""); err != nil {
 		t.Fatal(err)
