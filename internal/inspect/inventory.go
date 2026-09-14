@@ -404,9 +404,11 @@ func installedComponentInventory(root string, diagnostics *[]map[string]any) []m
 func validateFormDesigns(files map[string][]byte, diagnostics *[]map[string]any) {
 	sources := vbaSourceFiles(files)
 	paths := make([]string, 0)
+	designs := map[string]string{}
 	for path := range files {
 		if strings.HasPrefix(path, "forms/") && strings.EqualFold(pathpkg.Ext(path), ".json") {
 			paths = append(paths, path)
+			designs[strings.ToLower(strings.TrimSuffix(pathpkg.Base(path), pathpkg.Ext(path)))] = path
 		}
 	}
 	sort.Strings(paths)
@@ -434,6 +436,24 @@ func validateFormDesigns(files map[string][]byte, diagnostics *[]map[string]any)
 				"expected_form": expected,
 			})
 		}
+	}
+	// A form module is executable source, but its persisted designer is a
+	// separate input. New forms cannot be serialized without that design. An
+	// imported baseline may still carry an opaque existing form stream, so this
+	// is a warning rather than a claim that every build must fail.
+	for source, path := range sources {
+		if !strings.EqualFold(pathpkg.Ext(path), ".vba") {
+			continue
+		}
+		if _, ok := designs[strings.ToLower(source)]; ok {
+			continue
+		}
+		formName := strings.TrimSuffix(pathpkg.Base(path), pathpkg.Ext(path))
+		*diagnostics = append(*diagnostics, map[string]any{
+			"severity": "warning", "file": path,
+			"message": "form source has no matching persistent design; new forms require forms/" + formName + ".json",
+			"form": formName, "expected_design": "forms/" + formName + ".json",
+		})
 	}
 }
 
