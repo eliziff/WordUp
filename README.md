@@ -114,14 +114,33 @@ The complete signed Windows suite recorded 2.62 seconds warm and 4.58 seconds in
 
 ## Developing the harness
 
-End users do not need Go. Building the source requires Go 1.23+:
+End users do not need Go. On the Windows development machine, use the pinned
+wrapper so builds share the repository's cache and toolchain:
 
 ```text
-go test ./internal/... ./cmd/...
-go test -race ./internal/... ./cmd/...
-go build -trimpath -ldflags="-s -w" -o wordup ./cmd/wordup
+.\tools\go.ps1 test ./internal/... ./cmd/...
+.\tools\go.ps1 test -race ./internal/... ./cmd/...
+.\tools\go.ps1 build -trimpath -ldflags="-s -w" -o bin/wordup.exe ./cmd/wordup
 ```
 
-The core uses the pinned ANTLR Go runtime and its transitive dependencies in `go.mod`/`go.sum`. `scripts/build.sh` builds the standalone platform executables; it does not package optional Windows helpers. Open XML SDK validation and FlaUI patterns require the `office-tools` bundle built by `tools/office-bridge/build.ps1`; independent binary inspection requires the `wordup-oletools` bundle built by `tools/oletools/build.ps1`. Keep those folders beside the executable in a complete Windows distribution. End users do not need Go or Python to use the packaged builds. Private development specimens are excluded from the generic source package; setting `WORDUP_SPECIMEN` to a specimen path enables the optional specimen tests.
+The race command additionally requires a C compiler. Cross-platform source
+builds use `scripts/build.sh`; it does not package optional Windows helpers.
+To stage a Windows package, build the matching executable and select its
+platform explicitly:
+
+```text
+powershell -NoProfile -File scripts/package-windows.ps1 -Platform windows/amd64 -Executable bin/wordup.exe -Destination dist/windows-x64
+powershell -NoProfile -File scripts/package-windows.ps1 -Platform windows/arm64 -Executable dist/wordup-windows-arm64.exe -Destination dist/windows-arm64
+```
+
+The packager rejects an executable whose PE architecture does not match the
+declared platform. Open XML SDK validation and FlaUI patterns require the
+`office-tools` bundle built by `tools/office-bridge/build.ps1`; independent
+binary inspection requires the `wordup-oletools` bundle built by
+`tools/oletools/build.ps1`. Keep those folders beside the executable in a
+complete Windows distribution. End users do not need Go or Python to use the
+packaged builds. Private development specimens are excluded from the generic
+source package; setting `WORDUP_SPECIMEN` to a specimen path enables the
+optional specimen tests.
 
 Read `docs/API.md`, `docs/LIMITS.md`, `VALIDATION.md`, and the source. This preview is not signed or notarized. Do not circumvent OS security warnings or deploy an unverified candidate over a working template.

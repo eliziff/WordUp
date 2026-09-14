@@ -1,4 +1,8 @@
-# Windows validation for WordUp 0.3.0
+# Historical Windows validation
+
+This page preserves the recorded 0.3.0 native evidence. Current 0.4.0
+acceptance is indexed in [CURRENT-ACCEPTANCE.md](CURRENT-ACCEPTANCE.md); the
+commands below use the pinned Windows toolchain wrapper.
 
 Real Microsoft Word was exercised on Windows x64 on September 12, 2026. All processes launched for this work ran Below Normal. The supplied Mac backend was not executed.
 
@@ -26,10 +30,10 @@ Policy tests also cover interrupted replacement before the installed-state write
 ## Reproduce
 
 ```powershell
-go test -p 2 ./internal/... ./cmd/...
+.\tools\go.ps1 test -p 2 ./internal/... ./cmd/...
 $env:WORDUP_NATIVE_TEST = '1'
-go test -p 2 ./internal/verify -run '^TestNativeCompletion$' -count=1 -v
-go test -p 2 ./internal/deploy -run '^TestNativeLoginRecovery$' -count=1 -v
+.\tools\go.ps1 test -p 2 ./internal/verify -run '^TestNativeCompletion$' -count=1 -v
+.\tools\go.ps1 test -p 2 ./internal/deploy -run '^TestNativeLoginRecovery$' -count=1 -v
 ```
 
 Native tests require usable installed Word. `WORDUP_SIGNING_TEST=1` enables the separate signing test when SignTool and Office SIP are installed. `TestNativeFeedback` is the broader deliberate-error/isolation suite; it is opt-in and substantially longer than ordinary acceptance.
