@@ -265,7 +265,7 @@ func Source(file, src string, pr Profile) []Diagnostic {
 	return out
 }
 func Review(w *project.Workspace) (map[string]any, error) {
-	files, e := w.SourceFiles()
+	files, e := w.SourceFilesCached()
 	if e != nil {
 		return nil, e
 	}

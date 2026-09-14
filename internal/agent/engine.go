@@ -662,7 +662,7 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 	case "build", "compile", "check", "compat":
 		var w *project.Workspace
 		var err error
-		if method == "build" || method == "compile" || method == "check" {
+		if method == "build" || method == "compile" || method == "check" || method == "compat" {
 			w, err = e.openWorkspace()
 		} else {
 			w, err = project.Open(e.Root)

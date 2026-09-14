@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/eliziff/WordUp/internal/compat"
 	"github.com/eliziff/WordUp/internal/office"
 	"github.com/eliziff/WordUp/internal/project"
 )
@@ -106,6 +107,51 @@ func TestResidentFilesAndSearchRefreshSource(t *testing.T) {
 	}
 	if total, ok := result.(map[string]any)["total"].(int); !ok || total != 1 {
 		t.Fatalf("source edit did not refresh files/search snapshot: %#v", result)
+	}
+}
+
+func TestResidentCompatRefreshesSource(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "source")
+	if _, err := project.New("ResidentCompat", root); err != nil {
+		t.Fatal(err)
+	}
+	e := &Engine{Root: root}
+	defer e.Close()
+	if _, err := e.Call(context.Background(), "compat", Parameters{}); err != nil {
+		t.Fatal(err)
+	}
+	workspace := e.workspace
+	if workspace == nil {
+		t.Fatal("compat did not retain its resident workspace")
+	}
+	if _, err := e.Call(context.Background(), "compat", Parameters{}); err != nil {
+		t.Fatal(err)
+	}
+	if e.workspace != workspace {
+		t.Fatal("unchanged compat reopened the workspace")
+	}
+	if err := project.Write(root, "vba/WindowsOnly.bas", []byte("Attribute VB_Name = \"WindowsOnly\"\nPrivate Declare Function Beep Lib \"kernel32\" () As Long\n"), ""); err != nil {
+		t.Fatal(err)
+	}
+	result, err := e.Call(context.Background(), "compat", Parameters{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if e.workspace != workspace {
+		t.Fatal("source edit discarded the resident compat workspace")
+	}
+	diagnostics, ok := result.(map[string]any)["diagnostics"].([]compat.Diagnostic)
+	if !ok {
+		t.Fatalf("compat diagnostics have unexpected type: %#v", result)
+	}
+	found := false
+	for _, diagnostic := range diagnostics {
+		if diagnostic.File == "vba/WindowsOnly.bas" && diagnostic.Rule == "declare-ptrsafe" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("source edit did not refresh compat snapshot: %#v", result)
 	}
 }
 

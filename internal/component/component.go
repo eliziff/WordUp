@@ -614,6 +614,15 @@ func rejectIdentifierCollisions(root, componentID string, files []File) error {
 		if !strings.HasPrefix(strings.ToLower(filepath.ToSlash(file.Path)), "vba/") {
 			continue
 		}
+		base := filepath.Base(file.Path)
+		ext := filepath.Ext(base)
+		expectedModule := strings.TrimSuffix(base, ext)
+		if !office.ValidIdentifier(expectedModule) {
+			return fmt.Errorf("component %s source %s derives invalid VBA module name %q", componentID, file.Path, expectedModule)
+		}
+		if declared, line := vbaModuleName(strings.Split(strings.ReplaceAll(file.Text, "\r\n", "\n"), "\n")); declared != "" && !strings.EqualFold(declared, expectedModule) {
+			return fmt.Errorf("component %s VB_Name %q in %s:%d does not match module filename %q", componentID, declared, file.Path, line, expectedModule)
+		}
 		for _, symbol := range exportedSymbols(file.Path, file.Text) {
 			key := strings.ToLower(symbol.Name)
 			if prior, ok := seen[key]; ok && !compatiblePropertyAccessors(prior.Kind, symbol.Kind) {
@@ -680,6 +689,17 @@ func exportedSymbols(path, source string) []exportedSymbol {
 	result := []exportedSymbol{}
 	if name, line := vbaModuleName(lines); name != "" {
 		result = append(result, exportedSymbol{Name: name, Kind: "module", Path: path, Line: line})
+	} else {
+		// VBA.Rewrite derives a missing VB_Name from the source filename. Use
+		// that same rule during component preflight so a path-different module
+		// collision is rejected before installation rather than at build time.
+		ext := strings.ToLower(filepath.Ext(path))
+		if ext == ".bas" || ext == ".cls" || ext == ".vba" {
+			name := strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
+			if office.ValidIdentifier(name) {
+				result = append(result, exportedSymbol{Name: name, Kind: "module", Path: path, Line: 1})
+			}
+		}
 	}
 	inProcedure := false
 	for index, raw := range lines {

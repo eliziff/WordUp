@@ -121,6 +121,30 @@ func TestInstallationRejectsModuleNameCollision(t *testing.T) {
 	}
 }
 
+func TestInstallationRejectsDerivedModuleNameCollision(t *testing.T) {
+	root := t.TempDir()
+	if err := project.Write(root, "vba/WordUpSafeEdit.cls", []byte("Public Sub ExistingMacro()\nEnd Sub\n"), ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Add(root, "operation.safe-edit"); err == nil || !strings.Contains(err.Error(), `module name "WordUpSafeEdit"`) || !strings.Contains(err.Error(), "WordUpSafeEdit.cls:1") {
+		t.Fatalf("derived module collision was not precise: %v", err)
+	}
+	if _, err := project.Read(root, "vba/WordUpSafeEdit.bas"); !os.IsNotExist(err) {
+		t.Fatalf("component source was written after derived module collision: %v", err)
+	}
+}
+
+func TestInstallationRejectsModuleNameMismatch(t *testing.T) {
+	root := t.TempDir()
+	m := Manifest{ID: "mismatch", Version: "1", Files: []File{{Path: "vba/Expected.bas", Text: "Attribute VB_Name = \"Other\"\nPublic Sub Run()\nEnd Sub\n"}}}
+	if _, err := install(root, m); err == nil || !strings.Contains(err.Error(), `VB_Name "Other"`) || !strings.Contains(err.Error(), `Expected.bas:1`) {
+		t.Fatalf("module name mismatch was not rejected precisely: %v", err)
+	}
+	if _, err := project.Read(root, "vba/Expected.bas"); !os.IsNotExist(err) {
+		t.Fatalf("mismatched component source was written: %v", err)
+	}
+}
+
 func TestBundledVBADeclarations(t *testing.T) {
 	for _, manifest := range builtin() {
 		for _, file := range manifest.Files {
