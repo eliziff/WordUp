@@ -176,6 +176,42 @@ func textObservationsPart(p *office.Package, part string) ([]map[string]any, err
 		fields := []map[string]any{}
 		hyperlinks := []map[string]any{}
 		bookmarks := []map[string]any{}
+		artwork := []map[string]any{}
+		attachArtwork := func(x office.XMLSpan) {
+			if x.Name.Local == "drawing" || x.Name.Local == "pict" {
+				artwork = append(artwork, map[string]any{"kind": x.Name.Local, "xml_start": x.Start, "xml_end": x.End})
+				return
+			}
+			for i := len(artwork) - 1; i >= 0; i-- {
+				if artwork[i]["xml_start"].(int) >= x.Start || artwork[i]["xml_end"].(int) <= x.End {
+					continue
+				}
+				item := artwork[i]
+				switch x.Name.Local {
+				case "extent":
+					if value := x.Attribute("", "cx"); value != "" {
+						item["extent_cx"] = value
+					}
+					if value := x.Attribute("", "cy"); value != "" {
+						item["extent_cy"] = value
+					}
+				case "docPr":
+					for _, name := range []string{"id", "name", "descr", "title"} {
+						if value := x.Attribute("", name); value != "" {
+							item[name] = value
+						}
+					}
+				case "imagedata", "blip":
+					for _, name := range []string{"id", "embed", "link"} {
+						if value := x.Attribute(office.R, name); value != "" {
+							item["relationship_id"] = value
+							break
+						}
+					}
+				}
+				break
+			}
+		}
 		nestedEnd := 0
 		propertiesEnd := 0
 		paragraphMarkEnd := 0
@@ -186,7 +222,11 @@ func textObservationsPart(p *office.Package, part string) ([]map[string]any, err
 			if x.Start <= s.Start || x.End >= s.End {
 				continue
 			}
-			if x.Start < nestedEnd || x.Name.Space != office.W {
+			if x.Start < nestedEnd {
+				continue
+			}
+			attachArtwork(x)
+			if x.Name.Space != office.W {
 				continue
 			}
 			if x.Name.Local == "p" {
@@ -407,6 +447,9 @@ func textObservationsPart(p *office.Package, part string) ([]map[string]any, err
 		}
 		if len(bookmarks) > 0 {
 			observation["bookmark_evidence"] = bookmarks
+		}
+		if len(artwork) > 0 {
+			observation["artwork_evidence"] = artwork
 		}
 		if len(paragraphMarkFormatting) > 0 {
 			observation["paragraph_mark_formatting"] = paragraphMarkFormatting

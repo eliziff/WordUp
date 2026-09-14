@@ -198,6 +198,19 @@ func TestTextObservationsKeepFieldLinkAndBookmarkEvidenceCompact(t *testing.T) {
 	}
 }
 
+func TestTextObservationsKeepArtworkEvidenceSourceLocated(t *testing.T) {
+	p := office.BlankPackage()
+	p.Files["word/document.xml"] = []byte(`<w:document xmlns:w="` + office.W + `" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture" xmlns:r="` + office.R + `"><w:body><w:p><w:r><w:drawing><wp:inline><wp:extent cx="123" cy="456"/><wp:docPr id="4" name="Figure 4" descr="Figure alt"/><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:blipFill><a:blip r:embed="rId9"/></pic:blipFill></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p></w:body></w:document>`)
+	rows, err := TextObservations(p)
+	if err != nil || len(rows) != 1 {
+		t.Fatalf("artwork observations: %v %v", rows, err)
+	}
+	artwork, ok := rows[0]["artwork_evidence"].([]map[string]any)
+	if !ok || len(artwork) != 1 || artwork[0]["kind"] != "drawing" || artwork[0]["relationship_id"] != "rId9" || artwork[0]["extent_cx"] != "123" || artwork[0]["extent_cy"] != "456" || artwork[0]["descr"] != "Figure alt" {
+		t.Fatalf("artwork evidence missing: %#v", rows[0]["artwork_evidence"])
+	}
+}
+
 func TestStoryObservationsKeepPartQualifiedLocations(t *testing.T) {
 	p := office.BlankPackage()
 	p.Files["word/header1.xml"] = []byte(`<w:hdr xmlns:w="` + office.W + `"><w:p w14:paraId="ABC" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml"><w:pPr><w:pStyle w:val="Header"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Aptos"/><w:sz w:val="18"/></w:rPr><w:t>Running head</w:t></w:r></w:p></w:hdr>`)
