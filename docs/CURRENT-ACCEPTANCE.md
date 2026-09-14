@@ -19,6 +19,8 @@ The latest offline structure pass resolved all 109 retained DOCX submissions in 
 
 The current Windows x64 and ARM64 fidelity-36 package candidates each contain 252 manifest-hashed files with zero hash omissions, zero debug-symbol files and zero hits for the developer's absolute workspace path. The release builder now disables analysis-helper debug symbols and rejects any staged PDB, preserving this as a packaging invariant rather than a one-off audit.
 
+The exact x64 fidelity-36 candidate's disposable `--execute selftest` was attempted and failed in 278 ms with `native_session_restricted`: this Windows logon session refuses hidden Word creation (`CreateProcessW`: logon session does not exist). No native pass is claimed until that host boundary is cleared.
+
 ## Remaining completion gates
 
 The Rizzuto comment discrepancy is fixed by restoring character-collection traversal; tracked-formatting visibility is preserved explicitly. The selected-options baseline passes (`workspaces/alr-baseline/reports/full-rizzuto-with-alignment.json`, 67.914 s), and the complete output comparison passes with `equal=true`, `byte_identical=false`. Reopening saved Flat OPC was rejected as a shortcut because Word added font metadata; the final baseline ran the unchanged original on the original input instead.
