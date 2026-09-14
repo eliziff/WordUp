@@ -19,6 +19,9 @@ import (
 
 func textElement(b []byte) (string, error) {
 	start, end := bytes.IndexByte(b, '>'), bytes.LastIndexByte(b, '<')
+	if start >= 0 && bytes.HasSuffix(bytes.TrimSpace(b[:start]), []byte("/")) {
+		return "", nil
+	}
 	if start < 0 || end <= start {
 		return "", fmt.Errorf("invalid text element")
 	}

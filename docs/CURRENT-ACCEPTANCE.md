@@ -17,11 +17,13 @@ Repository-wide `go test -p 2 ./...` passed on 2026-09-13 after automatic XML sn
 
 The latest offline structure pass resolved all 109 retained DOCX submissions in one warm process (`build/structure-corpus-109-summary.json`): median resolver time was 48.9 ms, maximum 565.3 ms, and total engine time 5.98 s. The 30-document model-authored silver comparison covered 8,060 paragraphs in 1.17 s; evidence-aware ambiguity mismatches are zero, while 38 contradiction and 1,401 role/level/parent disagreements remain explicitly reported. This is corpus evidence and a repair queue, not a claim of generic or publication-specific parity.
 
-The current Windows x64 and ARM64 fidelity-36 package candidates each contain 252 manifest-hashed files with zero hash omissions, zero debug-symbol files and zero hits for the developer's absolute workspace path. The release builder now disables analysis-helper debug symbols and rejects any staged PDB, preserving this as a packaging invariant rather than a one-off audit.
+The 109-document formatting/evidence sweep initially exposed one real parser defect: an empty Word text element (`<w:t/>`) in `61-3 Spadotto--f38b50fc1cc0.docx` was rejected as invalid. `textElement` now treats valid self-closing text/instruction elements as empty; the fidelity-37 x64 candidate re-ran all 109 documents with zero errors (22,789 paragraph observations; 38.8 ms median, 170.8 ms maximum, 4.53 s engine time).
 
-The exact x64 fidelity-36 candidate's disposable `--execute selftest` was attempted and failed in 278 ms with `native_session_restricted`: this Windows logon session refuses hidden Word creation (`CreateProcessW`: logon session does not exist). No native pass is claimed until that host boundary is cleared.
+The current Windows x64 and ARM64 fidelity-37 package candidates each contain 252 manifest-hashed files with zero hash omissions, zero debug-symbol files and zero hits for the developer's absolute workspace path. The release builder now disables analysis-helper debug symbols and rejects any staged PDB, preserving this as a packaging invariant rather than a one-off audit.
 
-The same package passed an outside-repository package-only smoke run: `new`, `check` and uncached `build` all returned zero, with 68.1 ms check time, 24.1 ms build time, valid OPC output, and `vba_compiled=false` correctly retained because Word was not executed.
+The exact x64 fidelity-37 candidate's disposable `--execute selftest` was attempted and failed in 195 ms with `native_session_restricted`: this Windows logon session refuses hidden Word creation (`CreateProcessW`: logon session does not exist). No native pass is claimed until that host boundary is cleared.
+
+The same package passed an outside-repository package-only smoke run: `new`, `check` and uncached `build` all returned zero, with valid OPC output, 16.2 ms build time, and `vba_compiled=false` correctly retained because Word was not executed.
 
 ## Remaining completion gates
 
