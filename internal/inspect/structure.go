@@ -275,9 +275,12 @@ func StructureReference(file string) (map[string]any, error) {
 	if err != nil {
 		return nil, err
 	}
-	styles, err := office.XMLSpans(p.Files["word/styles.xml"])
-	if err != nil {
-		return nil, err
+	var styles []office.XMLSpan
+	if rawStyles := p.Files["word/styles.xml"]; len(rawStyles) > 0 {
+		styles, err = office.XMLSpans(rawStyles)
+		if err != nil {
+			return nil, err
+		}
 	}
 	numbering, err := numberingDefinitions(p)
 	if err != nil {

@@ -71,3 +71,26 @@ func TestStructureResolvesParagraphNumberingDefinition(t *testing.T) {
 		t.Fatalf("unresolved numbering evidence: %v", evidence)
 	}
 }
+
+func TestStructureReferenceAcceptsDocumentWithoutStylesPart(t *testing.T) {
+	p := office.BlankPackage()
+	delete(p.Files, "word/styles.xml")
+	p.Files[office.RelPart("word/document.xml")] = []byte(`<Relationships xmlns="` + office.RelNS + `"/>`)
+	p.Files["word/document.xml"] = []byte(`<w:document xmlns:w="` + office.W + `"><w:body><w:p><w:r><w:t>Body</w:t></w:r></w:p></w:body></w:document>`)
+	b, err := p.Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(t.TempDir(), "no-styles.docx")
+	if err = os.WriteFile(path, b, 0600); err != nil {
+		t.Fatal(err)
+	}
+	result, err := StructureReference(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rows := result["paragraphs"].([]map[string]any)
+	if len(rows) != 1 || rows[0]["text"] != "Body" {
+		t.Fatalf("document without styles was not inspected: %v", rows)
+	}
+}
