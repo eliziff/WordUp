@@ -183,7 +183,7 @@ Private Sub WU_ClassifyFrontMatter(ByRef result As Variant, ByVal count As Long,
         text = Trim$(CStr(result(i, WU_TEXT))): If Len(text) = 0 Or Len(text) > 240 Then GoTo NextFrontMatter
         style = LCase$(CStr(result(i, WU_STYLE)))
         isCentered = centered(i) Or InStr(style, "centred") > 0 Or InStr(style, "centered") > 0
-        titleStyle = (InStr(style, "document title") > 0 Or InStr(style, "heading title") > 0 Or Trim$(style) = "title")
+        titleStyle = ((WU_StyleToken(style, "document") And WU_StyleToken(style, "title")) Or (WU_StyleToken(style, "heading") And WU_StyleToken(style, "title")) Or Trim$(style) = "title")
         If Not titleSeen And (titleStyle Or (i = firstContent And (isCentered Or frontEmphasis(i)))) Then
             frontRoles(i) = "title": titleSeen = True
         ElseIf titleSeen And Not authorSeen And titleStyle Then
@@ -215,11 +215,11 @@ Private Function WU_SemanticRole(ByVal text As String, ByVal style As String, By
     If plain = "abstract" And level = 0 Then WU_SemanticRole = "abstract": Exit Function
     If plain = "contents" Or plain = "table of contents" Or context = "contents" Then WU_SemanticRole = "toc": Exit Function
     style = LCase$(style)
-    If InStr(style, "toc heading") > 0 Or InStr(style, "tocheading") > 0 Then WU_SemanticRole = "toc": Exit Function
-    If InStr(style, "quotation") > 0 Or InStr(style, "quote") > 0 Or InStr(style, "block text") > 0 Then WU_SemanticRole = "quotation": Exit Function
-    If InStr(style, "abstract") > 0 Then WU_SemanticRole = "abstract": Exit Function
-    If InStr(style, "author") > 0 Or InStr(style, "byline") > 0 Then WU_SemanticRole = "author": Exit Function
-    If InStr(style, "heading") = 0 And (InStr(style, "document title") > 0 Or Trim$(style) = "title" Or Trim$(style) = "title normal") Then WU_SemanticRole = "title"
+    If InStr(style, "tocheading") > 0 Or (WU_StyleToken(style, "toc") And WU_StyleToken(style, "heading")) Then WU_SemanticRole = "toc": Exit Function
+    If WU_StyleToken(style, "quotation") Or WU_StyleToken(style, "quote") Or (WU_StyleToken(style, "block") And WU_StyleToken(style, "text")) Then WU_SemanticRole = "quotation": Exit Function
+    If WU_StyleToken(style, "abstract") Then WU_SemanticRole = "abstract": Exit Function
+    If WU_StyleToken(style, "author") Or WU_StyleToken(style, "byline") Then WU_SemanticRole = "author": Exit Function
+    If Not WU_StyleToken(style, "heading") And ((WU_StyleToken(style, "document") And WU_StyleToken(style, "title")) Or Trim$(style) = "title" Or Trim$(style) = "title normal") Then WU_SemanticRole = "title"
 End Function
 
 ' Publication-specific copies may adjust evidence here. Do not apply styles here.

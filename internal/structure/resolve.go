@@ -210,7 +210,7 @@ func frontMatterRoles(rows []map[string]any) map[int]string {
 			continue
 		}
 		style := styleText(row)
-		if (hasNativeHeading(row) || headingLevelFromStyle(row) > 0) && !strings.Contains(style, "title") {
+		if (hasNativeHeading(row) || headingLevelFromStyle(row) > 0) && !strings.Contains(strings.ToLower(style), "title") {
 			limit = i
 			break
 		}
@@ -233,8 +233,10 @@ func frontMatterRoles(rows []map[string]any) map[int]string {
 			continue
 		}
 		style := styleText(row)
-		centered := strings.EqualFold(stringValue(row["paragraph_alignment"]), "center") || strings.Contains(style, "centred") || strings.Contains(style, "centered")
-		titleStyle := strings.Contains(style, "document title") || strings.Contains(style, "heading title") || strings.TrimSpace(style) == "title"
+		normalizedStyle := strings.ToLower(style)
+		centered := strings.EqualFold(stringValue(row["paragraph_alignment"]), "center") || strings.Contains(normalizedStyle, "centred") || strings.Contains(normalizedStyle, "centered")
+		titleStyle := (styleTokenPresent(style, "document") && styleTokenPresent(style, "title")) ||
+			(styleTokenPresent(style, "heading") && styleTokenPresent(style, "title")) || strings.EqualFold(strings.TrimSpace(style), "title")
 		if !titleSeen && len([]rune(text)) <= 240 && (titleStyle || i == firstContent && (centered || formattingSignal(row))) {
 			roles[i], titleSeen = "title", true
 			continue
@@ -259,7 +261,7 @@ func styleText(row map[string]any) string {
 	if names, ok := row["style_names"].([]string); ok {
 		parts = append(parts, names...)
 	}
-	return strings.ToLower(strings.Join(parts, " "))
+	return strings.Join(parts, " ")
 }
 
 func stringValue(value any) string {
@@ -306,16 +308,17 @@ func semanticRole(row map[string]any) string {
 		return "toc"
 	}
 	style := styleText(row)
+	normalizedStyle := strings.ToLower(style)
 	switch {
-	case strings.Contains(style, "toc heading"):
+	case strings.Contains(normalizedStyle, "tocheading") || (styleTokenPresent(style, "toc") && styleTokenPresent(style, "heading")):
 		return "toc"
-	case strings.Contains(style, "quotation") || strings.Contains(style, "quote") || strings.Contains(style, "block text"):
+	case styleTokenPresent(style, "quotation") || styleTokenPresent(style, "quote") || (styleTokenPresent(style, "block") && styleTokenPresent(style, "text")):
 		return "quotation"
-	case strings.Contains(style, "abstract"):
+	case styleTokenPresent(style, "abstract"):
 		return "abstract"
-	case strings.Contains(style, "author") || strings.Contains(style, "byline"):
+	case styleTokenPresent(style, "author") || styleTokenPresent(style, "byline"):
 		return "author"
-	case !strings.Contains(style, "heading") && (strings.Contains(style, "document title") || strings.TrimSpace(style) == "title normal"):
+	case !styleTokenPresent(style, "heading") && ((styleTokenPresent(style, "document") && styleTokenPresent(style, "title")) || strings.EqualFold(strings.TrimSpace(style), "title normal")):
 		return "title"
 	}
 	return ""
