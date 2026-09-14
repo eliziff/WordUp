@@ -606,11 +606,11 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		}
 		return map[string]any{"path": p.Path, "old_sha256": oldHash, "sha256": office.Hash(after), "bytes": len(after), "offset": p.Offset, "length": p.Length, "replacement_bytes": len(replacement)}, nil
 	case "files", "search":
-		w, err := project.Open(e.Root)
+		w, err := e.openWorkspace()
 		if err != nil {
 			return nil, err
 		}
-		files, err := w.SourceFiles()
+		files, err := w.SourceFilesCached()
 		if err != nil {
 			return nil, err
 		}
@@ -629,6 +629,12 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		}
 		total := 0
 		for _, n := range names {
+			// The component lock is an implementation record used by build and
+			// check, not a user source file exposed by the existing files/search
+			// contract.
+			if n == ".wordwright/components.json" {
+				continue
+			}
 			b := files[n]
 			if method == "files" {
 				total++

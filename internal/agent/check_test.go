@@ -74,6 +74,41 @@ func TestResidentProjectCheckRefreshesWorkspaceMetadata(t *testing.T) {
 	}
 }
 
+func TestResidentFilesAndSearchRefreshSource(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "source")
+	if _, err := project.New("ResidentFiles", root); err != nil {
+		t.Fatal(err)
+	}
+	e := &Engine{Root: root}
+	defer e.Close()
+	if _, err := e.Call(context.Background(), "files", Parameters{}); err != nil {
+		t.Fatal(err)
+	}
+	workspace := e.workspace
+	if workspace == nil {
+		t.Fatal("files did not retain its resident workspace")
+	}
+	if _, err := e.Call(context.Background(), "search", Parameters{Query: "ThisDocument"}); err != nil {
+		t.Fatal(err)
+	}
+	if e.workspace != workspace {
+		t.Fatal("unchanged search reopened the workspace")
+	}
+	if err := project.Write(root, "vba/Added.bas", []byte("Attribute VB_Name = \"Added\"\nPublic Sub AddedMacro()\nEnd Sub\n"), ""); err != nil {
+		t.Fatal(err)
+	}
+	result, err := e.Call(context.Background(), "search", Parameters{Query: "AddedMacro"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if e.workspace != workspace {
+		t.Fatal("source edit discarded the resident files/search workspace")
+	}
+	if total, ok := result.(map[string]any)["total"].(int); !ok || total != 1 {
+		t.Fatalf("source edit did not refresh files/search snapshot: %#v", result)
+	}
+}
+
 func projectJSONHash(b []byte) string {
 	// Keep this test independent of the agent's file-writing path while still
 	// exercising its optimistic-concurrency guard.
