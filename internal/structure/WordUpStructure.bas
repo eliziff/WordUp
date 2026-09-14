@@ -64,6 +64,7 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
             text = texts(i - 1): style = CStr(paragraph.Style)
             startPosition = starts(i - 1): endPosition = ends(i - 1)
         End If
+        context = "body": If hasTables Then If scope.Information(wdWithInTable) Then context = "table"
         marker = WU_ParseMarker(text): alternatives = WU_MarkerAlternatives(marker): label = vbNullString
         If i <= 64 And context = "body" And Len(Trim$(text)) > 0 Then
             If scope Is Nothing Then Set scope = paragraph.Range
@@ -74,7 +75,6 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
             If scope Is Nothing Then Set scope = paragraph.Range
             If scope.ListFormat.ListType <> wdListNoNumbering Then label = scope.ListFormat.ListString
         End If
-        context = "body": If hasTables Then If scope.Information(wdWithInTable) Then context = "table"
         score = 0: level = 0: evidence = vbNullString
         If context = "body" And Len(Trim$(text)) > 0 Then
             headingStyle = WU_HeadingStyle(style)
