@@ -169,6 +169,35 @@ func TestTrackedRevisionEvidenceDoesNotDuplicateText(t *testing.T) {
 	}
 }
 
+func TestTextObservationsKeepFieldLinkAndBookmarkEvidenceCompact(t *testing.T) {
+	p := office.BlankPackage()
+	p.Files["word/document.xml"] = []byte(`<w:document xmlns:w="` + office.W + `" xmlns:r="` + office.R + `"><w:body><w:p><w:bookmarkStart w:id="1" w:name="Cite"/><w:hyperlink r:id="rId5" w:anchor="Source"><w:r><w:t>citation</w:t></w:r></w:hyperlink><w:r><w:fldChar w:fldCharType="begin"/><w:instrText xml:space="preserve"> CITATION Source </w:instrText><w:fldChar w:fldCharType="separate"/><w:t>Source</w:t><w:fldChar w:fldCharType="end"/></w:r><w:bookmarkEnd w:id="1"/></w:p></w:body></w:document>`)
+	rows, err := TextObservations(p)
+	if err != nil || len(rows) != 1 {
+		t.Fatalf("field/link observations: %v %v", rows, err)
+	}
+	if rows[0]["text"] != "citationSource" {
+		t.Fatalf("displayed text changed: %#v", rows[0]["text"])
+	}
+	links, ok := rows[0]["hyperlink_evidence"].([]map[string]any)
+	if !ok || len(links) != 1 || links[0]["relationship_id"] != "rId5" || links[0]["anchor"] != "Source" {
+		t.Fatalf("link evidence missing: %#v", rows[0]["hyperlink_evidence"])
+	}
+	fields, ok := rows[0]["field_evidence"].([]map[string]any)
+	if !ok || len(fields) != 4 || fields[1]["instruction"] != " CITATION Source " || fields[0]["marker"] != "begin" || fields[3]["marker"] != "end" {
+		t.Fatalf("field evidence missing: %#v", rows[0]["field_evidence"])
+	}
+	bookmarks, ok := rows[0]["bookmark_evidence"].([]map[string]any)
+	if !ok || len(bookmarks) != 2 || bookmarks[0]["name"] != "Cite" || bookmarks[1]["kind"] != "bookmarkEnd" {
+		t.Fatalf("bookmark evidence missing: %#v", rows[0]["bookmark_evidence"])
+	}
+	for _, field := range fields {
+		if _, duplicated := field["text"]; duplicated {
+			t.Fatal("field evidence duplicated displayed text")
+		}
+	}
+}
+
 func TestStoryObservationsKeepPartQualifiedLocations(t *testing.T) {
 	p := office.BlankPackage()
 	p.Files["word/header1.xml"] = []byte(`<w:hdr xmlns:w="` + office.W + `"><w:p w14:paraId="ABC" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml"><w:pPr><w:pStyle w:val="Header"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Aptos"/><w:sz w:val="18"/></w:rPr><w:t>Running head</w:t></w:r></w:p></w:hdr>`)

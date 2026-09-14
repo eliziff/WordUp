@@ -173,6 +173,9 @@ func textObservationsPart(p *office.Package, part string) ([]map[string]any, err
 		runs := []map[string]any{}
 		references := []map[string]any{}
 		revisions := []map[string]any{}
+		fields := []map[string]any{}
+		hyperlinks := []map[string]any{}
+		bookmarks := []map[string]any{}
 		nestedEnd := 0
 		propertiesEnd := 0
 		paragraphMarkEnd := 0
@@ -216,6 +219,47 @@ func textObservationsPart(p *office.Package, part string) ([]map[string]any, err
 				}
 				revision["text_units"] = units
 				revisions = append(revisions, revision)
+			}
+			switch x.Name.Local {
+			case "hyperlink":
+				link := map[string]any{"xml_start": x.Start, "xml_end": x.End}
+				if value := x.Attribute(office.R, "id"); value != "" {
+					link["relationship_id"] = value
+				}
+				if value := x.Attribute(office.W, "anchor"); value != "" {
+					link["anchor"] = value
+				}
+				if value := x.Attribute(office.W, "history"); value != "" {
+					link["history"] = value
+				}
+				hyperlinks = append(hyperlinks, link)
+			case "fldSimple":
+				field := map[string]any{"kind": "simple", "xml_start": x.Start, "xml_end": x.End}
+				if value := x.Attribute(office.W, "instr"); value != "" {
+					field["instruction"] = value
+				}
+				fields = append(fields, field)
+			case "instrText":
+				value, err := textElement(b[x.Start:x.End])
+				if err != nil {
+					return nil, err
+				}
+				fields = append(fields, map[string]any{"kind": "instruction", "instruction": value, "xml_start": x.Start, "xml_end": x.End})
+			case "fldChar":
+				field := map[string]any{"kind": "marker", "xml_start": x.Start, "xml_end": x.End}
+				if value := x.Attribute(office.W, "fldCharType"); value != "" {
+					field["marker"] = value
+				}
+				fields = append(fields, field)
+			case "bookmarkStart", "bookmarkEnd":
+				bookmark := map[string]any{"kind": x.Name.Local, "xml_start": x.Start, "xml_end": x.End}
+				if value := x.Attribute(office.W, "id"); value != "" {
+					bookmark["id"] = value
+				}
+				if value := x.Attribute(office.W, "name"); value != "" {
+					bookmark["name"] = value
+				}
+				bookmarks = append(bookmarks, bookmark)
 			}
 			if x.Name.Local == "pStyle" {
 				style = x.Attribute(office.W, "val")
@@ -354,6 +398,15 @@ func textObservationsPart(p *office.Package, part string) ([]map[string]any, err
 		}
 		if len(revisions) > 0 {
 			observation["revision_evidence"] = revisions
+		}
+		if len(fields) > 0 {
+			observation["field_evidence"] = fields
+		}
+		if len(hyperlinks) > 0 {
+			observation["hyperlink_evidence"] = hyperlinks
+		}
+		if len(bookmarks) > 0 {
+			observation["bookmark_evidence"] = bookmarks
 		}
 		if len(paragraphMarkFormatting) > 0 {
 			observation["paragraph_mark_formatting"] = paragraphMarkFormatting
