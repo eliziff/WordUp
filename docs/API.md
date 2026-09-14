@@ -64,6 +64,12 @@ Methods accept positional `args` and named `named` parameters. Pass a retained o
 
 This generates a separate temporary DOTM containing a real `Public Function Evaluate() As Variant`, runs it through Word, and returns the result plus generated source/hash. It does not modify the target template. Use a normal source component for persistent behavior. Native errors remain errors; the harness does not evaluate the body itself.
 
+For a currently paused VBA frame, use `vba.immediate` with `paused:true` and
+`text:"? expression"`; optional `symbols` requests best-effort parameter/local/
+module-variable values. Each unavailable symbol remains an explicit result row.
+This path uses the owned VBE Immediate Window and returns the buffer text Word
+exposed; it does not substitute the scratch project or claim a typed value.
+
 ## Modal forms and UI
 
 ```json

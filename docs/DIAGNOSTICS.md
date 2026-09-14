@@ -16,8 +16,11 @@ selected semantic properties; Word can change incidental metadata.
 
 `vba.immediate` accepts `{"text":"? ActiveDocument.Paragraphs.Count"}` and
 returns a typed result, generated source and scratch artifact hash. It uses a
-separate native VBA project. It does not expose paused-stack locals or capture
-the VBE Immediate Window's `Debug.Print` buffer. For statements use `native.call`
+separate native VBA project. Set `paused:true` to evaluate against a currently
+paused VBA frame through the owned VBE Immediate Window; optional `symbols`
+return best-effort parameter/local/module-variable rows and explicitly list
+unavailable symbols. The paused path returns buffer text, not a typed value.
+For statements use `native.call`
 with `{"operation":{"op":"eval","value":"Evaluate = 6 * 7"}}`.
 Both require execute authority. Evaluation has a default 30-second deadline.
 

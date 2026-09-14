@@ -43,6 +43,8 @@ type Parameters struct {
 	Output               string                  `json:"output,omitempty"`
 	Name                 string                  `json:"name,omitempty"`
 	Text                 string                  `json:"text,omitempty"`
+	Paused               bool                    `json:"paused,omitempty"`
+	Symbols              []string                `json:"symbols,omitempty"`
 	Base64               string                  `json:"base64,omitempty"`
 	ExpectedSHA256       string                  `json:"expected_sha256,omitempty"`
 	Query                string                  `json:"query,omitempty"`
@@ -229,11 +231,14 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 			return nil, fmt.Errorf("VBA evaluation requires --execute authority")
 		}
 		text := strings.TrimSpace(p.Text)
-		if !strings.HasPrefix(text, "?") {
+		if p.Paused && text == "" && len(p.Symbols) > 0 {
+			// Symbol-only paused inspection is useful when a runtime failure
+			// already supplied the requested names.
+		} else if !strings.HasPrefix(text, "?") {
 			return nil, fmt.Errorf("vba.immediate currently requires ? followed by an expression; use native eval for statement blocks")
 		}
 		expression := strings.TrimSpace(strings.TrimPrefix(text, "?"))
-		if expression == "" {
+		if expression == "" && (!p.Paused || len(p.Symbols) == 0) {
 			return nil, fmt.Errorf("expression required")
 		}
 		if strings.ContainsAny(expression, "\r\n") || len(expression) > 1<<20 {
@@ -251,6 +256,13 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		h, err := e.Host(ctx)
 		if err != nil {
 			return nil, err
+		}
+		if p.Paused {
+			named := map[string]any{}
+			if len(p.Symbols) > 0 {
+				named["symbols"] = p.Symbols
+			}
+			return h.Call(ctx, native.Operation{Op: "ui.vba.immediate", Value: expression, Named: named, TimeoutMS: ms})
 		}
 		return h.Call(ctx, native.Operation{Op: "eval", Value: "Evaluate = (" + expression + ")", TimeoutMS: ms})
 	case "preview":
@@ -731,4 +743,4 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 	}
 }
 
-const NativeHelp = `Native operations on Windows: process.dump (file; owned Word thread/module minidump, no full heap); open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); toc.inspect (target = document; named.repaginate optionally refreshes pagination without updating fields; reports decimal TOC page mismatches, unresolved entries and completeness); vba.inspect (active project mode and native VBE code-pane selection, including module/line/text; selection is not a call stack or locals); vba.reset (requires execute and break mode; returns pre-reset selection and confirms design mode); ui.vba.inspect/ui.vba.reset (same diagnostics through a COM-marshaled owned reference, available while a direct macro call is pending); ui.vba.stack (requires execute and break mode; captures native stack frames and closes only the dialog it opens; reports truncation); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {"object":"handle"} to pass a retained object and {"missing":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.`
+const NativeHelp = `Native operations on Windows: process.dump (file; owned Word thread/module minidump, no full heap); open/new/addin (file,as); get/invoke/put/putref (target,member,args,named,value,as); run (macro,args); eval (value = VBA function body assigning Evaluate); compile (target,member = project name for the VBE menu fallback); render (target,file = output directory,value = DPI,child = optional 1-based page); toc.inspect (target = document; named.repaginate optionally refreshes pagination without updating fields; reports decimal TOC page mismatches, unresolved entries and completeness); vba.inspect (active project mode and native VBE code-pane selection, including module/line/text; selection is not a call stack or locals); vba.reset (requires execute and break mode; returns pre-reset selection and confirms design mode); ui.vba.inspect/ui.vba.reset (same diagnostics through a COM-marshaled owned reference, available while a direct macro call is pending); ui.vba.stack (requires execute and break mode; captures native stack frames and closes only the dialog it opens; reports truncation); ui.vba.immediate (paused-frame one-line expression through the owned VBE Immediate Window; returns the observed buffer); ui.vba.locals (paused-frame symbols array through the same window; each row reports available or unavailable); release/unload; batch (steps); ui.windows/ui.tree/ui.capture/ui.invoke/ui.set_value/ui.select (owned hwnd only). Use {"object":"handle"} to pass a retained object and {"missing":true} to omit an optional COM argument. Object-returning calls require as. begin wraps one operation in steps and returns a task token immediately; poll uses value=token; forget releases a completed task token. This allows modal forms to be driven through ui.* on a second STA. Mac: dictionary/get/put/invoke/run/ae.send; event codes come from the installed Word dictionary. Never interpret check/build/compat as VBA execution. Agent code runs with the user's OS authority, not a security sandbox. Fresh test runs prove only their recorded assertions.`

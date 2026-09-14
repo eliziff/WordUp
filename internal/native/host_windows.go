@@ -748,12 +748,15 @@ func HostMain(args []string) error {
 			select {
 			case q := <-queue:
 				perform(q, func(op Operation) (any, error) {
-					if op.Op == "ui.vba.inspect" || op.Op == "ui.vba.reset" || op.Op == "ui.vba.stack" {
+					if op.Op == "ui.vba.inspect" || op.Op == "ui.vba.reset" || op.Op == "ui.vba.stack" || op.Op == "ui.vba.immediate" || op.Op == "ui.vba.locals" {
 						if inspectErr != nil {
 							return nil, inspectErr
 						}
 						if op.Op == "ui.vba.stack" {
 							return vbaStack(inspector, h.process.PID, cfg.Directory, h.execute)
+						}
+						if op.Op == "ui.vba.immediate" || op.Op == "ui.vba.locals" {
+							return vbaImmediate(inspector, h.process.PID, h.execute, op)
 						}
 						return inspectVBA(inspector, h.execute, op.Op == "ui.vba.reset")
 					}

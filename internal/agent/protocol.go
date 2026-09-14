@@ -50,7 +50,7 @@ func Tools() []Tool {
 	ds = append(ds, [2]string{"vba.analyze", "Analyze selected workspace VBA paths together using the analysis helper. Source-only Option Explicit and unused-variable inspections with hashes and file locations. Standard/class modules only; host/form metadata and external references are not integrated. Does not establish native compilation."})
 	props["paths"] = map[string]any{"type": "array", "items": map[string]any{"type": "string"}}
 	ds = append(ds, [2]string{"xml.compare", "Compare reference and path XML using namespaces, retaining raw hashes, byte identity, and bounded first-difference XML with source offsets. xml_policy.context_parts selects part-level diagnostic context without narrowing equality. xml_policy may explicitly exclude named attributes/elements; the policy is returned with the evidence."})
-	ds = append(ds, [2]string{"vba.immediate", "Evaluate text beginning with ? in native Word and return its typed result. Uses a separate scratch VBA project; does not inspect paused-frame locals or capture the VBE Immediate output buffer. Requires --execute."})
+	ds = append(ds, [2]string{"vba.immediate", "Evaluate text beginning with ? in native Word. Default mode uses a separate scratch VBA project; paused:true evaluates against the owned paused VBA frame through the VBE Immediate Window, and optional symbols returns best-effort values with each unavailable symbol reported separately. Requires --execute."})
 	ds = append(ds, [2]string{"preview", "Open a fresh native-tested path in visible Word using acceptance reference. Optional document opens a copied manuscript with the template attached. Creates a local preview copy, restores automation security, changes no persistent trust settings. Requires --execute; Windows only."})
 	ds = append(ds, [2]string{"test.replay", "Rerun the recorded suite from reference. Without path, use the required hash-verified retained artifact snapshot. Explicit path tests a new candidate. Declared suite inputs are hash-verified snapshots with fresh working copies; undeclared external files are not frozen. fresh=true uses an independent hidden host. Requires --execute. Each run keeps a distinct saved_report and XML evidence."})
 	ds = append(ds, [2]string{"test.compare", "Compare baseline reference and candidate path native report files from the same suite. Automatically compares hash-verified XML snapshots using optional xml_policy, alongside asserted-field parity differences, per-step timing ratios, and separate task_timings for completed asynchronous polls. Poll-call latency is not macro duration. Does not execute Word or certify untested features."})
@@ -68,6 +68,8 @@ func Tools() []Tool {
 		props[key] = map[string]any{"type": "integer"}
 	}
 	props["fresh"] = map[string]any{"type": "boolean"}
+	props["paused"] = map[string]any{"type": "boolean", "description": "For vba.immediate, evaluate against the currently paused VBA frame through the owned VBE Immediate Window instead of a scratch project."}
+	props["symbols"] = map[string]any{"type": "array", "items": map[string]any{"type": "string"}, "description": "Optional paused-frame names to inspect individually; unavailable names remain explicit rows."}
 	props["operation"] = map[string]any{"type": "object", "description": NativeHelp}
 	props["suite"] = map[string]any{"type": "object", "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile"}
 	tools := []Tool{}
