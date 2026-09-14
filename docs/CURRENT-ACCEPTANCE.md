@@ -29,6 +29,8 @@ The exact x64 fidelity-37 candidate's disposable `--execute selftest` was attemp
 
 The same package passed an outside-repository package-only smoke run: `new`, `check` and uncached `build` all returned zero, with valid OPC output, 16.2 ms build time, and `vba_compiled=false` correctly retained because Word was not executed.
 
+The fidelity-37 package-only component smoke also listed the bundled catalog, installed `structure.detect`, and returned `component.status` as clean/compatible with `component.diff` equal to true. This is installation/hash evidence; native VBA compilation remains blocked by the host boundary above.
+
 ## Remaining completion gates
 
 The Rizzuto comment discrepancy is fixed by restoring character-collection traversal; tracked-formatting visibility is preserved explicitly. The selected-options baseline passes (`workspaces/alr-baseline/reports/full-rizzuto-with-alignment.json`, 67.914 s), and the complete output comparison passes with `equal=true`, `byte_identical=false`. Reopening saved Flat OPC was rejected as a shortcut because Word added font metadata; the final baseline ran the unchanged original on the original input instead.
