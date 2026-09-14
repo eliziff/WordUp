@@ -568,6 +568,16 @@ func StyleReference(file string) (map[string]any, error) {
 		return nil, e
 	}
 	out := office.Catalog(p)
+	partNames := make([]string, 0, len(p.Files))
+	for name := range p.Files {
+		partNames = append(partNames, name)
+	}
+	sort.Strings(partNames)
+	partInventory := make([]map[string]any, 0, len(partNames))
+	for _, name := range partNames {
+		partInventory = append(partInventory, map[string]any{"part": name, "bytes": len(p.Files[name]), "sha256": office.Hash(p.Files[name])})
+	}
+	out["part_inventory"] = partInventory
 	text, e := TextObservations(p)
 	if e != nil {
 		return nil, e

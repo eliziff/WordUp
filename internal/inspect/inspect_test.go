@@ -274,6 +274,7 @@ func TestStyleReferenceIncludesThemeAndNumberingInputs(t *testing.T) {
 	p.Files["word/theme/theme1.xml"] = []byte(`<a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:themeElements><a:fontScheme><a:majorFont><a:latin typeface="Aptos Display"/></a:majorFont></a:fontScheme></a:themeElements></a:theme>`)
 	p.Files["word/numbering.xml"] = []byte(`<w:numbering xmlns:w="` + office.W + `"><w:abstractNum w:abstractNumId="1"/></w:numbering>`)
 	p.Files["word/fontTable.xml"] = []byte(`<w:fonts xmlns:w="` + office.W + `"><w:font w:name="Aptos"><w:charset w:val="00"/></w:font></w:fonts>`)
+	p.Files["customXml/item1.xml"] = []byte(`<item><value>opaque</value></item>`)
 	data, err := p.Bytes()
 	if err != nil {
 		t.Fatal(err)
@@ -292,6 +293,19 @@ func TestStyleReferenceIncludesThemeAndNumberingInputs(t *testing.T) {
 	}
 	if theme["majorHAnsi"] != "Aptos Display" || !strings.Contains(reference["theme_xml"].(string), "Aptos Display") || reference["theme_sha256"] != office.Hash(p.Files["word/theme/theme1.xml"]) || !strings.Contains(reference["styles_xml"].(string), "styleId=\"Normal\"") || !strings.Contains(reference["numbering_xml"].(string), "abstractNumId") || reference["styles_sha256"] != office.Hash(p.Files["word/styles.xml"]) || reference["numbering_sha256"] != office.Hash(p.Files["word/numbering.xml"]) {
 		t.Fatalf("lost style cascade inputs: %#v", reference)
+	}
+	parts, ok := reference["part_inventory"].([]map[string]any)
+	if !ok {
+		t.Fatalf("missing part inventory: %#v", reference["part_inventory"])
+	}
+	found := false
+	for _, part := range parts {
+		if part["part"] == "customXml/item1.xml" && part["bytes"] == len(p.Files["customXml/item1.xml"]) && part["sha256"] == office.Hash(p.Files["customXml/item1.xml"]) {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("opaque part missing from inventory: %#v", parts)
 	}
 }
 
