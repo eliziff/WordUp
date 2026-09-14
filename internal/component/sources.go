@@ -41,6 +41,7 @@ Option Explicit
 Public Sub WU_ShowForm(ByVal formName As String)
     Dim instance As Object, failure As Long, failureSource As String, failureText As String
     On Error GoTo Failed
+    If Len(Trim$(formName)) = 0 Then Err.Raise 5, "WU_ShowForm", "form name is required"
     Set instance = VBA.UserForms.Add(formName)
     instance.Show
 CleanUp:
@@ -173,8 +174,8 @@ End Sub
 Public Function WU_ContextMenuRegistered(Optional ByVal expectedCaption As String = "", Optional ByVal expectedMacro As String = "") As Boolean
     Dim prior As Object, item As CommandBarControl
     Dim failure As Long, failureSource As String, failureText As String
-    Set prior = Application.CustomizationContext
     On Error GoTo Failed
+    Set prior = Application.CustomizationContext
     Application.CustomizationContext = ThisDocument
     Set item = WU_FindContextMenu()
     If item Is Nothing Then GoTo CleanUp
@@ -196,8 +197,8 @@ End Function
 Private Sub WU_ChangeContextMenu(ByVal caption As String, ByVal macroName As String, ByVal removeOnly As Boolean)
     Dim prior As Object, item As CommandBarControl
     Dim failure As Long, failureSource As String, failureText As String
-    Set prior = Application.CustomizationContext
     On Error GoTo Failed
+    Set prior = Application.CustomizationContext
     Application.CustomizationContext = ThisDocument
     WU_DeleteContextMenus
     If Not removeOnly Then
