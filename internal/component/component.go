@@ -65,7 +65,7 @@ func builtin() []Manifest {
 		vbaComponent("document.style-converter", "WordUpStyleConverter", "WU_ConvertStyle", "Converts one paragraph style in a single safe edit.", "style conversion", styleConverterSource)}
 	for i := range items {
 		if items[i].ID == "command.hotkey" {
-			items[i].Version = "1.0.1"
+			items[i].Version = "1.0.2"
 		}
 		if items[i].ID == "command.context-menu" {
 			items[i].Version = "1.0.2"

@@ -71,20 +71,32 @@ End Sub
 const hotkeySource = `Attribute VB_Name = "WordUpHotkey"
 Option Explicit
 Public Sub WU_RegisterHotkey(ByVal keyCode As Long, ByVal macroName As String)
+    If Len(Trim$(macroName)) = 0 Then Err.Raise 5, "WU_RegisterHotkey", "macro name is required"
     WU_ChangeHotkey keyCode, macroName, False
 End Sub
 Public Sub WU_RemoveHotkey(ByVal keyCode As Long)
     WU_ChangeHotkey keyCode, "", True
 End Sub
+Public Function WU_HotkeyRegistered(ByVal keyCode As Long, Optional ByVal expectedMacro As String = "") As Boolean
+    Dim binding As KeyBinding
+    Set binding = WU_OwnedHotkey(keyCode)
+    If binding Is Nothing Then Exit Function
+    If expectedMacro <> "" Then
+        If StrComp(binding.Command, expectedMacro, vbTextCompare) <> 0 And StrComp(binding.Command, WU_QualifiedHotkeyMacro(expectedMacro), vbTextCompare) <> 0 Then Exit Function
+    End If
+    WU_HotkeyRegistered = True
+End Function
 Private Sub WU_ChangeHotkey(ByVal keyCode As Long, ByVal macroName As String, ByVal remove As Boolean)
-    Dim prior As Object, failure As Long, failureSource As String, failureText As String
+    Dim prior As Object, binding As KeyBinding
+    Dim failure As Long, failureSource As String, failureText As String
     Set prior = Application.CustomizationContext
     On Error GoTo Failed
     Application.CustomizationContext = ThisDocument
     If remove Then
-        FindKey(keyCode).Clear
+        Set binding = WU_OwnedHotkey(keyCode)
+        If Not binding Is Nothing Then binding.Clear
     Else
-        KeyBindings.Add wdKeyCategoryMacro, macroName, keyCode
+        KeyBindings.Add wdKeyCategoryMacro, WU_QualifiedHotkeyMacro(macroName), keyCode
     End If
 CleanUp:
     On Error Resume Next
@@ -98,6 +110,17 @@ Failed:
     failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
     Resume CleanUp
 End Sub
+Private Function WU_OwnedHotkey(ByVal keyCode As Long) As KeyBinding
+    Dim binding As KeyBinding, owner As Object
+    On Error Resume Next
+    Set binding = FindKey(keyCode)
+    Set owner = binding.Context
+    If owner Is ThisDocument Then Set WU_OwnedHotkey = binding
+    On Error GoTo 0
+End Function
+Private Function WU_QualifiedHotkeyMacro(ByVal macroName As String) As String
+    If InStr(1, macroName, "!", vbBinaryCompare) > 0 Then WU_QualifiedHotkeyMacro = macroName Else WU_QualifiedHotkeyMacro = "'" & ThisDocument.Name & "'!" & macroName
+End Function
 `
 
 const contextMenuSource = `Attribute VB_Name = "WordUpContextMenu"
