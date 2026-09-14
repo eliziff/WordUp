@@ -49,6 +49,18 @@ func checkedReport(r *Report) error {
 	if r.Suite.RequireCompile && !r.VBACompiled {
 		return fmt.Errorf("required native compilation is missing")
 	}
+	// Native reports retain an immutable copy of the exact bytes Word opened.
+	// Verify it when present so parity cannot compare a report against a stale
+	// or edited artifact. Synthetic bookkeeping reports may omit the path.
+	if r.ArtifactSnapshot != "" {
+		artifact, err := project.Read(filepath.Dir(r.ArtifactSnapshot), filepath.Base(r.ArtifactSnapshot))
+		if err != nil {
+			return fmt.Errorf("artifact snapshot unavailable: %w", err)
+		}
+		if office.Hash(artifact) != r.SHA256 {
+			return fmt.Errorf("artifact snapshot hash mismatch")
+		}
+	}
 	count := 0
 	for i, step := range r.Suite.Steps {
 		ob := r.Observations[i]

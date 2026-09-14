@@ -4,8 +4,32 @@ import (
 	"github.com/eliziff/WordUp/internal/native"
 	"github.com/eliziff/WordUp/internal/office"
 	"github.com/eliziff/WordUp/internal/project"
+	"os"
+	"path/filepath"
 	"testing"
 )
+
+func TestCompareRejectsEditedRetainedArtifact(t *testing.T) {
+	root := t.TempDir()
+	artifact := filepath.Join(root, "input.dotm")
+	data := []byte("exact artifact")
+	if err := os.WriteFile(artifact, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	suite := Suite{Schema: 1, Name: "artifact identity", Steps: []Step{{Name: "value", Operation: native.Operation{Op: "get", Member: "Text"}, Assert: []Assertion{{Path: "/text", Kind: "equals", Expected: "stable"}}}}}
+	report := func() *Report {
+		return &Report{Status: "passed", WordExecuted: true, OS: "synthetic", Arch: "synthetic", ArtifactSnapshot: artifact, SHA256: office.Hash(data), Suite: suite, SuiteSHA256: office.Hash(project.JSON(suite)), Assertions: 1, Observations: []Observation{{Name: "value", Passed: true, Assertions: 1, Result: map[string]any{"text": "stable"}}}}
+	}
+	if _, err := Compare(report(), report()); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(artifact, []byte("edited artifact"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Compare(report(), report()); err == nil {
+		t.Fatal("edited retained artifact accepted")
+	}
+}
 
 func TestCompareRecordedBehavior(t *testing.T) {
 	// Synthetic reports exercise comparison policy, not Word execution.
