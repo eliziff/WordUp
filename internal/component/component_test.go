@@ -288,6 +288,33 @@ func TestBundledCatalogIsComplete(t *testing.T) {
 	}
 }
 
+func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
+	item, err := Get("document.style-converter")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if item.Version != "1.0.3" {
+		t.Fatalf("style converter version did not advance: %q", item.Version)
+	}
+	var source string
+	for _, file := range item.Files {
+		if file.Path == "vba/WordUpStyleConverter.bas" {
+			source = file.Text
+		}
+	}
+	for _, want := range []string{
+		`If document Is Nothing Then Err.Raise 91, "WU_ConvertStyle", "document is required"`,
+		`If Len(Trim$(fromStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyle", "source style is required"`,
+		`If Len(Trim$(toStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyle", "target style is required"`,
+		"captured = True",
+		"If captured Then Application.ScreenUpdating = updating",
+	} {
+		if !strings.Contains(source, want) {
+			t.Fatalf("style converter source omitted %q", want)
+		}
+	}
+}
+
 func TestAllBundledComponentsInstallWithoutCollisions(t *testing.T) {
 	root := t.TempDir()
 	for _, manifest := range builtin() {

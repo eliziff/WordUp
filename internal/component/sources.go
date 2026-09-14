@@ -274,11 +274,15 @@ End Function
 const styleConverterSource = `Attribute VB_Name = "WordUpStyleConverter"
 Option Explicit
 Public Function WU_ConvertStyle(ByVal document As Document, ByVal fromStyle As String, ByVal toStyle As String) As Boolean
-    Dim firstStory As Range, story As Range, updating As Boolean, opened As Boolean
+    Dim firstStory As Range, story As Range, updating As Boolean, opened As Boolean, captured As Boolean
     Dim failure As Long, failureSource As String, failureText As String
     Dim sourceStyle As Style, targetStyle As Style
     On Error GoTo Failed
+    If document Is Nothing Then Err.Raise 91, "WU_ConvertStyle", "document is required"
+    If Len(Trim$(fromStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyle", "source style is required"
+    If Len(Trim$(toStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyle", "target style is required"
     updating = Application.ScreenUpdating
+    captured = True
     Set sourceStyle = document.Styles(fromStyle)
     Set targetStyle = document.Styles(toStyle)
     If StrComp(sourceStyle.NameLocal, targetStyle.NameLocal, vbTextCompare) = 0 Then Exit Function
@@ -298,7 +302,7 @@ CleanUp:
         If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
         Err.Clear
     End If
-    Application.ScreenUpdating = updating
+    If captured Then Application.ScreenUpdating = updating
     If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
     On Error GoTo 0
     If failure <> 0 Then Err.Raise failure, failureSource, failureText
