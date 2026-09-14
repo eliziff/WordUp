@@ -493,6 +493,9 @@ func install(root string, m Manifest) (Installed, error) {
 	if err := validateRibbonMerges(root, id, m); err != nil {
 		return Installed{}, err
 	}
+	if err := validateBundleForms(id, m.Files); err != nil {
+		return Installed{}, err
+	}
 	if err := rejectIdentifierCollisions(root, id, m.Files); err != nil {
 		return Installed{}, err
 	}
@@ -544,6 +547,55 @@ func install(root string, m Manifest) (Installed, error) {
 		return rollback(err)
 	}
 	return installed, nil
+}
+
+// validateBundleForms performs the cheap structural checks that can be made
+// without opening an existing MSForms binary. Build still owns full property
+// and serialization validation; this preflight prevents an invalid bundle
+// from partially installing before that later stage rejects it.
+func validateBundleForms(componentID string, files []File) error {
+	for _, file := range files {
+		path := filepath.ToSlash(file.Path)
+		if !strings.HasPrefix(strings.ToLower(path), "forms/") || !strings.EqualFold(filepath.Ext(path), ".json") {
+			continue
+		}
+		var design office.Design
+		if err := project.ReadJSON(fileData(file), &design); err != nil {
+			return fmt.Errorf("component %s form %s: invalid design: %w", componentID, file.Path, err)
+		}
+		expected := strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
+		if design.Name != expected {
+			return fmt.Errorf("component %s form %s name %q does not match filename %q", componentID, file.Path, design.Name, expected)
+		}
+		if err := validateBundleControlSet(componentID, file.Path, "controls", design.Controls); err != nil {
+			return err
+		}
+		if err := validateBundleControlSet(componentID, file.Path, "pages", design.Pages); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func validateBundleControlSet(componentID, filePath, scope string, controls []office.ControlDesign) error {
+	seen := map[string]string{}
+	for _, control := range controls {
+		if !office.ValidIdentifier(control.Name) {
+			return fmt.Errorf("component %s form %s has invalid control name %q in %s", componentID, filePath, control.Name, scope)
+		}
+		key := strings.ToLower(control.Name)
+		if prior, exists := seen[key]; exists {
+			return fmt.Errorf("component %s form %s has duplicate control name %q in %s (also declared as %q)", componentID, filePath, control.Name, scope, prior)
+		}
+		seen[key] = control.Name
+		if err := validateBundleControlSet(componentID, filePath, control.Name+" controls", control.Controls); err != nil {
+			return err
+		}
+		if err := validateBundleControlSet(componentID, filePath, control.Name+" pages", control.Pages); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func validateRibbonMerges(root, componentID string, m Manifest) error {

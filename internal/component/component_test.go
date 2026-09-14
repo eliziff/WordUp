@@ -477,6 +477,23 @@ func TestLocalBundleRejectsUnsafeSources(t *testing.T) {
 	}
 }
 
+func TestLocalBundleRejectsDuplicateFormControlsBeforeCopy(t *testing.T) {
+	bundle, root := t.TempDir(), t.TempDir()
+	manifest := Manifest{Schema: 1, ID: "form.invalid", Version: "1", License: "MIT", Provenance: "test", Files: []File{{Path: "forms/Editor.json"}}}
+	if err := project.Write(bundle, "component.json", project.JSON(manifest), ""); err != nil {
+		t.Fatal(err)
+	}
+	if err := project.Write(bundle, "forms/Editor.json", []byte(`{"name":"Editor","controls":[{"name":"Run","type":"CommandButton"},{"name":"run","type":"Label"}]}`), ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := AddBundle(root, bundle); err == nil || !strings.Contains(err.Error(), "duplicate control name \"run\" in controls") {
+		t.Fatalf("duplicate form control was not rejected during preflight: %v", err)
+	}
+	if _, err := project.Read(root, "forms/Editor.json"); !os.IsNotExist(err) {
+		t.Fatalf("invalid form bundle was partially installed: %v", err)
+	}
+}
+
 func TestManifestHashIncludesBinarySourceBytes(t *testing.T) {
 	base := Manifest{Schema: 1, ID: "binary.hash", Version: "1", License: "MIT", Provenance: "test", Files: []File{{Path: "assets/icon.bin", Binary: true, data: []byte{1, 2, 3}}}}
 	changed := base
