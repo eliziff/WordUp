@@ -478,7 +478,7 @@ func (p *Package) Relationship(source, id, typ, target, mode string) error {
 			if s.Attribute("", "Type") == typ && s.Attribute("", "Target") == target && s.Attribute("", "TargetMode") == mode {
 				return nil
 			}
-			break
+			return fmt.Errorf("relationship ID collision in %s: %s targets %s, requested %s", rel, id, s.Attribute("", "Target"), target)
 		}
 	}
 	m := ""

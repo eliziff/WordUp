@@ -45,11 +45,11 @@ func TestExistingPackageMetadataIsNotReserialized(t *testing.T) {
 			t.Fatal("Override precedence lost")
 		}
 	}
-	if err := p.Relationship("word/document.xml", "rId1", VBAProjectRel, "other.bin", ""); err != nil {
-		t.Fatal(err)
+	if err := p.Relationship("word/document.xml", "rId1", VBAProjectRel, "other.bin", ""); err == nil {
+		t.Fatal("relationship collision was silently replaced")
 	}
-	if bytes.Equal(rels, p.Files[RelPart("word/document.xml")]) {
-		t.Fatal("Changed target ignored")
+	if !bytes.Equal(rels, p.Files[RelPart("word/document.xml")]) {
+		t.Fatal("relationship collision changed the original part")
 	}
 }
 
