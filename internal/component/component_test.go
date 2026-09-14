@@ -185,6 +185,23 @@ func TestAddAppliesOnlyDeclaredTypedParameters(t *testing.T) {
 	}
 }
 
+func TestModulePrefixOnlyChangesIdentifierTokens(t *testing.T) {
+	m := Manifest{ID: "tokens", Version: "1", Parameters: map[string]string{"module_prefix": "prefix"}, Defaults: map[string]string{"module_prefix": "WU"}, Files: []File{{Path: "vba/Tokens.bas", Text: "Public Sub WU_Run()\n    Dim value As String\n    value = \"WU_String\" & \"WU_Command_\"\n    value = \"XWU_Unchanged\"\n    ' WU_Comment\nEnd Sub\n"}}, Acceptance: "WU_Run is the entry point."}
+	adapted, err := adapt(m, map[string]string{"module_prefix": "ACME"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	source := adapted.Files[0].Text
+	for _, want := range []string{"Public Sub ACME_Run", `"ACME_String"`, `"ACME_Command_"`, `"XWU_Unchanged"`, "' WU_Comment"} {
+		if !strings.Contains(source, want) {
+			t.Fatalf("adaptation lost %q: %s", want, source)
+		}
+	}
+	if strings.Contains(source, "WU_Run") || adapted.Acceptance != "ACME_Run is the entry point." {
+		t.Fatalf("identifier adaptation was incomplete: source=%s acceptance=%q", source, adapted.Acceptance)
+	}
+}
+
 func TestAddRejectsInvalidOrUndeclaredParametersBeforeWriting(t *testing.T) {
 	for name, values := range map[string]map[string]string{
 		"invalid identifier": {"module_prefix": "not-valid"},

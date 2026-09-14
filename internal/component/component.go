@@ -246,15 +246,93 @@ func adapt(m Manifest, supplied map[string]string) (Manifest, error) {
 				return Manifest{}, fmt.Errorf("component %s parameter module_prefix must be a valid VBA identifier", m.ID)
 			}
 			for i := range m.Files {
-				m.Files[i].Text = strings.ReplaceAll(m.Files[i].Text, "WU_", value+"_")
+				m.Files[i].Text = replaceVBAIdentifierPrefix(m.Files[i].Text, "WU_", value+"_")
 			}
-			m.Acceptance = strings.ReplaceAll(m.Acceptance, "WU_", value+"_")
+			m.Acceptance = replaceVBAIdentifierPrefix(m.Acceptance, "WU_", value+"_")
 		default:
 			return Manifest{}, fmt.Errorf("component %s parameter %s has no typed adapter", m.ID, name)
 		}
 	}
 	m.applied = values
 	return m, nil
+}
+
+// replaceVBAIdentifierPrefix changes an identifier prefix without rewriting
+// apostrophe comments or arbitrary prose. VBA strings are scanned as text too,
+// because callbacks and macro names are commonly stored in string literals.
+// The token boundary keeps names such as XWU_Name untouched.
+func replaceVBAIdentifierPrefix(source, from, to string) string {
+	if source == "" || from == "" || len(from) > len(source) {
+		return source
+	}
+	var out strings.Builder
+	out.Grow(len(source))
+	inString, inComment := false, false
+	for i := 0; i < len(source); {
+		if inComment {
+			out.WriteByte(source[i])
+			if source[i] == '\n' || source[i] == '\r' {
+				inComment = false
+			}
+			i++
+			continue
+		}
+		if inString {
+			if source[i] == '"' {
+				out.WriteByte(source[i])
+				if i+1 < len(source) && source[i+1] == '"' {
+					out.WriteByte(source[i+1])
+					i += 2
+					continue
+				}
+				inString = false
+				i++
+				continue
+			}
+			if hasIdentifierPrefix(source, i, from) {
+				out.WriteString(to)
+				i += len(from)
+				continue
+			}
+			out.WriteByte(source[i])
+			i++
+			continue
+		}
+		if source[i] == '"' {
+			inString = true
+			out.WriteByte(source[i])
+			i++
+			continue
+		}
+		if source[i] == '\'' {
+			inComment = true
+			out.WriteByte(source[i])
+			i++
+			continue
+		}
+		if hasIdentifierPrefix(source, i, from) {
+			out.WriteString(to)
+			i += len(from)
+			continue
+		}
+		out.WriteByte(source[i])
+		i++
+	}
+	return out.String()
+}
+
+func hasIdentifierPrefix(source string, index int, prefix string) bool {
+	if index > 0 && vbaIdentifierByte(source[index-1]) {
+		return false
+	}
+	if index+len(prefix) >= len(source) || !strings.EqualFold(source[index:index+len(prefix)], prefix) {
+		return false
+	}
+	return vbaIdentifierByte(source[index+len(prefix)])
+}
+
+func vbaIdentifierByte(value byte) bool {
+	return value >= 'a' && value <= 'z' || value >= 'A' && value <= 'Z' || value >= '0' && value <= '9' || value == '_'
 }
 
 func install(root string, m Manifest) (Installed, error) {
