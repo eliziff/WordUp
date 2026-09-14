@@ -151,9 +151,16 @@ func hasNativeHeading(row map[string]any) bool {
 	return ok && outline["body_text"] != true
 }
 func formattingSignal(row map[string]any) bool {
+	if evidence, ok := row["direct_formatting_evidence"].(map[string]int); ok {
+		total := evidence["text_units"]
+		if total == 0 {
+			return false
+		}
+		return evidence["bold_units"]*100 >= total*65 || evidence["caps_units"]*100 >= total*65 || evidence["small_caps_units"]*100 >= total*65
+	}
 	runs, _ := row["run_properties"].([]map[string]any)
 	for _, run := range runs {
-		x, _ := run["xml"].(string)
+		x, _ := run["properties_xml"].(string)
 		if strings.Contains(x, ":b") || strings.Contains(x, ":smallCaps") || strings.Contains(x, ":caps") {
 			return true
 		}

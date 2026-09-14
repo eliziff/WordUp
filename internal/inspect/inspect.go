@@ -13,6 +13,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"unicode/utf16"
 )
 
 func textElement(b []byte) (string, error) {
@@ -189,9 +190,6 @@ func TextObservations(p *office.Package) ([]map[string]any, error) {
 				}
 				text.WriteString(value)
 			}
-			if x.Name.Local == "rPr" {
-				runs = append(runs, map[string]any{"xml": string(b[x.Start:x.End])})
-			}
 			if x.Start < propertiesEnd {
 				continue
 			}
@@ -204,9 +202,76 @@ func TextObservations(p *office.Package) ([]map[string]any, error) {
 				references = append(references, map[string]any{"kind": x.Name.Local, "id": x.Attribute(office.W, "id"), "xml_start": x.Start})
 			}
 		}
+		weighted := map[string]int{"text_units": 0, "bold_units": 0, "italic_units": 0, "caps_units": 0, "small_caps_units": 0}
+		nestedEnd = 0
+		for runIndex, run := range spans[index+1:] {
+			if run.Start >= s.End {
+				break
+			}
+			if run.Start < nestedEnd || run.Name.Space != office.W {
+				continue
+			}
+			if run.Name.Local == "p" {
+				nestedEnd = run.End
+				continue
+			}
+			if run.Name.Local != "r" || run.Start < propertiesEnd {
+				continue
+			}
+			item := map[string]any{"xml_start": run.Start, "xml_end": run.End, "text_units": 0}
+			var runText strings.Builder
+			nestedRunEnd := 0
+			for _, x := range spans[index+1+runIndex+1:] {
+				if x.Start >= run.End {
+					break
+				}
+				if x.Start < nestedRunEnd || x.Name.Space != office.W {
+					continue
+				}
+				if x.Name.Local == "p" {
+					nestedRunEnd = x.End
+					continue
+				}
+				switch x.Name.Local {
+				case "rPr":
+					item["properties_xml"] = string(b[x.Start:x.End])
+				case "t":
+					value, err := textElement(b[x.Start:x.End])
+					if err != nil {
+						return nil, err
+					}
+					runText.WriteString(value)
+				case "tab", "br", "cr":
+					runText.WriteRune('\t')
+				case "b", "i", "caps", "smallCaps":
+					value := x.Attribute(office.W, "val")
+					item[x.Name.Local] = value == "" || (value != "0" && !strings.EqualFold(value, "false") && !strings.EqualFold(value, "off"))
+				case "rFonts":
+					for _, name := range []string{"ascii", "hAnsi", "cs", "eastAsia"} {
+						if value := x.Attribute(office.W, name); value != "" {
+							item["font"] = value
+							break
+						}
+					}
+				case "sz":
+					item["size_half_points"] = x.Attribute(office.W, "val")
+				}
+			}
+			units := len(utf16.Encode([]rune(runText.String())))
+			item["text_units"] = units
+			weighted["text_units"] += units
+			for _, name := range []string{"bold", "italic", "caps", "small_caps"} {
+				xmlName := map[string]string{"bold": "b", "italic": "i", "caps": "caps", "small_caps": "smallCaps"}[name]
+				if item[xmlName] == true {
+					weighted[name+"_units"] += units
+				}
+			}
+			runs = append(runs, item)
+		}
 		out = append(out, map[string]any{
 			"text": text.String(), "style_id": style, "paragraph_properties_xml": props, "run_properties": runs,
-			"source_part": "word/document.xml", "xml_start": s.Start, "xml_end": s.End,
+			"direct_formatting_evidence": weighted,
+			"source_part":                "word/document.xml", "xml_start": s.Start, "xml_end": s.End,
 			"xml_path":     fmt.Sprintf("(//w:p)[%d]", len(out)+1),
 			"paragraph_id": s.Attribute("http://schemas.microsoft.com/office/word/2010/wordml", "paraId"),
 			"references":   references,
