@@ -123,6 +123,13 @@ type wordHost struct {
 	evalPrograms map[string]*evalProgram
 }
 
+// windowsVisible is true only for an explicit preview or for the private
+// desktop. A restricted logon session may force the hidden host to inherit the
+// caller's desktop; in that case Word and opened documents must stay hidden.
+func (h *wordHost) windowsVisible() bool {
+	return h.cfg.Visible || h.cfg.Desktop != ""
+}
+
 func connectWord(cfg hostConfig) (*wordHost, error) {
 	null, e := os.OpenFile("NUL", os.O_RDWR, 0600)
 	if e != nil {
@@ -153,6 +160,14 @@ func connectWord(cfg hostConfig) (*wordHost, error) {
 				"inherited_create_error": e.Error(),
 			})
 		}
+	}
+	if e != nil && !cfg.Visible && noLogonSessionError(e) {
+		return nil, Fail("native_session_restricted", "Windows refused hidden Word creation in the current logon session", map[string]any{
+			"desktop":                     cfg.Desktop,
+			"word_path":                   cfg.WordPath,
+			"create_error":                e.Error(),
+			"inherited_desktop_attempted": desktop == "",
+		})
 	}
 	if e != nil {
 		return nil, e
@@ -207,7 +222,7 @@ func connectWord(cfg hostConfig) (*wordHost, error) {
 						h.app = app
 						h.objects["app"] = app
 						_ = app.put("DisplayAlerts", 0)
-						_ = app.put("Visible", true)
+						_ = app.put("Visible", cfg.Visible || cfg.Desktop != "")
 						if cfg.Visible {
 							seedValue, err := app.get("ActiveDocument")
 							if err != nil {
@@ -354,7 +369,7 @@ func (h *wordHost) operation(op Operation) (any, error) {
 		version, _ := h.app.get("Version")
 		defer version.clear()
 		v, _ := version.value(0)
-		return map[string]any{"pid": h.process.PID, "word_version": v, "desktop": h.cfg.Desktop, "visible_desktop_switched": false, "owns_word_process": true, "user_word_attached": false, "runtime": "Microsoft Word", "macro_execution_authorized": h.execute, "registry_security_settings_modified": false, "automation_open_mode": "ForceDisable for inspection; Low only for explicitly authorized staged input", "directory": h.cfg.Directory, "private_desktop_is_security_sandbox": false}, nil
+		return map[string]any{"pid": h.process.PID, "word_version": v, "desktop": h.cfg.Desktop, "desktop_isolation": h.cfg.Desktop != "", "visible": h.windowsVisible(), "visible_desktop_switched": false, "owns_word_process": true, "user_word_attached": false, "runtime": "Microsoft Word", "macro_execution_authorized": h.execute, "registry_security_settings_modified": false, "automation_open_mode": "ForceDisable for inspection; Low only for explicitly authorized staged input", "directory": h.cfg.Directory, "private_desktop_is_security_sandbox": false}, nil
 	case "release":
 		if op.Target == "app" {
 			return nil, fmt.Errorf("cannot release application handle")
@@ -434,10 +449,10 @@ func (h *wordHost) operation(op Operation) (any, error) {
 		}
 		defer coll.release()
 		member := "Open"
-		named := map[string]any{"FileName": target, "ReadOnly": false, "AddToRecentFiles": false, "Visible": true, "OpenAndRepair": false}
+		named := map[string]any{"FileName": target, "ReadOnly": false, "AddToRecentFiles": false, "Visible": h.windowsVisible(), "OpenAndRepair": false}
 		if op.Op == "new" {
 			member = "Add"
-			named = map[string]any{"Visible": true}
+			named = map[string]any{"Visible": h.windowsVisible()}
 			if target != "" {
 				named["Template"] = target
 			}
@@ -692,7 +707,10 @@ func HostMain(args []string) error {
 	if e = json.Unmarshal(b, &cfg); e != nil {
 		return e
 	}
-	if len(cfg.Token) != 32 || (!strings.HasPrefix(cfg.Desktop, "WordUp-") && !(cfg.Visible && cfg.Desktop == "Default")) || filepath.Clean(args[0]) != filepath.Join(cfg.Directory, "host.json") {
+	privateDesktop := strings.HasPrefix(cfg.Desktop, "WordUp-")
+	previewDesktop := cfg.Visible && cfg.Desktop == "Default"
+	hiddenInherited := !cfg.Visible && cfg.Desktop == ""
+	if len(cfg.Token) != 32 || !(privateDesktop || previewDesktop || hiddenInherited) || filepath.Clean(args[0]) != filepath.Join(cfg.Directory, "host.json") {
 		return fmt.Errorf("invalid private-host configuration")
 	}
 	runtime.LockOSThread()
@@ -702,10 +720,13 @@ func HostMain(args []string) error {
 		return fmt.Errorf("CoInitializeEx STA: 0x%08X", uint32(hr))
 	}
 	defer coUninit.Call()
-	// Verify that a manually invoked private-host command cannot silently run
-	// its windows on the caller's visible desktop.
-	if e = verifyDesktop(cfg.Desktop); e != nil {
-		return e
+	// Verify that a normal private host is on its own desktop. An empty desktop
+	// is an explicit hidden fallback for restricted logon sessions; it is
+	// reported as degraded isolation rather than silently treated as private.
+	if cfg.Desktop != "" {
+		if e = verifyDesktop(cfg.Desktop); e != nil {
+			return e
+		}
 	}
 	h, e := connectWord(cfg)
 	if e != nil {

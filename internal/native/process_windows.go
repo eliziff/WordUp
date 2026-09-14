@@ -339,13 +339,39 @@ func Start(ctx context.Context, opt Options) (Host, error) {
 	h.process, e = spawnOnDesktop(exe, []string{"__host", configPath}, h.cfg.Desktop, !h.cfg.Options.Visible, inRead, outWrite, logWrite, h.job)
 	if e != nil {
 		if !opt.Visible && noLogonSessionError(e) {
-			return nil, Fail("native_session_restricted", "Windows refused the private WordUp desktop in the current logon session", map[string]any{
-				"desktop":      h.cfg.Desktop,
-				"word_path":    h.cfg.WordPath,
-				"create_error": e.Error(),
-			})
+			// Some interactive/service-like logon sessions let us create a
+			// desktop object but reject CreateProcessW when it names that
+			// desktop. Keep the host and Word hidden on the inherited desktop so
+			// COM/runtime verification can still run. The handshake reports the
+			// loss of desktop isolation explicitly.
+			initial := e
+			privateDesktop := h.cfg.Desktop
+			if h.desktop != 0 {
+				closeDesktop.Call(h.desktop)
+				h.desktop = 0
+			}
+			h.cfg.Desktop = ""
+			cfg, marshalErr := json.Marshal(h.cfg)
+			if marshalErr != nil {
+				return nil, marshalErr
+			}
+			if writeErr := os.WriteFile(configPath, cfg, 0600); writeErr != nil {
+				return nil, writeErr
+			}
+			h.process, e = spawnOnDesktop(exe, []string{"__host", configPath}, "", true, inRead, outWrite, logWrite, h.job)
+			if e != nil {
+				return nil, Fail("native_session_restricted", "Windows refused hidden Word creation in the current logon session", map[string]any{
+					"desktop":                     privateDesktop,
+					"word_path":                   h.cfg.WordPath,
+					"create_error":                e.Error(),
+					"private_create_error":        initial.Error(),
+					"inherited_desktop_attempted": true,
+				})
+			}
 		}
-		return nil, e
+		if e != nil {
+			return nil, e
+		}
 	}
 	spawnFinished := time.Now()
 	// The parent must release its copies of the child's pipe ends immediately.
