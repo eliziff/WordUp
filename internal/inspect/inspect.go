@@ -794,7 +794,7 @@ func Check(w *project.Workspace) (map[string]any, error) {
 }
 
 func CheckWithConstants(w *project.Workspace, constants map[string]any) (map[string]any, error) {
-	files, e := w.SourceFiles()
+	files, e := w.SourceFilesCached()
 	if e != nil {
 		return nil, e
 	}

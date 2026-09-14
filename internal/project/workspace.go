@@ -471,6 +471,19 @@ func (w *Workspace) SourceFiles() (map[string][]byte, error) {
 	out["project.json"] = b
 	return out, nil
 }
+
+// SourceFilesCached returns the current source snapshot while reusing bytes
+// whose file stamps have not changed. It shares the same stamp/memo path as
+// Build, so resident agents do not pay a full read for every check request.
+// The returned map is owned by the workspace and must be treated as read-only.
+func (w *Workspace) SourceFilesCached() (map[string][]byte, error) {
+	stamps, err := sourceStamps(w.Root, w.sourceStamp)
+	if err != nil {
+		return nil, err
+	}
+	return w.buildSourceFiles(stamps)
+}
+
 func Fingerprint(files map[string][]byte) string {
 	return fingerprint(files, nil)
 }
