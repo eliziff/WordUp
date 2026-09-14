@@ -2,6 +2,8 @@ package office
 
 import "fmt"
 
+const flatOPCNamespace = "http://schemas.microsoft.com/office/2006/xmlPackage"
+
 // XMLInput selects an XML part from an OPC package when part is non-empty.
 // Raw XML remains valid input, which lets an expected XML file be compared
 // directly with a package part without an extraction fixture.
@@ -23,7 +25,35 @@ func XMLInput(data []byte, part string) ([]byte, error) {
 	// A raw expected XML file has no package part to select; use it as-is.
 	// Validate it here so a malformed raw file does not produce a misleading
 	// comparison error later.
-	if _, xmlErr := XMLSpans(data); xmlErr == nil {
+	spans, xmlErr := XMLSpans(data)
+	if xmlErr == nil {
+		if len(spans) > 0 && spans[0].Name.Space == flatOPCNamespace && spans[0].Name.Local == "package" {
+			want := "/" + part
+			for i, span := range spans {
+				if span.Name.Space != flatOPCNamespace || span.Name.Local != "part" || span.Attribute(flatOPCNamespace, "name") != want {
+					continue
+				}
+				for _, dataSpan := range spans[i+1:] {
+					if dataSpan.Start >= span.End {
+						break
+					}
+					if dataSpan.Name.Space != flatOPCNamespace || dataSpan.Name.Local != "xmlData" || dataSpan.Depth != span.Depth+1 {
+						continue
+					}
+					for _, xmlSpan := range spans[i+1:] {
+						if xmlSpan.Start >= dataSpan.End {
+							break
+						}
+						if xmlSpan.Depth == dataSpan.Depth+1 {
+							return data[xmlSpan.Start:xmlSpan.End], nil
+						}
+					}
+					return nil, fmt.Errorf("Flat OPC part %q has no XML data", part)
+				}
+				return nil, fmt.Errorf("Flat OPC part %q not found", part)
+			}
+			return nil, fmt.Errorf("Flat OPC part %q not found", part)
+		}
 		return data, nil
 	}
 	return nil, fmt.Errorf("select XML package part %q: %w", part, packageErr)

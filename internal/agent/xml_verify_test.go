@@ -89,6 +89,15 @@ func TestXMLVerifySelectsPackagePartWithoutExtraction(t *testing.T) {
 	if result, err := e.Call(context.Background(), "xml.verify", params); err != nil || result.(map[string]any)["matches_expected"] != true {
 		t.Fatalf("package part did not compare directly: result=%v err=%v", result, err)
 	}
+	flat := `<pkg:package xmlns:pkg="` + "http://schemas.microsoft.com/office/2006/xmlPackage" + `"><pkg:part pkg:name="/word/document.xml" pkg:contentType="application/xml"><pkg:xmlData>` + string(expected) + `</pkg:xmlData></pkg:part></pkg:package>`
+	if err := project.Write(root, "sample-flat.xml", []byte(flat), ""); err != nil {
+		t.Fatal(err)
+	}
+	params.Path = "sample-flat.xml"
+	if result, err := e.Call(context.Background(), "xml.verify", params); err != nil || result.(map[string]any)["matches_expected"] != true {
+		t.Fatalf("Flat OPC part did not compare directly: result=%v err=%v", result, err)
+	}
+	params.Path = "sample.docx"
 	pkg.Files["word/document.xml"] = []byte(`<w:document xmlns:w="` + office.W + `"><w:body><w:p><w:r><w:t>changed</w:t></w:r></w:p></w:body></w:document>`)
 	changed, err := pkg.Bytes()
 	if err != nil {
@@ -107,5 +116,9 @@ func TestXMLVerifySelectsPackagePartWithoutExtraction(t *testing.T) {
 		} else if !strings.Contains(err.Error(), "XML package part") && !strings.Contains(err.Error(), "unsafe") {
 			t.Fatalf("unexpected part error for %s: %v", part, err)
 		}
+	}
+	params.Path, params.Part = "sample-flat.xml", "word/missing.xml"
+	if _, err := e.Call(context.Background(), "xml.verify", params); err == nil {
+		t.Fatal("missing Flat OPC part accepted")
 	}
 }

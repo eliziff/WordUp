@@ -153,9 +153,10 @@ The standalone `WU_DetectStructure(document)` returns `result(paragraphIndex, WU
 
 `xml.verify` compares expected XML `reference` directly with actual XML `path`.
 Set `part` (for example `word/document.xml`) when either path is a DOCX/DOTM
-package; the named package part is selected in memory, so no extraction fixture
-is needed. Copy starting Word XML and edit only intended differences to create
-the expectation. Comparison defaults to exact bytes; `comparison: "semantic"`
+or Flat OPC export; the named package part is selected in memory, so no
+extraction fixture is needed. Copy starting Word XML and edit only intended
+differences to create the expectation. Comparison defaults to exact bytes;
+`comparison: "semantic"`
 explicitly selects namespace-aware equality without ignored content. Mismatch
 returns an error plus hashes and difference locations. This command reads XML;
 it does not execute Word.
