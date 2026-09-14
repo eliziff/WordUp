@@ -513,6 +513,17 @@ func sourceStamps(root string) (map[string]fileStamp, error) {
 		}
 		result[rel] = fileStamp{Size: info.Size(), ModifiedNS: info.ModTime().UnixNano(), Hash: hash}
 	}
+	rel := ".wordwright/components.json"
+	path := filepath.Join(root, filepath.FromSlash(rel))
+	if info, err := os.Stat(path); err == nil {
+		hash, hashErr := fileHash(path)
+		if hashErr != nil {
+			return nil, hashErr
+		}
+		result[rel] = fileStamp{Size: info.Size(), ModifiedNS: info.ModTime().UnixNano(), Hash: hash}
+	} else if !os.IsNotExist(err) {
+		return nil, err
+	}
 	for _, top := range sourceDirectories {
 		base := filepath.Join(root, top)
 		err := filepath.WalkDir(base, func(path string, entry fs.DirEntry, err error) error {
@@ -609,6 +620,64 @@ func fileHash(path string) (string, error) {
 	return hex.EncodeToString(hash.Sum(nil)), nil
 }
 
+type ribbonMergeSource struct {
+	Component string
+	Source    string `json:"source"`
+	Target    string `json:"target"`
+}
+
+// workspaceRibbonMerges reads only the typed Ribbon composition entries from
+// the existing component lock. The lock is provenance, not a second source
+// tree; malformed or unsafe entries fail the build before package mutation.
+func workspaceRibbonMerges(root string) ([]ribbonMergeSource, error) {
+	raw, err := Read(root, ".wordwright/components.json")
+	if os.IsNotExist(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var envelope struct {
+		Schema     int                        `json:"schema"`
+		Components map[string]json.RawMessage `json:"components"`
+	}
+	if err := json.Unmarshal(raw, &envelope); err != nil {
+		return nil, fmt.Errorf("component lock: %w", err)
+	}
+	if envelope.Schema != 1 || envelope.Components == nil {
+		return nil, fmt.Errorf("component lock schema mismatch")
+	}
+	ids := make([]string, 0, len(envelope.Components))
+	for id := range envelope.Components {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+	merges := []ribbonMergeSource{}
+	for _, id := range ids {
+		var component struct {
+			RibbonMerges []struct {
+				Source string `json:"source"`
+				Target string `json:"target"`
+			} `json:"ribbon_merges"`
+		}
+		if err := json.Unmarshal(envelope.Components[id], &component); err != nil {
+			return nil, fmt.Errorf("component %s lock: %w", id, err)
+		}
+		for _, merge := range component.RibbonMerges {
+			source := filepath.ToSlash(merge.Source)
+			target := filepath.ToSlash(merge.Target)
+			if !fs.ValidPath(source) || strings.ContainsAny(source, `\:`) || strings.HasPrefix(strings.ToLower(source), "package/") {
+				return nil, fmt.Errorf("component %s Ribbon source path is unsafe: %q", id, merge.Source)
+			}
+			if !office.SafePart(target) || !strings.HasSuffix(strings.ToLower(target), ".xml") {
+				return nil, fmt.Errorf("component %s Ribbon target path is unsafe: %q", id, merge.Target)
+			}
+			merges = append(merges, ribbonMergeSource{Component: id, Source: source, Target: target})
+		}
+	}
+	return merges, nil
+}
+
 func (w *Workspace) Build(output string) (*BuildReport, error) {
 	start := time.Now()
 	if output == "" {
@@ -688,6 +757,19 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 		}
 	}
 	p := w.Baseline.WithFiles(packageFiles)
+	ribbonMerges, mergeErr := workspaceRibbonMerges(w.Root)
+	if mergeErr != nil {
+		return nil, mergeErr
+	}
+	for _, merge := range ribbonMerges {
+		fragment, ok := files[merge.Source]
+		if !ok {
+			return nil, fmt.Errorf("component %s Ribbon source is missing: %s", merge.Component, merge.Source)
+		}
+		if err := p.MergeRibbon(merge.Target, fragment); err != nil {
+			return nil, fmt.Errorf("component %s Ribbon merge %s -> %s: %w", merge.Component, merge.Source, merge.Target, err)
+		}
+	}
 	if packageChanged {
 		if e = p.ConnectRibbons(); e != nil {
 			return nil, e

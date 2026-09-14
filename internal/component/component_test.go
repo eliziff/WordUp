@@ -1,6 +1,7 @@
 package component
 
 import (
+	"github.com/eliziff/WordUp/internal/office"
 	"github.com/eliziff/WordUp/internal/project"
 	"github.com/eliziff/WordUp/internal/vbaparse"
 	"os"
@@ -32,7 +33,7 @@ func TestInstallationPreflightsAllFiles(t *testing.T) {
 }
 
 func TestInstallationRollsBackCompletedCopies(t *testing.T) {
-	root := t.TempDir()
+	root := filepath.Join(t.TempDir(), "workspace")
 	// A parent file prevents directory creation after an earlier copy succeeds.
 	if err := project.Write(root, "blocked", []byte("user file"), ""); err != nil {
 		t.Fatal(err)
@@ -304,5 +305,79 @@ func TestLocalBundleRejectsUnsafeSources(t *testing.T) {
 				t.Fatal("unsafe local bundle accepted")
 			}
 		})
+	}
+}
+
+func TestRibbonMergeBundleIsPreflightedAndBuilt(t *testing.T) {
+	const ns = "http://schemas.microsoft.com/office/2009/07/customui"
+	base := []byte(`<customUI xmlns="` + ns + `"><ribbon><tabs><tab id="base"/></tabs></ribbon></customUI>`)
+	fragment := []byte(`<customUI xmlns="` + ns + `"><ribbon><tabs><tab id="added"><group id="group"><button id="button" label="Run"/></group></tab></tabs></ribbon></customUI>`)
+	conflict := []byte(`<customUI xmlns="` + ns + `"><ribbon><tabs><tab id="base" label="Conflict"/></tabs></ribbon></customUI>`)
+	bundle := t.TempDir()
+	manifest := Manifest{Schema: 1, ID: "ribbon.local", Version: "1", License: "MIT", Provenance: "local Ribbon test", Files: []File{{Path: "assets/fragment.xml"}}, RibbonMerges: []RibbonMerge{{Source: "assets/fragment.xml", Target: "customUI/customUI14.xml"}}}
+	if err := project.Write(bundle, "component.json", project.JSON(manifest), ""); err != nil {
+		t.Fatal(err)
+	}
+	if err := project.Write(bundle, "assets/fragment.xml", fragment, ""); err != nil {
+		t.Fatal(err)
+	}
+	root := filepath.Join(t.TempDir(), "workspace")
+	if _, err := project.New("RibbonProject", root); err != nil {
+		t.Fatal(err)
+	}
+	if err := project.Write(root, "package/customUI/customUI14.xml", base, ""); err != nil {
+		t.Fatal(err)
+	}
+	installed, err := AddBundle(root, bundle)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(installed.RibbonMerges) != 1 || installed.RibbonMerges[0].Target != "customUI/customUI14.xml" {
+		t.Fatalf("Ribbon mapping was not recorded: %#v", installed)
+	}
+	w, err := project.Open(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	report, err := w.Build(filepath.Join(root, "dist", "RibbonProject.dotm"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	artifact, err := os.ReadFile(report.Artifact)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pkg, err := office.ReadPackage(artifact)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(pkg.Files["customUI/customUI14.xml"]), `id="button"`) {
+		t.Fatal("Ribbon fragment was not composed into the built package")
+	}
+	status, err := Status(root, manifest.ID)
+	if err != nil || status["ribbon_merges"] == nil {
+		t.Fatalf("Ribbon mapping missing from status: %#v (%v)", status, err)
+	}
+
+	conflictBundle := t.TempDir()
+	manifest.ID = "ribbon.conflict"
+	if err := project.Write(conflictBundle, "component.json", project.JSON(manifest), ""); err != nil {
+		t.Fatal(err)
+	}
+	if err := project.Write(conflictBundle, "assets/fragment.xml", conflict, ""); err != nil {
+		t.Fatal(err)
+	}
+	conflictRoot := filepath.Join(t.TempDir(), "workspace")
+	if _, err := project.New("RibbonConflict", conflictRoot); err != nil {
+		t.Fatal(err)
+	}
+	if err := project.Write(conflictRoot, "package/customUI/customUI14.xml", base, ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := AddBundle(conflictRoot, conflictBundle); err == nil || !strings.Contains(err.Error(), "Ribbon merge assets/fragment.xml") {
+		t.Fatalf("Ribbon collision was not rejected before copy: %v", err)
+	}
+	if _, err := project.Read(conflictRoot, "assets/fragment.xml"); !os.IsNotExist(err) {
+		t.Fatalf("Ribbon source copied after rejected preflight: %v", err)
 	}
 }

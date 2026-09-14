@@ -46,11 +46,7 @@ func Studio(root string) (*project.BuildReport, error) {
 	if e = office.AddBuildingBlocks(p, blocks, nil); e != nil {
 		return nil, e
 	}
-	p.Files["customUI/customUI14.xml"] = []byte(ribbon)
-	if e = p.ContentType("customUI/customUI14.xml", "application/xml"); e != nil {
-		return nil, e
-	}
-	if e = p.Relationship("", "rIdStudioRibbon", "http://schemas.microsoft.com/office/2007/relationships/ui/extensibility", "customUI/customUI14.xml", ""); e != nil {
+	if e = p.MergeRibbon("customUI/customUI14.xml", []byte(ribbon)); e != nil {
 		return nil, e
 	}
 	for path, data := range p.Files {

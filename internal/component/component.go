@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -20,6 +21,10 @@ const lockPath = ".wordwright/components.json"
 type File struct {
 	Path string `json:"path"`
 	Text string `json:"text,omitempty"`
+}
+type RibbonMerge struct {
+	Source string `json:"source"`
+	Target string `json:"target"`
 }
 type Manifest struct {
 	Schema             int               `json:"schema"`
@@ -35,6 +40,7 @@ type Manifest struct {
 	Acceptance         string            `json:"acceptance"`
 	Adaptation         string            `json:"adaptation"`
 	Files              []File            `json:"files"`
+	RibbonMerges       []RibbonMerge     `json:"ribbon_merges,omitempty"`
 	applied            map[string]string
 }
 type Installed struct {
@@ -46,6 +52,7 @@ type Installed struct {
 	ManifestSHA256     string            `json:"manifest_sha256,omitempty"`
 	Parameters         map[string]string `json:"parameters,omitempty"`
 	SupportedPlatforms []string          `json:"supported_platforms,omitempty"`
+	RibbonMerges       []RibbonMerge     `json:"ribbon_merges,omitempty"`
 }
 type Lock struct {
 	Schema     int                  `json:"schema"`
@@ -253,7 +260,9 @@ func adapt(m Manifest, supplied map[string]string) (Manifest, error) {
 				return Manifest{}, fmt.Errorf("component %s parameter module_prefix must be a valid VBA identifier", m.ID)
 			}
 			for i := range m.Files {
-				m.Files[i].Text = replaceVBAIdentifierPrefix(m.Files[i].Text, "WU_", value+"_")
+				if strings.HasPrefix(strings.ToLower(filepath.ToSlash(m.Files[i].Path)), "vba/") {
+					m.Files[i].Text = replaceVBAIdentifierPrefix(m.Files[i].Text, "WU_", value+"_")
+				}
 			}
 			m.Acceptance = replaceVBAIdentifierPrefix(m.Acceptance, "WU_", value+"_")
 		default:
@@ -402,12 +411,12 @@ func install(root string, m Manifest) (Installed, error) {
 		for _, f := range m.Files {
 			same = same && prior.Files[f.Path] == office.Hash([]byte(f.Text))
 		}
-		if status["state"] == "clean" && prior.Version == m.Version && same && maps.Equal(prior.Parameters, m.applied) {
+		if status["state"] == "clean" && prior.Version == m.Version && same && maps.Equal(prior.Parameters, m.applied) && slices.Equal(prior.RibbonMerges, m.RibbonMerges) {
 			return prior, nil
 		}
 		return Installed{}, fmt.Errorf("component %s is already installed and differs from its recorded source; inspect component.status or component.diff", id)
 	}
-	installed := Installed{ID: id, Version: m.Version, Files: map[string]string{}, Provenance: m.Provenance, License: m.License, ManifestSHA256: office.Hash(project.JSON(m)), Parameters: m.applied, SupportedPlatforms: append([]string(nil), m.SupportedPlatforms...)}
+	installed := Installed{ID: id, Version: m.Version, Files: map[string]string{}, Provenance: m.Provenance, License: m.License, ManifestSHA256: office.Hash(project.JSON(m)), Parameters: m.applied, SupportedPlatforms: append([]string(nil), m.SupportedPlatforms...), RibbonMerges: append([]RibbonMerge(nil), m.RibbonMerges...)}
 	// Preflight every file before writing any source. Components are independent
 	// copies: no file in this path is allowed to replace an existing file.
 	seen := map[string]bool{}
@@ -426,6 +435,9 @@ func install(root string, m Manifest) (Installed, error) {
 			return Installed{}, err
 		}
 		installed.Files[f.Path] = office.Hash([]byte(f.Text))
+	}
+	if err := validateRibbonMerges(root, id, m); err != nil {
+		return Installed{}, err
 	}
 	if err := rejectIdentifierCollisions(root, id, m.Files); err != nil {
 		return Installed{}, err
@@ -478,6 +490,64 @@ func install(root string, m Manifest) (Installed, error) {
 		return rollback(err)
 	}
 	return installed, nil
+}
+
+func validateRibbonMerges(root, componentID string, m Manifest) error {
+	if len(m.RibbonMerges) == 0 {
+		return nil
+	}
+	files := map[string]File{}
+	for _, file := range m.Files {
+		files[strings.ToLower(filepath.ToSlash(file.Path))] = file
+	}
+	working := map[string][]byte{}
+	loaded := map[string]bool{}
+	hasBase := map[string]bool{}
+	for _, merge := range m.RibbonMerges {
+		sourceKey := strings.ToLower(filepath.ToSlash(merge.Source))
+		file, ok := files[sourceKey]
+		if !ok || !fs.ValidPath(merge.Source) || strings.ContainsAny(merge.Source, `\:`) || strings.HasPrefix(sourceKey, "package/") || strings.HasPrefix(sourceKey, ".wordwright/") {
+			return fmt.Errorf("component %s Ribbon merge source %q must name a listed non-package source file", componentID, merge.Source)
+		}
+		target := filepath.ToSlash(merge.Target)
+		if !office.SafePart(target) || !strings.HasSuffix(strings.ToLower(target), ".xml") {
+			return fmt.Errorf("component %s Ribbon merge target %q must be a safe XML package part", componentID, merge.Target)
+		}
+		if !loaded[target] {
+			loaded[target] = true
+			if raw, err := project.Read(root, "package/"+target); err == nil {
+				working[target] = raw
+				hasBase[target] = true
+			} else if !os.IsNotExist(err) {
+				return err
+			} else if baseRaw, baseErr := project.Read(root, ".wordwright/base.opc"); baseErr == nil {
+				base, readErr := office.ReadPackage(baseRaw)
+				if readErr != nil {
+					return fmt.Errorf("component %s Ribbon base package: %w", componentID, readErr)
+				}
+				if raw, ok := base.Files[target]; ok {
+					working[target] = append([]byte(nil), raw...)
+					hasBase[target] = true
+				}
+			} else if !os.IsNotExist(baseErr) {
+				return baseErr
+			}
+		}
+		if !hasBase[target] {
+			probe := office.BlankPackage()
+			if err := probe.MergeRibbon(target, []byte(file.Text)); err != nil {
+				return fmt.Errorf("component %s Ribbon merge %s -> %s: %w", componentID, merge.Source, merge.Target, err)
+			}
+			working[target] = append([]byte(nil), probe.Files[target]...)
+			continue
+		}
+		merged, err := office.MergeRibbonXML(working[target], []byte(file.Text))
+		if err != nil {
+			return fmt.Errorf("component %s Ribbon merge %s -> %s: %w", componentID, merge.Source, merge.Target, err)
+		}
+		working[target] = merged
+	}
+	return nil
 }
 
 func rejectIdentifierCollisions(root, componentID string, files []File) error {
@@ -691,7 +761,7 @@ func Status(root, id string) (map[string]any, error) {
 	}
 	return map[string]any{"id": id, "version": installed.Version, "state": state, "files": rows,
 		"provenance": installed.Provenance, "license": installed.License, "manifest_sha256": installed.ManifestSHA256, "parameters": installed.Parameters,
-		"supported_platforms": installed.SupportedPlatforms, "compatibility": Compatibility(installed.SupportedPlatforms)}, nil
+		"supported_platforms": installed.SupportedPlatforms, "ribbon_merges": installed.RibbonMerges, "compatibility": Compatibility(installed.SupportedPlatforms)}, nil
 }
 
 func Diff(root, id string) (map[string]any, error) {
@@ -775,7 +845,7 @@ func diff(root string, m Manifest) (map[string]any, error) {
 		}
 		files = append(files, row)
 	}
-	return map[string]any{"component": m.ID, "bundled_version": m.Version, "status": status, "equal": equal, "files": files}, nil
+	return map[string]any{"component": m.ID, "bundled_version": m.Version, "status": status, "equal": equal, "files": files, "ribbon_merges": m.RibbonMerges}, nil
 }
 
 func firstDifference(a, b []byte) int {
