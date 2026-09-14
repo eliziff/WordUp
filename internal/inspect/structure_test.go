@@ -72,6 +72,37 @@ func TestStructureResolvesParagraphNumberingDefinition(t *testing.T) {
 	}
 }
 
+func TestStructureReportsConflictingDuplicateStyleIDs(t *testing.T) {
+	p := office.BlankPackage()
+	p.Files["word/styles.xml"] = []byte(`<w:styles xmlns:w="` + office.W + `"><w:style w:type="paragraph" w:styleId="Duplicate"><w:pPr><w:outlineLvl w:val="1"/></w:pPr></w:style><w:style w:type="paragraph" w:styleId="Duplicate"><w:pPr><w:outlineLvl w:val="8"/></w:pPr></w:style></w:styles>`)
+	p.Files["word/document.xml"] = []byte(`<w:document xmlns:w="` + office.W + `"><w:body><w:p><w:pPr><w:pStyle w:val="Duplicate"/></w:pPr><w:r><w:t>Ambiguous</w:t></w:r></w:p></w:body></w:document>`)
+	b, err := p.Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(t.TempDir(), "duplicate-style.docx")
+	if err = os.WriteFile(path, b, 0600); err != nil {
+		t.Fatal(err)
+	}
+	result, err := StructureReference(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rows := result["paragraphs"].([]map[string]any)
+	ambiguity, ok := rows[0]["style_ambiguity"].(map[string]any)
+	if !ok || ambiguity["kind"] != "conflicting_duplicate_style_id" {
+		t.Fatalf("duplicate style ambiguity missing: %v", rows[0])
+	}
+	duplicates, ok := result["style_duplicates"].([]map[string]any)
+	if !ok || len(duplicates) != 1 || duplicates[0]["style_id"] != "Duplicate" || duplicates[0]["conflicting"] != true {
+		t.Fatalf("duplicate style evidence missing: %v", result["style_duplicates"])
+	}
+	definitions, ok := duplicates[0]["definitions"].([]map[string]any)
+	if !ok || len(definitions) != 2 || definitions[0]["sha256"] == definitions[1]["sha256"] {
+		t.Fatalf("duplicate definitions were not retained: %v", duplicates[0])
+	}
+}
+
 func TestStructureReferenceAcceptsDocumentWithoutStylesPart(t *testing.T) {
 	p := office.BlankPackage()
 	delete(p.Files, "word/styles.xml")

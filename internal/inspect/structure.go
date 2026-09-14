@@ -299,6 +299,10 @@ func StructureReference(file string) (map[string]any, error) {
 	}
 	byID := map[string]style{}
 	styleEvidence := map[string]map[string]any{}
+	styleSources := map[string]map[string]any{}
+	styleDuplicates := map[string][]map[string]any{}
+	styleDuplicateOrder := []string{}
+	styleConflicts := map[string]bool{}
 	defaultID := ""
 	for i, s := range styles {
 		if s.Name.Space != office.W || s.Name.Local != "style" || s.Depth != 1 {
@@ -342,6 +346,20 @@ func StructureReference(file string) (map[string]any, error) {
 			}
 		}
 		byID[id] = def
+		raw := p.Files["word/styles.xml"][s.Start:s.End]
+		source := map[string]any{"start": s.Start, "end": s.End, "sha256": office.Hash(raw)}
+		if first, exists := styleSources[id]; exists {
+			if _, recorded := styleDuplicates[id]; !recorded {
+				styleDuplicateOrder = append(styleDuplicateOrder, id)
+				styleDuplicates[id] = []map[string]any{first}
+			}
+			styleDuplicates[id] = append(styleDuplicates[id], source)
+			if first["sha256"] != source["sha256"] {
+				styleConflicts[id] = true
+			}
+		} else {
+			styleSources[id] = source
+		}
 		evidence := map[string]any{"name": def.name, "based_on": def.parent, "paragraph_properties_xml": def.paragraphProperties, "run_properties_xml": def.runProperties, "fonts": resolvedFonts(def.fonts, fonts)}
 		if def.numID != "" {
 			evidence["num_id"] = def.numID
@@ -418,6 +436,7 @@ func StructureReference(file string) (map[string]any, error) {
 			chain := []string{}
 			styleNames := []string{}
 			seen := map[string]bool{}
+			styleAmbiguities := []string{}
 			outline, origin := "", ""
 			styleNumID, styleNumOrigin, styleIlvl := "", "", 0
 			styleHasIlvl := false
@@ -431,6 +450,9 @@ func StructureReference(file string) (map[string]any, error) {
 				if !ok {
 					item["style_error"] = "missing style " + at
 					break
+				}
+				if styleConflicts[at] {
+					styleAmbiguities = append(styleAmbiguities, at)
 				}
 				chain = append(chain, at)
 				styleNames = append(styleNames, def.name)
@@ -446,6 +468,13 @@ func StructureReference(file string) (map[string]any, error) {
 			}
 			item["style_chain"] = chain
 			item["style_names"] = styleNames
+			if len(styleAmbiguities) > 0 {
+				item["style_ambiguity"] = map[string]any{
+					"kind":       "conflicting_duplicate_style_id",
+					"style_ids":  styleAmbiguities,
+					"resolution": "source-order fallback; inspect style_duplicates before treating inherited properties as effective",
+				}
+			}
 			if context == "body" {
 				for index, ancestor := range chain {
 					name := ""
@@ -609,7 +638,15 @@ func StructureReference(file string) (map[string]any, error) {
 		rows[candidateRows[i]]["sequence_evidence"] = assignment
 		rows[candidateRows[i]]["sequence_is_heading_claim"] = false
 	}
-	return map[string]any{"source_sha256": office.Hash(b), "paragraphs": rows, "styles": styleEvidence, "document_default_run_properties_xml": defaultRunProperties, "document_default_fonts": resolvedFonts(defaultFonts, fonts), "theme_fonts": fonts, "numbering_xml": string(p.Files["word/numbering.xml"]), "xml_namespaces": map[string]string{"w": office.W}, "locator_units": "UTF-8 XML byte offsets; paragraph indexes include nested paragraphs, not native Word range positions", "editorial_hierarchy_verified": false, "scope": "main document XML; native outline evidence, style and formatting ancestry, theme fonts, and table/textbox containment; heading inference remains generic"}, nil
+	out := map[string]any{"source_sha256": office.Hash(b), "paragraphs": rows, "styles": styleEvidence, "document_default_run_properties_xml": defaultRunProperties, "document_default_fonts": resolvedFonts(defaultFonts, fonts), "theme_fonts": fonts, "numbering_xml": string(p.Files["word/numbering.xml"]), "xml_namespaces": map[string]string{"w": office.W}, "locator_units": "UTF-8 XML byte offsets; paragraph indexes include nested paragraphs, not native Word range positions", "editorial_hierarchy_verified": false, "scope": "main document XML; native outline evidence, style and formatting ancestry, theme fonts, and table/textbox containment; heading inference remains generic"}
+	if len(styleDuplicateOrder) > 0 {
+		duplicates := make([]map[string]any, 0, len(styleDuplicateOrder))
+		for _, id := range styleDuplicateOrder {
+			duplicates = append(duplicates, map[string]any{"style_id": id, "conflicting": styleConflicts[id], "definitions": styleDuplicates[id]})
+		}
+		out["style_duplicates"] = duplicates
+	}
+	return out, nil
 }
 
 func StructureResolved(file string) (map[string]any, error) {
