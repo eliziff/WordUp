@@ -247,12 +247,21 @@ func TextObservations(p *office.Package) ([]map[string]any, error) {
 					value := x.Attribute(office.W, "val")
 					item[x.Name.Local] = value == "" || (value != "0" && !strings.EqualFold(value, "false") && !strings.EqualFold(value, "off"))
 				case "rFonts":
-					for _, name := range []string{"ascii", "hAnsi", "cs", "eastAsia"} {
+					fonts := map[string]string{}
+					for _, name := range []string{"ascii", "hAnsi", "cs", "eastAsia", "asciiTheme", "hAnsiTheme", "cstheme", "csTheme", "eastAsiaTheme"} {
 						if value := x.Attribute(office.W, name); value != "" {
+							fonts[name] = value
+						}
+					}
+					item["fonts"] = fonts
+					for _, name := range []string{"ascii", "hAnsi", "cs", "eastAsia"} {
+						if value := fonts[name]; value != "" {
 							item["font"] = value
 							break
 						}
 					}
+				case "rStyle":
+					item["style_id"] = x.Attribute(office.W, "val")
 				case "sz":
 					item["size_half_points"] = x.Attribute(office.W, "val")
 				}

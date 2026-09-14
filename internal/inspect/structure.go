@@ -21,6 +21,54 @@ type numberingDefinition struct {
 	Overrides  map[int]int
 }
 
+const drawingML = "http://schemas.openxmlformats.org/drawingml/2006/main"
+
+func themeFonts(p *office.Package) (map[string]string, error) {
+	b := p.Files["word/theme/theme1.xml"]
+	if len(b) == 0 {
+		return map[string]string{}, nil
+	}
+	spans, err := office.XMLSpans(b)
+	if err != nil {
+		return nil, err
+	}
+	out := map[string]string{}
+	ancestors := []office.XMLSpan{}
+	for _, span := range spans {
+		for len(ancestors) > 0 && ancestors[len(ancestors)-1].End <= span.Start {
+			ancestors = ancestors[:len(ancestors)-1]
+		}
+		if span.Name.Space == drawingML && (span.Name.Local == "latin" || span.Name.Local == "ea" || span.Name.Local == "cs") {
+			family := ""
+			for i := len(ancestors) - 1; i >= 0; i-- {
+				if ancestors[i].Name.Space == drawingML && (ancestors[i].Name.Local == "majorFont" || ancestors[i].Name.Local == "minorFont") {
+					family = strings.TrimSuffix(ancestors[i].Name.Local, "Font")
+					break
+				}
+			}
+			if family != "" && span.Attribute("", "typeface") != "" {
+				key := map[string]string{"latin": "HAnsi", "ea": "EastAsia", "cs": "Bidi"}[span.Name.Local]
+				out[family+key] = span.Attribute("", "typeface")
+			}
+		}
+		ancestors = append(ancestors, span)
+	}
+	return out, nil
+}
+
+func resolvedFonts(values, theme map[string]string) map[string]string {
+	out := map[string]string{}
+	for key, value := range values {
+		out[key] = value
+	}
+	for _, key := range []string{"asciiTheme", "hAnsiTheme", "eastAsiaTheme", "csTheme", "cstheme"} {
+		if token := values[key]; token != "" && theme[token] != "" {
+			out[strings.TrimSuffix(strings.TrimSuffix(key, "Theme"), "theme")] = theme[token]
+		}
+	}
+	return out
+}
+
 func numberingDefinitions(p *office.Package) (map[string]numberingDefinition, error) {
 	b := p.Files["word/numbering.xml"]
 	if len(b) == 0 {
@@ -135,8 +183,13 @@ func StructureReference(file string) (map[string]any, error) {
 	if err != nil {
 		return nil, err
 	}
+	fonts, err := themeFonts(p)
+	if err != nil {
+		return nil, err
+	}
 	type style struct {
 		parent, outline, name, paragraphProperties, runProperties string
+		fonts                                                     map[string]string
 	}
 	byID := map[string]style{}
 	styleEvidence := map[string]map[string]any{}
@@ -149,7 +202,7 @@ func StructureReference(file string) (map[string]any, error) {
 		if s.Attribute(office.W, "type") == "paragraph" && s.Attribute(office.W, "default") == "1" {
 			defaultID = id
 		}
-		def := style{}
+		def := style{fonts: map[string]string{}}
 		for _, x := range styles[i+1:] {
 			if x.Start >= s.End {
 				break
@@ -166,14 +219,21 @@ func StructureReference(file string) (map[string]any, error) {
 				def.paragraphProperties = string(p.Files["word/styles.xml"][x.Start:x.End])
 			case x.Depth == s.Depth+1 && x.Name.Local == "rPr":
 				def.runProperties = string(p.Files["word/styles.xml"][x.Start:x.End])
+			case x.Depth == s.Depth+2 && x.Name.Local == "rFonts":
+				for _, key := range []string{"ascii", "hAnsi", "eastAsia", "cs", "asciiTheme", "hAnsiTheme", "eastAsiaTheme", "csTheme", "cstheme"} {
+					if value := x.Attribute(office.W, key); value != "" {
+						def.fonts[key] = value
+					}
+				}
 			case x.Depth == s.Depth+2 && x.Name.Local == "outlineLvl":
 				def.outline = x.Attribute(office.W, "val")
 			}
 		}
 		byID[id] = def
-		styleEvidence[id] = map[string]any{"name": def.name, "based_on": def.parent, "paragraph_properties_xml": def.paragraphProperties, "run_properties_xml": def.runProperties}
+		styleEvidence[id] = map[string]any{"name": def.name, "based_on": def.parent, "paragraph_properties_xml": def.paragraphProperties, "run_properties_xml": def.runProperties, "fonts": resolvedFonts(def.fonts, fonts)}
 	}
 	defaultRunProperties := ""
+	defaultFonts := map[string]string{}
 	for i, s := range styles {
 		if s.Name.Space != office.W || s.Name.Local != "rPrDefault" {
 			continue
@@ -184,10 +244,26 @@ func StructureReference(file string) (map[string]any, error) {
 			}
 			if x.Name.Space == office.W && x.Name.Local == "rPr" && x.Depth == s.Depth+1 {
 				defaultRunProperties = string(p.Files["word/styles.xml"][x.Start:x.End])
-				break
+			}
+			if x.Name.Space == office.W && x.Name.Local == "rFonts" && x.Depth == s.Depth+2 {
+				for _, key := range []string{"ascii", "hAnsi", "eastAsia", "cs", "asciiTheme", "hAnsiTheme", "eastAsiaTheme", "csTheme", "cstheme"} {
+					if value := x.Attribute(office.W, key); value != "" {
+						defaultFonts[key] = value
+					}
+				}
 			}
 		}
 		break
+	}
+	for _, item := range rows {
+		runs, _ := item["run_properties"].([]map[string]any)
+		for _, run := range runs {
+			values, _ := run["fonts"].(map[string]string)
+			resolved := resolvedFonts(values, fonts)
+			if len(resolved) > 0 {
+				run["fonts"] = resolved
+			}
+		}
 	}
 	spans, err := office.XMLSpans(p.Files["word/document.xml"])
 	if err != nil {
@@ -377,7 +453,7 @@ func StructureReference(file string) (map[string]any, error) {
 		rows[candidateRows[i]]["sequence_evidence"] = assignment
 		rows[candidateRows[i]]["sequence_is_heading_claim"] = false
 	}
-	return map[string]any{"source_sha256": office.Hash(b), "paragraphs": rows, "styles": styleEvidence, "document_default_run_properties_xml": defaultRunProperties, "numbering_xml": string(p.Files["word/numbering.xml"]), "xml_namespaces": map[string]string{"w": office.W}, "locator_units": "UTF-8 XML byte offsets; paragraph indexes include nested paragraphs, not native Word range positions", "editorial_hierarchy_verified": false, "scope": "main document XML; native outline evidence, style and formatting ancestry, and table/textbox containment; heading inference remains generic"}, nil
+	return map[string]any{"source_sha256": office.Hash(b), "paragraphs": rows, "styles": styleEvidence, "document_default_run_properties_xml": defaultRunProperties, "document_default_fonts": resolvedFonts(defaultFonts, fonts), "theme_fonts": fonts, "numbering_xml": string(p.Files["word/numbering.xml"]), "xml_namespaces": map[string]string{"w": office.W}, "locator_units": "UTF-8 XML byte offsets; paragraph indexes include nested paragraphs, not native Word range positions", "editorial_hierarchy_verified": false, "scope": "main document XML; native outline evidence, style and formatting ancestry, theme fonts, and table/textbox containment; heading inference remains generic"}, nil
 }
 
 func StructureResolved(file string) (map[string]any, error) {
