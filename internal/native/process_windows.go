@@ -337,26 +337,6 @@ func Start(ctx context.Context, opt Options) (Host, error) {
 	// Resolve the name in the current window station; see connectWord for why
 	// qualifying it with WinSta0 is not portable across interactive sessions.
 	h.process, e = spawnOnDesktop(exe, []string{"__host", configPath}, h.cfg.Desktop, !h.cfg.Options.Visible, inRead, outWrite, logWrite, h.job)
-	if e != nil && !opt.Visible && noLogonSessionError(e) {
-		// Some restricted interactive sessions can create a desktop but cannot
-		// target it from CreateProcessW (ERROR_NO_LOGON_SESSION). Inherit the
-		// current desktop instead, keep both processes hidden, and retain the
-		// same job containment. This is a compatibility fallback, not a trust
-		// boundary or a visible-preview path.
-		if h.desktop != 0 {
-			closeDesktop.Call(h.desktop)
-			h.desktop = 0
-		}
-		h.cfg.Desktop = "Default"
-		cfg, marshalErr := json.Marshal(h.cfg)
-		if marshalErr != nil {
-			return nil, marshalErr
-		}
-		if writeErr := os.WriteFile(configPath, cfg, 0600); writeErr != nil {
-			return nil, writeErr
-		}
-		h.process, e = spawnOnDesktop(exe, []string{"__host", configPath}, "", true, inRead, outWrite, logWrite, h.job)
-	}
 	if e != nil {
 		return nil, e
 	}

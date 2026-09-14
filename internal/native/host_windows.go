@@ -140,8 +140,9 @@ func connectWord(cfg hostConfig) (*wordHost, error) {
 	}
 	p, e := spawnOnDesktop(cfg.WordPath, []string{"/a", filepath.Join(cfg.Directory, "seed.docx")}, desktop, !cfg.Visible, null, null, null, 0)
 	if e != nil && !cfg.Visible && noLogonSessionError(e) && desktop != "" {
-		// Keep the worker's current private desktop when possible, but inherit it
-		// if this session refuses an explicit desktop target.
+		// The host is already running on the private desktop, so inheriting its
+		// current desktop preserves isolation while avoiding a second station
+		// lookup in restricted sessions.
 		p, e = spawnOnDesktop(cfg.WordPath, []string{"/a", filepath.Join(cfg.Directory, "seed.docx")}, "", true, null, null, null, 0)
 	}
 	if e != nil {
