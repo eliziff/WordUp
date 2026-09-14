@@ -64,7 +64,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## Microsoft Office and operating systems
 
-Microsoft Word, Office components, system DLLs/frameworks, fonts, and third-party ActiveX controls are not redistributed. The app calls existing installed system and Office APIs. Microsoft/Apple trademarks belong to their respective owners. The user's private ALR template is not in the generic source distribution.
+Microsoft Word, Office components, system DLLs/frameworks, fonts, and third-party ActiveX controls are not redistributed. The app calls existing installed system and Office APIs. Microsoft/Apple trademarks belong to their respective owners.
 
 
 ## Microsoft RibbonX schemas
