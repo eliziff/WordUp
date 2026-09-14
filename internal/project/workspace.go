@@ -1286,6 +1286,7 @@ Commit editable source, tests, assets and the .wordwright baseline/index; treat 
 Use the wordup executable. No module imports, VBE typing, or Python setup.
 
 - Edit vba/*.bas, *.cls, and *.vba as ordinary UTF-8 files; module names and VB_Name must agree.
+- Keep source-tree roots named exactly package/, vba/, forms/, and assets/; case variants are rejected before check, build, or component installation.
 - New .bas files become standard modules; new .cls files become classes; .vba files are UserForm code.
 - forms/<name>.json describes persistent native MSForms design, in points. Existing unsupported controls remain opaque.
 - package/ is the full original Open XML package, including RibbonX XML, embedded assets and native saved parts. Do not rewrite the ZIP by hand.
