@@ -47,6 +47,9 @@ func TestNamedHeadingDashVariants(t *testing.T) {
 			t.Fatal(text, got)
 		}
 	}
+	if got := MarkerChoices("Part iv - Lowercase Roman"); len(got) != 1 || got[0].Family != "roman_named_section" || got[0].Value != 4 {
+		t.Fatalf("lowercase named Roman marker was not recognized: %#v", got)
+	}
 }
 
 func TestGenericNamedHeadingPrefixes(t *testing.T) {
