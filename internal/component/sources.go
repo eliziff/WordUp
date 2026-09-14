@@ -49,6 +49,8 @@ Public Sub WU_ShowForm(ByVal formName As String)
 CleanUp:
     On Error Resume Next
     If Not instance Is Nothing Then Unload instance
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
     On Error GoTo 0
     If failure <> 0 Then Err.Raise failure, failureSource, failureText
     Exit Sub

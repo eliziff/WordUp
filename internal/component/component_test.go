@@ -357,6 +357,31 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 	}
 }
 
+func TestFormShellPreservesUnloadFailure(t *testing.T) {
+	item, err := Get("ui.form-shell")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if item.Version != "1.0.2" {
+		t.Fatalf("form shell version did not advance: %q", item.Version)
+	}
+	var source string
+	for _, file := range item.Files {
+		if file.Path == "vba/WordUpFormShell.bas" {
+			source = file.Text
+		}
+	}
+	for _, want := range []string{
+		"If Not instance Is Nothing Then Unload instance",
+		"If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description",
+		"Err.Clear",
+	} {
+		if !strings.Contains(source, want) {
+			t.Fatalf("form shell cleanup omitted %q", want)
+		}
+	}
+}
+
 func TestRibbonCallbackEncodingUsesASCIIOnly(t *testing.T) {
 	item, err := Get("ui.ribbon-command")
 	if err != nil {

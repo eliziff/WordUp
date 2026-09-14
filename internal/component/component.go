@@ -115,7 +115,7 @@ func builtin() []Manifest {
 			items[i].Version = "1.0.4"
 		}
 		if items[i].ID == "ui.form-shell" {
-			items[i].Version = "1.0.1"
+			items[i].Version = "1.0.2"
 		}
 		if items[i].ID == "ui.progress-cancel" {
 			items[i].Version = "1.0.1"
