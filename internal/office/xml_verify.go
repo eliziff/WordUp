@@ -2,8 +2,36 @@ package office
 
 import "fmt"
 
+// XMLInput selects an XML part from an OPC package when part is non-empty.
+// Raw XML remains valid input, which lets an expected XML file be compared
+// directly with a package part without an extraction fixture.
+func XMLInput(data []byte, part string) ([]byte, error) {
+	if part == "" {
+		return data, nil
+	}
+	if !SafePart(part) {
+		return nil, fmt.Errorf("unsafe XML package part %q", part)
+	}
+	pkg, packageErr := ReadPackage(data)
+	if packageErr == nil {
+		selected, ok := pkg.Files[part]
+		if !ok {
+			return nil, fmt.Errorf("XML package part %q not found", part)
+		}
+		return selected, nil
+	}
+	// A raw expected XML file has no package part to select; use it as-is.
+	// Validate it here so a malformed raw file does not produce a misleading
+	// comparison error later.
+	if _, xmlErr := XMLSpans(data); xmlErr == nil {
+		return data, nil
+	}
+	return nil, fmt.Errorf("select XML package part %q: %w", part, packageErr)
+}
+
 // VerifyXML compares the expected artifact directly, without a manifest or
-// annotation roundtrip. Equality covers the whole input; no ignored content.
+// secondary representation. Equality covers the whole input; no ignored
+// content.
 func VerifyXML(expected, actual []byte, mode string) (map[string]any, error) {
 	if mode == "" {
 		mode = "exact"

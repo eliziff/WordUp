@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"github.com/eliziff/WordUp/internal/office"
 	"github.com/eliziff/WordUp/internal/project"
 	"strings"
 	"testing"
@@ -65,5 +66,46 @@ func TestExpectedXMLToolDiscovery(t *testing.T) {
 	}
 	if !found {
 		t.Fatal("direct XML verification not discoverable")
+	}
+}
+
+func TestXMLVerifySelectsPackagePartWithoutExtraction(t *testing.T) {
+	root := t.TempDir()
+	pkg := office.BlankPackage()
+	pkg.Files["word/document.xml"] = []byte(`<w:document xmlns:w="` + office.W + `"><w:body><w:p><w:r><w:t>keep</w:t></w:r></w:p></w:body></w:document>`)
+	data, err := pkg.Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := project.Write(root, "sample.docx", data, ""); err != nil {
+		t.Fatal(err)
+	}
+	expected := pkg.Files["word/document.xml"]
+	if err := project.Write(root, "expected.xml", expected, ""); err != nil {
+		t.Fatal(err)
+	}
+	e := &Engine{Root: root}
+	params := Parameters{Reference: "expected.xml", Path: "sample.docx", Part: "word/document.xml"}
+	if result, err := e.Call(context.Background(), "xml.verify", params); err != nil || result.(map[string]any)["matches_expected"] != true {
+		t.Fatalf("package part did not compare directly: result=%v err=%v", result, err)
+	}
+	pkg.Files["word/document.xml"] = []byte(`<w:document xmlns:w="` + office.W + `"><w:body><w:p><w:r><w:t>changed</w:t></w:r></w:p></w:body></w:document>`)
+	changed, err := pkg.Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := project.Write(root, "sample.docx", changed, ""); err != nil {
+		t.Fatal(err)
+	}
+	if result, err := e.Call(context.Background(), "xml.compare", params); err != nil || result.(map[string]any)["equal"] == true {
+		t.Fatalf("changed package part unexpectedly compared equal: result=%v err=%v", result, err)
+	}
+	for _, part := range []string{"../word/document.xml", "word/missing.xml"} {
+		params.Part = part
+		if _, err := e.Call(context.Background(), "xml.verify", params); err == nil {
+			t.Fatal("unsafe or missing package part accepted", part)
+		} else if !strings.Contains(err.Error(), "XML package part") && !strings.Contains(err.Error(), "unsafe") {
+			t.Fatalf("unexpected part error for %s: %v", part, err)
+		}
 	}
 }

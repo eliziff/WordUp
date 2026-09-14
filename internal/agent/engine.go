@@ -213,7 +213,11 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 			if err != nil {
 				return nil, err
 			}
-			return project.Read(filepath.Dir(full), filepath.Base(full))
+			data, err := project.Read(filepath.Dir(full), filepath.Base(full))
+			if err != nil {
+				return nil, err
+			}
+			return office.XMLInput(data, p.Part)
 		}
 		a, err := read(p.Reference)
 		if err != nil {

@@ -152,7 +152,10 @@ The standalone `WU_DetectStructure(document)` returns `result(paragraphIndex, WU
 `component.list`, `component.get`, `component.add`, `component.status`, and `component.diff` expose editable components. Pass `component` for a built-in, or `path` for a local directory containing `component.json` and its listed files. `component.add` and `component.diff` accept declared string `parameters`; `module_prefix` is currently the typed adaptation seam and must be a valid VBA identifier. Undeclared parameters and manifest parameters without a typed adapter are rejected. Installation writes ordinary source and records its initial SHA-256 hashes, provenance, and applied parameters in `.wordwright/components.json`; repeating the same unchanged installation is idempotent, while different parameters, adapted source, or a colliding file are never overwritten.
 
 `xml.verify` compares expected XML `reference` directly with actual XML `path`.
-Copy starting Word XML and edit only intended differences to create the expectation.
-Comparison defaults to exact bytes; `comparison: "semantic"` explicitly selects
-namespace-aware equality without ignored content. Mismatch returns an error plus
-hashes and difference locations. This command reads XML; it does not execute Word.
+Set `part` (for example `word/document.xml`) when either path is a DOCX/DOTM
+package; the named package part is selected in memory, so no extraction fixture
+is needed. Copy starting Word XML and edit only intended differences to create
+the expectation. Comparison defaults to exact bytes; `comparison: "semantic"`
+explicitly selects namespace-aware equality without ignored content. Mismatch
+returns an error plus hashes and difference locations. This command reads XML;
+it does not execute Word.
