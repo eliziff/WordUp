@@ -192,7 +192,7 @@ func lineRegistrations(files map[string][]byte, pattern *regexp.Regexp, kind str
 	rows := []map[string]any{}
 	for _, path := range paths {
 		for lineNumber, line := range strings.Split(strings.ReplaceAll(string(files[path]), "\r\n", "\n"), "\n") {
-			code := CommentFree(line)
+			code := registrationCode(line)
 			if !pattern.MatchString(code) {
 				continue
 			}
@@ -200,6 +200,39 @@ func lineRegistrations(files map[string][]byte, pattern *regexp.Regexp, kind str
 		}
 	}
 	return rows
+}
+
+// registrationCode removes comments and string literals before the lexical
+// wiring scan. A macro may legitimately mention "CommandBars.Controls.Add"
+// in a message or diagnostic without registering a menu.
+func registrationCode(line string) string {
+	line = CommentFree(line)
+	var out strings.Builder
+	out.Grow(len(line))
+	quoted := false
+	for i := 0; i < len(line); i++ {
+		if quoted {
+			if line[i] == '"' {
+				out.WriteByte(' ')
+				if i+1 < len(line) && line[i+1] == '"' {
+					out.WriteByte(' ')
+					i++
+					continue
+				}
+				quoted = false
+				continue
+			}
+			out.WriteByte(' ')
+			continue
+		}
+		if line[i] == '"' {
+			quoted = true
+			out.WriteByte(' ')
+			continue
+		}
+		out.WriteByte(line[i])
+	}
+	return out.String()
 }
 
 func ribbonInventory(files map[string][]byte, publicNames map[string]bool) []map[string]any {
