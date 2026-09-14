@@ -107,7 +107,11 @@ var formEventSuffixes = map[string]bool{
 }
 
 var hotkeyRegistration = regexp.MustCompile(`(?i)\b(?:keybindings\s*\.\s*add|application\s*\.\s*onkey|(^|[^a-z])onkey)\b`)
-var contextMenuRegistration = regexp.MustCompile(`(?i)\b(?:commandbars\s*\(|controls\s*\.\s*add|commandbarcontrol)\b`)
+
+// A CommandBars lookup is not a registration by itself. Require the Add
+// call, while still recognizing both the collection and direct CommandBars
+// forms used by Word's object model.
+var contextMenuRegistration = regexp.MustCompile(`(?i)\b(?:commandbars\s*(?:\([^)]*\))?\s*\.\s*(?:controls\s*\.\s*)?add|commandbarcontrols?\s*\.\s*add)\b`)
 
 type componentLock struct {
 	Schema     int `json:"schema"`
