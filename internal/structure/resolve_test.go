@@ -16,8 +16,12 @@ func TestResolveKeepsOutlineAndDemotesOrdinaryList(t *testing.T) {
 	if rows[1]["resolved_structure"].(map[string]any)["role"] == "heading" {
 		t.Fatal("ordinary sentence became heading")
 	}
-	if rows[2]["resolved_structure"].(map[string]any)["role"] != "table" {
+	table := rows[2]["resolved_structure"].(map[string]any)
+	if table["role"] != "table" {
 		t.Fatal(rows[2])
+	}
+	if table["level"] != 0 || table["parent_paragraph"] != 1 || table["ambiguous"] != false {
+		t.Fatalf("non-body result did not preserve contract defaults: %#v", table)
 	}
 	if rows[3]["resolved_structure"].(map[string]any)["role"] != "heading" || rows[3]["resolved_structure"].(map[string]any)["level"] != 2 {
 		t.Fatal(rows[3])

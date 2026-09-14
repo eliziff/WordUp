@@ -19,7 +19,7 @@ func Resolve(rows []map[string]any) map[string]any {
 		score, level := 0, 0
 		evidence := []string{}
 		if role := semanticRole(row); role != "" {
-			resolved := map[string]any{"role": role, "candidate_score": 100, "confidence": 100, "evidence": []string{"semantic-style-or-context"}}
+			resolved := map[string]any{"role": role, "level": 0, "parent_paragraph": 0, "candidate_score": 100, "confidence": 100, "ambiguous": false, "evidence": []string{"semantic-style-or-context"}}
 			if role == "quotation" || role == "abstract" {
 				attachParent(resolved, rows, parents)
 			}
@@ -27,11 +27,11 @@ func Resolve(rows []map[string]any) map[string]any {
 			continue
 		}
 		if role := frontMatter[i]; role != "" {
-			row["resolved_structure"] = map[string]any{"role": role, "candidate_score": 85, "confidence": 85, "evidence": []string{"front-matter-layout"}}
+			row["resolved_structure"] = map[string]any{"role": role, "level": 0, "parent_paragraph": 0, "candidate_score": 85, "confidence": 85, "ambiguous": false, "evidence": []string{"front-matter-layout"}}
 			continue
 		}
 		if context != "body" || strings.TrimSpace(text) == "" {
-			resolved := map[string]any{"role": fallbackRole(context, text), "candidate_score": score, "confidence": 100, "evidence": evidence}
+			resolved := map[string]any{"role": fallbackRole(context, text), "level": 0, "parent_paragraph": 0, "candidate_score": score, "confidence": 100, "ambiguous": false, "evidence": evidence}
 			if resolved["role"] != "blank" {
 				attachParent(resolved, rows, parents)
 			}
@@ -140,7 +140,9 @@ func Resolve(rows []map[string]any) map[string]any {
 			resolved := map[string]any{"role": role, "level": level, "parent_paragraph": parent, "candidate_score": score, "confidence": clamp(score), "ambiguous": ambiguous, "evidence": evidence}
 			addResolutionAlternatives(resolved, alternatives, contradictions)
 			if parent > 0 {
-				resolved["parent_source_id"] = rows[parent-1]["source_id"]
+				if sourceID := rows[parent-1]["source_id"]; sourceID != nil && sourceID != "" {
+					resolved["parent_source_id"] = sourceID
+				}
 			}
 			if ambiguous {
 				ambiguities++
@@ -318,7 +320,9 @@ func attachParent(resolved map[string]any, rows []map[string]any, parents [10]in
 	for level := len(parents) - 1; level > 0; level-- {
 		if paragraph := parents[level]; paragraph > 0 {
 			resolved["parent_paragraph"] = paragraph
-			resolved["parent_source_id"] = rows[paragraph-1]["source_id"]
+			if sourceID := rows[paragraph-1]["source_id"]; sourceID != nil && sourceID != "" {
+				resolved["parent_source_id"] = sourceID
+			}
 			return
 		}
 	}
