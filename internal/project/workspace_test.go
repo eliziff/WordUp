@@ -300,6 +300,26 @@ func TestGuardedWrites(t *testing.T) {
 		}
 	}
 }
+
+func TestSourceStampsRejectsMetadataSymlink(t *testing.T) {
+	w := newWorkspace(t)
+	target := filepath.Join(w.Root, "project.json")
+	backup := filepath.Join(w.Root, ".project.json.wordup-test-backup")
+	if err := os.Rename(target, backup); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		_ = os.Remove(target)
+		_ = os.Rename(backup, target)
+	})
+	if err := os.Symlink(backup, target); err != nil {
+		t.Skipf("metadata symlinks unavailable: %v", err)
+	}
+	if _, err := sourceStamps(w.Root, nil); err == nil || !strings.Contains(err.Error(), "workspace metadata symlink is not accepted: project.json") {
+		t.Fatalf("metadata symlink was followed: %v", err)
+	}
+}
+
 func TestSpecimenWorkspaceRoundTripAndControlledEdit(t *testing.T) {
 	src := os.Getenv("WORDUP_SPECIMEN")
 	if src == "" {

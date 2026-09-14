@@ -547,7 +547,7 @@ func sourceStamps(root string, previous map[string]fileStamp) (map[string]fileSt
 	}
 	for _, rel := range []string{"project.json", ".wordwright/base.opc", ".wordwright/index.json"} {
 		path := filepath.Join(root, filepath.FromSlash(rel))
-		info, err := os.Stat(path)
+		info, err := workspaceFileInfo(path, rel)
 		if err != nil {
 			return nil, err
 		}
@@ -557,7 +557,7 @@ func sourceStamps(root string, previous map[string]fileStamp) (map[string]fileSt
 	}
 	rel := componentLockSource
 	path := filepath.Join(root, filepath.FromSlash(rel))
-	if info, err := os.Stat(path); err == nil {
+	if info, err := workspaceFileInfo(path, rel); err == nil {
 		if hashErr := record(rel, path, info); hashErr != nil {
 			return nil, hashErr
 		}
@@ -596,6 +596,23 @@ func sourceStamps(root string, previous map[string]fileStamp) (map[string]fileSt
 		}
 	}
 	return result, nil
+}
+
+// sourceStamps reads metadata outside Under/Read, so check the final path
+// explicitly. Without this guard a metadata symlink could make the resident
+// cache hash a file outside the workspace after the workspace was opened.
+func workspaceFileInfo(path, rel string) (os.FileInfo, error) {
+	info, err := os.Lstat(path)
+	if err != nil {
+		return nil, err
+	}
+	if info.Mode()&os.ModeSymlink != 0 {
+		return nil, fmt.Errorf("workspace metadata symlink is not accepted: %s", rel)
+	}
+	if !info.Mode().IsRegular() {
+		return nil, fmt.Errorf("workspace metadata is not a regular file: %s", rel)
+	}
+	return info, nil
 }
 
 var workspaceMetadataPaths = [...]string{"project.json", ".wordwright/base.opc", ".wordwright/index.json"}
