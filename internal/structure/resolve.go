@@ -51,6 +51,12 @@ func Resolve(rows []map[string]any) map[string]any {
 				evidence = append(evidence, "coherent-style-family")
 			}
 		}
+		if level == 0 {
+			if n := headingLevelFromStyle(row); n > 0 {
+				level = n
+				evidence = append(evidence, "heading-style-level")
+			}
+		}
 		if headingStyle(style) {
 			score += 30
 			evidence = append(evidence, "heading-style-name")
@@ -220,6 +226,28 @@ func intValue(v any) (int, bool) {
 func headingStyle(s string) bool {
 	s = strings.ToLower(s)
 	return strings.Contains(s, "heading") || strings.Contains(s, "title") || strings.Contains(s, "head")
+}
+
+func headingLevelFromStyle(row map[string]any) int {
+	parts := []string{}
+	if id, _ := row["style_id"].(string); id != "" {
+		parts = append(parts, id)
+	}
+	if chain, ok := row["style_chain"].([]map[string]any); ok && len(chain) > 0 {
+		if name, _ := chain[0]["name"].(string); name != "" {
+			parts = append(parts, name)
+		}
+	}
+	name := strings.ToLower(strings.Join(parts, " "))
+	if !strings.Contains(name, "heading") && !strings.Contains(name, "outline") {
+		return 0
+	}
+	for i := len(name) - 1; i >= 0; i-- {
+		if name[i] >= '1' && name[i] <= '9' {
+			return int(name[i] - '0')
+		}
+	}
+	return 0
 }
 func listStyle(s string) bool { return strings.Contains(strings.ToLower(s), "list") }
 func hasNativeHeading(row map[string]any) bool {

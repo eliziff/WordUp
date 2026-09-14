@@ -51,6 +51,7 @@ func CompareStructureSilver(root, reference string, limit int) (map[string]any, 
 	mismatchFields := map[string]int{}
 	roleConfusions := map[string]int{}
 	roleExamples := map[string]any{}
+	parentMismatches := map[string]int{}
 	for _, expectedDocument := range silver.Documents {
 		path, err := project.Under(root, filepath.ToSlash(expectedDocument.Source))
 		if err != nil {
@@ -111,6 +112,14 @@ func CompareStructureSilver(root, reference string, limit int) (map[string]any, 
 			if compareStructureValue(&mismatches, limit, expectedDocument.Source, id, "parent", expectedParent, actualParent) {
 				mismatchCount++
 				mismatchFields["parent"]++
+				switch {
+				case expectedParent == "":
+					parentMismatches["unexpected"]++
+				case actualParent == "":
+					parentMismatches["missing"]++
+				default:
+					parentMismatches["wrong"]++
+				}
 			}
 		}
 	}
@@ -118,7 +127,7 @@ func CompareStructureSilver(root, reference string, limit int) (map[string]any, 
 		"schema": silver.Schema, "silver_status": silver.Status,
 		"documents": len(silver.Documents), "paragraphs_compared": compared,
 		"mismatches": mismatches, "mismatch_count": mismatchCount,
-		"mismatch_fields": mismatchFields, "role_confusions": roleConfusions, "role_confusion_examples": roleExamples,
+		"mismatch_fields": mismatchFields, "role_confusions": roleConfusions, "role_confusion_examples": roleExamples, "parent_mismatches": parentMismatches,
 		"exact": mismatchCount == 0,
 	}, nil
 }
