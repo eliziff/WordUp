@@ -172,6 +172,7 @@ func TestTrackedRevisionEvidenceDoesNotDuplicateText(t *testing.T) {
 func TestTextObservationsKeepFieldLinkAndBookmarkEvidenceCompact(t *testing.T) {
 	p := office.BlankPackage()
 	p.Files["word/document.xml"] = []byte(`<w:document xmlns:w="` + office.W + `" xmlns:r="` + office.R + `"><w:body><w:p><w:bookmarkStart w:id="1" w:name="Cite"/><w:hyperlink r:id="rId5" w:anchor="Source"><w:r><w:t>citation</w:t></w:r></w:hyperlink><w:r><w:fldChar w:fldCharType="begin"/><w:instrText xml:space="preserve"> CITATION Source </w:instrText><w:fldChar w:fldCharType="separate"/><w:t>Source</w:t><w:fldChar w:fldCharType="end"/></w:r><w:bookmarkEnd w:id="1"/></w:p></w:body></w:document>`)
+	p.Files["word/_rels/document.xml.rels"] = []byte(`<Relationships xmlns="` + office.RelNS + `"><Relationship Id="rId5" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="https://example.test/source" TargetMode="External"/></Relationships>`)
 	rows, err := TextObservations(p)
 	if err != nil || len(rows) != 1 {
 		t.Fatalf("field/link observations: %v %v", rows, err)
@@ -180,7 +181,7 @@ func TestTextObservationsKeepFieldLinkAndBookmarkEvidenceCompact(t *testing.T) {
 		t.Fatalf("displayed text changed: %#v", rows[0]["text"])
 	}
 	links, ok := rows[0]["hyperlink_evidence"].([]map[string]any)
-	if !ok || len(links) != 1 || links[0]["relationship_id"] != "rId5" || links[0]["anchor"] != "Source" {
+	if !ok || len(links) != 1 || links[0]["relationship_id"] != "rId5" || links[0]["anchor"] != "Source" || links[0]["relationship_target"] != "https://example.test/source" || links[0]["relationship_target_mode"] != "External" {
 		t.Fatalf("link evidence missing: %#v", rows[0]["hyperlink_evidence"])
 	}
 	fields, ok := rows[0]["field_evidence"].([]map[string]any)
@@ -201,12 +202,13 @@ func TestTextObservationsKeepFieldLinkAndBookmarkEvidenceCompact(t *testing.T) {
 func TestTextObservationsKeepArtworkEvidenceSourceLocated(t *testing.T) {
 	p := office.BlankPackage()
 	p.Files["word/document.xml"] = []byte(`<w:document xmlns:w="` + office.W + `" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture" xmlns:r="` + office.R + `"><w:body><w:p><w:r><w:drawing><wp:inline><wp:extent cx="123" cy="456"/><wp:docPr id="4" name="Figure 4" descr="Figure alt"/><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:blipFill><a:blip r:embed="rId9"/></pic:blipFill></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p></w:body></w:document>`)
+	p.Files["word/_rels/document.xml.rels"] = []byte(`<Relationships xmlns="` + office.RelNS + `"><Relationship Id="rId9" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/figure.png"/></Relationships>`)
 	rows, err := TextObservations(p)
 	if err != nil || len(rows) != 1 {
 		t.Fatalf("artwork observations: %v %v", rows, err)
 	}
 	artwork, ok := rows[0]["artwork_evidence"].([]map[string]any)
-	if !ok || len(artwork) != 1 || artwork[0]["kind"] != "drawing" || artwork[0]["relationship_id"] != "rId9" || artwork[0]["extent_cx"] != "123" || artwork[0]["extent_cy"] != "456" || artwork[0]["descr"] != "Figure alt" {
+	if !ok || len(artwork) != 1 || artwork[0]["kind"] != "drawing" || artwork[0]["relationship_id"] != "rId9" || artwork[0]["relationship_target"] != "media/figure.png" || artwork[0]["extent_cx"] != "123" || artwork[0]["extent_cy"] != "456" || artwork[0]["descr"] != "Figure alt" {
 		t.Fatalf("artwork evidence missing: %#v", rows[0]["artwork_evidence"])
 	}
 }

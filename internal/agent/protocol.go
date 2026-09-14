@@ -28,7 +28,7 @@ func Tools() []Tool {
 			ds[i][1] = "Read a workspace file with its full-file SHA-256; optional offset and limit retrieve a bounded byte range for large reports or evidence."
 		}
 		if ds[i][0] == "reference.document" {
-			ds[i][1] = "Read exact theme1.xml, styles.xml, numbering.xml and available fontTable.xml parts with hashes, source-located section geometry, document/settings/relationship hashes, theme font resolution, paragraph/property observations, field/link/bookmark evidence, and artwork evidence from path."
+			ds[i][1] = "Read exact theme1.xml, styles.xml, numbering.xml and available fontTable.xml parts with hashes, source-located section geometry, document/settings/relationship hashes, theme font resolution, paragraph/property observations, field/link/bookmark evidence, and artwork evidence with relationship targets from path."
 		}
 	}
 	ds = append(ds, [2]string{"structure.source", "Return an editable standalone VBA paragraph detection core, separate from house-style mapping. Read-only native evidence plus unresolved marker candidates; no installation or execution."})

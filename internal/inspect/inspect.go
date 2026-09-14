@@ -157,6 +157,40 @@ func textObservationsPart(p *office.Package, part string) ([]map[string]any, err
 	if len(b) == 0 {
 		return []map[string]any{}, nil
 	}
+	type relationship struct {
+		target, kind, mode string
+	}
+	relationships := map[string]relationship{}
+	relationshipPart := filepath.ToSlash(filepath.Join(filepath.Dir(part), "_rels", filepath.Base(part)+".rels"))
+	if raw := p.Files[relationshipPart]; len(raw) > 0 {
+		relationshipSpans, err := office.XMLSpans(raw)
+		if err != nil {
+			return nil, err
+		}
+		for _, span := range relationshipSpans {
+			if span.Name.Space != office.RelNS || span.Name.Local != "Relationship" || span.Depth != 1 {
+				continue
+			}
+			id := span.Attribute("", "Id")
+			if id != "" {
+				relationships[id] = relationship{target: span.Attribute("", "Target"), kind: span.Attribute("", "Type"), mode: span.Attribute("", "TargetMode")}
+			}
+		}
+	}
+	attachRelationship := func(item map[string]any) {
+		id, _ := item["relationship_id"].(string)
+		if rel, ok := relationships[id]; ok {
+			if rel.target != "" {
+				item["relationship_target"] = rel.target
+			}
+			if rel.kind != "" {
+				item["relationship_type"] = rel.kind
+			}
+			if rel.mode != "" {
+				item["relationship_target_mode"] = rel.mode
+			}
+		}
+	}
 	spans, e := office.XMLSpans(b)
 	if e != nil {
 		return nil, e
@@ -205,6 +239,7 @@ func textObservationsPart(p *office.Package, part string) ([]map[string]any, err
 					for _, name := range []string{"id", "embed", "link"} {
 						if value := x.Attribute(office.R, name); value != "" {
 							item["relationship_id"] = value
+							attachRelationship(item)
 							break
 						}
 					}
@@ -272,6 +307,7 @@ func textObservationsPart(p *office.Package, part string) ([]map[string]any, err
 				if value := x.Attribute(office.W, "history"); value != "" {
 					link["history"] = value
 				}
+				attachRelationship(link)
 				hyperlinks = append(hyperlinks, link)
 			case "fldSimple":
 				field := map[string]any{"kind": "simple", "xml_start": x.Start, "xml_end": x.End}
