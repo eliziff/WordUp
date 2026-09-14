@@ -1,7 +1,7 @@
 Attribute VB_Name = "WordUpStructure"
 Option Explicit
 
-' WordUp structure contract 1.0.0. MIT licensed; editable and dependency-free.
+' WordUp structure contract 1.1.0. MIT licensed; editable and dependency-free.
 ' Detection is separate from publication-specific style mapping.
 Public Const WU_ROLE As Long = 0
 Public Const WU_LEVEL As Long = 1
@@ -16,7 +16,12 @@ Public Const WU_END As Long = 9
 Public Const WU_MARKER As Long = 10
 Public Const WU_LIST_LABEL As Long = 11
 Public Const WU_CONTEXT As Long = 12
-Public Const WU_COLUMNS As Long = 13
+Public Const WU_SOURCE_ID As Long = 13
+Public Const WU_PARENT_SOURCE_ID As Long = 14
+Public Const WU_PROVENANCE As Long = 15
+Public Const WU_CONTRADICTION As Long = 16
+Public Const WU_ALTERNATIVES As Long = 17
+Public Const WU_COLUMNS As Long = 18
 
 ' Returns result(paragraphIndex, WU_*). Positions are Word UTF-16 story offsets.
 ' This procedure reads the document and never edits it.
@@ -72,7 +77,7 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
             If plausible Then
                 outline = paragraph.OutlineLevel
                 If outline >= 1 And outline <= 9 Then
-                    level = outline: score = score + 100: WU_AddEvidence evidence, "native-outline"
+                    level = outline: score = score + 55: WU_AddEvidence evidence, "native-outline"
                 End If
                 If scope Is Nothing Then Set scope = paragraph.Range
                 keepNext = (paragraph.KeepWithNext <> 0)
@@ -95,6 +100,11 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
         result(i - 1, WU_CONTEXT) = context: result(i - 1, WU_EVIDENCE) = evidence
         result(i - 1, WU_CONFIDENCE) = score: result(i - 1, WU_LEVEL) = level
         result(i - 1, WU_PARENT) = 0: result(i - 1, WU_AMBIGUOUS) = False
+        result(i - 1, WU_SOURCE_ID) = "main:" & CStr(startPosition) & ":" & CStr(endPosition)
+        result(i - 1, WU_PARENT_SOURCE_ID) = vbNullString
+        result(i - 1, WU_PROVENANCE) = "Word object model"
+        result(i - 1, WU_CONTRADICTION) = vbNullString
+        result(i - 1, WU_ALTERNATIVES) = marker
     Next paragraph
     WU_ResolveStyleFamilies result, count
     WU_ResolveMarkerLadder result, count
@@ -102,6 +112,8 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
         score = CLng(result(i, WU_CONFIDENCE)): level = CLng(result(i, WU_LEVEL))
         If result(i, WU_CONTEXT) <> "body" Then
             result(i, WU_ROLE) = result(i, WU_CONTEXT)
+        ElseIf Len(Trim$(CStr(result(i, WU_TEXT)))) = 0 Then
+            result(i, WU_ROLE) = "blank"
         ElseIf level > 0 And score >= 35 Then
             result(i, WU_ROLE) = "heading": result(i, WU_PARENT) = WU_FindParent(parentAt, level)
             parentAt(level) = i + 1: WU_ClearDeeper parentAt, level
@@ -110,6 +122,8 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
         Else
             result(i, WU_ROLE) = "body"
         End If
+        If result(i, WU_ROLE) <> "heading" And result(i, WU_ROLE) <> "blank" And CLng(result(i, WU_PARENT)) = 0 Then result(i, WU_PARENT) = WU_FindDeepestParent(parentAt)
+        If CLng(result(i, WU_PARENT)) > 0 Then result(i, WU_PARENT_SOURCE_ID) = result(CLng(result(i, WU_PARENT)) - 1, WU_SOURCE_ID)
         If score > 100 Then result(i, WU_CONFIDENCE) = 100
         If score < 0 Then result(i, WU_CONFIDENCE) = 0
     Next i
@@ -139,7 +153,7 @@ Private Sub WU_ResolveStyleFamilies(ByRef result As Variant, ByVal count As Long
         If CLng(result(i, WU_LEVEL)) = 0 And result(i, WU_CONTEXT) = "body" And CLng(result(i, WU_CONFIDENCE)) >= 25 Then
             slot = WU_StyleSlot(keys, capacity, CStr(result(i, WU_STYLE)))
             If votes(slot) >= 2 And Not conflict(slot) Then
-                result(i, WU_LEVEL) = levels(slot): result(i, WU_CONFIDENCE) = CLng(result(i, WU_CONFIDENCE)) + 30
+                result(i, WU_LEVEL) = levels(slot): result(i, WU_CONFIDENCE) = CLng(result(i, WU_CONFIDENCE)) + 15
                 result(i, WU_EVIDENCE) = WU_Appended(CStr(result(i, WU_EVIDENCE)), "coherent-style-family")
             End If
         End If
@@ -188,8 +202,16 @@ Private Sub WU_ResolveMarkerLadder(ByRef result As Variant, ByVal count As Long)
 End Sub
 
 Public Function WU_ParseMarker(ByVal text As String) As String
-    Dim at As Long, prefix As String, rest As String, i As Long, c As String
+    Dim at As Long, prefix As String, rest As String, i As Long, c As String, lowerText As String
     text = Trim$(Replace(Replace(text, vbTab, " "), ChrW(160), " "))
+    lowerText = LCase$(text)
+    If Left$(lowerText, 5) = "part " Or Left$(lowerText, 8) = "chapter " Then
+        at = InStr(text, ":"): If at = 0 Then at = InStr(text, " - ")
+        If at > 1 Then
+            prefix = Trim$(Mid$(text, InStr(text, " ") + 1, at - InStr(text, " ") - 1))
+            If IsNumeric(prefix) Or WU_WordNumber(prefix) > 0 Or WU_IsRoman(prefix) Then WU_ParseMarker = "part:" & prefix: Exit Function
+        End If
+    End If
     at = InStr(text, "."): If at < 2 Or at > 8 Then Exit Function
     prefix = Left$(text, at - 1): rest = Mid$(text, at + 1)
     If Left$(rest, 1) <> " " Or Len(Trim$(rest)) = 0 Then Exit Function
@@ -201,7 +223,9 @@ Public Function WU_ParseMarker(ByVal text As String) As String
 End Function
 
 Private Function WU_MarkerFamily(ByVal marker As String) As String
-    If IsNumeric(marker) Then
+    If Left$(LCase$(marker), 5) = "part:" Then
+        WU_MarkerFamily = "named"
+    ElseIf IsNumeric(marker) Then
         WU_MarkerFamily = "decimal"
     ElseIf Len(marker) = 1 And InStr(1, "IVXLCDM", marker, vbBinaryCompare) = 0 Then
         WU_MarkerFamily = "alpha"
@@ -211,6 +235,12 @@ Private Function WU_MarkerFamily(ByVal marker As String) As String
 End Function
 
 Private Function WU_MarkerValue(ByVal marker As String, ByVal family As String) As Long
+    If family = "named" Then
+        marker = Mid$(marker, 6)
+        If WU_WordNumber(marker) > 0 Then WU_MarkerValue = WU_WordNumber(marker): Exit Function
+        If IsNumeric(marker) Then WU_MarkerValue = CLng(marker): Exit Function
+        marker = UCase$(marker): family = "roman"
+    End If
     If family = "decimal" Then WU_MarkerValue = CLng(marker): Exit Function
     If family = "alpha" Then WU_MarkerValue = AscW(marker) - 64: Exit Function
     Dim i As Long, n As Long, last As Long, current As Long
@@ -220,6 +250,29 @@ Private Function WU_MarkerValue(ByVal marker As String, ByVal family As String) 
         If current < last Then n = n - current Else n = n + current: last = current
     Next i
     WU_MarkerValue = n
+End Function
+
+Private Function WU_WordNumber(ByVal value As String) As Long
+    Select Case LCase$(Trim$(value))
+        Case "one": WU_WordNumber = 1
+        Case "two": WU_WordNumber = 2
+        Case "three": WU_WordNumber = 3
+        Case "four": WU_WordNumber = 4
+        Case "five": WU_WordNumber = 5
+        Case "six": WU_WordNumber = 6
+        Case "seven": WU_WordNumber = 7
+        Case "eight": WU_WordNumber = 8
+        Case "nine": WU_WordNumber = 9
+        Case "ten": WU_WordNumber = 10
+    End Select
+End Function
+
+Private Function WU_IsRoman(ByVal value As String) As Boolean
+    Dim i As Long
+    value = UCase$(Trim$(value)): If Len(value) = 0 Then Exit Function
+    For i = 1 To Len(value): If InStr(1, "IVXLCDM", Mid$(value, i, 1), vbBinaryCompare) = 0 Then Exit Function
+    Next i
+    WU_IsRoman = True
 End Function
 
 Private Function WU_HeadingStyle(ByVal name As String) As Boolean
@@ -251,6 +304,10 @@ Private Function WU_Appended(ByVal evidence As String, ByVal item As String) As 
 End Function
 Private Function WU_FindParent(ByRef parents() As Long, ByVal level As Long) As Long
     Dim i As Long: For i = level - 1 To 1 Step -1: If parents(i) > 0 Then WU_FindParent = parents(i): Exit Function
+    Next i
+End Function
+Private Function WU_FindDeepestParent(ByRef parents() As Long) As Long
+    Dim i As Long: For i = 9 To 1 Step -1: If parents(i) > 0 Then WU_FindDeepestParent = parents(i): Exit Function
     Next i
 End Function
 Private Sub WU_ClearDeeper(ByRef parents() As Long, ByVal level As Long)
