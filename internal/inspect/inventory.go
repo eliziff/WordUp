@@ -95,11 +95,15 @@ func ribbonDeclarationMismatch(expected string, actual Symbol) string {
 // and UserForm itself. The inventory is deliberately lexical: native compile
 // and event dispatch remain the authority for a particular Office build.
 var formEventSuffixes = map[string]bool{
-	"activate": true, "beforeupdate": true, "change": true, "click": true,
-	"dblclick": true, "deactivate": true, "enter": true, "exit": true,
+	"activate": true, "addcontrol": true, "afterupdate": true,
+	"beforedragover": true, "beforedroporpaste": true, "beforeupdate": true,
+	"change": true, "click": true, "dblclick": true, "deactivate": true,
+	"dropbuttonclick": true, "enter": true, "error": true, "exit": true,
 	"initialize": true, "keydown": true, "keypress": true, "keyup": true,
-	"mousedown": true, "mousemove": true, "mouseup": true, "queryclose": true,
-	"remove": true, "resize": true, "scroll": true, "terminate": true,
+	"layout": true, "mousedown": true, "mousemove": true, "mouseup": true,
+	"queryclose": true, "remove": true, "removecontrol": true, "resize": true,
+	"scroll": true, "spindown": true, "spinup": true, "terminate": true,
+	"update": true,
 }
 
 var hotkeyRegistration = regexp.MustCompile(`(?i)\b(?:keybindings\s*\.\s*add|application\s*\.\s*onkey|(^|[^a-z])onkey)\b`)
@@ -162,8 +166,7 @@ func formEventRow(file string, symbol Symbol, controls map[string]bool, designKn
 	if i := strings.LastIndexByte(name, '_'); i > 0 {
 		control, event = name[:i], strings.ToLower(name[i+1:])
 	}
-	lifecycle := strings.EqualFold(name, "UserForm_Initialize") || strings.EqualFold(name, "UserForm_Terminate") ||
-		strings.EqualFold(name, "UserForm_QueryClose")
+	lifecycle := strings.HasPrefix(strings.ToLower(name), "userform_")
 	wiring := "unknown"
 	if lifecycle {
 		wiring = "form_lifecycle"
