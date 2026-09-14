@@ -1,10 +1,19 @@
 param(
- [string]$Executable = (Join-Path $PSScriptRoot '../dist/wordup-windows-x64.exe'),
- [string]$Destination = (Join-Path $PSScriptRoot '../dist/windows-x64')
+ [ValidateSet('windows/amd64','windows/arm64')]
+ [string]$Platform = 'windows/amd64',
+ [string]$Executable = '',
+ [string]$Destination = ''
 )
 $ErrorActionPreference = 'Stop'
 [Diagnostics.Process]::GetCurrentProcess().PriorityClass = 'BelowNormal'
 $root = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+$architecture = if ($Platform -eq 'windows/arm64') { 'arm64' } else { 'x64' }
+if ([string]::IsNullOrWhiteSpace($Executable)) {
+ $Executable = Join-Path $root ('dist/wordup-windows-' + $architecture + '.exe')
+}
+if ([string]::IsNullOrWhiteSpace($Destination)) {
+ $Destination = Join-Path $root ('dist/windows-' + $architecture)
+}
 $destinationRoot = [IO.Path]::GetFullPath($Destination)
 $executablePath = (Resolve-Path -LiteralPath $Executable).Path
 $required = @('office-tools/WordUp.OfficeTools.exe','office-tools/OPENXML-LICENSE','wordup-oletools/wordup-oletools.exe','wordup-oletools/DEPENDENCIES.txt','wordup-oletools/licenses')
@@ -42,18 +51,21 @@ New-Item -ItemType Directory -Path $licenseDirectory | Out-Null
 foreach ($relative in $runtimeNotices) {
  Copy-Item -LiteralPath (Join-Path $root $relative) -Destination $licenseDirectory
 }
-@'
-WordUp Windows x64 development distribution
+@"
+WordUp Windows $architecture development distribution
 
 Keep wordup.exe, office-tools and wordup-oletools together. Native template execution requires installed Microsoft Word. Go and Python are not required on the end user's computer. OfficeTools uses Windows .NET Framework 4.8. VBA signing additionally requires Windows SDK SignTool and Office SIP.
+
+The main executable targets Windows $Platform. The bundled oletools helper is a
+portable x64 Windows payload and relies on Windows x64 emulation on ARM64.
 
 Run wordup.exe help and wordup.exe doctor first. Native execution requires --execute. This package is not a claim that every template or workflow has passed verification.
 
 Source, documentation and dependency notices: https://github.com/eliziff/WordUp
 The source corresponding to a published binary must accompany its release; do not publish this development stage independently of that source.
-'@ | Set-Content -Encoding UTF8 -LiteralPath (Join-Path $destinationRoot 'README.txt')
+"@ | Set-Content -Encoding UTF8 -LiteralPath (Join-Path $destinationRoot 'README.txt')
 $files = @(Get-ChildItem -LiteralPath $destinationRoot -File -Recurse | Sort-Object FullName | ForEach-Object {
  [ordered]@{path=$_.FullName.Substring($destinationRoot.Length + 1).Replace('\','/'); bytes=$_.Length; sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()}
 })
-[ordered]@{schema=1; platform='windows/amd64'; files=$files} | ConvertTo-Json -Depth 5 | Set-Content -Encoding UTF8 -LiteralPath (Join-Path $destinationRoot 'manifest.json')
+[ordered]@{schema=1; platform=$Platform; files=$files} | ConvertTo-Json -Depth 5 | Set-Content -Encoding UTF8 -LiteralPath (Join-Path $destinationRoot 'manifest.json')
 Write-Output $destinationRoot
