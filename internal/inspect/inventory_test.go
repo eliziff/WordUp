@@ -102,3 +102,29 @@ func TestCheckInventoryReportsDuplicateModuleNames(t *testing.T) {
 	}
 	t.Fatal("duplicate module diagnostic missing")
 }
+
+func TestCheckInventoryReportsDerivedModuleName(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "workspace")
+	if _, err := project.New("DerivedModule", root); err != nil {
+		t.Fatal(err)
+	}
+	if err := project.Write(root, "vba/NoAttribute.bas", []byte("Option Explicit\nPublic Sub Run()\nEnd Sub\n"), ""); err != nil {
+		t.Fatal(err)
+	}
+	w, err := project.Open(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := Check(w)
+	if err != nil {
+		t.Fatal(err)
+	}
+	inventory := result["inventory"].(map[string]any)
+	modules := inventory["module_names"].([]map[string]any)
+	for _, module := range modules {
+		if module["file"] == "vba/NoAttribute.bas" && module["module"] == "NoAttribute" && module["derived"] == true {
+			return
+		}
+	}
+	t.Fatalf("filename-derived module was not inventoried: %#v", modules)
+}

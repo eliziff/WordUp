@@ -411,6 +411,18 @@ func CheckInventory(root string, files map[string][]byte, diagnostics *[]map[str
 			moduleNames = append(moduleNames, row)
 			key := strings.ToLower(name)
 			moduleByName[key] = append(moduleByName[key], row)
+		} else {
+			// The builder derives a missing VB_Name from the source filename.
+			// Keep the inventory aligned with that rule instead of silently
+			// dropping otherwise valid source-only modules.
+			ext := pathpkg.Ext(path)
+			name := strings.TrimSuffix(strings.TrimPrefix(path, "vba/"), ext)
+			if office.ValidIdentifier(name) {
+				row := map[string]any{"file": path, "module": name, "line": 1, "derived": true}
+				moduleNames = append(moduleNames, row)
+				key := strings.ToLower(name)
+				moduleByName[key] = append(moduleByName[key], row)
+			}
 		}
 		for _, symbol := range Symbols(strings.TrimSuffix(strings.TrimPrefix(path, "vba/"), pathpkg.Ext(path)), string(files[path])) {
 			if publicSymbol(symbol) {
