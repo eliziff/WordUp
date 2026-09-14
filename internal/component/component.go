@@ -224,7 +224,10 @@ func LoadBundle(dir string) (Manifest, error) {
 			return Manifest{}, fmt.Errorf("component.json file %d requires a path and must not embed source or binary data", i)
 		}
 		path := filepath.ToSlash(m.Files[i].Path)
-		if !fs.ValidPath(path) || path == "." || strings.ContainsAny(path, `\:`) {
+		// Bundle paths are a cross-platform wire format. Do not silently
+		// normalize a Windows spelling and then record a different source
+		// identity; the manifest must already use slash-separated paths.
+		if path != m.Files[i].Path || !fs.ValidPath(path) || path == "." || strings.ContainsAny(path, `\:`) {
 			return Manifest{}, fmt.Errorf("component.json file %d requires a canonical relative path: %q", i, m.Files[i].Path)
 		}
 		key := strings.ToLower(path)

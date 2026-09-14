@@ -477,6 +477,17 @@ func TestLocalBundleRejectsUnsafeSources(t *testing.T) {
 	}
 }
 
+func TestLocalBundleRejectsNonCanonicalBackslashPath(t *testing.T) {
+	bundle := t.TempDir()
+	manifest := Manifest{Schema: 1, ID: "noncanonical.path", Version: "1", License: "MIT", Provenance: "test", Files: []File{{Path: `assets\icon.bin`}}}
+	if err := project.Write(bundle, "component.json", project.JSON(manifest), ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := LoadBundle(bundle); err == nil || !strings.Contains(err.Error(), "canonical relative path") {
+		t.Fatalf("non-canonical component path was accepted: %v", err)
+	}
+}
+
 func TestLocalBundleRejectsCaseCollisionBeforePayloadReads(t *testing.T) {
 	bundle := t.TempDir()
 	manifest := Manifest{Schema: 1, ID: "duplicate.paths", Version: "1", License: "MIT", Provenance: "test", Files: []File{{Path: "assets/icon.bin"}, {Path: "assets/ICON.BIN"}}}
