@@ -807,9 +807,31 @@ func Status(root, id string) (map[string]any, error) {
 		}
 		rows = append(rows, row)
 	}
-	return map[string]any{"id": id, "version": installed.Version, "state": state, "files": rows,
+	result := map[string]any{"id": id, "version": installed.Version, "state": state, "files": rows,
 		"provenance": installed.Provenance, "license": installed.License, "manifest_sha256": installed.ManifestSHA256, "parameters": installed.Parameters,
-		"supported_platforms": installed.SupportedPlatforms, "ribbon_merges": installed.RibbonMerges, "compatibility": Compatibility(installed.SupportedPlatforms)}, nil
+		"supported_platforms": installed.SupportedPlatforms, "ribbon_merges": installed.RibbonMerges, "compatibility": Compatibility(installed.SupportedPlatforms)}
+	// Built-ins have a local starting version to compare against. Local bundles
+	// remain provenance-only after installation, so their current source cannot
+	// be guessed from an ID alone.
+	if bundled, getErr := Get(id); getErr == nil {
+		adapted, adaptErr := adapt(bundled, installed.Parameters)
+		if adaptErr == nil {
+			bundleHash := manifestHash(adapted)
+			result["bundled_version"] = adapted.Version
+			result["bundled_manifest_sha256"] = bundleHash
+			if installed.Version == adapted.Version && installed.ManifestSHA256 == bundleHash {
+				result["version_state"] = "current"
+			} else {
+				result["version_state"] = "outdated"
+			}
+		} else {
+			result["version_state"] = "unavailable"
+			result["version_error"] = adaptErr.Error()
+		}
+	} else {
+		result["version_state"] = "unknown"
+	}
+	return result, nil
 }
 
 func Diff(root, id string) (map[string]any, error) {

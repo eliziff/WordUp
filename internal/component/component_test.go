@@ -149,6 +149,9 @@ func TestAddTracksAndProtectsEditedComponent(t *testing.T) {
 	if compatibility, ok := status["compatibility"].(string); !ok || compatibility == "" {
 		t.Fatalf("status lost compatibility: %#v", status)
 	}
+	if status["version_state"] != "current" || status["bundled_version"] != installed.Version || status["bundled_manifest_sha256"] != installed.ManifestSHA256 {
+		t.Fatalf("status lost bundled version provenance: %#v", status)
+	}
 	if _, err = Add(root, "structure.detect"); err == nil {
 		t.Fatal("edited component overwritten")
 	}
