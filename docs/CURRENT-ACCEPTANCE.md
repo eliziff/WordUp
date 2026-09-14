@@ -33,6 +33,8 @@ The same fidelity-38 package passed an outside-repository package-only smoke run
 
 The fidelity-38 package-only component smoke also listed the bundled catalog, installed `structure.detect`, and returned `component.status` as clean/compatible with `component.diff` equal to true. This is installation/hash evidence; native VBA compilation remains blocked by the host boundary above.
 
+The same packaged x64 executable was then exercised from a disposable workspace with all eight bundled components. Every add was clean/compatible and every `component.diff` returned `equal=true`; the workspace `check` found zero diagnostics across nine parsed VBA modules, and an uncached build completed in 21.8 ms with a valid OPC package. `vba_compiled=false` remains explicit because this run did not execute Word. The workspace was removed after the run.
+
 ## Remaining completion gates
 
 The Rizzuto comment discrepancy is fixed by restoring character-collection traversal; tracked-formatting visibility is preserved explicitly. The selected-options baseline passes (`workspaces/alr-baseline/reports/full-rizzuto-with-alignment.json`, 67.914 s), and the complete output comparison passes with `equal=true`, `byte_identical=false`. Reopening saved Flat OPC was rejected as a shortcut because Word added font metadata; the final baseline ran the unchanged original on the original input instead.
