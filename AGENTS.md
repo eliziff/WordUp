@@ -2,6 +2,8 @@
 
 THIS PROJECT HAS ZERO USERS: NEVER PRESERVE A LEGACY SHIM, EXISTING WORKSPACE FORMAT, OR BACKWARD-COMPATIBILITY PATH.
 
+ALWAYS RUN GO THROUGH `tools/go.ps1`; NEVER USE `go`, `go run`, OR DEFAULT GO CACHE/TEMP PATHS DIRECTLY.
+
 Choose proportionate evidence of the user's intended outcome. When an expected artifact is useful, mechanically copy the starting Word XML and edit only the intended differences; compare it directly with XML captured after the operation in Word. Do not retype unchanged text, create annotation sidecars, or require per-paragraph explanations. Ordinary assertions may suffice for smaller changes. Test reusable behavior beyond its development example and investigate mismatches rather than automatically updating expectations. See [expected XML](docs/EXPECTED-RESULTS.md).
 
 You are controlling a local executable called WordUp. Complete the user's Word template work yourself; do not ask them to import modules, open VBE, configure a VM, or run/debug your tests manually.

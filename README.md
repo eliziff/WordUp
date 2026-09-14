@@ -51,6 +51,8 @@ There is no global agent configuration installer. Clients that support stdio MCP
 
 For reference-driven template work, use the [WordUp template-builder agent skill](docs/skills/wordup-template-builder/SKILL.md). It defines the minimum style, conversion, UI and native-evidence workflow, with a reusable acceptance plan.
 
+On Windows, run the pinned toolchain through `tools/go.ps1`. It keeps Go's build cache, module cache, and temporary work inside the repository tool area, disables redundant VCS probing, and keeps normal iterations offline. On a fresh checkout, fetch dependencies explicitly with `tools/go.ps1 -Online mod download`.
+
 ## Source format
 
 For legal-document projects, agents can reuse [Legal Structure Parser](https://github.com/eliziff/legal-structure-parser) and [Legal PDF Parser](https://github.com/eliziff/legal-pdf-parser). WordUp's generated agent instructions link to both. They are optional development tools; the executable and delivered templates do not require them. See [reuse guidance](docs/REUSE.md).
