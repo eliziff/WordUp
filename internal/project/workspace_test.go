@@ -104,12 +104,65 @@ func TestImportBuildPreservesCaseDistinctPackageParts(t *testing.T) {
 		t.Fatal(err)
 	}
 	for name, want := range map[string][]byte{
-		"customXml/item1.xml":  p.Files["customXml/item1.xml"],
+		"customXml/item1.xml": p.Files["customXml/item1.xml"],
 		"customXML/item3.xml": p.Files["customXML/item3.xml"],
 	} {
 		if !bytes.Equal(out.Files[name], want) {
 			t.Fatalf("case-distinct package part changed or disappeared: %s", name)
 		}
+	}
+}
+
+func TestRibbonMergeTargetUsesImportedPartSpelling(t *testing.T) {
+	const namespace = "http://schemas.microsoft.com/office/2009/07/customui"
+	base := office.BlankPackage()
+	baseRibbon := []byte(`<customUI xmlns="` + namespace + `"><ribbon><tabs><tab id="base"/></tabs></ribbon></customUI>`)
+	fragment := []byte(`<customUI xmlns="` + namespace + `"><ribbon><tabs><tab id="added"/></tabs></ribbon></customUI>`)
+	if err := base.MergeRibbon("customUI/customUI14.xml", baseRibbon); err != nil {
+		t.Fatal(err)
+	}
+	original, err := base.Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	input := filepath.Join(t.TempDir(), "ribbon-case.docx")
+	if err := os.WriteFile(input, original, 0600); err != nil {
+		t.Fatal(err)
+	}
+	root := filepath.Join(t.TempDir(), "workspace")
+	if _, err := Import(input, root); err != nil {
+		t.Fatal(err)
+	}
+	if err := Write(root, "assets/fragment.xml", fragment, ""); err != nil {
+		t.Fatal(err)
+	}
+	lock := map[string]any{"schema": 1, "components": map[string]any{
+		"ribbon.case": map[string]any{"ribbon_merges": []map[string]string{{"source": "assets/fragment.xml", "target": "customui/customui14.xml"}}},
+	}}
+	if err := Write(root, componentLockSource, JSON(lock), ""); err != nil {
+		t.Fatal(err)
+	}
+	w, err := Open(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	report, err := w.Build("")
+	if err != nil {
+		t.Fatal("case-variant Ribbon target rejected:", err)
+	}
+	built, err := os.ReadFile(report.Artifact)
+	if err != nil {
+		t.Fatal(err)
+	}
+	out, err := office.ReadPackage(built)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Contains(out.Files["customUI/customUI14.xml"], []byte(`id="added"`)) {
+		t.Fatal("Ribbon fragment did not merge into the imported part spelling")
+	}
+	if _, exists := out.Files["customui/customui14.xml"]; exists {
+		t.Fatal("case-variant Ribbon merge created a second package part")
 	}
 }
 

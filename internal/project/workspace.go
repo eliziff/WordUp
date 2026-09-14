@@ -837,6 +837,14 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 	// other baseline part, its immutable hash is already authoritative; this
 	// avoids hashing unchanged media and custom XML again on a source edit.
 	dirtyPackageParts := map[string]bool{}
+	// Windows treats package source paths case-insensitively, while the OPC
+	// part map is keyed by its original spelling. Resolve Ribbon targets once
+	// so a component cannot accidentally create a second part that differs
+	// only by case. New targets retain the spelling declared by the first merge.
+	ribbonTargetNames := map[string]string{}
+	for name := range packageFiles {
+		ribbonTargetNames[strings.ToLower(name)] = name
+	}
 	ribbonMerges, mergeErr := workspaceRibbonMerges(w.Root)
 	if mergeErr != nil {
 		return nil, mergeErr
@@ -846,10 +854,17 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 		if !ok {
 			return nil, fmt.Errorf("component %s Ribbon source is missing: %s", merge.Component, merge.Source)
 		}
-		if err := p.MergeRibbon(merge.Target, fragment); err != nil {
+		target := merge.Target
+		key := strings.ToLower(target)
+		if canonical, exists := ribbonTargetNames[key]; exists {
+			target = canonical
+		} else {
+			ribbonTargetNames[key] = target
+		}
+		if err := p.MergeRibbon(target, fragment); err != nil {
 			return nil, fmt.Errorf("component %s Ribbon merge %s -> %s: %w", merge.Component, merge.Source, merge.Target, err)
 		}
-		dirtyPackageParts[merge.Target] = true
+		dirtyPackageParts[target] = true
 		dirtyPackageParts["[Content_Types].xml"] = true
 		dirtyPackageParts["_rels/.rels"] = true
 	}
