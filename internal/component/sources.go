@@ -123,6 +123,11 @@ Private Sub WU_ChangeHotkey(ByVal keyCode As Long, ByVal macroName As String, By
         Set binding = WU_OwnedHotkey(keyCode)
         If Not binding Is Nothing Then binding.Clear
     Else
+        ' Replace only a binding owned by this template.  Re-registering a
+        ' shortcut must not accumulate duplicate entries or disturb another
+        ' template's customization context.
+        Set binding = WU_OwnedHotkey(keyCode)
+        If Not binding Is Nothing Then binding.Clear
         KeyBindings.Add wdKeyCategoryMacro, macroName, keyCode
     End If
 CleanUp:
