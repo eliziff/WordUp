@@ -158,3 +158,30 @@ func TestStructureReferenceAcceptsDocumentWithoutStylesPart(t *testing.T) {
 		t.Fatalf("document without styles was not inspected: %v", rows)
 	}
 }
+
+func TestNumberingLabelHonorsWordRestartRules(t *testing.T) {
+	definition := numberingDefinition{Levels: map[int]numberingLevel{
+		0: {Family: "decimal", Pattern: "%1.", Start: 1, RestartAfter: -1},
+		1: {Family: "lowerLetter", Pattern: "%2.", Start: 1, RestartAfter: -1},
+		2: {Family: "lowerRoman", Pattern: "%3.", Start: 1, RestartAfter: 0},
+	}}
+	state := &numberingState{}
+	levels := []int{0, 1, 2, 0, 1, 2}
+	want := []string{"1.", "a.", "i.", "2.", "a.", "ii."}
+	for i, level := range levels {
+		got, certain := numberingLabel(definition, level, state)
+		if !certain || got != want[i] {
+			t.Fatalf("step %d level %d: label=%q certain=%v want %q", i, level, got, certain, want[i])
+		}
+	}
+
+	definition.Levels[2] = numberingLevel{Family: "lowerRoman", Pattern: "%3.", Start: 1, RestartAfter: 2}
+	state = &numberingState{}
+	for i, level := range []int{0, 1, 2, 0, 2} {
+		got, certain := numberingLabel(definition, level, state)
+		want := []string{"1.", "a.", "i.", "2.", "i."}[i]
+		if !certain || got != want {
+			t.Fatalf("explicit restart step %d level %d: label=%q certain=%v want %q", i, level, got, certain, want)
+		}
+	}
+}

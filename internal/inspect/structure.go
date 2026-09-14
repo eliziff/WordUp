@@ -45,8 +45,17 @@ func numberingLabel(definition numberingDefinition, level int, state *numberingS
 		state.values[level], state.seen[level] = start, true
 	}
 	for deeper := level + 1; deeper < len(state.values); deeper++ {
-		restart := definition.Levels[deeper].RestartAfter
-		if restart == 0 || (restart > 0 && restart-1 != level) {
+		item, exists := definition.Levels[deeper]
+		if !exists {
+			continue
+		}
+		// Word's lvlRestart value is one-based: a positive value restarts
+		// after that level or any higher level. Zero means never restart;
+		// omission means the previous level or any higher level. Values
+		// greater than this level are ignored by Word.
+		restart := item.RestartAfter
+		reset := restart < 0 || restart > 0 && restart <= deeper && level <= restart-1
+		if !reset {
 			continue
 		}
 		state.values[deeper], state.seen[deeper] = 0, false
@@ -212,7 +221,7 @@ func numberingDefinitions(p *office.Package) (map[string]numberingDefinition, er
 					case "lvlText":
 						item.Pattern = x.Attribute(office.W, "val")
 					case "lvlRestart":
-						if n, e := strconv.Atoi(x.Attribute(office.W, "val")); e == nil {
+						if n, e := strconv.Atoi(x.Attribute(office.W, "val")); e == nil && n >= 0 {
 							item.RestartAfter = n
 						}
 					}
