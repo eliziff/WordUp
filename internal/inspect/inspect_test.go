@@ -226,3 +226,29 @@ func TestStyleReferenceIncludesThemeAndNumberingInputs(t *testing.T) {
 		t.Fatalf("lost style cascade inputs: %#v", reference)
 	}
 }
+
+func TestStyleReferenceIncludesSectionAndDocumentSettings(t *testing.T) {
+	p := office.BlankPackage()
+	p.Files["word/document.xml"] = []byte(`<w:document xmlns:w="` + office.W + `"><w:body><w:p><w:r><w:t>Page one</w:t></w:r></w:p><w:p><w:pPr><w:sectPr><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440"/><w:cols w:num="2"/></w:sectPr></w:pPr><w:r><w:t>Page two</w:t></w:r></w:p></w:body></w:document>`)
+	p.Files["word/settings.xml"] = []byte(`<w:settings xmlns:w="` + office.W + `"><w:updateFields w:val="true"/></w:settings>`)
+	p.Files["word/_rels/document.xml.rels"] = []byte(`<Relationships xmlns="` + office.RelNS + `"><Relationship Id="rIdHeader" Type="header" Target="header1.xml"/></Relationships>`)
+	data, err := p.Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	file := filepath.Join(t.TempDir(), "reference.docx")
+	if err := os.WriteFile(file, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	reference, err := StyleReference(file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sections, ok := reference["section_observations"].([]map[string]any)
+	if !ok || len(sections) != 1 || sections[0]["index"] != 1 || !strings.Contains(sections[0]["xml"].(string), `w:num="2"`) {
+		t.Fatalf("lost exact section geometry: %#v", reference["section_observations"])
+	}
+	if reference["document_xml_sha256"] != office.Hash(p.Files["word/document.xml"]) || reference["settings_part_sha256"] != office.Hash(p.Files["word/settings.xml"]) || reference["document_relationships_part_sha256"] != office.Hash(p.Files["word/_rels/document.xml.rels"]) {
+		t.Fatalf("lost document-level source hashes: %#v", reference)
+	}
+}

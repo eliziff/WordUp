@@ -401,6 +401,41 @@ func StyleReference(file string) (map[string]any, error) {
 		out["font_table_sha256"] = office.Hash(fontTable)
 	}
 	out["paragraph_observations"] = text
+	if document := p.Files["word/document.xml"]; len(document) > 0 {
+		out["document_xml_sha256"] = office.Hash(document)
+		spans, err := office.XMLSpans(document)
+		if err != nil {
+			return nil, err
+		}
+		sections := make([]map[string]any, 0)
+		for _, span := range spans {
+			if span.Name.Space != office.W || span.Name.Local != "sectPr" {
+				continue
+			}
+			sections = append(sections, map[string]any{
+				"index":     len(sections) + 1,
+				"xml_start": span.Start,
+				"xml_end":   span.End,
+				"xml_path":  fmt.Sprintf("(//w:sectPr)[%d]", len(sections)+1),
+				"xml":       string(document[span.Start:span.End]),
+			})
+		}
+		if len(sections) > 0 {
+			// Keep page geometry, columns, section breaks and header/footer
+			// references exact and source-locatable. Do not reduce them to a
+			// guessed layout recipe.
+			out["section_observations"] = sections
+		}
+	}
+	for part, key := range map[string]string{
+		"word/settings.xml":            "settings",
+		"word/_rels/document.xml.rels": "document_relationships",
+		"word/webSettings.xml":         "web_settings",
+	} {
+		if data := p.Files[part]; len(data) > 0 {
+			out[key+"_part_sha256"] = office.Hash(data)
+		}
+	}
 	// Headers, footers, notes, comments, and glossary entries carry real
 	// journal/template formatting too. Keep them in separate, part-qualified
 	// observations so the main-story contract remains stable and callers can
