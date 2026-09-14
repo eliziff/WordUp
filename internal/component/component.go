@@ -466,6 +466,9 @@ func vbaWhitespace(value byte) bool {
 
 func install(root string, m Manifest) (Installed, error) {
 	id := m.ID
+	if err := project.ValidateSourceDirectories(root); err != nil {
+		return Installed{}, err
+	}
 	guard, err := project.Under(root, ".wordwright/component-install.lock")
 	if err != nil {
 		return Installed{}, err

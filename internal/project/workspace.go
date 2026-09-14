@@ -226,6 +226,9 @@ func Open(root string) (*Workspace, error) {
 	if office.Hash(b) != w.Index.BaselineSHA256 {
 		return nil, fmt.Errorf("baseline hash mismatch")
 	}
+	if err := ValidateSourceDirectories(root); err != nil {
+		return nil, err
+	}
 	w.Baseline, e = office.ReadPackage(b)
 	return w, e
 }
@@ -448,6 +451,18 @@ func sourceDirectory(root, top string) (string, error) {
 		}
 	}
 	return filepath.Join(root, top), nil
+}
+
+// ValidateSourceDirectories checks the source-tree boundaries without
+// reading their contents. Component installation also calls this because it
+// intentionally does not open a workspace just to perform its preflight.
+func ValidateSourceDirectories(root string) error {
+	for _, top := range sourceDirectories {
+		if _, err := sourceDirectory(root, top); err != nil && !os.IsNotExist(err) {
+			return err
+		}
+	}
+	return nil
 }
 
 func (w *Workspace) SourceFiles() (map[string][]byte, error) {

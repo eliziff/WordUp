@@ -33,6 +33,20 @@ func TestInstallationPreflightsAllFiles(t *testing.T) {
 	}
 }
 
+func TestInstallationRejectsCaseVariantSourceDirectory(t *testing.T) {
+	root := t.TempDir()
+	if err := os.Mkdir(filepath.Join(root, "VBA"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	m := Manifest{ID: "case-variant", Version: "1", Files: []File{{Path: "vba/New.bas", Text: "Option Explicit\n"}}}
+	if _, err := install(root, m); err == nil || !strings.Contains(err.Error(), `workspace source directory must be named "vba" (found "VBA")`) {
+		t.Fatalf("case-variant source directory was accepted: %v", err)
+	}
+	if _, err := project.Read(root, "vba/New.bas"); !os.IsNotExist(err) {
+		t.Fatalf("case-variant install wrote source: %v", err)
+	}
+}
+
 func TestInstallationRollsBackCompletedCopies(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "workspace")
 	// A parent file prevents directory creation after an earlier copy succeeds.

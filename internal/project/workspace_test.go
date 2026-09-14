@@ -72,6 +72,7 @@ func TestSourceDirectoryRejectsCaseVariant(t *testing.T) {
 	for name, check := range map[string]func() error{
 		"source files":  func() error { _, err := w.SourceFiles(); return err },
 		"source stamps": func() error { _, err := sourceStamps(w.Root, nil); return err },
+		"open":          func() error { _, err := Open(w.Root); return err },
 	} {
 		err := check()
 		if err == nil || !strings.Contains(err.Error(), `workspace source directory must be named "vba" (found "VBA")`) {
