@@ -13,7 +13,7 @@ Timings are individual observations, not latency guarantees or controlled speedu
 
 The ALR original and candidate also pass the same 200-paragraph short-form workload. `workspaces/alr-refactor/reports/workload-parity.json` records built-in asserted-field parity and separate asynchronous task timings (1998.083 ms original, 1420.943 ms candidate). These include completion-dialog handling. The shared comparison command separates `task_timings` from polling-call `timings`; no manual extraction of macro timing is required.
 
-Repository-wide `go test -p 2 ./...` passed on 2026-09-13 after automatic XML snapshot parity, bounded mismatch previews, explicit XML equivalences and raw/wrapped acceptance report decoding. This invocation does not enable opt-in native Word tests; their separate evidence is listed below.
+Repository-wide `go test -p 2 ./...` passed on 2026-09-14 after automatic XML snapshot parity, bounded mismatch previews, explicit XML equivalences and raw/wrapped acceptance report decoding. This invocation does not enable opt-in native Word tests; their separate evidence is listed below.
 
 The opt-in race lane was attempted with the installed Windows Build Tools. The pinned Go toolchain requires a cgo compiler; no GCC/Clang is installed, and direct MSVC `cl.exe` invocation rejects the cgo warning flags. No race pass is claimed until a supported cgo compiler is available.
 
