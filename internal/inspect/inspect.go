@@ -839,7 +839,7 @@ func CheckWithConstants(w *project.Workspace, constants map[string]any) (map[str
 	}
 	for _, n := range orderedFiles {
 		b := files[n]
-		if !strings.HasPrefix(n, "package/") || !strings.HasSuffix(n, ".xml") {
+		if !strings.HasPrefix(n, "package/") || !strings.HasSuffix(strings.ToLower(n), ".xml") {
 			continue
 		}
 		spans, e := office.XMLSpans(b)

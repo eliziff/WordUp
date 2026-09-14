@@ -16,7 +16,7 @@ func TestRibbonDiagnosticsUseXMLIdentity(t *testing.T) {
 		t.Fatal(err)
 	}
 	files := map[string]string{
-		"tools.xml":         `<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui" loadImage="MissingImage"><ribbon><tabs><tab id="tools" label="Tools"><group id="tools" label="Group"><button id="action" onAction="MissingAction"/></group></tab></tabs></ribbon></customUI>`,
+		"tools.XML":         `<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui" loadImage="MissingImage"><ribbon><tabs><tab id="tools" label="Tools"><group id="tools" label="Group"><button id="action" onAction="MissingAction"/></group></tab></tabs></ribbon></customUI>`,
 		"customUI-data.xml": `<data id="same" onAction="OrdinaryData"><item id="same"/></data>`,
 	}
 	for name, value := range files {
@@ -37,7 +37,7 @@ func TestRibbonDiagnosticsUseXMLIdentity(t *testing.T) {
 		if diagnostic["file"] == "package/customUI-data.xml" {
 			t.Fatal("treated ordinary XML as Ribbon", diagnostic)
 		}
-		if diagnostic["file"] == "package/tools.xml" {
+		if diagnostic["file"] == "package/tools.XML" {
 			messages += diagnostic["message"].(string) + "\n"
 		}
 		if diagnostic["callback"] == "MissingImage" && diagnostic["expected_declaration"] != "Public Sub MissingImage(imageID As String, ByRef returnedVal)" {
