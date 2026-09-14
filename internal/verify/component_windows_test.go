@@ -222,7 +222,8 @@ Failed:
     Resume CleanUp
 End Sub
 Public Function Check() As String
-    Dim number As Long, source As String, description As String, changed As Long
+    Dim number As Long, source As String, description As String, changed As Boolean, i As Long
+    Dim lines(1 To 400) As String, started As Single, elapsed As Single
     ActiveDocument.Content.Text = "original"
     Application.ScreenUpdating = False
     On Error Resume Next
@@ -242,10 +243,21 @@ Public Function Check() As String
     ActiveDocument.Styles.Add "ProofTarget", wdStyleTypeParagraph
     ActiveDocument.Content.Style = ActiveDocument.Styles(wdStyleNormal)
     changed = WU_ConvertStyle(ActiveDocument, ActiveDocument.Styles(wdStyleNormal).NameLocal, "ProofTarget")
-    If changed <> 1 Then Err.Raise 5, , "conversion count"
-    If WU_ConvertStyle(ActiveDocument, "ProofTarget", "ProofTarget") <> 0 Then Err.Raise 5, , "same style not a no-op"
+    If Not changed Then Err.Raise 5, , "conversion did not report a change"
+    If WU_ConvertStyle(ActiveDocument, "ProofTarget", "ProofTarget") Then Err.Raise 5, , "same style not a no-op"
     If Not ActiveDocument.Undo Then Err.Raise 5, , "missing conversion undo"
     If ActiveDocument.Paragraphs(1).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Then Err.Raise 5, , "conversion not undone"
+    For i = 1 To 400: lines(i) = "Ordinary paragraph.": Next i
+    ActiveDocument.Content.Text = Join(lines, vbCr)
+    ActiveDocument.Content.Style = ActiveDocument.Styles(wdStyleNormal)
+    started = Timer
+    changed = WU_ConvertStyle(ActiveDocument, ActiveDocument.Styles(wdStyleNormal).NameLocal, "ProofTarget")
+    elapsed = Timer - started
+    If elapsed < 0 Then elapsed = elapsed + 86400
+    If Not changed Then Err.Raise 5, , "bulk conversion did not report a change"
+    If elapsed * 1000 > 250 Then Err.Raise 5, , "bulk conversion exceeded 250 ms: " & CStr(elapsed * 1000)
+    If Not ActiveDocument.Undo Then Err.Raise 5, , "missing bulk conversion undo"
+    If ActiveDocument.Paragraphs(400).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Then Err.Raise 5, , "bulk conversion not undone"
     Application.ScreenUpdating = True
     Check = "PASS"
 End Function
@@ -336,7 +348,7 @@ const manuscriptProof = `Attribute VB_Name = "ManuscriptProof"
 Option Explicit
 Public Function CheckDocument() As Variant
     Dim doc As Document, baseline As String, detected As Variant
-    Dim originalStyle As String, changed As Long
+    Dim originalStyle As String, changed As Boolean
     Set doc = ActiveDocument
     baseline = doc.WordOpenXML
     baseline = doc.WordOpenXML
@@ -347,7 +359,7 @@ Public Function CheckDocument() As Variant
     originalStyle = doc.Paragraphs(1).Style.NameLocal
     baseline = doc.WordOpenXML
     changed = WU_ConvertStyle(doc, originalStyle, "WordUpPreservationTarget")
-    If changed < 1 Then Err.Raise 5, , "no paragraph converted"
+    If Not changed Then Err.Raise 5, , "no paragraph converted"
     If Not doc.Undo Then Err.Raise 5, , "missing conversion undo"
     If baseline <> doc.WordOpenXML Then CheckDocument = Array("undo XML mismatch", baseline, doc.WordOpenXML): Exit Function
     CheckDocument = "PASS"

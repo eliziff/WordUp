@@ -70,6 +70,9 @@ func builtin() []Manifest {
 		if items[i].ID == "command.context-menu" {
 			items[i].Version = "1.0.1"
 		}
+		if items[i].ID == "document.style-converter" {
+			items[i].Version = "1.0.1"
+		}
 		items[i].Schema = 1
 		items[i].License = "MIT"
 		items[i].Provenance = "WordUp 0.4.0 bundled editable source"
