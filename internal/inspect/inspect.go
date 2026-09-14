@@ -904,6 +904,29 @@ func CheckWithConstants(w *project.Workspace, constants map[string]any) (map[str
 			}
 		}
 	}
+	packageValidation := map[string]any{"valid": true, "checked": false}
+	if w.Baseline != nil {
+		packageFiles := make(map[string][]byte)
+		for n, b := range files {
+			if strings.HasPrefix(n, "package/") {
+				packageFiles[strings.TrimPrefix(n, "package/")] = b
+			}
+		}
+		if len(packageFiles) > 0 {
+			packageValidation["checked"] = true
+			candidate := w.Baseline.WithFiles(packageFiles)
+			if err := candidate.Validate(); err != nil {
+				packageValidation["valid"] = false
+				packageValidation["error"] = err.Error()
+				diagnostics = append(diagnostics, map[string]any{
+					"severity": "error",
+					"file":     "package",
+					"message":  "OPC package validation failed: " + err.Error(),
+					"engine":   "Open Packaging Conventions",
+				})
+			}
+		}
+	}
 	sort.Slice(symbols, func(i, j int) bool {
 		if symbols[i].Module == symbols[j].Module {
 			return symbols[i].Line < symbols[j].Line
@@ -911,5 +934,5 @@ func CheckWithConstants(w *project.Workspace, constants map[string]any) (map[str
 		return symbols[i].Module < symbols[j].Module
 	})
 	inventory := CheckInventory(w.Root, files, &diagnostics)
-	return map[string]any{"symbols": symbols, "diagnostics": diagnostics, "compilation_constants": constants, "syntax_modules_parsed": parsedModules, "syntax_modules_skipped": skippedModules, "vba_compiled": false, "word_executed": false, "inventory": inventory, "coverage": "Rubberduck VBA syntax with conditional preprocessing, lexical symbols, XML syntax, Windows RibbonX XSD validation, duplicate IDs, callback declaration-shape checks and unresolved callback warnings; not a VBA compiler or complete callback/idMso checker"}, nil
+	return map[string]any{"symbols": symbols, "diagnostics": diagnostics, "compilation_constants": constants, "syntax_modules_parsed": parsedModules, "syntax_modules_skipped": skippedModules, "vba_compiled": false, "word_executed": false, "inventory": inventory, "package_validation": packageValidation, "coverage": "Rubberduck VBA syntax with conditional preprocessing, lexical symbols, XML syntax, Windows RibbonX XSD validation, duplicate IDs, callback declaration-shape checks, OPC package graph validation, and unresolved callback warnings; not a VBA compiler or complete callback/idMso checker"}, nil
 }

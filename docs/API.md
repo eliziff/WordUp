@@ -136,7 +136,8 @@ The signing report distinguishes `signed`, `digest_verified` and certificate tru
 
 ## Images and style references
 
-`check` performs the offline source/XML checks and also returns a compact
+`check` performs the offline source/XML checks, validates the assembled OPC
+package graph (content types and relationship targets), and also returns a compact
 `inventory`: public procedures, UserForm event handlers and their declared
 controls, Ribbon callback bindings (including conservative declaration-shape
 warnings), VBA hotkey/context-menu registrations, and
