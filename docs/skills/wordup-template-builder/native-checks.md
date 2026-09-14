@@ -2,7 +2,7 @@
 
 Use `wordup -w WORKSPACE call METHOD '@parameters.json'` for offline operations; add `--execute` for native execution. A warm `session start` plus `rpc` avoids repeated host startup. Paths inside parameters resolve against the workspace unless absolute; the CLI's `@parameters.json` is read from the current working directory.
 
-- `structure.inspect` with a document `path` reads style ancestry, direct/inherited outline evidence and containment without launching Word. Use it to inspect source facts before conversion; it is not yet the completed heading resolver.
+- `structure.inspect` with a document `path` reads style ancestry, direct/inherited outline evidence and containment without launching Word. Follow it with `structure.resolve` when the agent needs generic candidate roles, levels, parents and ambiguity before conversion.
 - `reference.document` with `{"path":"dist/Template.dotm"}` inspects saved package styles, theme fonts, numbering and paragraph/story observations. Inspect both source and output; this is not a complete resolved style engine.
 - `check` checks source syntax/XML/Ribbon diagnostics. Use a native `compile` step separately; parser success is not compiler success.
 - `test` with `path`, `fresh:true`, and a `suite` executes native assertions. Keep requirement-specific suites in the workspace and reuse `test.replay`; use `test.compare` for compatible baseline/candidate suites.

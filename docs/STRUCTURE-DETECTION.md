@@ -1,6 +1,6 @@
 # Word structure detection: reuse boundary
 
-The standalone VBA observer returned by `structure.source` is currently a native evidence collector plus a small marker recognizer. It is not the completed heading detector. Keep it out of the per-paragraph editing loop: redundant COM reads can dominate conversion time; collect evidence once and reuse it.
+The standalone VBA component returned by `structure.source` is a native read-only evidence collector and generic candidate resolver. It is not a publication-specific converter. Keep it out of the per-paragraph editing loop: redundant COM reads can dominate conversion time; collect evidence once and reuse it.
 
 ## Local source review
 
