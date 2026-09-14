@@ -265,6 +265,22 @@ func TestSourceBuildCacheAndTamper(t *testing.T) {
 		t.Fatal("wrong artifact hash")
 	}
 }
+
+func TestMetadataChangedDetectsSameStampHashEdit(t *testing.T) {
+	previous := map[string]fileStamp{
+		"project.json": {Size: 16, ModifiedNS: 7, ChangedNS: 0, Hash: "before"},
+		".wordwright/base.opc": {Size: 32, ModifiedNS: 8, ChangedNS: 0, Hash: "same"},
+		".wordwright/index.json": {Size: 24, ModifiedNS: 9, ChangedNS: 0, Hash: "same-index"},
+	}
+	current := map[string]fileStamp{
+		"project.json": {Size: 16, ModifiedNS: 7, ChangedNS: 0, Hash: "after"},
+		".wordwright/base.opc": {Size: 32, ModifiedNS: 8, ChangedNS: 0, Hash: "same"},
+		".wordwright/index.json": {Size: 24, ModifiedNS: 9, ChangedNS: 0, Hash: "same-index"},
+	}
+	if !metadataChanged(previous, current) {
+		t.Fatal("same-stamp metadata edit was not detected")
+	}
+}
 func TestGuardedWrites(t *testing.T) {
 	w := newWorkspace(t)
 	old, err := Read(w.Root, "vba/ThisDocument.cls")

@@ -607,7 +607,7 @@ func metadataChanged(previous, current map[string]fileStamp) bool {
 	for _, path := range workspaceMetadataPaths {
 		before, beforeOK := previous[path]
 		after, afterOK := current[path]
-		if !beforeOK || !afterOK || before.Size != after.Size || before.ModifiedNS != after.ModifiedNS || before.ChangedNS != after.ChangedNS {
+		if !beforeOK || !afterOK || before.Size != after.Size || before.ModifiedNS != after.ModifiedNS || before.ChangedNS != after.ChangedNS || before.Hash != after.Hash {
 			return true
 		}
 	}
