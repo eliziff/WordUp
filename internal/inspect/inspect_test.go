@@ -218,7 +218,7 @@ func TestStyleReferenceIncludesThemeAndNumberingInputs(t *testing.T) {
 		t.Fatal(err)
 	}
 	theme := reference["theme_fonts"].(map[string]string)
-	if theme["majorHAnsi"] != "Aptos Display" || !strings.Contains(reference["numbering_xml"].(string), "abstractNumId") {
+	if theme["majorHAnsi"] != "Aptos Display" || !strings.Contains(reference["styles_xml"].(string), "styleId=\"Normal\"") || !strings.Contains(reference["numbering_xml"].(string), "abstractNumId") || reference["styles_sha256"] != office.Hash(p.Files["word/styles.xml"]) || reference["numbering_sha256"] != office.Hash(p.Files["word/numbering.xml"]) {
 		t.Fatalf("lost style cascade inputs: %#v", reference)
 	}
 }

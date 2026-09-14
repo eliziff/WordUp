@@ -384,8 +384,13 @@ func StyleReference(file string) (map[string]any, error) {
 		return nil, e
 	}
 	out["theme_fonts"] = theme
+	if styles := p.Files["word/styles.xml"]; len(styles) > 0 {
+		out["styles_xml"] = string(styles)
+		out["styles_sha256"] = office.Hash(styles)
+	}
 	if numbering := p.Files["word/numbering.xml"]; len(numbering) > 0 {
 		out["numbering_xml"] = string(numbering)
+		out["numbering_sha256"] = office.Hash(numbering)
 	}
 	out["paragraph_observations"] = text
 	// Headers, footers, notes, comments, and glossary entries carry real
