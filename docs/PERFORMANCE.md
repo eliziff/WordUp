@@ -36,21 +36,31 @@ Local raw evidence: `build/lightning-ready-cold.json` and `build/lightning-ready
 
 ## Offline writer loop
 
-`tools/writer-compare` separates direct writer work, complete workspace rebuilds,
-resident cache checks, and independent verification. On a 708 KB complex local
-template, one controlled Windows run measured direct module edits at 93.1 ms in
-the Go library and 100.0 ms in pinned pyOpenVBA; direct class additions measured
-101.9 ms and 105.7 ms respectively. This small difference does not justify a
-language cutover. Complete Go workspace rebuilds measured 174.9–194.6 ms for
-those operations, identifying orchestration and source traversal as the larger
-optimization surface.
+`tools/writer-compare/go` separates direct package mutation, complete workspace
+rebuilds, and resident-cache checks. The latest local run on the complex Atelier
+template measured these Go-only lanes:
 
-The resident workspace cache uses one metadata traversal and retains parsed
-state only inside the existing idle-expiring agent session. It reloads the
-immutable baseline and import index whenever source, evidence, or artifact
-metadata changes; ordinary external source edits therefore force a real rebuild.
-After removing duplicate path resolution and stat calls, the same five-workload
-run measured warm cache medians of 2.3–4.4 ms and p95 of 4.1–7.2 ms. The full
-correctness suites still hash content on real builds, and the independent writer
-comparison validates source, package-part and CFB-stream changes outside the
-timed operation.
+| Operation | Forced rebuild warm median | Same-output cache warm median |
+|---|---:|---:|
+| unchanged workspace | 19.11 ms | 1.03 ms |
+| module edit | 23.24 ms | 1.05 ms |
+| class add | 24.46 ms | 1.30 ms |
+| control caption | 21.67 ms | 2.10 ms |
+| control font | 21.73 ms | 1.55 ms |
+
+The direct Go package lane measured 4.52 ms for a module edit and 5.12 ms for a
+class add. These are writer measurements, not Word compilation or rendering.
+The resident cache retains parsed state only inside the existing idle-expiring
+agent session; external source, evidence, or artifact changes invalidate it and
+force a real build. Independent verification still hashes source, package parts,
+and CFB streams outside the timed operation.
+
+The older pyOpenVBA comparison is historical evidence, not a current gate: this
+checkout does not contain a separate repository at the pinned revision, so no
+current cross-language result is claimed. When that oracle is available, run
+`tools/writer-compare/compare.py` against the exact pinned checkout before using
+language or cutover conclusions.
+
+The same warm session measured a second `check` request at 23.3 ms after a first
+request that included session startup (520.8 ms). A direct process check took
+704.6 ms, which is startup overhead rather than the warm agent loop.
