@@ -267,12 +267,13 @@ func replaceVBAIdentifierPrefix(source, from, to string) string {
 	}
 	var out strings.Builder
 	out.Grow(len(source))
-	inString, inComment := false, false
+	inString, inComment, statementStart := false, false, true
 	for i := 0; i < len(source); {
 		if inComment {
 			out.WriteByte(source[i])
 			if source[i] == '\n' || source[i] == '\r' {
 				inComment = false
+				statementStart = true
 			}
 			i++
 			continue
@@ -286,6 +287,7 @@ func replaceVBAIdentifierPrefix(source, from, to string) string {
 					continue
 				}
 				inString = false
+				statementStart = false
 				i++
 				continue
 			}
@@ -304,8 +306,33 @@ func replaceVBAIdentifierPrefix(source, from, to string) string {
 			i++
 			continue
 		}
+		if statementStart && i+3 <= len(source) && strings.EqualFold(source[i:i+3], "Rem") && (i+3 == len(source) || vbaWhitespace(source[i+3])) {
+			out.WriteString(source[i : i+3])
+			i += 3
+			inComment = true
+			statementStart = false
+			continue
+		}
 		if source[i] == '\'' {
 			inComment = true
+			out.WriteByte(source[i])
+			statementStart = false
+			i++
+			continue
+		}
+		if source[i] == ':' {
+			out.WriteByte(source[i])
+			statementStart = true
+			i++
+			continue
+		}
+		if source[i] == '\n' || source[i] == '\r' {
+			out.WriteByte(source[i])
+			statementStart = true
+			i++
+			continue
+		}
+		if statementStart && vbaWhitespace(source[i]) {
 			out.WriteByte(source[i])
 			i++
 			continue
@@ -313,9 +340,11 @@ func replaceVBAIdentifierPrefix(source, from, to string) string {
 		if hasIdentifierPrefix(source, i, from) {
 			out.WriteString(to)
 			i += len(from)
+			statementStart = false
 			continue
 		}
 		out.WriteByte(source[i])
+		statementStart = false
 		i++
 	}
 	return out.String()
@@ -333,6 +362,10 @@ func hasIdentifierPrefix(source string, index int, prefix string) bool {
 
 func vbaIdentifierByte(value byte) bool {
 	return value >= 'a' && value <= 'z' || value >= 'A' && value <= 'Z' || value >= '0' && value <= '9' || value == '_'
+}
+
+func vbaWhitespace(value byte) bool {
+	return value == ' ' || value == '\t'
 }
 
 func install(root string, m Manifest) (Installed, error) {
