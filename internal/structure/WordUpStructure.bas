@@ -29,7 +29,7 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
     Dim paragraphs As Paragraphs, count As Long, result() As Variant
     Dim i As Long, paragraph As Paragraph, scope As Range, text As String, rawText As String
     Dim marker As String, label As String, style As String, context As String, alternatives As String
-    Dim score As Long, level As Long, outline As Long, evidence As String, parentAt(1 To 9) As Long
+    Dim score As Long, level As Long, outline As Long, evidence As String, semanticRole As String, parentAt(1 To 9) As Long
     Dim hasLists As Boolean, hasTables As Boolean, plausible As Boolean
     Dim headingStyle As Boolean, keepNext As Boolean, upperText As Boolean
     Dim story As Range, pieces As Variant, position As Long, startPosition As Long, endPosition As Long
@@ -116,25 +116,49 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
     WU_ResolveStyleFamilies result, count
     WU_ResolveMarkerLadder result, count
     For i = 0 To count - 1
-        score = CLng(result(i, WU_CONFIDENCE)): level = CLng(result(i, WU_LEVEL))
+        score = CLng(result(i, WU_CONFIDENCE)): level = CLng(result(i, WU_LEVEL)): semanticRole = vbNullString
         If result(i, WU_CONTEXT) <> "body" Then
             result(i, WU_ROLE) = result(i, WU_CONTEXT)
         ElseIf Len(Trim$(CStr(result(i, WU_TEXT)))) = 0 Then
             result(i, WU_ROLE) = "blank"
-        ElseIf level > 0 And score >= 35 Then
-            result(i, WU_ROLE) = "heading": result(i, WU_PARENT) = WU_FindParent(parentAt, level)
-            parentAt(level) = i + 1: WU_ClearDeeper parentAt, level
-        ElseIf score >= 25 Then
-            result(i, WU_ROLE) = "candidate": result(i, WU_AMBIGUOUS) = True
         Else
-            result(i, WU_ROLE) = "body"
+            semanticRole = WU_SemanticRole(CStr(result(i, WU_TEXT)), CStr(result(i, WU_STYLE)), CStr(result(i, WU_CONTEXT)), level)
+            If Len(semanticRole) > 0 Then
+                result(i, WU_ROLE) = semanticRole: result(i, WU_LEVEL) = 0
+                result(i, WU_CONFIDENCE) = 100: result(i, WU_AMBIGUOUS) = False
+                result(i, WU_EVIDENCE) = "semantic-style-or-context"
+                result(i, WU_CONTRADICTION) = vbNullString: result(i, WU_ALTERNATIVES) = vbNullString
+                If semanticRole = "quotation" Or semanticRole = "abstract" Then result(i, WU_PARENT) = WU_FindDeepestParent(parentAt)
+            ElseIf level > 0 And score >= 35 Then
+                result(i, WU_ROLE) = "heading": result(i, WU_PARENT) = WU_FindParent(parentAt, level)
+                parentAt(level) = i + 1: WU_ClearDeeper parentAt, level
+            ElseIf score >= 25 Then
+                result(i, WU_ROLE) = "candidate": result(i, WU_AMBIGUOUS) = True
+            Else
+                result(i, WU_ROLE) = "body"
+            End If
         End If
-        If result(i, WU_ROLE) <> "heading" And result(i, WU_ROLE) <> "blank" And CLng(result(i, WU_PARENT)) = 0 Then result(i, WU_PARENT) = WU_FindDeepestParent(parentAt)
+        If result(i, WU_ROLE) <> "heading" And result(i, WU_ROLE) <> "blank" And Len(semanticRole) = 0 And CLng(result(i, WU_PARENT)) = 0 Then result(i, WU_PARENT) = WU_FindDeepestParent(parentAt)
         If CLng(result(i, WU_PARENT)) > 0 Then result(i, WU_PARENT_SOURCE_ID) = result(CLng(result(i, WU_PARENT)) - 1, WU_SOURCE_ID)
         If score > 100 Then result(i, WU_CONFIDENCE) = 100
         If score < 0 Then result(i, WU_CONFIDENCE) = 0
     Next i
     WU_DetectStructure = result
+End Function
+
+Private Function WU_SemanticRole(ByVal text As String, ByVal style As String, ByVal context As String, ByVal level As Long) As String
+    Dim plain As String
+    plain = LCase$(Trim$(text))
+    Do While Len(plain) > 0 And Right$(plain, 1) = ":": plain = Trim$(Left$(plain, Len(plain) - 1)): Loop
+    If plain = "" Then Exit Function
+    If plain = "abstract" And level = 0 Then WU_SemanticRole = "abstract": Exit Function
+    If plain = "contents" Or plain = "table of contents" Or context = "contents" Then WU_SemanticRole = "toc": Exit Function
+    style = LCase$(style)
+    If InStr(style, "toc heading") > 0 Or InStr(style, "tocheading") > 0 Then WU_SemanticRole = "toc": Exit Function
+    If InStr(style, "quotation") > 0 Or InStr(style, "quote") > 0 Or InStr(style, "block text") > 0 Then WU_SemanticRole = "quotation": Exit Function
+    If InStr(style, "abstract") > 0 Then WU_SemanticRole = "abstract": Exit Function
+    If InStr(style, "author") > 0 Or InStr(style, "byline") > 0 Then WU_SemanticRole = "author": Exit Function
+    If InStr(style, "heading") = 0 And (InStr(style, "document title") > 0 Or Trim$(style) = "title" Or Trim$(style) = "title normal") Then WU_SemanticRole = "title"
 End Function
 
 ' Publication-specific copies may adjust evidence here. Do not apply styles here.
