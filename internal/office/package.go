@@ -186,6 +186,14 @@ func (p *Package) Bytes() ([]byte, error) {
 // BytesChanged skips re-reading unchanged ZIP members after the caller has
 // already established the complete changed-part set by content hash.
 func (p *Package) BytesChanged(changed []string) ([]byte, error) {
+	return p.BytesChangedWithHashes(changed, nil)
+}
+
+// BytesChangedWithHashes is the verified fast path for callers that already
+// hashed every current package part while deriving changed. Missing entries
+// are still hashed here, so supplying a partial map cannot weaken the changed
+// part completeness check.
+func (p *Package) BytesChangedWithHashes(changed []string, currentHashes map[string]string) ([]byte, error) {
 	if p.hashes == nil {
 		return p.Bytes()
 	}
@@ -193,7 +201,9 @@ func (p *Package) BytesChanged(changed []string) ([]byte, error) {
 	for _, name := range changed {
 		dirty[strings.TrimPrefix(name, "-")] = true
 	}
-	currentHashes := make(map[string]string, len(p.hashes))
+	if currentHashes == nil {
+		currentHashes = make(map[string]string, len(p.hashes))
+	}
 	for name, original := range p.hashes {
 		data, exists := p.Files[name]
 		if !exists {
@@ -202,8 +212,11 @@ func (p *Package) BytesChanged(changed []string) ([]byte, error) {
 			}
 			continue
 		}
-		current := Hash(data)
-		currentHashes[name] = current
+		current, hashed := currentHashes[name]
+		if !hashed {
+			current = Hash(data)
+			currentHashes[name] = current
+		}
 		if !dirty[name] && current != original {
 			return nil, fmt.Errorf("changed-part set omits modified part %s", name)
 		}

@@ -71,12 +71,23 @@ func TestKnownChangedPartsSkipReadsWithoutTrustingIncompleteSet(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	hashes := map[string]string{}
+	for name, data := range p.Files {
+		hashes[name] = Hash(data)
+	}
+	fastWithHashes, err := p.BytesChangedWithHashes([]string{part}, hashes)
+	if err != nil {
+		t.Fatal(err)
+	}
 	ordinary, err := p.Bytes()
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !bytes.Equal(fast, ordinary) {
 		t.Fatal("known-change serialization differs from checked serialization")
+	}
+	if !bytes.Equal(fastWithHashes, ordinary) {
+		t.Fatal("prehashed known-change serialization differs from checked serialization")
 	}
 }
 

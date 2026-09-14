@@ -59,14 +59,15 @@ type BuildReport struct {
 	Warnings          []string `json:"warnings,omitempty"`
 }
 type Workspace struct {
-	Root        string
-	Manifest    Manifest
-	Index       Index
-	Baseline    *office.Package
-	buildMemo   *buildMemo
-	baselineVBA *office.VBA
-	sourceMemo  map[string][]byte
-	sourceStamp map[string]fileStamp
+	Root           string
+	Manifest       Manifest
+	Index          Index
+	Baseline       *office.Package
+	buildMemo      *buildMemo
+	baselineVBA    *office.VBA
+	baselineHashes map[string]string
+	sourceMemo     map[string][]byte
+	sourceStamp    map[string]fileStamp
 }
 
 type fileStamp struct {
@@ -609,6 +610,16 @@ func (w *Workspace) buildSourceFiles(stamps map[string]fileStamp) (map[string][]
 	return files, nil
 }
 
+func (w *Workspace) baselinePartHashes() map[string]string {
+	if w.baselineHashes == nil {
+		w.baselineHashes = make(map[string]string, len(w.Baseline.Files))
+		for name, data := range w.Baseline.Files {
+			w.baselineHashes[name] = office.Hash(data)
+		}
+	}
+	return w.baselineHashes
+}
+
 func stamp(path string) (fileStamp, error) {
 	info, err := os.Stat(path)
 	if err != nil {
@@ -727,7 +738,7 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 				return nil, refreshErr
 			}
 			w.Manifest, w.Index, w.Baseline = fresh.Manifest, fresh.Index, fresh.Baseline
-			w.baselineVBA, w.sourceMemo, w.sourceStamp = nil, nil, nil
+			w.baselineVBA, w.baselineHashes, w.sourceMemo, w.sourceStamp = nil, nil, nil, nil
 		}
 		w.buildMemo = nil
 	}
@@ -761,10 +772,7 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 			}
 		}
 	}
-	original := map[string]string{}
-	for n, b := range w.Baseline.Files {
-		original[n] = office.Hash(b)
-	}
+	original := w.baselinePartHashes()
 	// Windows workspaces cannot retain two directory spellings that differ
 	// only by case. Map the editable package tree back to the immutable ZIP's
 	// exact part names before validation so a relationship such as
@@ -957,8 +965,11 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 		}
 	}
 	modified := []string{}
+	currentHashes := map[string]string{}
 	for n, b := range p.Files {
-		if original[n] != office.Hash(b) {
+		current := office.Hash(b)
+		currentHashes[n] = current
+		if original[n] != current {
 			modified = append(modified, n)
 		}
 	}
@@ -976,8 +987,11 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 			return nil, e
 		}
 		modified = nil
+		currentHashes = map[string]string{}
 		for n, b := range p.Files {
-			if original[n] != office.Hash(b) {
+			current := office.Hash(b)
+			currentHashes[n] = current
+			if original[n] != current {
 				modified = append(modified, n)
 			}
 		}
@@ -991,7 +1005,7 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 	if e = p.Validate(); e != nil {
 		return nil, e
 	}
-	result, e := p.BytesChanged(modified)
+	result, e := p.BytesChangedWithHashes(modified, currentHashes)
 	if e != nil {
 		return nil, e
 	}
