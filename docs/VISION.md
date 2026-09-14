@@ -38,7 +38,7 @@ oracles unless they provide a distinct required capability.
 | Forms and Ribbon | Instantiate saved nested forms, operate their controls, observe events and real Ribbon callbacks. |
 | Document design | Assert styles, content controls, footnotes and saved parts; inspect actual Word page renders. |
 | Isolation | Keep the user's existing Word process/documents intact; contain timeouts and modal failures; leave no owned Word process. |
-| Fast iteration | Measure cold startup and repeated warm builds/calls on actual Word, with workload and host recorded. |
+| Fast iteration | Measure cold startup and repeated warm builds/calls on actual Word, with workload and host recorded. Treat a slow product operation as a product defect and slow build/test plumbing as a harness defect; neither may be hidden inside aggregate acceptance time. |
 | Delivery | Bind acceptance to exact artifact bytes, back up the target, reject stale writes, and recover pending activation after login. |
 | Mac stretch | Execute on Word for Mac; Windows passes and static portability checks cannot substitute. |
 
