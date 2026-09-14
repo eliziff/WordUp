@@ -143,14 +143,14 @@ Private Sub WU_ResolveStyleFamilies(ByRef result As Variant, ByVal count As Long
     ' Snapshot only original evidence. Inferred paragraphs never cast votes.
     For i = 0 To count - 1
         level = CLng(result(i, WU_LEVEL))
-        If level >= 1 And level <= 9 And result(i, WU_CONTEXT) = "body" Then
+        If level >= 1 And level <= 9 And result(i, WU_CONTEXT) = "body" And Len(Trim$(CStr(result(i, WU_STYLE)))) > 0 Then
             slot = WU_StyleSlot(keys, capacity, CStr(result(i, WU_STYLE)))
             If votes(slot) > 0 And levels(slot) <> level Then conflict(slot) = True
             levels(slot) = level: votes(slot) = votes(slot) + 1
         End If
     Next i
     For i = 0 To count - 1
-        If CLng(result(i, WU_LEVEL)) = 0 And result(i, WU_CONTEXT) = "body" And CLng(result(i, WU_CONFIDENCE)) >= 25 Then
+        If CLng(result(i, WU_LEVEL)) = 0 And result(i, WU_CONTEXT) = "body" And Len(Trim$(CStr(result(i, WU_STYLE)))) > 0 And CLng(result(i, WU_CONFIDENCE)) >= 25 Then
             slot = WU_StyleSlot(keys, capacity, CStr(result(i, WU_STYLE)))
             If votes(slot) >= 2 And Not conflict(slot) Then
                 result(i, WU_LEVEL) = levels(slot): result(i, WU_CONFIDENCE) = CLng(result(i, WU_CONFIDENCE)) + 15
