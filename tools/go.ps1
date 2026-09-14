@@ -21,7 +21,18 @@ New-Item -ItemType Directory -Force $env:GOCACHE, $env:GOMODCACHE, $env:GOTMPDIR
 $processPath = [Environment]::GetEnvironmentVariable('Path', 'Process')
 [Environment]::SetEnvironmentVariable('PATH', $null, 'Process')
 [Environment]::SetEnvironmentVariable('Path', $processPath, 'Process')
-$process = Start-Process -FilePath $go -ArgumentList $args -WorkingDirectory $repo -NoNewWindow -PassThru
+# Start-Process joins an argument array into one Windows command line without
+# adding quotes. Quote arguments containing whitespace so repository paths such
+# as "reference/Style Guide [Fall].dotm" remain one argument.
+$argumentList = @($args | ForEach-Object {
+    $value = [string]$_
+    if ($value -match '[\s"]') {
+        '"' + $value.Replace('"', '\"') + '"'
+    } else {
+        $value
+    }
+})
+$process = Start-Process -FilePath $go -ArgumentList $argumentList -WorkingDirectory $repo -NoNewWindow -PassThru
 $process.PriorityClass = 'BelowNormal'
 $process.WaitForExit()
 exit $process.ExitCode
