@@ -347,7 +347,31 @@ Private Function WU_IsRoman(ByVal value As String) As Boolean
 End Function
 
 Private Function WU_HeadingStyle(ByVal name As String) As Boolean
-    name = LCase$(name): WU_HeadingStyle = InStr(name, "heading") > 0 Or InStr(name, "title") > 0 Or InStr(name, "head") > 0
+    WU_HeadingStyle = WU_StyleToken(name, "heading") Or WU_StyleToken(name, "title") Or WU_StyleToken(name, "head")
+End Function
+
+' Match complete style-name tokens, including common camel-case and digit
+' boundaries. This keeps Header/AheadBody/Headnote from becoming headings.
+Private Function WU_StyleToken(ByVal name As String, ByVal wanted As String) As Boolean
+    Dim at As Long, before As String, after As String, original As String, current As String
+    original = name: name = LCase$(name): wanted = LCase$(wanted)
+    at = InStr(1, name, wanted, vbBinaryCompare)
+    Do While at > 0
+        before = vbNullString: after = vbNullString: current = vbNullString
+        If at > 1 Then before = Mid$(name, at - 1, 1)
+        If at + Len(wanted) <= Len(name) Then after = Mid$(name, at + Len(wanted), 1)
+        current = Mid$(original, at, 1)
+        If (Not WU_StyleIdentifier(before) Or (before >= "a" And before <= "z" And current >= "A" And current <= "Z") Or after >= "0" And after <= "9") And _
+           (Not WU_StyleIdentifier(after) Or after >= "0" And after <= "9" Or (current >= "a" And current <= "z" And after >= "A" And after <= "Z")) Then
+            WU_StyleToken = True: Exit Function
+        End If
+        at = InStr(at + 1, name, wanted, vbBinaryCompare)
+    Loop
+End Function
+
+Private Function WU_StyleIdentifier(ByVal value As String) As Boolean
+    If Len(value) = 0 Then Exit Function
+    WU_StyleIdentifier = value Like "[A-Za-z0-9_]"
 End Function
 
 Private Function WU_CleanText(ByVal text As String) As String

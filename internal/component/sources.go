@@ -68,9 +68,21 @@ Public Sub WU_RibbonCommand(ByVal control As Object)
     If control Is Nothing Then Err.Raise 91, "WU_RibbonCommand", "control is required"
     controlID = CStr(control.Id)
     If Len(controlID) = 0 Then Err.Raise 5, "WU_RibbonCommand", "control id is required"
-    macroName = "WU_Command_" & Replace(Replace(controlID, "-", "_"), ".", "_")
-    Application.Run macroName
+    macroName = WU_RibbonMacroName(controlID)
+    Application.Run WU_QualifiedMacro(macroName)
 End Sub
+Private Function WU_RibbonMacroName(ByVal controlID As String) As String
+    Dim i As Long, character As String, value As String
+    value = "WU_Command_"
+    For i = 1 To Len(controlID)
+        character = Mid$(controlID, i, 1)
+        If character Like "[A-Za-z0-9_]" Then value = value & character Else value = value & "_"
+    Next i
+    WU_RibbonMacroName = value
+End Function
+Private Function WU_QualifiedMacro(ByVal macroName As String) As String
+    WU_QualifiedMacro = "'" & Replace(ThisDocument.Name, "'", "''") & "'!" & macroName
+End Function
 `
 
 const hotkeySource = `Attribute VB_Name = "WordUpHotkey"
@@ -229,9 +241,13 @@ Public Function WU_ConvertStyle(ByVal document As Document, ByVal fromStyle As S
     Next firstStory
 CleanUp:
     On Error Resume Next
-    If opened Then Application.UndoRecord.EndCustomRecord
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
     Application.ScreenUpdating = updating
-    If failure = 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
     On Error GoTo 0
     If failure <> 0 Then Err.Raise failure, failureSource, failureText
     Exit Function

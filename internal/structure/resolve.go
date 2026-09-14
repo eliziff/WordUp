@@ -351,8 +351,49 @@ func intValue(v any) (int, bool) {
 	return 0, false
 }
 func headingStyle(s string) bool {
-	s = strings.ToLower(s)
-	return strings.Contains(s, "heading") || strings.Contains(s, "title") || strings.Contains(s, "head")
+	for _, token := range styleTokens(s) {
+		switch token {
+		case "heading", "title", "head":
+			return true
+		}
+	}
+	return false
+}
+
+// styleTokens treats separators, digit transitions and camel-case boundaries
+// as style-name boundaries. Substring matching makes unrelated names such as
+// Header, AheadBody and Headnote look like heading styles.
+func styleTokens(s string) []string {
+	runes := []rune(s)
+	words := make([]string, 0, 4)
+	word := make([]rune, 0, 12)
+	flush := func() {
+		if len(word) == 0 {
+			return
+		}
+		words = append(words, strings.ToLower(string(word)))
+		word = word[:0]
+	}
+	for i, r := range runes {
+		if !unicode.IsLetter(r) && !unicode.IsDigit(r) {
+			flush()
+			continue
+		}
+		if len(word) > 0 {
+			previous := runes[i-1]
+			next := rune(0)
+			if i+1 < len(runes) {
+				next = runes[i+1]
+			}
+			if unicode.IsUpper(r) && (unicode.IsLower(previous) || unicode.IsUpper(previous) && unicode.IsLower(next)) ||
+				unicode.IsDigit(r) != unicode.IsDigit(previous) {
+				flush()
+			}
+		}
+		word = append(word, r)
+	}
+	flush()
+	return words
 }
 
 func headingLevelFromStyle(row map[string]any) int {
@@ -363,8 +404,8 @@ func headingLevelFromStyle(row map[string]any) int {
 	if names, ok := row["style_names"].([]string); ok && len(names) > 0 {
 		parts = append(parts, names[0])
 	}
-	name := strings.ToLower(strings.Join(parts, " "))
-	if !strings.Contains(name, "heading") && !strings.Contains(name, "outline") {
+	name := strings.Join(parts, " ")
+	if !styleTokenPresent(name, "heading") && !styleTokenPresent(name, "outline") {
 		return 0
 	}
 	for i := len(name) - 1; i >= 0; i-- {
@@ -373,6 +414,15 @@ func headingLevelFromStyle(row map[string]any) int {
 		}
 	}
 	return 0
+}
+
+func styleTokenPresent(s, wanted string) bool {
+	for _, token := range styleTokens(s) {
+		if token == wanted {
+			return true
+		}
+	}
+	return false
 }
 func listStyle(s string) bool { return strings.Contains(strings.ToLower(s), "list") }
 func hasNativeHeading(row map[string]any) bool {
