@@ -752,13 +752,45 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 	for n, b := range w.Baseline.Files {
 		original[n] = office.Hash(b)
 	}
+	// Windows workspaces cannot retain two directory spellings that differ
+	// only by case. Map the editable package tree back to the immutable ZIP's
+	// exact part names before validation so a relationship such as
+	// customXML/item3.xml survives an import/build round trip.
+	baselineNames := map[string]string{}
+	for name := range w.Baseline.Files {
+		folded := strings.ToLower(name)
+		if prior, exists := baselineNames[folded]; exists && prior != name {
+			return nil, fmt.Errorf("baseline contains case-colliding package parts %s and %s", prior, name)
+		}
+		baselineNames[folded] = name
+	}
+	indexNames := map[string]string{}
+	for name := range w.Index.Files {
+		folded := strings.ToLower(name)
+		if prior, exists := indexNames[folded]; exists && prior != name {
+			return nil, fmt.Errorf("workspace index contains case-colliding paths %s and %s", prior, name)
+		}
+		indexNames[folded] = name
+	}
 	packageFiles := map[string][]byte{}
 	packageChanged := false
 	for n, b := range files {
 		if strings.HasPrefix(n, "package/") {
 			part := strings.TrimPrefix(n, "package/")
+			if canonical, ok := baselineNames[strings.ToLower(part)]; ok {
+				part = canonical
+			}
+			if prior, exists := packageFiles[part]; exists && !bytes.Equal(prior, b) {
+				return nil, fmt.Errorf("package source paths collide after case normalization: %s", part)
+			}
 			packageFiles[part] = b
-			if w.Index.Files[n] != office.Hash(b) {
+			expected := w.Index.Files[n]
+			if expected == "" {
+				if indexed, ok := indexNames[strings.ToLower("package/"+part)]; ok {
+					expected = w.Index.Files[indexed]
+				}
+			}
+			if expected != office.Hash(b) {
 				packageChanged = true
 			}
 		}

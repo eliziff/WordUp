@@ -59,6 +59,60 @@ func TestWorkspaceManifestHasOneCurrentShape(t *testing.T) {
 	}
 }
 
+func TestImportBuildPreservesCaseDistinctPackageParts(t *testing.T) {
+	p := office.BlankPackage()
+	p.Files["customXml/item1.xml"] = []byte(`<item xmlns="urn:one"/>`)
+	p.Files["customXML/item3.xml"] = []byte(`<item xmlns="urn:three"/>`)
+	if err := p.ContentType("customXml/item1.xml", "application/xml"); err != nil {
+		t.Fatal(err)
+	}
+	if err := p.ContentType("customXML/item3.xml", "application/xml"); err != nil {
+		t.Fatal(err)
+	}
+	if err := p.Relationship("word/document.xml", "rIdCase", office.R+"/customXml", "/customXML/item3.xml", ""); err != nil {
+		t.Fatal(err)
+	}
+	if err := p.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	original, err := p.Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	input := filepath.Join(t.TempDir(), "case-distinct.docx")
+	if err := os.WriteFile(input, original, 0600); err != nil {
+		t.Fatal(err)
+	}
+	root := filepath.Join(t.TempDir(), "workspace")
+	if _, err := Import(input, root); err != nil {
+		t.Fatal(err)
+	}
+	w, err := Open(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	report, err := w.Build("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	built, err := os.ReadFile(report.Artifact)
+	if err != nil {
+		t.Fatal(err)
+	}
+	out, err := office.ReadPackage(built)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for name, want := range map[string][]byte{
+		"customXml/item1.xml":  p.Files["customXml/item1.xml"],
+		"customXML/item3.xml": p.Files["customXML/item3.xml"],
+	} {
+		if !bytes.Equal(out.Files[name], want) {
+			t.Fatalf("case-distinct package part changed or disappeared: %s", name)
+		}
+	}
+}
+
 func TestSourceBuildCacheAndTamper(t *testing.T) {
 	w := newWorkspace(t)
 	if err := Write(w.Root, "vba/Answer.bas", []byte("Option Explicit\nPublic Function Answer() As Long\nAnswer = 42\nEnd Function\n"), ""); err != nil {
