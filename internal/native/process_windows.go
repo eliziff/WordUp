@@ -122,6 +122,10 @@ func winError(api string, e error) error {
 	return fmt.Errorf("%s: %w", api, e)
 }
 
+func noLogonSessionError(err error) bool {
+	return errors.Is(err, syscall.Errno(1312)) || strings.Contains(strings.ToLower(err.Error()), "specified logon session does not exist")
+}
+
 func duplicateInheritable(f *os.File) (syscall.Handle, error) {
 	var out syscall.Handle
 	self, _, _ := currentProcess.Call()
@@ -131,7 +135,7 @@ func duplicateInheritable(f *os.File) (syscall.Handle, error) {
 	}
 	return out, nil
 }
-func spawnOnDesktop(exe string, args []string, desktop string, stdin, stdout, stderr *os.File, job uintptr) (childProcess, error) {
+func spawnOnDesktop(exe string, args []string, desktop string, hidden bool, stdin, stdout, stderr *os.File, job uintptr) (childProcess, error) {
 	var result childProcess
 	ep, e := utf(exe)
 	if e != nil {
@@ -146,9 +150,12 @@ func spawnOnDesktop(exe string, args []string, desktop string, stdin, stdout, st
 	if e != nil {
 		return result, e
 	}
-	dp, e := utf(desktop)
-	if e != nil {
-		return result, e
+	var dp *uint16
+	if desktop != "" {
+		dp, e = utf(desktop)
+		if e != nil {
+			return result, e
+		}
 	}
 	handles := make([]syscall.Handle, 3)
 	for i, f := range []*os.File{stdin, stdout, stderr} {
@@ -187,7 +194,11 @@ func spawnOnDesktop(exe string, args []string, desktop string, stdin, stdout, st
 	si := startupEX{Attributes: attr}
 	si.Info.Cb = uint32(unsafe.Sizeof(si))
 	si.Info.Desktop = dp
-	si.Info.Flags = 0x100
+	si.Info.Flags = 0x100 // STARTF_USESTDHANDLES
+	if hidden {
+		si.Info.Flags |= 0x1   // STARTF_USESHOWWINDOW
+		si.Info.ShowWindow = 0 // SW_HIDE
+	}
 	si.Info.StdInput = handles[0]
 	si.Info.StdOutput = handles[1]
 	si.Info.StdErr = handles[2]
@@ -323,7 +334,29 @@ func Start(ctx context.Context, opt Options) (Host, error) {
 		return nil, e
 	}
 	spawnStarted := time.Now()
-	h.process, e = spawnOnDesktop(exe, []string{"__host", configPath}, "WinSta0\\"+h.cfg.Desktop, inRead, outWrite, logWrite, h.job)
+	// Resolve the name in the current window station; see connectWord for why
+	// qualifying it with WinSta0 is not portable across interactive sessions.
+	h.process, e = spawnOnDesktop(exe, []string{"__host", configPath}, h.cfg.Desktop, !h.cfg.Options.Visible, inRead, outWrite, logWrite, h.job)
+	if e != nil && !opt.Visible && noLogonSessionError(e) {
+		// Some restricted interactive sessions can create a desktop but cannot
+		// target it from CreateProcessW (ERROR_NO_LOGON_SESSION). Inherit the
+		// current desktop instead, keep both processes hidden, and retain the
+		// same job containment. This is a compatibility fallback, not a trust
+		// boundary or a visible-preview path.
+		if h.desktop != 0 {
+			closeDesktop.Call(h.desktop)
+			h.desktop = 0
+		}
+		h.cfg.Desktop = "Default"
+		cfg, marshalErr := json.Marshal(h.cfg)
+		if marshalErr != nil {
+			return nil, marshalErr
+		}
+		if writeErr := os.WriteFile(configPath, cfg, 0600); writeErr != nil {
+			return nil, writeErr
+		}
+		h.process, e = spawnOnDesktop(exe, []string{"__host", configPath}, "", true, inRead, outWrite, logWrite, h.job)
+	}
 	if e != nil {
 		return nil, e
 	}

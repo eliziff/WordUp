@@ -129,7 +129,21 @@ func connectWord(cfg hostConfig) (*wordHost, error) {
 		return nil, e
 	}
 	defer null.Close()
-	p, e := spawnOnDesktop(cfg.WordPath, []string{"/a", filepath.Join(cfg.Directory, "seed.docx")}, "WinSta0\\"+cfg.Desktop, null, null, null, 0)
+	// The private desktop was created in the caller's current window station.
+	// Supplying a hard-coded WinSta0 prefix fails in disconnected/service-like
+	// sessions with ERROR_NO_LOGON_SESSION even when CreateDesktopW succeeded.
+	desktop := cfg.Desktop
+	if desktop == "Default" {
+		// An empty desktop inherits the worker's current desktop and avoids
+		// re-resolving the window station in restricted sessions.
+		desktop = ""
+	}
+	p, e := spawnOnDesktop(cfg.WordPath, []string{"/a", filepath.Join(cfg.Directory, "seed.docx")}, desktop, !cfg.Visible, null, null, null, 0)
+	if e != nil && !cfg.Visible && noLogonSessionError(e) && desktop != "" {
+		// Keep the worker's current private desktop when possible, but inherit it
+		// if this session refuses an explicit desktop target.
+		p, e = spawnOnDesktop(cfg.WordPath, []string{"/a", filepath.Join(cfg.Directory, "seed.docx")}, "", true, null, null, null, 0)
+	}
 	if e != nil {
 		return nil, e
 	}
