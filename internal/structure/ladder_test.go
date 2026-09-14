@@ -44,3 +44,21 @@ func TestNamedHeadingDashVariants(t *testing.T) {
 		}
 	}
 }
+
+func TestGenericNamedHeadingPrefixes(t *testing.T) {
+	for _, text := range []string{"Theme 1: Pricing", "Section II - Scope", "Appendix A: Sources"} {
+		if got := MarkerChoices(text); len(got) == 0 {
+			t.Fatalf("named heading prefix was not recognized: %q", text)
+		}
+	}
+}
+
+func TestNamedHeadingPrefixesCreateNestedFamilies(t *testing.T) {
+	got := HeadingLadder([][]Interpretation{
+		MarkerChoices("Part I - Introduction"),
+		MarkerChoices("Theme 1: Pricing"),
+	})
+	if len(got) != 2 || got[0].Level != 1 || got[1].Level != 2 {
+		t.Fatalf("named prefixes collapsed into one ladder family: %#v", got)
+	}
+}

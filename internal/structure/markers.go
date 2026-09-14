@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-var namedHeadingPrefix = regexp.MustCompile(`^\s*(?i:part|chapter)\s+([IVXLCDM]{1,7}|[0-9]{1,3}|(?i:one|two|three|four|five|six|seven|eight|nine|ten))\s*([:\-\x{2013}\x{2014}])\s*(.+)$`)
+var namedHeadingPrefix = regexp.MustCompile(`^\s*((?i:part|chapter|theme|section|article|appendix|schedule|division|book|title))\s+([IVXLCDM]{1,7}|[A-Za-z]|[0-9]{1,3}|(?i:one|two|three|four|five|six|seven|eight|nine|ten))\s*([:\-\x{2013}\x{2014}])\s*(.+)$`)
 
 var headingPrefix = regexp.MustCompile(`^\s*(?:(?i:part|chapter)\s+)?([IVXLCDM]{1,7}|[A-Za-z]|[0-9]{1,3})([.)]|\s*[-\x{2013}\x{2014}])\s+(.+)$`)
 
@@ -21,9 +21,14 @@ func MarkerChoices(text string) []Interpretation {
 	if parts == nil {
 		return nil
 	}
-	value, punct := parts[1], strings.TrimSpace(parts[2])
+	namedPrefix, value, punct := "", parts[1], strings.TrimSpace(parts[2])
 	if named {
-		punct = "named_section"
+		namedPrefix, value, punct = strings.ToLower(parts[1]), parts[2], strings.TrimSpace(parts[3])
+		if namedPrefix == "part" || namedPrefix == "chapter" {
+			punct = "named_section"
+		} else {
+			punct = namedPrefix + "_named_section"
+		}
 	}
 	if n, err := strconv.Atoi(value); err == nil {
 		if n > 0 {

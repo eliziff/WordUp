@@ -202,14 +202,17 @@ Private Sub WU_ResolveMarkerLadder(ByRef result As Variant, ByVal count As Long)
 End Sub
 
 Public Function WU_ParseMarker(ByVal text As String) As String
-    Dim at As Long, prefix As String, rest As String, i As Long, c As String, lowerText As String
+    Dim at As Long, prefix As String, namedKind As String, rest As String, i As Long, c As String, lowerText As String
     text = Trim$(Replace(Replace(text, vbTab, " "), ChrW(160), " "))
     lowerText = LCase$(text)
-    If Left$(lowerText, 5) = "part " Or Left$(lowerText, 8) = "chapter " Then
+    If WU_IsNamedHeading(lowerText) Then
         at = InStr(text, ":"): If at = 0 Then at = InStr(text, " - ")
+        If at = 0 Then at = InStr(text, ChrW(&H2013))
+        If at = 0 Then at = InStr(text, ChrW(&H2014))
         If at > 1 Then
+            namedKind = Left$(text, InStr(text, " ") - 1)
             prefix = Trim$(Mid$(text, InStr(text, " ") + 1, at - InStr(text, " ") - 1))
-            If IsNumeric(prefix) Or WU_WordNumber(prefix) > 0 Or WU_IsRoman(prefix) Then WU_ParseMarker = "part:" & prefix: Exit Function
+            If IsNumeric(prefix) Or WU_WordNumber(prefix) > 0 Or WU_IsRoman(prefix) Or (Len(prefix) = 1 And LCase$(prefix) >= "a" And LCase$(prefix) <= "z") Then WU_ParseMarker = "named:" & LCase$(namedKind) & ":" & prefix: Exit Function
         End If
     End If
     at = InStr(text, "."): If at < 2 Or at > 8 Then Exit Function
@@ -223,8 +226,20 @@ Public Function WU_ParseMarker(ByVal text As String) As String
 End Function
 
 Private Function WU_MarkerFamily(ByVal marker As String) As String
-    If Left$(LCase$(marker), 5) = "part:" Then
-        WU_MarkerFamily = "named"
+    Dim lowerMarker As String, namedKind As String, at As Long
+    lowerMarker = LCase$(marker)
+    If Left$(lowerMarker, 5) = "part:" Then
+        WU_MarkerFamily = "named_section": Exit Function
+    End If
+    If Left$(lowerMarker, 6) = "named:" Then
+        at = InStr(7, lowerMarker, ":")
+        If at > 0 Then namedKind = Mid$(lowerMarker, 7, at - 7)
+        If namedKind = "part" Or namedKind = "chapter" Or Len(namedKind) = 0 Then
+            WU_MarkerFamily = "named_section"
+        Else
+            WU_MarkerFamily = "named_" & namedKind & "_section"
+        End If
+        Exit Function
     ElseIf IsNumeric(marker) Then
         WU_MarkerFamily = "decimal"
     ElseIf Len(marker) = 1 And InStr(1, "IVXLCDM", marker, vbBinaryCompare) = 0 Then
@@ -235,10 +250,11 @@ Private Function WU_MarkerFamily(ByVal marker As String) As String
 End Function
 
 Private Function WU_MarkerValue(ByVal marker As String, ByVal family As String) As Long
-    If family = "named" Then
-        marker = Mid$(marker, 6)
+    If family = "named" Or Left$(family, 6) = "named_" Then
+        marker = Mid$(marker, InStrRev(marker, ":", -1, vbBinaryCompare) + 1)
         If WU_WordNumber(marker) > 0 Then WU_MarkerValue = WU_WordNumber(marker): Exit Function
         If IsNumeric(marker) Then WU_MarkerValue = CLng(marker): Exit Function
+        If Len(marker) = 1 And LCase$(marker) >= "a" And LCase$(marker) <= "z" Then WU_MarkerValue = AscW(UCase$(marker)) - 64: Exit Function
         marker = UCase$(marker): family = "roman"
     End If
     If family = "decimal" Then WU_MarkerValue = CLng(marker): Exit Function
@@ -250,6 +266,13 @@ Private Function WU_MarkerValue(ByVal marker As String, ByVal family As String) 
         If current < last Then n = n - current Else n = n + current: last = current
     Next i
     WU_MarkerValue = n
+End Function
+
+Private Function WU_IsNamedHeading(ByVal lowerText As String) As Boolean
+    Dim prefix As Variant
+    For Each prefix In Array("part ", "chapter ", "theme ", "section ", "article ", "appendix ", "schedule ", "division ", "book ", "title ")
+        If Left$(lowerText, Len(CStr(prefix))) = CStr(prefix) Then WU_IsNamedHeading = True: Exit Function
+    Next prefix
 End Function
 
 Private Function WU_WordNumber(ByVal value As String) As Long
