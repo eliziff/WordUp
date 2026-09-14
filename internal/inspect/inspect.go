@@ -384,6 +384,10 @@ func StyleReference(file string) (map[string]any, error) {
 		return nil, e
 	}
 	out["theme_fonts"] = theme
+	if themeXML := p.Files["word/theme/theme1.xml"]; len(themeXML) > 0 {
+		out["theme_xml"] = string(themeXML)
+		out["theme_sha256"] = office.Hash(themeXML)
+	}
 	if styles := p.Files["word/styles.xml"]; len(styles) > 0 {
 		out["styles_xml"] = string(styles)
 		out["styles_sha256"] = office.Hash(styles)

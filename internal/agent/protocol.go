@@ -27,6 +27,9 @@ func Tools() []Tool {
 		if ds[i][0] == "read" {
 			ds[i][1] = "Read a workspace file with its full-file SHA-256; optional offset and limit retrieve a bounded byte range for large reports or evidence."
 		}
+		if ds[i][0] == "reference.document" {
+			ds[i][1] = "Read exact theme1.xml, styles.xml and numbering.xml parts with hashes, theme font resolution, and paragraph/property observations from path."
+		}
 	}
 	ds = append(ds, [2]string{"structure.source", "Return an editable standalone VBA paragraph detection core, separate from house-style mapping. Read-only native evidence plus unresolved marker candidates; no installation or execution."})
 	ds = append(ds, [2]string{"structure.inspect", "Inspect document path without Word: source-located paragraphs, style inheritance, direct versus inherited outline levels, character-weighted direct formatting, resolved numbering definitions, table/textbox containment and raw evidence XML. Evidence adapter, not editorial truth."})
