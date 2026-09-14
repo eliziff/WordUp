@@ -409,7 +409,7 @@ Option Explicit
 func (w *Workspace) SourceFiles() (map[string][]byte, error) {
 	out := map[string][]byte{}
 	total := 0
-	for _, top := range []string{"package", "vba", "forms", "styles", "content", "building_blocks", "assets"} {
+	for _, top := range []string{"package", "vba", "forms", "assets"} {
 		base := filepath.Join(w.Root, top)
 		e := filepath.WalkDir(base, func(p string, d fs.DirEntry, e error) error {
 			if os.IsNotExist(e) {
