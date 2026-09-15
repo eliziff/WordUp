@@ -902,9 +902,13 @@ Failed:
 End Sub
 
 Private Sub WU_UpdateFieldsInStory(ByVal story As Range, ByRef failures As Long)
+    Dim fieldResult As Long
     On Error Resume Next
-    story.Fields.Update
-    If Err.Number <> 0 Then failures = failures + 1
+    ' Fields.Update reports the first failing field by return value; it does
+    ' not necessarily raise a VBA error. Treat either signal as a failed
+    ' story so a quality action cannot claim success over a broken field.
+    fieldResult = story.Fields.Update
+    If Err.Number <> 0 Or fieldResult <> 0 Then failures = failures + 1
     Err.Clear
     On Error GoTo 0
 End Sub
