@@ -408,6 +408,12 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 		"If enabled(row) Then If WU_ConvertStyleInStory",
 		"WU_ConvertStyleInStoryChain",
 		"WU_ConvertStyleInStoryType",
+		"wdPrimaryHeaderStory",
+		"wdFirstPageHeaderStory",
+		"wdEvenPagesHeaderStory",
+		"wdPrimaryFooterStory",
+		"wdFirstPageFooterStory",
+		"wdEvenPagesFooterStory",
 		"WU_ConvertStyleBatchInStoryChain",
 	} {
 		if !strings.Contains(source, want) {
