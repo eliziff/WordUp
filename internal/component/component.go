@@ -109,7 +109,7 @@ func builtin() []Manifest {
 		vbaComponent("command.hotkey", "WordUpHotkey", "WU_RegisterHotkey", "Registers and removes a template-owned key binding.", "hotkeys", hotkeySource),
 		vbaComponent("command.context-menu", "WordUpContextMenu", "WU_RegisterContextMenu", "Registers and removes a tagged context-menu command.", "context menus", contextMenuSource),
 		vbaComponent("document.style-converter", "WordUpStyleConverter", "WU_ConvertStyle", "Converts one paragraph style across stories or inside an exact Range in a single safe edit.", "style conversion", styleConverterSource),
-		vbaComponent("document.text-operations", "WordUpTextOperations", "WU_ReplaceLiteral", "Performs bounded literal replacement, batch replacement, and character-style matching across selected Word stories or an exact Range without using Selection.", "text operations", textOperationsSource)}
+		vbaComponent("document.text-operations", "WordUpTextOperations", "WU_ReplaceLiteral", "Counts and performs bounded literal replacement, batch replacement, and character-style matching across selected Word stories or an exact Range without using Selection.", "text operations", textOperationsSource)}
 	for i := range items {
 		if items[i].ID == "command.hotkey" {
 			items[i].Version = "1.0.5"
@@ -135,9 +135,9 @@ func builtin() []Manifest {
 			items[i].Acceptance = "WU_ConvertStyle and WU_ConvertStyleInRange are public, bounded, state-safe, and compile without non-Office references."
 		}
 		if items[i].ID == "document.text-operations" {
-			items[i].Version = "1.0.6"
-			items[i].Capabilities = []string{"literal replacement", "batch replacement", "character-style matching", "range-bounded edits"}
-			items[i].Acceptance = "WU_ReplaceLiteral, WU_ReplaceLiteralBatch, and the character-style match/range operations are public, bounded, state-safe, and compile without non-Office references."
+			items[i].Version = "1.0.8"
+			items[i].Capabilities = []string{"literal replacement", "literal counting", "batch replacement", "range-bounded edits", "character-style matching"}
+			items[i].Acceptance = "Literal count, replacement, batch, and character-style match/range operations are public, bounded, state-safe, and compile without non-Office references."
 		}
 		items[i].Schema = 1
 		items[i].License = "MIT"

@@ -404,13 +404,13 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.6" {
+	if item.Version != "1.0.8" {
 		t.Fatalf("text operations version=%q", item.Version)
 	}
 	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
 		t.Fatalf("unexpected text operations files: %#v", item.Files)
 	}
-	for _, capability := range []string{"literal replacement", "batch replacement", "character-style matching", "range-bounded edits"} {
+	for _, capability := range []string{"literal replacement", "literal counting", "batch replacement", "range-bounded edits", "character-style matching"} {
 		found := false
 		for _, got := range item.Capabilities {
 			if got == capability {
@@ -425,11 +425,15 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	source := item.Files[0].Text
 	for _, want := range []string{
 		"Public Function WU_ReplaceLiteral",
+		"Public Function WU_CountLiteral",
+		"Public Function WU_CountLiteralInRange",
 		"Public Function WU_ReplaceLiteralBatch",
+		"Public Function WU_ReplaceLiteralBatchInRange",
 		"Public Function WU_ReplaceLiteralInRange",
 		"Public Function WU_ApplyCharacterStyleToMatches",
 		"Public Function WU_ApplyCharacterStyleToRange",
 		"target range is required",
+		"never opens an undo record or toggles ScreenUpdating",
 		"story scope must be main, notes, or all",
 		"replacements must be a two-dimensional array",
 		"replacements must have exactly two columns",

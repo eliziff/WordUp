@@ -458,6 +458,57 @@ Failed:
     Resume CleanUp
 End Function
 
+' Count literal matches without changing document state. This is the
+' read-only companion for citation and quality audits: it uses the same
+' bounded story selection and explicit Find flags as the edit paths, but
+' never opens an undo record or toggles ScreenUpdating.
+Public Function WU_CountLiteral(ByVal document As Document, ByVal findText As String, Optional ByVal storyScope As String = "main", Optional ByVal matchCase As Boolean = False, Optional ByVal wholeWord As Boolean = False) As Long
+    Dim firstStory As Range, story As Range, count As Long
+    Dim failure As Long, failureSource As String, failureText As String
+    On Error GoTo Failed
+    If document Is Nothing Then Err.Raise 91, "WU_CountLiteral", "document is required"
+    WU_ValidateLiteral findText, "", "WU_CountLiteral"
+    storyScope = LCase$(Trim$(storyScope))
+    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "all" Then Err.Raise 5, "WU_CountLiteral", "story scope must be main, notes, or all"
+    If storyScope = "main" Then
+        Set story = document.StoryRanges(wdMainTextStory)
+        If Not story Is Nothing Then If story.End > story.Start Then count = WU_CountLiteralInStory(story, findText, matchCase, wholeWord)
+    ElseIf storyScope = "notes" Then
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdFootnotesStory)
+        Err.Clear
+        On Error GoTo Failed
+        If Not firstStory Is Nothing Then count = WU_CountLiteralInStoryChain(firstStory, findText, matchCase, wholeWord)
+        Set firstStory = Nothing
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdEndnotesStory)
+        Err.Clear
+        On Error GoTo Failed
+        If Not firstStory Is Nothing Then count = count + WU_CountLiteralInStoryChain(firstStory, findText, matchCase, wholeWord)
+    Else
+        For Each firstStory In document.StoryRanges
+            count = count + WU_CountLiteralInStoryChain(firstStory, findText, matchCase, wholeWord)
+        Next firstStory
+    End If
+    WU_CountLiteral = count
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+End Function
+
+' Count only inside the exact caller-supplied Range. The range is never
+' widened to a story, which keeps audits safe for a selected section or cell.
+Public Function WU_CountLiteralInRange(ByVal target As Range, ByVal findText As String, Optional ByVal matchCase As Boolean = False, Optional ByVal wholeWord As Boolean = False) As Long
+    Dim targetStart As Long, targetEnd As Long
+    If target Is Nothing Then Err.Raise 91, "WU_CountLiteralInRange", "target range is required"
+    WU_ValidateLiteral findText, "", "WU_CountLiteralInRange"
+    targetStart = target.Start: targetEnd = target.End
+    If targetEnd <= targetStart Then Exit Function
+    WU_CountLiteralInRange = WU_CountLiteralInStory(target, findText, matchCase, wholeWord)
+End Function
+
 ' Replace a two-column Variant array of find/replacement pairs in one safe edit.
 ' The first column is the literal find text and the second is its replacement.
 ' The array is only a compact command list: Word remains the source of truth
@@ -505,6 +556,50 @@ Public Function WU_ReplaceLiteralBatch(ByVal document As Document, ByVal replace
         If matched(row) Then changed = changed + 1
     Next row
     WU_ReplaceLiteralBatch = changed
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
+' Replace a two-column Variant array only inside the exact caller-supplied
+' Range. Validation happens before the one undo record is opened, and the
+' return value counts pairs that matched at least once.
+Public Function WU_ReplaceLiteralBatchInRange(ByVal target As Range, ByVal replacements As Variant, Optional ByVal matchCase As Boolean = False, Optional ByVal wholeWord As Boolean = False) As Long
+    Dim document As Document, updating As Boolean, opened As Boolean, captured As Boolean
+    Dim failure As Long, failureSource As String, failureText As String
+    Dim targetStart As Long, targetEnd As Long, firstRow As Long, lastRow As Long, firstColumn As Long, row As Long, changed As Long, activeRows As Long
+    Dim matched() As Boolean
+    On Error GoTo Failed
+    If target Is Nothing Then Err.Raise 91, "WU_ReplaceLiteralBatchInRange", "target range is required"
+    Set document = target.Document
+    activeRows = WU_ValidateLiteralBatch(replacements, matchCase)
+    If activeRows = 0 Then Exit Function
+    targetStart = target.Start: targetEnd = target.End
+    If targetEnd <= targetStart Then Exit Function
+    firstRow = LBound(replacements, 1): lastRow = UBound(replacements, 1): firstColumn = LBound(replacements, 2)
+    ReDim matched(firstRow To lastRow)
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Replace literal text batch": opened = True
+    WU_ReplaceLiteralBatchInStory target, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched
+    For row = firstRow To lastRow
+        If matched(row) Then changed = changed + 1
+    Next row
+    WU_ReplaceLiteralBatchInRange = changed
 CleanUp:
     On Error Resume Next
     If opened Then
@@ -687,6 +782,40 @@ Failed:
     failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
     On Error GoTo 0
     If failure <> 0 Then Err.Raise failure, failureSource, failureText
+End Function
+
+Private Function WU_CountLiteralInStoryChain(ByVal firstStory As Range, ByVal findText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
+    Dim story As Range, count As Long
+    Set story = firstStory
+    Do While Not story Is Nothing
+        If story.End > story.Start Then count = count + WU_CountLiteralInStory(story, findText, matchCase, wholeWord)
+        Set story = story.NextStoryRange
+    Loop
+    WU_CountLiteralInStoryChain = count
+End Function
+
+Private Function WU_CountLiteralInStory(ByVal story As Range, ByVal findText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
+    Dim search As Range, nextStart As Long, count As Long
+    Set search = story.Duplicate
+    With search.Find
+        .ClearFormatting
+        .Text = WU_EscapeFindLiteral(findText)
+        .Forward = True
+        .Wrap = wdFindStop
+        .Format = False
+        .MatchCase = matchCase
+        .MatchWholeWord = wholeWord
+        .MatchWildcards = False
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
+    End With
+    Do While search.Find.Execute
+        count = count + 1
+        nextStart = search.End
+        If nextStart >= story.End Then Exit Do
+        search.SetRange Start:=nextStart, End:=story.End
+    Loop
+    WU_CountLiteralInStory = count
 End Function
 
 Private Sub WU_ReplaceLiteralBatchInStoryChain(ByVal firstStory As Range, ByVal replacements As Variant, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, ByRef matched() As Boolean)

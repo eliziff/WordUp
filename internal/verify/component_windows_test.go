@@ -180,7 +180,7 @@ Public Function CheckRibbonAndProgress() As String
 End Function
 Public Function CheckTextOperations() As String
     Dim d As Document, result As Boolean, before As String, bodyAfterNote As String, formatted As Range, scoped As Range, rejected As Boolean, note As Footnote, priorUpdating As Boolean
-    Dim replacements(0 To 2, 0 To 1) As Variant, batchChanged As Long, citationStyle As Style, styled As Long
+    Dim replacements(0 To 2, 0 To 1) As Variant, batchChanged As Long, rangeBatchChanged As Long, literalCount As Long, citationStyle As Style, styled As Long
     Dim i As Long, lines(1 To 400) As String, started As Single, elapsed As Single
     Set d = Documents.Add
     d.Content.Text = "Alpha alpha alphabet" & vbCr
@@ -217,6 +217,17 @@ Public Function CheckTextOperations() As String
     If Application.ScreenUpdating <> priorUpdating Then Err.Raise 5, , "batch replacement did not restore ScreenUpdating"
     If Not d.Undo Then Err.Raise 5, , "batch replacement did not create one undo record"
     If d.Content.Text <> "Alpha alpha Gamma" & vbCr Then Err.Raise 5, , "batch replacement undo did not restore text"
+    d.Content.Text = "First Alpha" & vbCr & "Second Gamma" & vbCr
+    Set scoped = d.Paragraphs(1).Range.Duplicate
+    rangeBatchChanged = WU_ReplaceLiteralBatchInRange(scoped, replacements, True, True)
+    If rangeBatchChanged <> 1 Or d.Content.Text <> "First Omega" & vbCr & "Second Gamma" & vbCr Then Err.Raise 5, , "range batch replacement escaped its requested boundary"
+    literalCount = WU_CountLiteral(d, "Gamma", "main", True, True)
+    If literalCount <> 1 Then Err.Raise 5, , "literal counter returned the wrong main-story count"
+    literalCount = WU_CountLiteralInRange(scoped, "Omega", True, True)
+    If literalCount <> 1 Then Err.Raise 5, , "range literal counter missed the bounded match"
+    If Application.ScreenUpdating <> priorUpdating Then Err.Raise 5, , "range batch replacement did not restore ScreenUpdating"
+    If Not d.Undo Then Err.Raise 5, , "range batch replacement did not create one undo record"
+    If d.Content.Text <> "First Alpha" & vbCr & "Second Gamma" & vbCr Then Err.Raise 5, , "range batch replacement undo did not restore text"
     d.Content.Text = "Alpha Alpha Gamma" & vbCr
     Set citationStyle = d.Styles.Add(Name:="Proof Citation", Type:=wdStyleTypeCharacter)
     citationStyle.Font.Italic = True
