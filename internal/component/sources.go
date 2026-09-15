@@ -1321,11 +1321,18 @@ End Function
 ' Refresh only fields inside the exact caller-supplied Range. The range is
 ' never widened and no table of contents is implicitly updated.
 Public Function WU_RefreshFieldsInRange(ByVal target As Range) As Long
-    Dim updating As Boolean, opened As Boolean, captured As Boolean, fieldResult As Long, updateError As Long
+    Dim updating As Boolean, opened As Boolean, captured As Boolean, fieldResult As Long, updateError As Long, fieldCount As Long, readError As Long
     Dim failure As Long, failureSource As String, failureText As String
     On Error GoTo Failed
     If target Is Nothing Then Err.Raise 91, "WU_RefreshFieldsInRange", "target range is required"
     If target.End <= target.Start Then Exit Function
+    On Error Resume Next
+    fieldCount = target.Fields.Count
+    readError = Err.Number
+    Err.Clear
+    On Error GoTo Failed
+    If readError <> 0 Then Err.Raise readError, "WU_RefreshFieldsInRange", "fields are unavailable"
+    If fieldCount = 0 Then Exit Function
     updating = Application.ScreenUpdating
     captured = True
     Application.ScreenUpdating = False
@@ -1397,7 +1404,7 @@ Private Sub WU_RefreshFieldStoryChain(ByVal firstStory As Range, ByRef failures 
 End Sub
 
 Private Sub WU_RefreshFieldStory(ByVal story As Range, ByRef failures As Long)
-    Dim fieldResult As Long, readError As Long, storyStart As Long, storyEnd As Long
+    Dim fieldResult As Long, fieldCount As Long, readError As Long, storyStart As Long, storyEnd As Long
     If story Is Nothing Then Exit Sub
     On Error Resume Next
     Err.Clear
@@ -1408,6 +1415,13 @@ Private Sub WU_RefreshFieldStory(ByVal story As Range, ByRef failures As Long)
     On Error GoTo 0
     If readError <> 0 Then failures = failures + 1: Exit Sub
     If storyEnd <= storyStart Then Exit Sub
+    On Error Resume Next
+    fieldCount = story.Fields.Count
+    readError = Err.Number
+    Err.Clear
+    On Error GoTo 0
+    If readError <> 0 Then failures = failures + 1: Exit Sub
+    If fieldCount = 0 Then Exit Sub
     On Error Resume Next
     Err.Clear
     fieldResult = story.Fields.Update

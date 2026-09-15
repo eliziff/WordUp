@@ -141,9 +141,9 @@ func builtin() []Manifest {
 			items[i].Acceptance = "Literal and explicit wildcard count/replacement, wildcard batch replacement, exact character-style application, character-style match/range/batch, and exact offset-run operations support main, notes, headers, footers, and all scopes; plain and linked character styles are recognized without unsafe Linked reads, wildcard replacement tokens are opt-in, literal searches remain escaped, Find's sticky fuzzy/phrase/width/Unicode/control/prefix flags are pinned where exposed, one-record style batches resolve each unique style once, cache target names and story boundaries, skip empty linked stories, reject unavailable or self-referential story chains, bound longer malformed chains at 32768 linked stories, skip zero-width style matches, all paths remain bounded and state-safe, and the module compiles without non-Office references."
 		}
 		if items[i].ID == "document.field-refresh" {
-			items[i].Version = "1.0.5"
+			items[i].Version = "1.0.6"
 			items[i].Capabilities = []string{"field refresh", "table-of-contents refresh", "range-bounded refresh", "story scopes", "header/footer scopes", "return-code diagnostics", "bounded story traversal"}
-			items[i].Acceptance = "WU_RefreshFields and WU_RefreshFieldsInRange support explicit story selection, optional table-of-contents updates, nonzero Fields.Update return-code detection, bounded empty/unavailable/self-referential story traversal, a 32768-story malformed-chain ceiling, one-record state-safe cleanup, and compilation without non-Office references."
+			items[i].Acceptance = "WU_RefreshFields and WU_RefreshFieldsInRange support explicit story selection, optional table-of-contents updates, skip field-free stories and ranges before opening an undo record, nonzero Fields.Update return-code detection, bounded empty/unavailable/self-referential story traversal, a 32768-story malformed-chain ceiling, one-record state-safe cleanup, and compilation without non-Office references."
 		}
 		items[i].Schema = 1
 		items[i].License = "MIT"
