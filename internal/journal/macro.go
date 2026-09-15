@@ -725,6 +725,9 @@ Private Sub WU_ApplyResolvedParagraphStyles(ByVal story As Range, ByRef structur
                 If StrComp(styleName, "Normal", vbTextCompare) = 0 Or StrComp(styleName, "Body Text", vbTextCompare) = 0 Then Set desiredStyle = bodyStyle
             End If
         End If
+        If Not desiredStyle Is Nothing Then
+            If StrComp(styleName, desiredStyle.NameLocal, vbTextCompare) = 0 Then Set desiredStyle = Nothing
+        End If
         If desiredStyle Is Nothing Then
             WU_FlushParagraphStyleBatch batch, batchStyle
         ElseIf batch Is Nothing Then
@@ -752,13 +755,19 @@ Private Sub WU_ApplyNativeParagraphStyles(ByVal story As Range, ByVal bodyStyle 
         End If
         Set paragraphRange = paragraph.Range: Set desiredStyle = Nothing
         If Not paragraphRange.Information(wdWithInTable) Then
+            currentStyle = vbNullString
+            On Error Resume Next
+            currentStyle = CStr(paragraphRange.Style)
+            On Error GoTo 0
             Set desiredStyle = WU_HeadingStyleForLevel(paragraph.OutlineLevel, heading1, heading2, heading3, heading4, heading5, heading6, heading7, heading8, heading9)
+            If Not desiredStyle Is Nothing Then
+                If StrComp(currentStyle, desiredStyle.NameLocal, vbTextCompare) = 0 Then Set desiredStyle = Nothing
+            End If
             If desiredStyle Is Nothing Then
-                currentStyle = vbNullString
-                On Error Resume Next
-                currentStyle = CStr(paragraphRange.Style)
-                On Error GoTo 0
                 If StrComp(currentStyle, "Normal", vbTextCompare) = 0 Or StrComp(currentStyle, "Body Text", vbTextCompare) = 0 Then Set desiredStyle = bodyStyle
+            End If
+            If Not desiredStyle Is Nothing Then
+                If StrComp(currentStyle, desiredStyle.NameLocal, vbTextCompare) = 0 Then Set desiredStyle = Nothing
             End If
         End If
         If desiredStyle Is Nothing Then
