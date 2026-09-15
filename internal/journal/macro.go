@@ -2,11 +2,13 @@ package journal
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"sync"
+	"unicode/utf8"
 
 	"github.com/eliziff/WordUp/internal/component"
 	"github.com/eliziff/WordUp/internal/office"
@@ -50,8 +52,8 @@ func Create(root string, profile Profile) (CreateReport, error) {
 	if root == "" {
 		return CreateReport{}, fmt.Errorf("journal workspace path required")
 	}
-	if profile.ID == "" {
-		return CreateReport{}, fmt.Errorf("journal profile id required")
+	if err := validateProfile(profile); err != nil {
+		return CreateReport{}, err
 	}
 	if profile.BodyFont == "" {
 		profile.BodyFont = "Times New Roman"
@@ -113,6 +115,33 @@ func Create(root string, profile Profile) (CreateReport, error) {
 		return CreateReport{}, err
 	}
 	return CreateReport{Journal: profile, Workspace: root, Artifact: artifact, Build: build}, nil
+}
+
+func validateProfile(profile Profile) error {
+	if profile.ID == "" {
+		return fmt.Errorf("journal profile id required")
+	}
+	for label, value := range map[string]string{
+		"id": profile.ID, "name": profile.Name, "abbreviation": profile.Abbreviation,
+		"scope": profile.Scope, "permalink_policy": profile.PermalinkPolicy,
+		"body_font": profile.BodyFont, "note_font": profile.NoteFont, "evidence_status": profile.EvidenceStatus,
+	} {
+		if !utf8.ValidString(value) {
+			return fmt.Errorf("journal profile %s is not valid UTF-8", label)
+		}
+		if strings.ContainsAny(value, "\x00\r\n") {
+			return fmt.Errorf("journal profile %s contains a prohibited control character", label)
+		}
+	}
+	for i, feature := range profile.Features {
+		if !utf8.ValidString(feature) || strings.ContainsAny(feature, "\x00\r\n") {
+			return fmt.Errorf("journal profile feature %d contains a prohibited character", i)
+		}
+	}
+	if math.IsNaN(profile.BodySizePT) || math.IsInf(profile.BodySizePT, 0) || math.IsNaN(profile.NoteSizePT) || math.IsInf(profile.NoteSizePT, 0) {
+		return fmt.Errorf("journal profile font sizes must be finite")
+	}
+	return nil
 }
 
 func CreateAll(root string) ([]CreateReport, error) {

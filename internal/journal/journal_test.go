@@ -2,6 +2,7 @@ package journal
 
 import (
 	"encoding/json"
+	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -216,5 +217,20 @@ func TestCreateBuildsIndependentJournalWorkspace(t *testing.T) {
 	}
 	if diagnostics, ok := check["diagnostics"].([]map[string]any); !ok || len(diagnostics) != 0 {
 		t.Fatalf("generated workspace diagnostics: %#v", check)
+	}
+}
+
+func TestCreateRejectsUnsafeProfileValuesBeforeWriting(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "workspace")
+	profile := Profile{ID: "BAD\nID", Name: "Unsafe", BodySizePT: 11, NoteSizePT: 9}
+	if _, err := Create(root, profile); err == nil || !strings.Contains(err.Error(), "control character") {
+		t.Fatalf("unsafe profile was accepted: %v", err)
+	}
+	if _, err := os.Stat(root); !os.IsNotExist(err) {
+		t.Fatalf("unsafe profile created output: %v", err)
+	}
+	profile = Profile{ID: "BAD-SIZE", Name: "Unsafe", BodySizePT: math.NaN(), NoteSizePT: 9}
+	if _, err := Create(root, profile); err == nil || !strings.Contains(err.Error(), "finite") {
+		t.Fatalf("non-finite profile size was accepted: %v", err)
 	}
 }
