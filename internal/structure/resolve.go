@@ -14,6 +14,11 @@ const maxHierarchyLevel = 9
 // It mutates the supplied observation rows so callers retain exact source facts.
 func Resolve(rows []map[string]any) map[string]any {
 	parents := [10]int{}
+	for i, row := range rows {
+		if row == nil {
+			rows[i] = map[string]any{}
+		}
+	}
 	frontMatter := frontMatterRoles(rows)
 	headings, candidates, ambiguities := 0, 0, 0
 	for i, row := range rows {

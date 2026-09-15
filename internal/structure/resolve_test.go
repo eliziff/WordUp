@@ -152,6 +152,18 @@ func TestResolveAcceptsDecodedEvidenceShapes(t *testing.T) {
 	}
 }
 
+func TestResolveNormalizesNilRows(t *testing.T) {
+	rows := []map[string]any{nil}
+	report := Resolve(rows)
+	if report["paragraphs"] != 1 {
+		t.Fatalf("unexpected paragraph count: %#v", report)
+	}
+	resolved, ok := rows[0]["resolved_structure"].(map[string]any)
+	if !ok || resolved["role"] != "blank" {
+		t.Fatalf("nil row was not resolved safely: %#v", rows)
+	}
+}
+
 func TestResolveRejectsOutOfRangeHierarchyEvidence(t *testing.T) {
 	cases := []map[string]any{
 		{"context": "body", "text": "Body prose", "outline_evidence": map[string]any{"level": 99}},
