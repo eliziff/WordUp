@@ -522,6 +522,9 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 			t.Fatalf("style converter source omitted %q", want)
 		}
 	}
+	if strings.Contains(source, "And Not style.Linked") {
+		t.Fatal("style converter directly reads Linked in a non-short-circuit condition")
+	}
 }
 
 func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
@@ -672,6 +675,9 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		if !strings.Contains(source, want) {
 			t.Fatalf("text operations source omitted %q", want)
 		}
+	}
+	if strings.Contains(source, "And Not style.Linked") {
+		t.Fatal("text operations directly reads Linked in a non-short-circuit condition")
 	}
 	batchHelper := source[strings.Index(source, "Private Function WU_ApplyCharacterStyleBatchInStory(ByVal"):]
 	if strings.Contains(batchHelper, "document.Styles(styleName)") {
