@@ -467,7 +467,8 @@ End Function
 Public Function WU_ReplaceLiteralBatch(ByVal document As Document, ByVal replacements As Variant, Optional ByVal storyScope As String = "main", Optional ByVal matchCase As Boolean = False, Optional ByVal wholeWord As Boolean = False) As Long
     Dim firstStory As Range, story As Range, updating As Boolean, opened As Boolean, captured As Boolean
     Dim failure As Long, failureSource As String, failureText As String
-    Dim firstRow As Long, lastRow As Long, firstColumn As Long, activeRows As Long, changed As Long
+    Dim firstRow As Long, lastRow As Long, firstColumn As Long, activeRows As Long, changed As Long, row As Long
+    Dim matched() As Boolean
     On Error GoTo Failed
     If document Is Nothing Then Err.Raise 91, "WU_ReplaceLiteralBatch", "document is required"
     storyScope = LCase$(Trim$(storyScope))
@@ -475,30 +476,34 @@ Public Function WU_ReplaceLiteralBatch(ByVal document As Document, ByVal replace
     activeRows = WU_ValidateLiteralBatch(replacements, matchCase)
     If activeRows = 0 Then Exit Function
     firstRow = LBound(replacements, 1): lastRow = UBound(replacements, 1): firstColumn = LBound(replacements, 2)
+    ReDim matched(firstRow To lastRow)
     updating = Application.ScreenUpdating
     captured = True
     Application.ScreenUpdating = False
     Application.UndoRecord.StartCustomRecord "Replace literal text batch": opened = True
     If storyScope = "main" Then
         Set story = document.StoryRanges(wdMainTextStory)
-        If Not story Is Nothing Then If story.End > story.Start Then changed = WU_ReplaceLiteralBatchInStory(story, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+        If Not story Is Nothing Then If story.End > story.Start Then WU_ReplaceLiteralBatchInStory story, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched
     ElseIf storyScope = "notes" Then
         On Error Resume Next
         Set firstStory = document.StoryRanges(wdFootnotesStory)
         Err.Clear
         On Error GoTo Failed
-        If Not firstStory Is Nothing Then changed = WU_ReplaceLiteralBatchInStoryChain(firstStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+        If Not firstStory Is Nothing Then WU_ReplaceLiteralBatchInStoryChain firstStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched
         Set firstStory = Nothing
         On Error Resume Next
         Set firstStory = document.StoryRanges(wdEndnotesStory)
         Err.Clear
         On Error GoTo Failed
-        If Not firstStory Is Nothing Then changed = changed + WU_ReplaceLiteralBatchInStoryChain(firstStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+        If Not firstStory Is Nothing Then WU_ReplaceLiteralBatchInStoryChain firstStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched
     Else
         For Each firstStory In document.StoryRanges
-            changed = changed + WU_ReplaceLiteralBatchInStoryChain(firstStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+            WU_ReplaceLiteralBatchInStoryChain firstStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched
         Next firstStory
     End If
+    For row = firstRow To lastRow
+        If matched(row) Then changed = changed + 1
+    Next row
     WU_ReplaceLiteralBatch = changed
 CleanUp:
     On Error Resume Next
@@ -684,27 +689,25 @@ Failed:
     If failure <> 0 Then Err.Raise failure, failureSource, failureText
 End Function
 
-Private Function WU_ReplaceLiteralBatchInStoryChain(ByVal firstStory As Range, ByVal replacements As Variant, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
-    Dim story As Range, changed As Long
+Private Sub WU_ReplaceLiteralBatchInStoryChain(ByVal firstStory As Range, ByVal replacements As Variant, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, ByRef matched() As Boolean)
+    Dim story As Range
     Set story = firstStory
     Do While Not story Is Nothing
-        If story.End > story.Start Then changed = changed + WU_ReplaceLiteralBatchInStory(story, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+        If story.End > story.Start Then WU_ReplaceLiteralBatchInStory story, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched
         Set story = story.NextStoryRange
     Loop
-    WU_ReplaceLiteralBatchInStoryChain = changed
-End Function
+End Sub
 
-Private Function WU_ReplaceLiteralBatchInStory(ByVal story As Range, ByVal replacements As Variant, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
-    Dim row As Long, findText As String, replaceText As String, changed As Long
+Private Sub WU_ReplaceLiteralBatchInStory(ByVal story As Range, ByVal replacements As Variant, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, ByRef matched() As Boolean)
+    Dim row As Long, findText As String, replaceText As String
     For row = firstRow To lastRow
         findText = CStr(replacements(row, firstColumn))
         replaceText = CStr(replacements(row, firstColumn + 1))
         If Not (matchCase And StrComp(findText, replaceText, vbBinaryCompare) = 0) Then
-            If WU_ReplaceLiteralInStory(story, findText, replaceText, matchCase, wholeWord) Then changed = changed + 1
+            If WU_ReplaceLiteralInStory(story, findText, replaceText, matchCase, wholeWord) Then matched(row) = True
         End If
     Next row
-    WU_ReplaceLiteralBatchInStory = changed
-End Function
+End Sub
 
 Private Function WU_ApplyCharacterStyleInStoryChain(ByVal firstStory As Range, ByVal findText As String, ByVal style As Style, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
     Dim story As Range, changed As Long
