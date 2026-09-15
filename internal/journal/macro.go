@@ -416,6 +416,12 @@ Public Const WU_JOURNAL_STYLE_NOTE As String = %s
 Public Const WU_JOURNAL_STYLE_H1 As String = %s
 Public Const WU_JOURNAL_STYLE_H2 As String = %s
 Public Const WU_JOURNAL_STYLE_H3 As String = %s
+Public Const WU_JOURNAL_STYLE_H4 As String = %s
+Public Const WU_JOURNAL_STYLE_H5 As String = %s
+Public Const WU_JOURNAL_STYLE_H6 As String = %s
+Public Const WU_JOURNAL_STYLE_H7 As String = %s
+Public Const WU_JOURNAL_STYLE_H8 As String = %s
+Public Const WU_JOURNAL_STYLE_H9 As String = %s
 
 Public Sub WU_JournalRibbonLoad(ByVal ribbon As IRibbonUI)
     ' The callback is intentionally a no-op. Keeping it public makes the
@@ -480,6 +486,8 @@ Public Sub WU_JournalApplyStyles()
     Dim priorStatus As Variant
     Dim doc As Document, bodyStyle As Style, noteStyle As Style
     Dim heading1 As Style, heading2 As Style, heading3 As Style
+    Dim heading4 As Style, heading5 As Style, heading6 As Style
+    Dim heading7 As Style, heading8 As Style, heading9 As Style
     On Error GoTo Failed
     Set doc = ActiveDocument
     priorStatus = Application.StatusBar
@@ -490,10 +498,22 @@ Public Sub WU_JournalApplyStyles()
     Set heading1 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H1, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE + 1, True)
     Set heading2 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H2, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True)
     Set heading3 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H3, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True)
+    Set heading4 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H4, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True)
+    Set heading5 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H5, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True)
+    Set heading6 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H6, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True)
+    Set heading7 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H7, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True)
+    Set heading8 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H8, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True)
+    Set heading9 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H9, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True)
     heading1.ParagraphFormat.OutlineLevel = wdOutlineLevel1
     heading2.ParagraphFormat.OutlineLevel = wdOutlineLevel2
     heading3.ParagraphFormat.OutlineLevel = wdOutlineLevel3
-    WU_ApplyParagraphStyles doc, bodyStyle, heading1, heading2, heading3
+    heading4.ParagraphFormat.OutlineLevel = wdOutlineLevel4
+    heading5.ParagraphFormat.OutlineLevel = wdOutlineLevel5
+    heading6.ParagraphFormat.OutlineLevel = wdOutlineLevel6
+    heading7.ParagraphFormat.OutlineLevel = wdOutlineLevel7
+    heading8.ParagraphFormat.OutlineLevel = wdOutlineLevel8
+    heading9.ParagraphFormat.OutlineLevel = wdOutlineLevel9
+    WU_ApplyParagraphStyles doc, bodyStyle, heading1, heading2, heading3, heading4, heading5, heading6, heading7, heading8, heading9
     WU_ApplyFootnoteStyle doc, noteStyle
 Cleanup:
     On Error Resume Next
@@ -529,7 +549,7 @@ Private Function WU_EnsureStyle(ByVal doc As Document, ByVal styleName As String
     Set WU_EnsureStyle = value
 End Function
 
-Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As Style, ByVal heading1 As Style, ByVal heading2 As Style, ByVal heading3 As Style)
+Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As Style, ByVal heading1 As Style, ByVal heading2 As Style, ByVal heading3 As Style, ByVal heading4 As Style, ByVal heading5 As Style, ByVal heading6 As Style, ByVal heading7 As Style, ByVal heading8 As Style, ByVal heading9 As Style)
     Dim story As Range, paragraph As Paragraph, currentStyle As String, detectedRole As String
     Dim structure As Variant, haveStructure As Boolean, paragraphIndex As Long, level As Long
     On Error Resume Next
@@ -571,6 +591,18 @@ Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As St
                 paragraph.Range.Style = heading2
             ElseIf level = wdOutlineLevel3 Then
                 paragraph.Range.Style = heading3
+            ElseIf level = wdOutlineLevel4 Then
+                paragraph.Range.Style = heading4
+            ElseIf level = wdOutlineLevel5 Then
+                paragraph.Range.Style = heading5
+            ElseIf level = wdOutlineLevel6 Then
+                paragraph.Range.Style = heading6
+            ElseIf level = wdOutlineLevel7 Then
+                paragraph.Range.Style = heading7
+            ElseIf level = wdOutlineLevel8 Then
+                paragraph.Range.Style = heading8
+            ElseIf level = wdOutlineLevel9 Then
+                paragraph.Range.Style = heading9
             Else
                 currentStyle = ""
                 On Error Resume Next
@@ -818,6 +850,12 @@ Public Sub WU_JournalPreflight()
     If Not WU_HasStyle(doc, WU_JOURNAL_STYLE_H1) Then missing = missing & WU_JOURNAL_STYLE_H1 & ", "
     If Not WU_HasStyle(doc, WU_JOURNAL_STYLE_H2) Then missing = missing & WU_JOURNAL_STYLE_H2 & ", "
     If Not WU_HasStyle(doc, WU_JOURNAL_STYLE_H3) Then missing = missing & WU_JOURNAL_STYLE_H3 & ", "
+    If Not WU_HasStyle(doc, WU_JOURNAL_STYLE_H4) Then missing = missing & WU_JOURNAL_STYLE_H4 & ", "
+    If Not WU_HasStyle(doc, WU_JOURNAL_STYLE_H5) Then missing = missing & WU_JOURNAL_STYLE_H5 & ", "
+    If Not WU_HasStyle(doc, WU_JOURNAL_STYLE_H6) Then missing = missing & WU_JOURNAL_STYLE_H6 & ", "
+    If Not WU_HasStyle(doc, WU_JOURNAL_STYLE_H7) Then missing = missing & WU_JOURNAL_STYLE_H7 & ", "
+    If Not WU_HasStyle(doc, WU_JOURNAL_STYLE_H8) Then missing = missing & WU_JOURNAL_STYLE_H8 & ", "
+    If Not WU_HasStyle(doc, WU_JOURNAL_STYLE_H9) Then missing = missing & WU_JOURNAL_STYLE_H9 & ", "
     If Len(missing) > 0 Then issues = issues & "Missing generated styles: " & Left$(missing, Len(missing) - 2) & vbCrLf
     report = "Main-story paragraphs: " & CStr(doc.Paragraphs.Count) & vbCrLf
     report = report & "Sections: " & CStr(doc.Sections.Count)
@@ -881,5 +919,5 @@ Private Sub WU_TrimAnchorParagraphMark(ByVal target As Range)
     tail = target.Characters.Last.Text
     If tail = Chr$(13) Or tail = Chr$(7) Then target.End = target.End - 1
 End Sub
-`, vbaString(profile.ID), vbaString(profile.Name), vbaString(profile.BodyFont), vbaString(profile.NoteFont), profile.BodySizePT, profile.NoteSizePT, vbaString(profile.PermalinkPolicy), vbaString(styleBase+" Body"), vbaString(styleBase+" Note"), vbaString(styleBase+" Heading 1"), vbaString(styleBase+" Heading 2"), vbaString(styleBase+" Heading 3"), profile.Name, profile.Name)
+`, vbaString(profile.ID), vbaString(profile.Name), vbaString(profile.BodyFont), vbaString(profile.NoteFont), profile.BodySizePT, profile.NoteSizePT, vbaString(profile.PermalinkPolicy), vbaString(styleBase+" Body"), vbaString(styleBase+" Note"), vbaString(styleBase+" Heading 1"), vbaString(styleBase+" Heading 2"), vbaString(styleBase+" Heading 3"), vbaString(styleBase+" Heading 4"), vbaString(styleBase+" Heading 5"), vbaString(styleBase+" Heading 6"), vbaString(styleBase+" Heading 7"), vbaString(styleBase+" Heading 8"), vbaString(styleBase+" Heading 9"), profile.Name, profile.Name)
 }
