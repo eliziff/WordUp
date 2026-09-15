@@ -448,13 +448,13 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.12" {
+	if item.Version != "1.0.13" {
 		t.Fatalf("text operations version=%q", item.Version)
 	}
 	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
 		t.Fatalf("unexpected text operations files: %#v", item.Files)
 	}
-	for _, capability := range []string{"literal replacement", "literal counting", "batch replacement", "range-bounded edits", "character-style matching", "batch character-style matching", "header/footer scopes"} {
+	for _, capability := range []string{"literal replacement", "literal counting", "batch replacement", "range-bounded edits", "character-style matching", "offset character-style runs", "batch character-style matching", "header/footer scopes"} {
 		found := false
 		for _, got := range item.Capabilities {
 			if got == capability {
@@ -476,6 +476,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"Public Function WU_ReplaceLiteralInRange",
 		"Public Function WU_ApplyCharacterStyleToMatches",
 		"Public Function WU_ApplyCharacterStyleToRange",
+		"Public Function WU_ApplyCharacterStyleRuns",
 		"Public Function WU_ApplyCharacterStyleBatch",
 		"Public Function WU_ApplyCharacterStyleBatchInRange",
 		"target range is required",
@@ -489,6 +490,14 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"IsObject(replacements(row, firstColumn))",
 		"IsArray(replacements(row, firstColumn + 1))",
 		"style rule count exceeds 1024",
+		"Private Function WU_ValidateCharacterStyleRuns",
+		"Private Function WU_ReadCharacterStylePosition",
+		"Private Function WU_CharacterStyleMatches",
+		"character style run count exceeds 4096",
+		"character style runs must be ordered and non-overlapping",
+		"character style run ",
+		"scope.End = endPosition: scope.Start = startPosition",
+		"Application.UndoRecord.StartCustomRecord \"Apply character style runs\"",
 		"style is not a character style",
 		"find text exceeds Word's 255-character limit",
 		"Application.UndoRecord.StartCustomRecord \"Replace literal text\"",

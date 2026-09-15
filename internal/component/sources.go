@@ -1186,6 +1186,59 @@ Failed:
     Resume CleanUp
 End Function
 
+' Apply a character or linked style to exact Word story offsets in one edit.
+' Each row is [absoluteStart, absoluteEnd, styleName]. This is the fast,
+' deterministic path when an inspector or detector already located citation,
+' case-name, or short-form spans: it never re-searches text and never copies
+' the matched text through an intermediate representation.
+Public Function WU_ApplyCharacterStyleRuns(ByVal target As Range, ByVal runs As Variant) As Long
+    Dim document As Document, scope As Range, style As Style
+    Dim firstRow As Long, lastRow As Long, firstColumn As Long, row As Long, activeRows As Long, changed As Long
+    Dim startPosition As Long, endPosition As Long, updating As Boolean, opened As Boolean, captured As Boolean
+    Dim failure As Long, failureSource As String, failureText As String
+    Dim styleCache() As Style, styleNames() As String
+    On Error GoTo Failed
+    If target Is Nothing Then Err.Raise 91, "WU_ApplyCharacterStyleRuns", "target range is required"
+    Set document = target.Document
+    activeRows = WU_ValidateCharacterStyleRuns(document, target, runs, styleCache, styleNames)
+    If activeRows = 0 Then Exit Function
+    firstRow = LBound(runs, 1): lastRow = UBound(runs, 1): firstColumn = LBound(runs, 2)
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Apply character style runs": opened = True
+    Set scope = target.Duplicate
+    For row = firstRow To lastRow
+        startPosition = CLng(runs(row, firstColumn))
+        endPosition = CLng(runs(row, firstColumn + 1))
+        ' Extend first, then move the start; assigning a later start to a
+        ' reused Range before its end can make Word reject the transient span.
+        scope.End = endPosition: scope.Start = startPosition
+        Set style = styleCache(row)
+        If Not WU_CharacterStyleMatches(scope, styleNames(row)) Then
+            scope.Style = style
+            changed = changed + 1
+        End If
+    Next row
+    WU_ApplyCharacterStyleRuns = changed
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
 ' Apply a two-column Variant array of literal/style pairs in one safe edit.
 ' The first column is the literal to find and the second is an existing
 ' character or linked style name. The return value is the number of matching
@@ -1411,6 +1464,86 @@ Failed:
     failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
     On Error GoTo 0
     If failure <> 0 Then Err.Raise failure, failureSource, failureText
+End Function
+
+Private Function WU_ValidateCharacterStyleRuns(ByVal document As Document, ByVal target As Range, ByVal runs As Variant, ByRef styleCache() As Style, ByRef styleNames() As String) As Long
+    Const WU_MAX_CHARACTER_STYLE_RUNS As Long = 4096
+    Dim firstRow As Long, lastRow As Long, firstColumn As Long, lastColumn As Long, row As Long, dimensionError As Long
+    Dim targetStart As Long, targetEnd As Long, startPosition As Long, endPosition As Long, previousEnd As Long
+    Dim styleName As String, style As Style, cachedName As String, cachedStyle As Style, styleError As Long
+    Dim failure As Long, failureSource As String, failureText As String
+    On Error GoTo Failed
+    If Not IsArray(runs) Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "runs must be a two-dimensional array"
+    On Error Resume Next
+    firstRow = LBound(runs, 1): lastRow = UBound(runs, 1)
+    firstColumn = LBound(runs, 2): lastColumn = UBound(runs, 2)
+    dimensionError = Err.Number
+    Err.Clear
+    On Error GoTo Failed
+    If dimensionError <> 0 Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "runs must be a two-dimensional array"
+    If lastColumn - firstColumn + 1 <> 3 Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "runs must have exactly three columns"
+    If lastRow - firstRow + 1 > WU_MAX_CHARACTER_STYLE_RUNS Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "character style run count exceeds 4096"
+    targetStart = target.Start: targetEnd = target.End: previousEnd = targetStart
+    ReDim styleCache(firstRow To lastRow): ReDim styleNames(firstRow To lastRow)
+    For row = firstRow To lastRow
+        If IsError(runs(row, firstColumn)) Or IsNull(runs(row, firstColumn)) Or IsEmpty(runs(row, firstColumn)) Or IsObject(runs(row, firstColumn)) Or IsArray(runs(row, firstColumn)) Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "character style run " & CStr(row) & " start must be scalar"
+        If IsError(runs(row, firstColumn + 1)) Or IsNull(runs(row, firstColumn + 1)) Or IsEmpty(runs(row, firstColumn + 1)) Or IsObject(runs(row, firstColumn + 1)) Or IsArray(runs(row, firstColumn + 1)) Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "character style run " & CStr(row) & " end must be scalar"
+        If IsError(runs(row, firstColumn + 2)) Or IsNull(runs(row, firstColumn + 2)) Or IsEmpty(runs(row, firstColumn + 2)) Or IsObject(runs(row, firstColumn + 2)) Or IsArray(runs(row, firstColumn + 2)) Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "character style run " & CStr(row) & " style name must be scalar"
+        If Not WU_ReadCharacterStylePosition(runs(row, firstColumn), startPosition) Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "character style run " & CStr(row) & " start must be an integer position"
+        If Not WU_ReadCharacterStylePosition(runs(row, firstColumn + 1), endPosition) Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "character style run " & CStr(row) & " end must be an integer position"
+        If startPosition < targetStart Or endPosition > targetEnd Or endPosition <= startPosition Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "character style run " & CStr(row) & " is outside the target range"
+        If startPosition < previousEnd Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "character style runs must be ordered and non-overlapping"
+        styleName = CStr(runs(row, firstColumn + 2))
+        If Len(Trim$(styleName)) = 0 Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "character style run " & CStr(row) & " style name is required"
+        Set style = Nothing
+        If StrComp(styleName, cachedName, vbTextCompare) = 0 And Not cachedStyle Is Nothing Then
+            Set style = cachedStyle
+        Else
+            styleError = 0
+            On Error Resume Next
+            Set style = document.Styles(styleName)
+            styleError = Err.Number
+            Err.Clear
+            On Error GoTo Failed
+            If styleError <> 0 Or style Is Nothing Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "character style run " & CStr(row) & " names a missing style"
+            Set cachedStyle = style: cachedName = styleName
+        End If
+        If style.Type <> wdStyleTypeCharacter And Not style.Linked Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "character style run " & CStr(row) & " style is not a character style"
+        Set styleCache(row) = style: styleNames(row) = cachedName
+        previousEnd = endPosition
+    Next row
+    WU_ValidateCharacterStyleRuns = lastRow - firstRow + 1
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+End Function
+
+Private Function WU_ReadCharacterStylePosition(ByVal value As Variant, ByRef position As Long) As Boolean
+    Dim numericValue As Double, conversionError As Long
+    If IsEmpty(value) Or IsObject(value) Or IsArray(value) Then Exit Function
+    If VarType(value) = vbBoolean Or VarType(value) = vbDate Then Exit Function
+    If Not IsNumeric(value) Then Exit Function
+    On Error Resume Next
+    numericValue = CDbl(value)
+    conversionError = Err.Number
+    Err.Clear
+    On Error GoTo 0
+    If conversionError <> 0 Or numericValue <> Fix(numericValue) Then Exit Function
+    If numericValue < -2147483647# - 1# Or numericValue > 2147483647# Then Exit Function
+    position = CLng(numericValue)
+    WU_ReadCharacterStylePosition = True
+End Function
+
+Private Function WU_CharacterStyleMatches(ByVal target As Range, ByVal expectedName As String) As Boolean
+    Dim currentStyle As String, readError As Long
+    On Error Resume Next
+    currentStyle = CStr(target.Style)
+    readError = Err.Number
+    Err.Clear
+    On Error GoTo 0
+    If readError = 0 Then WU_CharacterStyleMatches = (StrComp(currentStyle, expectedName, vbTextCompare) = 0)
 End Function
 
 Private Function WU_ApplyCharacterStyleBatchInStoryChain(ByVal firstStory As Range, ByVal matches As Variant, ByRef styleCache() As Style, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long

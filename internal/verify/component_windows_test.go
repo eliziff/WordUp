@@ -180,7 +180,7 @@ Public Function CheckRibbonAndProgress() As String
 End Function
 Public Function CheckTextOperations() As String
     Dim d As Document, result As Boolean, before As String, bodyAfterNote As String, unicodeText As String, formatted As Range, scoped As Range, header As Range, footer As Range, rejected As Boolean, note As Footnote, priorUpdating As Boolean, table As Table
-    Dim replacements(0 To 2, 0 To 1) As Variant, styleMatches(0 To 2, 0 To 1) As Variant, batchChanged As Long, rangeBatchChanged As Long, literalCount As Long, citationStyle As Style, styled As Long, styleBatchChanged As Long
+    Dim replacements(0 To 2, 0 To 1) As Variant, styleMatches(0 To 2, 0 To 1) As Variant, characterRuns(0 To 1, 0 To 2) As Variant, batchChanged As Long, rangeBatchChanged As Long, literalCount As Long, citationStyle As Style, styled As Long, styleBatchChanged As Long, styleRunChanged As Long
     Dim i As Long, lines(1 To 400) As String, started As Single, elapsed As Single
     Set d = Documents.Add
     d.Content.Text = "Alpha alpha alphabet" & vbCr
@@ -257,6 +257,27 @@ Public Function CheckTextOperations() As String
     If d.Paragraphs(2).Range.Characters(8).Italic Or d.Paragraphs(2).Range.Characters(14).Italic Then Err.Raise 5, , "range character style batch escaped its boundary"
     If Not d.Undo Then Err.Raise 5, , "range character style batch did not create one undo record"
     If d.Paragraphs(1).Range.Characters(7).Italic Or d.Paragraphs(1).Range.Characters(13).Italic Then Err.Raise 5, , "range character style batch undo did not restore formatting"
+    d.Content.Text = "First Alpha Gamma" & vbCr & "Second Alpha Gamma" & vbCr
+    Set scoped = d.Paragraphs(1).Range.Duplicate
+    characterRuns(0, 0) = scoped.Start + 6: characterRuns(0, 1) = scoped.Start + 11: characterRuns(0, 2) = citationStyle.NameLocal
+    characterRuns(1, 0) = scoped.Start + 12: characterRuns(1, 1) = scoped.Start + 17: characterRuns(1, 2) = citationStyle.NameLocal
+    d.Saved = True
+    styleRunChanged = WU_ApplyCharacterStyleRuns(scoped, characterRuns)
+    If styleRunChanged <> 2 Then Err.Raise 5, , "character style offset runs did not style each exact span"
+    If d.Content.Text <> "First Alpha Gamma" & vbCr & "Second Alpha Gamma" & vbCr Then Err.Raise 5, , "character style offset runs changed text"
+    If Not d.Paragraphs(1).Range.Characters(7).Italic Or Not d.Paragraphs(1).Range.Characters(13).Italic Then Err.Raise 5, , "character style offset runs missed a span"
+    If d.Paragraphs(2).Range.Characters(8).Italic Then Err.Raise 5, , "character style offset runs escaped its exact range"
+    If Not d.Undo Then Err.Raise 5, , "character style offset runs did not create one undo record"
+    If d.Paragraphs(1).Range.Characters(7).Italic Or d.Paragraphs(1).Range.Characters(13).Italic Then Err.Raise 5, , "character style offset runs undo did not restore formatting"
+    d.Saved = True
+    characterRuns(1, 2) = "Missing proof style"
+    On Error Resume Next
+    styleRunChanged = WU_ApplyCharacterStyleRuns(scoped, characterRuns)
+    rejected = (Err.Number <> 0)
+    Err.Clear
+    On Error GoTo 0
+    If Not rejected Or Not d.Saved Then Err.Raise 5, , "invalid character style offset run was not rejected before mutation"
+    characterRuns(1, 2) = citationStyle.NameLocal
     d.Saved = True
     styleMatches(1, 1) = "Missing proof style"
     On Error Resume Next
