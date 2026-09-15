@@ -620,9 +620,33 @@ func applyStyles(p *Package, r StyleRecipe) error {
 			if e != nil {
 				return e
 			}
-			b, e = UpsertXML(b, W, "num", W, "numId", strconv.Itoa(n.ID), fmt.Sprintf(`<w:num w:numId="%d"><w:abstractNumId w:val="%d"/></w:num>`, n.ID, aid))
+			// A concrete numbering ID may already carry Word-authored level
+			// overrides (for example a restart or a per-level start value). Update
+			// only its abstract definition link; replacing the whole <w:num> node
+			// would silently discard those unrelated children.
+			fragment := fmt.Sprintf(`<w:abstractNumId w:val="%d"/>`, aid)
+			updated := false
+			spans, e = XMLSpans(b)
 			if e != nil {
 				return e
+			}
+			for _, s := range spans {
+				if s.Depth != 1 || s.Name.Space != W || s.Name.Local != "num" || s.Attribute(W, "numId") != strconv.Itoa(n.ID) {
+					continue
+				}
+				node, mergeErr := mergeChild(b[s.Start:s.End], "abstractNumId", fragment, "abstractNumId lvlOverride", true)
+				if mergeErr != nil {
+					return mergeErr
+				}
+				b = bytes.Join([][]byte{b[:s.Start], node, b[s.End:]}, nil)
+				updated = true
+				break
+			}
+			if !updated {
+				b, e = UpsertXML(b, W, "num", W, "numId", strconv.Itoa(n.ID), fmt.Sprintf(`<w:num w:numId="%d"><w:abstractNumId w:val="%d"/></w:num>`, n.ID, aid))
+				if e != nil {
+					return e
+				}
 			}
 		}
 		p.Files["word/numbering.xml"] = b

@@ -616,6 +616,19 @@ func TestRecipeRejectsFractionalAndInvalidNumberingFields(t *testing.T) {
 	}
 }
 
+func TestNumberingRecipePreservesExistingLevelOverrides(t *testing.T) {
+	p := BlankPackage()
+	p.Files["word/numbering.xml"] = []byte(`<w:numbering xmlns:w="` + W + `"><w:abstractNum w:abstractNumId="2"/><w:num w:numId="7"><w:abstractNumId w:val="2"/><w:lvlOverride w:ilvl="0"><w:startOverride w:val="4"/></w:lvlOverride></w:num></w:numbering>`)
+	err := ApplyStyles(p, StyleRecipe{Numbering: []NumberingSpec{{ID: 7, Levels: []NumberLevel{{Level: 0, Format: "decimal", Text: "%1."}}}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(p.Files["word/numbering.xml"])
+	if !strings.Contains(text, `<w:abstractNumId w:val="3"/>`) || !strings.Contains(text, `<w:lvlOverride w:ilvl="0"><w:startOverride w:val="4"/></w:lvlOverride>`) {
+		t.Fatalf("numbering update discarded existing override: %s", text)
+	}
+}
+
 func TestComposeRejectsInvalidLayoutMeasurements(t *testing.T) {
 	cases := []struct {
 		name   string
