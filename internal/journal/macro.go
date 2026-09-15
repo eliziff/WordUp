@@ -724,6 +724,9 @@ Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As St
             Set batchStyle = desiredStyle
         End If
     Next paragraph
+    ' Assign once per contiguous target-style run. Setting a paragraph style
+    ' does not flatten direct run formatting, while avoiding one COM setter per
+    ' paragraph keeps large manuscript conversions proportional to runs.
     WU_FlushParagraphStyleBatch batch, batchStyle
 End Sub
 
@@ -906,10 +909,10 @@ End Sub
 
 Public Sub WU_JournalQualityReport()
     Dim doc As Document, report As String
-    Dim fieldCount As Long, tableCount As Long, revisionCount As Long, hyperlinkCount As Long
+    Dim fieldCount As Long, tableCount As Long, revisionCount As Long, hyperlinkCount As Long, countFailures As Long
     On Error GoTo Failed
     Set doc = ActiveDocument
-    WU_CountStoryItems doc, fieldCount, tableCount, revisionCount, hyperlinkCount
+    WU_CountStoryItems doc, fieldCount, tableCount, revisionCount, hyperlinkCount, countFailures
     report = "Paragraphs: " & CStr(doc.Paragraphs.Count) & vbCrLf
     report = report & "Sections: " & CStr(doc.Sections.Count) & vbCrLf
     report = report & "Footnotes: " & CStr(doc.Footnotes.Count) & vbCrLf
@@ -918,24 +921,34 @@ Public Sub WU_JournalQualityReport()
     report = report & "Tables (all stories): " & CStr(tableCount) & vbCrLf
     report = report & "Revisions (all stories): " & CStr(revisionCount) & vbCrLf
     report = report & "Hyperlinks (all stories): " & CStr(hyperlinkCount)
+    If countFailures > 0 Then report = report & vbCrLf & "Unavailable story scans: " & CStr(countFailures)
     MsgBox report, vbInformation, "Quality report"
     Exit Sub
 Failed:
     MsgBox Err.Description, vbExclamation, "Quality report"
 End Sub
 
-Private Sub WU_CountStoryItems(ByVal doc As Document, ByRef fieldCount As Long, ByRef tableCount As Long, ByRef revisionCount As Long, ByRef hyperlinkCount As Long)
-    Dim firstStory As Range, story As Range
+Private Sub WU_CountStoryItems(ByVal doc As Document, ByRef fieldCount As Long, ByRef tableCount As Long, ByRef revisionCount As Long, ByRef hyperlinkCount As Long, ByRef failures As Long)
+    Dim firstStory As Range, story As Range, storyFailed As Boolean
     For Each firstStory In doc.StoryRanges
         Set story = firstStory
         Do While Not story Is Nothing
+            storyFailed = False
             On Error Resume Next
             fieldCount = fieldCount + story.Fields.Count
+            If Err.Number <> 0 Then storyFailed = True
+            Err.Clear
             tableCount = tableCount + story.Tables.Count
+            If Err.Number <> 0 Then storyFailed = True
+            Err.Clear
             revisionCount = revisionCount + story.Revisions.Count
+            If Err.Number <> 0 Then storyFailed = True
+            Err.Clear
             hyperlinkCount = hyperlinkCount + story.Hyperlinks.Count
+            If Err.Number <> 0 Then storyFailed = True
             Err.Clear
             On Error GoTo 0
+            If storyFailed Then failures = failures + 1
             Set story = story.NextStoryRange
         Loop
     Next firstStory
