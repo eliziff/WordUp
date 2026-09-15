@@ -17,7 +17,7 @@ covers a partial-range boundary, literal caret text, whole-word matching,
 notes-only isolation, bulk replacement and undo; native execution remains
 unclaimed while this logon session refuses hidden Word. The fresh offline
 109-document structure gate resolved 109/109 documents and 22,789 paragraphs
-in 5.61 s; the slowest document was 241.6 ms. These are observed gates, not
+in 5.44 s; the slowest document was 237.9 ms. These are observed gates, not
 claims that every Word build or manuscript has identical latency.
 The neutral style pass also honors a resolved non-heading role over a
 tentative marker level, so ordinary numbered lists are not promoted to
