@@ -10,7 +10,8 @@ The full harness goal is **not complete**. This index distinguishes current evid
 | UBC template | `b901717545fd83de79005ad17ea712ee28250e9ef40e7cb4f73713812d317ad8` | `workspaces/ubc-template/reports/footer-preservation-core.json`, `publication-footer-ui.json`, `publication-footer-visual.json` | Native core 10.627 s; actual Ribbon/form suite 7.690 s. Real manuscript preserves 146 notes, body text, fields/bookmarks and table formatting under the explicit layout policy. TOC closing paragraph stays unchanged. Publication headers continue section numbering and remove duplicate footer PAGE fields; one-step undo restores the original restart. Linked footer text and NUMPAGES fields are preserved; undo restores the removed PAGE field after a paginated baseline. Native pages 2-3 inspected: blank page and duplicate page numbers resolved. Title/author editorial roles and complete house-style fidelity remain open. |
 
 The current neutral journal slice adds read-only literal counting, bounded
-batch replacement (including an exact Range path), explicitly scoped
+batch replacement (including an exact Range path), explicit wildcard
+replacement/counting and wildcard character-style batches, explicitly scoped
 paragraph-style conversion and ordered offset-run application, and direct
 character-style match/range/batch operations beside the document/story
 replacement path. Document operations can target `main`,
@@ -19,7 +20,9 @@ when requested. All paths use bounded Word Find operations, preserve text and un
 direct formatting, create one undo record, restore `ScreenUpdating`, and reject
 Word's raw and escaped 255-character limits. The native fixture also covers a
 partial-range boundary, literal caret text, whole-word matching, notes-only
-isolation, bulk replacement, range-batch replacement, read-only count, and undo; case-sensitive exact no-ops and empty
+isolation, bulk replacement, range-batch replacement, wildcard capture
+replacement/counting and wildcard style-batch boundaries, read-only count, and
+undo; case-sensitive exact no-ops and empty
 ranges, ordered paragraph-style batches, and undo; case-sensitive exact
 no-ops and empty ranges return before touching Word state. Native execution remains unclaimed
 while this logon session refuses hidden Word. The fresh offline
