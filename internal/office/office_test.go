@@ -590,17 +590,21 @@ func TestRecipeRejectsFractionalAndInvalidNumberingFields(t *testing.T) {
 	}
 }
 
-func TestComposeRejectsNonFiniteLayoutMeasurements(t *testing.T) {
+func TestComposeRejectsInvalidLayoutMeasurements(t *testing.T) {
 	cases := []struct {
 		name   string
 		recipe ContentRecipe
 	}{
 		{name: "page width", recipe: ContentRecipe{Page: &PageSpec{WidthPT: math.NaN()}}},
 		{name: "page height", recipe: ContentRecipe{Page: &PageSpec{HeightPT: math.Inf(1)}}},
+		{name: "tiny page width", recipe: ContentRecipe{Page: &PageSpec{WidthPT: 0.001}}},
 		{name: "page margin", recipe: ContentRecipe{Page: &PageSpec{MarginsPT: map[string]float64{"left": math.NaN()}}}},
 		{name: "table column", recipe: ContentRecipe{Blocks: []Block{{Type: "table", ColumnsPT: []float64{math.Inf(1)}, Rows: [][]Cell{{{Text: "cell"}}}}}}},
+		{name: "huge table column", recipe: ContentRecipe{Blocks: []Block{{Type: "table", ColumnsPT: []float64{math.MaxFloat64}, Rows: [][]Cell{{{Text: "cell"}}}}}}},
 		{name: "table cell", recipe: ContentRecipe{Blocks: []Block{{Type: "table", ColumnsPT: []float64{72}, Rows: [][]Cell{{{Text: "cell", WidthPT: math.NaN()}}}}}}},
+		{name: "negative table cell", recipe: ContentRecipe{Blocks: []Block{{Type: "table", ColumnsPT: []float64{72}, Rows: [][]Cell{{{Text: "cell", WidthPT: -1}}}}}}},
 		{name: "image size", recipe: ContentRecipe{Blocks: []Block{{Inlines: []Inline{{Image: "figure.png", WidthPT: math.NaN(), HeightPT: 12}}}}}},
+		{name: "tiny image size", recipe: ContentRecipe{Blocks: []Block{{Inlines: []Inline{{Image: "figure.png", WidthPT: 0.000001, HeightPT: 12}}}}}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

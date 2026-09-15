@@ -46,6 +46,17 @@ func finiteFloat(v float64) bool {
 	return !math.IsNaN(v) && !math.IsInf(v, 0)
 }
 
+func twips(v float64) (string, error) {
+	if !finiteFloat(v) {
+		return "", fmt.Errorf("finite measurement required")
+	}
+	n := math.Round(v * 20)
+	if !finiteFloat(n) || n < math.MinInt32 || n > math.MaxInt32 {
+		return "", fmt.Errorf("measurement outside 32-bit twip range")
+	}
+	return strconv.FormatInt(int64(n), 10), nil
+}
+
 // integer is for OOXML fields whose schema is an integer, not a measurement.
 // Do not round a caller's value here: a fractional outline or numbering level
 // would otherwise produce a different document than the recipe requested.
@@ -869,6 +880,9 @@ func (c *composer) image(in Inline) (string, error) {
 		return "", e
 	}
 	cx, cy := int64(math.Round(in.WidthPT*12700)), int64(math.Round(in.HeightPT*12700))
+	if cx <= 0 || cy <= 0 {
+		return "", fmt.Errorf("image dimensions must be at least one EMU")
+	}
 	return fmt.Sprintf(`<w:r><w:drawing><wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><wp:extent cx="%d" cy="%d"/><wp:docPr id="%d" name="%s" descr="%s"/><wp:cNvGraphicFramePr/><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="%d" name="%s" descr="%s"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="%s"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="%d" cy="%d"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>`, cx, cy, c.next, Esc(path.Base(in.Image)), Esc(in.Alt), c.next, Esc(path.Base(in.Image)), Esc(in.Alt), id, cx, cy), nil
 }
 func pathRelative(base, target string) (string, error) {
@@ -960,10 +974,11 @@ func (c *composer) blocks(blocks []Block) (string, error) {
 				}
 			}
 			for _, w := range widths {
-				if !finiteFloat(w) || w <= 0 {
+				columnWidth, err := twips(w)
+				if err != nil || w <= 0 || columnWidth == "0" {
 					return "", fmt.Errorf("positive column width required")
 				}
-				out.WriteString(fmt.Sprintf(`<w:gridCol w:w="%.0f"/>`, w*20))
+				out.WriteString(`<w:gridCol w:w="` + columnWidth + `"/>`)
 			}
 			out.WriteString(`</w:tblGrid>`)
 			for i, row := range b.Rows {
@@ -976,11 +991,15 @@ func (c *composer) blocks(blocks []Block) (string, error) {
 					span := max(1, cell.Span)
 					occupied += span
 					out.WriteString(`<w:tc><w:tcPr>`)
-					if !finiteFloat(cell.WidthPT) {
+					if !finiteFloat(cell.WidthPT) || cell.WidthPT < 0 {
 						return "", fmt.Errorf("finite cell width required")
 					}
 					if cell.WidthPT > 0 {
-						out.WriteString(fmt.Sprintf(`<w:tcW w:w="%.0f" w:type="dxa"/>`, cell.WidthPT*20))
+						cellWidth, err := twips(cell.WidthPT)
+						if err != nil || cellWidth == "0" {
+							return "", fmt.Errorf("cell width outside supported range")
+						}
+						out.WriteString(`<w:tcW w:w="` + cellWidth + `" w:type="dxa"/>`)
 					}
 					if span > 1 {
 						out.WriteString(fmt.Sprintf(`<w:gridSpan w:val="%d"/>`, span))
@@ -1093,7 +1112,12 @@ func compose(p *Package, r ContentRecipe, asset func(string) ([]byte, error)) er
 		if pg.Landscape {
 			orient = ` w:orient="landscape"`
 		}
-		b.WriteString(fmt.Sprintf(`<w:pgSz w:w="%.0f" w:h="%.0f"%s/>`, w*20, h*20, orient))
+		pageWidth, widthErr := twips(w)
+		pageHeight, heightErr := twips(h)
+		if widthErr != nil || heightErr != nil || pageWidth == "0" || pageHeight == "0" {
+			return fmt.Errorf("page dimensions outside Word's supported 32-bit twip range")
+		}
+		b.WriteString(`<w:pgSz w:w="` + pageWidth + `" w:h="` + pageHeight + `"` + orient + `/>`)
 		m := map[string]float64{"top": 72, "bottom": 72, "left": 72, "right": 72, "header": 36, "footer": 36, "gutter": 0}
 		for k, v := range pg.MarginsPT {
 			if _, ok := m[k]; !ok {
@@ -1106,7 +1130,11 @@ func compose(p *Package, r ContentRecipe, asset func(string) ([]byte, error)) er
 		}
 		a := map[string]string{}
 		for k, v := range m {
-			a["w:"+k] = fmt.Sprintf("%.0f", v*20)
+			value, err := twips(v)
+			if err != nil {
+				return fmt.Errorf("margin outside supported range")
+			}
+			a["w:"+k] = value
 		}
 		b.WriteString(attrsXML("w:pgMar", a))
 		if pg.PageStart > 0 {
