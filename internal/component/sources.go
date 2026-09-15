@@ -725,7 +725,12 @@ Public Function WU_ConvertStyleBatchInRange(ByVal target As Range, ByVal mapping
     Application.UndoRecord.StartCustomRecord "Convert style batch": opened = True
     For row = firstRow To lastRow
         If enabled(row) Then
-            Set rowScope = document.Range(targetStart, targetEnd)
+            ' Re-derive from the caller's Range so a note, header, footer, or
+            ' text-frame story never gets rebuilt as a main-story Document
+            ' range. Extend first, then move the start to avoid Word rejecting
+            ' a transient inverted span after a prior row changed state.
+            Set rowScope = target.Duplicate
+            rowScope.End = targetEnd: rowScope.Start = targetStart
             If WU_ConvertStyleInStory(rowScope, sourceCache(row), targetCache(row)) Then matched(row) = True
         End If
     Next row

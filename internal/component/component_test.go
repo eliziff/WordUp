@@ -428,7 +428,7 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.19" {
+	if item.Version != "1.0.20" {
 		t.Fatalf("style converter version did not advance: %q", item.Version)
 	}
 	for _, capability := range []string{"paragraph-style conversion", "character-style conversion", "paragraph-style application", "range-bounded conversion", "offset style runs", "story-wide conversion", "header/footer scopes", "batch style mapping", "character-style batch mapping", "bounded story traversal"} {
@@ -518,6 +518,8 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 		`"source style " & fromStyle & " was not found"`,
 		`"style " & styleName & " was not found"`,
 		"Application.UndoRecord.StartCustomRecord \"Convert style batch\"",
+		"Set rowScope = target.Duplicate",
+		"rowScope.End = targetEnd: rowScope.Start = targetStart",
 		"Application.UndoRecord.StartCustomRecord \"Convert character style\"",
 		"Application.UndoRecord.StartCustomRecord \"Convert character style batch\"",
 		"ReDim sourceCache(firstRow To lastRow): ReDim targetCache(firstRow To lastRow): ReDim enabled(firstRow To lastRow)",
@@ -555,6 +557,9 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 	}
 	if strings.Contains(source, "And Not style.Linked") {
 		t.Fatal("style converter directly reads Linked in a non-short-circuit condition")
+	}
+	if strings.Contains(source, "Set rowScope = document.Range(targetStart, targetEnd)") {
+		t.Fatal("style batch range conversion rebuilt a non-main story as a Document range")
 	}
 }
 
