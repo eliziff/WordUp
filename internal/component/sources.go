@@ -285,6 +285,7 @@ End Function
 
 const styleConverterSource = `Attribute VB_Name = "WordUpStyleConverter"
 Option Explicit
+Private Const WU_MAX_STYLE_BATCH_RULES As Long = 256
 Public Function WU_ConvertStyle(ByVal document As Document, ByVal fromStyle As String, ByVal toStyle As String) As Boolean
     Dim firstStory As Range, story As Range, updating As Boolean, opened As Boolean, captured As Boolean
     Dim failure As Long, failureSource As String, failureText As String
@@ -318,6 +319,54 @@ CleanUp:
     End If
     If captured Then Application.ScreenUpdating = updating
     If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
+' Convert a bounded list of paragraph-style pairs in one safe edit. Rows run
+' in order, so an intentional chain such as A -> B followed by B -> C is
+' deterministic. Word remains the source of truth for paragraphs and styles;
+' the two-column Variant array is only a compact command list.
+Public Function WU_ConvertStyleBatch(ByVal document As Document, ByVal mappings As Variant) As Long
+    Dim firstStory As Range, story As Range, updating As Boolean, opened As Boolean, captured As Boolean
+    Dim failure As Long, failureSource As String, failureText As String
+    Dim firstRow As Long, lastRow As Long, firstColumn As Long, activeRows As Long, changed As Long, row As Long
+    Dim sourceCache() As Style, targetCache() As Style, enabled() As Boolean, matched() As Boolean
+    On Error GoTo Failed
+    If document Is Nothing Then Err.Raise 91, "WU_ConvertStyleBatch", "document is required"
+    activeRows = WU_ValidateStyleBatch(document, mappings, sourceCache, targetCache, enabled)
+    If activeRows = 0 Then Exit Function
+    firstRow = LBound(mappings, 1): lastRow = UBound(mappings, 1): firstColumn = LBound(mappings, 2)
+    ReDim matched(firstRow To lastRow)
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Convert style batch": opened = True
+    For Each firstStory In document.StoryRanges
+        Set story = firstStory
+        Do While Not story Is Nothing
+            If story.End > story.Start Then WU_ConvertStyleBatchInStory story, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+            Set story = story.NextStoryRange
+        Loop
+    Next firstStory
+    For row = firstRow To lastRow
+        If matched(row) Then changed = changed + 1
+    Next row
+    WU_ConvertStyleBatch = changed
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
     On Error GoTo 0
     If failure <> 0 Then Err.Raise failure, failureSource, failureText
     Exit Function
@@ -367,6 +416,107 @@ Failed:
     failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
     Resume CleanUp
 End Function
+
+' Convert the same bounded style map only inside the exact caller-supplied
+' Range. The range is never widened to a story or Selection.
+Public Function WU_ConvertStyleBatchInRange(ByVal target As Range, ByVal mappings As Variant) As Long
+    Dim document As Document, updating As Boolean, opened As Boolean, captured As Boolean
+    Dim failure As Long, failureSource As String, failureText As String
+    Dim targetStart As Long, targetEnd As Long, firstRow As Long, lastRow As Long, firstColumn As Long, activeRows As Long, row As Long, changed As Long
+    Dim sourceCache() As Style, targetCache() As Style, enabled() As Boolean, matched() As Boolean
+    On Error GoTo Failed
+    If target Is Nothing Then Err.Raise 91, "WU_ConvertStyleBatchInRange", "target range is required"
+    Set document = target.Document
+    activeRows = WU_ValidateStyleBatch(document, mappings, sourceCache, targetCache, enabled)
+    If activeRows = 0 Then Exit Function
+    targetStart = target.Start: targetEnd = target.End
+    If targetEnd <= targetStart Then Exit Function
+    firstRow = LBound(mappings, 1): lastRow = UBound(mappings, 1): firstColumn = LBound(mappings, 2)
+    ReDim matched(firstRow To lastRow)
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Convert style batch": opened = True
+    WU_ConvertStyleBatchInStory target, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+    For row = firstRow To lastRow
+        If matched(row) Then changed = changed + 1
+    Next row
+    WU_ConvertStyleBatchInRange = changed
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
+Private Function WU_ValidateStyleBatch(ByVal document As Document, ByVal mappings As Variant, ByRef sourceCache() As Style, ByRef targetCache() As Style, ByRef enabled() As Boolean) As Long
+    Dim firstRow As Long, lastRow As Long, firstColumn As Long, lastColumn As Long, row As Long, dimensionError As Long
+    Dim fromStyle As String, toStyle As String, sourceStyle As Style, targetStyle As Style, sourceError As Long, targetError As Long, activeRows As Long
+    Dim failure As Long, failureSource As String, failureText As String
+    On Error GoTo Failed
+    If Not IsArray(mappings) Then Err.Raise 5, "WU_ConvertStyleBatch", "mappings must be a two-dimensional array"
+    On Error Resume Next
+    firstRow = LBound(mappings, 1): lastRow = UBound(mappings, 1)
+    firstColumn = LBound(mappings, 2): lastColumn = UBound(mappings, 2)
+    dimensionError = Err.Number
+    Err.Clear
+    On Error GoTo Failed
+    If dimensionError <> 0 Then Err.Raise 5, "WU_ConvertStyleBatch", "mappings must be a two-dimensional array"
+    If lastColumn - firstColumn + 1 <> 2 Then Err.Raise 5, "WU_ConvertStyleBatch", "mappings must have exactly two columns"
+    If lastRow - firstRow + 1 > WU_MAX_STYLE_BATCH_RULES Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping count exceeds 256"
+    ReDim sourceCache(firstRow To lastRow): ReDim targetCache(firstRow To lastRow): ReDim enabled(firstRow To lastRow)
+    For row = firstRow To lastRow
+        If IsError(mappings(row, firstColumn)) Or IsNull(mappings(row, firstColumn)) Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " source must be scalar"
+        If IsError(mappings(row, firstColumn + 1)) Or IsNull(mappings(row, firstColumn + 1)) Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " target must be scalar"
+        fromStyle = CStr(mappings(row, firstColumn))
+        toStyle = CStr(mappings(row, firstColumn + 1))
+        If Len(Trim$(fromStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " source is required"
+        If Len(Trim$(toStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " target is required"
+        Set sourceStyle = Nothing: sourceError = 0
+        On Error Resume Next
+        Set sourceStyle = document.Styles(fromStyle)
+        sourceError = Err.Number
+        Err.Clear
+        On Error GoTo Failed
+        If sourceError <> 0 Or sourceStyle Is Nothing Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " names a missing source style"
+        If sourceStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " source is not a paragraph style"
+        Set targetStyle = Nothing: targetError = 0
+        On Error Resume Next
+        Set targetStyle = document.Styles(toStyle)
+        targetError = Err.Number
+        Err.Clear
+        On Error GoTo Failed
+        If targetError <> 0 Or targetStyle Is Nothing Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " names a missing target style"
+        If targetStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " target is not a paragraph style"
+        Set sourceCache(row) = sourceStyle: Set targetCache(row) = targetStyle
+        enabled(row) = (StrComp(sourceStyle.NameLocal, targetStyle.NameLocal, vbTextCompare) <> 0)
+        If enabled(row) Then activeRows = activeRows + 1
+    Next row
+    WU_ValidateStyleBatch = activeRows
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+End Function
+
+Private Sub WU_ConvertStyleBatchInStory(ByVal story As Range, ByRef sourceCache() As Style, ByRef targetCache() As Style, ByRef enabled() As Boolean, ByVal firstRow As Long, ByVal lastRow As Long, ByRef matched() As Boolean)
+    Dim row As Long
+    For row = firstRow To lastRow
+        If enabled(row) Then If WU_ConvertStyleInStory(story, sourceCache(row), targetCache(row)) Then matched(row) = True
+    Next row
+End Sub
 
 Private Function WU_ConvertStyleInStory(ByVal story As Range, ByVal sourceStyle As Style, ByVal targetStyle As Style) As Boolean
     Dim scope As Range

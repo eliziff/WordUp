@@ -359,10 +359,10 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.4" {
+	if item.Version != "1.0.5" {
 		t.Fatalf("style converter version did not advance: %q", item.Version)
 	}
-	for _, capability := range []string{"paragraph-style conversion", "range-bounded conversion", "story-wide conversion"} {
+	for _, capability := range []string{"paragraph-style conversion", "range-bounded conversion", "story-wide conversion", "batch style mapping"} {
 		found := false
 		for _, got := range item.Capabilities {
 			if got == capability {
@@ -382,7 +382,11 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 	}
 	for _, want := range []string{
 		"Public Function WU_ConvertStyleInRange",
+		"Public Function WU_ConvertStyleBatch",
+		"Public Function WU_ConvertStyleBatchInRange",
 		"Private Function WU_ConvertStyleInStory",
+		"Private Function WU_ValidateStyleBatch",
+		"Private Const WU_MAX_STYLE_BATCH_RULES As Long = 256",
 		`If document Is Nothing Then Err.Raise 91, "WU_ConvertStyle", "document is required"`,
 		`If Len(Trim$(fromStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyle", "source style is required"`,
 		`If Len(Trim$(toStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyle", "target style is required"`,
@@ -392,6 +396,13 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 		"If captured Then Application.ScreenUpdating = updating",
 		"If targetEnd <= targetStart Then Exit Function",
 		"If story.End > story.Start Then If WU_ConvertStyleInStory",
+		"mappings must be a two-dimensional array",
+		"mappings must have exactly two columns",
+		"style mapping count exceeds 256",
+		"Application.UndoRecord.StartCustomRecord \"Convert style batch\"",
+		"ReDim sourceCache(firstRow To lastRow): ReDim targetCache(firstRow To lastRow): ReDim enabled(firstRow To lastRow)",
+		"Set sourceCache(row) = sourceStyle: Set targetCache(row) = targetStyle",
+		"If enabled(row) Then If WU_ConvertStyleInStory",
 	} {
 		if !strings.Contains(source, want) {
 			t.Fatalf("style converter source omitted %q", want)

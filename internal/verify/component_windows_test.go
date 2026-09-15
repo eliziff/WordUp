@@ -393,6 +393,7 @@ Failed:
 End Sub
 Public Function Check() As String
     Dim number As Long, source As String, description As String, changed As Boolean, i As Long, bounded As Range
+    Dim styleMap(0 To 1, 0 To 1) As Variant, styleBatchChanged As Long
     Dim lines(1 To 400) As String, started As Single, elapsed As Single
     ActiveDocument.Content.Text = "original"
     Application.ScreenUpdating = False
@@ -424,6 +425,38 @@ Public Function Check() As String
     If Not changed Or ActiveDocument.Paragraphs(1).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Or ActiveDocument.Paragraphs(2).Style.NameLocal <> "ProofTarget" Then Err.Raise 5, , "bounded conversion widened its range"
     If Not ActiveDocument.Undo Then Err.Raise 5, , "missing bounded conversion undo"
     If ActiveDocument.Paragraphs(2).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Then Err.Raise 5, , "bounded conversion not undone"
+    ActiveDocument.Content.Text = "first" & vbCr & "second" & vbCr & "third" & vbCr
+    ActiveDocument.Content.Style = ActiveDocument.Styles(wdStyleNormal)
+    ActiveDocument.Paragraphs(2).Range.Italic = True
+    ActiveDocument.Styles.Add "ProofSecond", wdStyleTypeParagraph
+    styleMap(0, 0) = ActiveDocument.Styles(wdStyleNormal).NameLocal: styleMap(0, 1) = "ProofTarget"
+    styleMap(1, 0) = "ProofTarget": styleMap(1, 1) = "ProofSecond"
+    styleBatchChanged = WU_ConvertStyleBatch(ActiveDocument, styleMap)
+    If styleBatchChanged <> 2 Then Err.Raise 5, , "style batch did not report both ordered mappings"
+    If ActiveDocument.Paragraphs(1).Style.NameLocal <> "ProofSecond" Or ActiveDocument.Paragraphs(3).Style.NameLocal <> "ProofSecond" Then Err.Raise 5, , "ordered style batch did not reach its final style"
+    If Not ActiveDocument.Paragraphs(2).Range.Italic Then Err.Raise 5, , "style batch lost direct italic formatting"
+    If Not ActiveDocument.Undo Then Err.Raise 5, , "missing style batch undo"
+    If ActiveDocument.Paragraphs(2).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Then Err.Raise 5, , "style batch undo did not restore the source style"
+    ActiveDocument.Content.Text = "first" & vbCr & "second" & vbCr & "third" & vbCr
+    ActiveDocument.Content.Style = ActiveDocument.Styles(wdStyleNormal)
+    Set bounded = ActiveDocument.Paragraphs(2).Range.Duplicate
+    styleMap(0, 0) = ActiveDocument.Styles(wdStyleNormal).NameLocal: styleMap(0, 1) = "ProofTarget"
+    styleMap(1, 0) = "ProofTarget": styleMap(1, 1) = "ProofSecond"
+    styleBatchChanged = WU_ConvertStyleBatchInRange(bounded, styleMap)
+    If styleBatchChanged <> 2 Or ActiveDocument.Paragraphs(1).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Or ActiveDocument.Paragraphs(2).Style.NameLocal <> "ProofSecond" Or ActiveDocument.Paragraphs(3).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Then Err.Raise 5, , "bounded style batch escaped its requested range"
+    If Not ActiveDocument.Undo Then Err.Raise 5, , "missing bounded style batch undo"
+    If ActiveDocument.Paragraphs(2).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Then Err.Raise 5, , "bounded style batch undo did not restore the source style"
+    ActiveDocument.Content.Text = "first" & vbCr & "second" & vbCr
+    ActiveDocument.Content.Style = ActiveDocument.Styles(wdStyleNormal)
+    ActiveDocument.Saved = True
+    styleMap(0, 0) = ActiveDocument.Styles(wdStyleNormal).NameLocal: styleMap(0, 1) = "MissingProofStyle"
+    styleMap(1, 0) = "ProofTarget": styleMap(1, 1) = "ProofSecond"
+    On Error Resume Next
+    styleBatchChanged = WU_ConvertStyleBatch(ActiveDocument, styleMap)
+    number = Err.Number
+    Err.Clear
+    On Error GoTo 0
+    If number = 0 Or Not ActiveDocument.Saved Then Err.Raise 5, , "invalid style batch was not rejected before mutation"
     For i = 1 To 400: lines(i) = "Ordinary paragraph.": Next i
     ActiveDocument.Content.Text = Join(lines, vbCr)
     ActiveDocument.Content.Style = ActiveDocument.Styles(wdStyleNormal)
