@@ -3,6 +3,7 @@ package office
 import (
 	"archive/zip"
 	"bytes"
+	"strings"
 	"testing"
 )
 
@@ -157,6 +158,20 @@ func TestChangedPartMarkersHandleLeadingHyphenNames(t *testing.T) {
 	p.Files["asset.bin"] = []byte("present")
 	if _, err := p.BytesChanged([]string{DeletedPartPrefix + "asset.bin"}); err == nil {
 		t.Fatal("present deletion target was accepted")
+	}
+}
+
+func TestChangedPartSetRejectsUnknownPart(t *testing.T) {
+	original, err := BlankPackage().Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	p, err := ReadPackage(original)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := p.BytesChanged([]string{"word/does-not-exist.xml"}); err == nil || !strings.Contains(err.Error(), "does not exist") {
+		t.Fatalf("unknown changed part was silently ignored: %v", err)
 	}
 }
 

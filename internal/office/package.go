@@ -222,6 +222,11 @@ func (p *Package) BytesChangedWithHashes(changed []string, currentHashes map[str
 			}
 			dirty[part] = true
 		} else {
+			if _, current := p.Files[name]; !current {
+				if _, original := p.hashes[name]; !original {
+					return nil, fmt.Errorf("changed package part does not exist: %s", name)
+				}
+			}
 			dirty[name] = true
 		}
 	}
