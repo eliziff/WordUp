@@ -1,7 +1,7 @@
 Attribute VB_Name = "WordUpStructure"
 Option Explicit
 
-' WordUp structure contract 1.2.10. MIT licensed; editable and dependency-free.
+' WordUp structure contract 1.2.11. MIT licensed; editable and dependency-free.
 ' Detection is separate from publication-specific style mapping.
 Public Const WU_ROLE As Long = 0
 Public Const WU_LEVEL As Long = 1
@@ -331,7 +331,7 @@ Private Sub WU_ResolveMarkerLadder(ByRef result As Variant, ByVal count As Long)
 End Sub
 
 Public Function WU_ParseMarker(ByVal text As String) As String
-    Dim at As Long, dashAt As Long, prefix As String, namedKind As String, rest As String, i As Long, c As String, lowerText As String, candidate As Variant, periodOrClose As Boolean
+    Dim at As Long, dashAt As Long, prefix As String, namedKind As String, rest As String, i As Long, c As String, lowerText As String, candidate As Variant, periodOrClose As Boolean, delimiterLength As Long
     ' Pasted publisher text may use NBSP, narrow NBSP, figure or thin
     ' spaces around a marker. Normalize those separators only for grammar;
     ' the original paragraph text remains unchanged in the result table.
@@ -339,22 +339,24 @@ Public Function WU_ParseMarker(ByVal text As String) As String
     text = Trim$(text)
     lowerText = LCase$(text)
     If WU_IsNamedHeading(lowerText) Then
-        at = InStr(text, ":"): If at = 0 Then at = InStr(text, " - ")
-        If at = 0 Then at = InStr(text, ChrW(&H2013))
-        If at = 0 Then at = InStr(text, ChrW(&H2014))
+        at = InStr(text, ":"): If at > 0 Then delimiterLength = 1
+        If at = 0 Then at = InStr(text, " - "): If at > 0 Then delimiterLength = 3
+        If at = 0 Then at = InStr(text, ChrW(&H2013)): If at > 0 Then delimiterLength = 1
+        If at = 0 Then at = InStr(text, ChrW(&H2014)): If at > 0 Then delimiterLength = 1
         If at = 0 And Left$(lowerText, 5) <> "part " And Left$(lowerText, 8) <> "chapter " Then
             at = InStr(text, ".")
-            If at > 0 Then periodOrClose = True
+            If at > 0 Then periodOrClose = True: delimiterLength = 1
         End If
         If at = 0 And Left$(lowerText, 5) <> "part " And Left$(lowerText, 8) <> "chapter " Then
             at = InStr(text, ")")
-            If at > 0 Then periodOrClose = True
+            If at > 0 Then periodOrClose = True: delimiterLength = 1
         End If
         If periodOrClose And (at >= Len(text) Or Mid$(text, at + 1, 1) <> " ") Then at = 0
         If at > 1 Then
+            If Len(Trim$(Mid$(text, at + delimiterLength))) = 0 Then Exit Function
             namedKind = Left$(text, InStr(text, " ") - 1)
             prefix = Trim$(Mid$(text, InStr(text, " ") + 1, at - InStr(text, " ") - 1))
-            If IsNumeric(prefix) Or WU_WordNumber(prefix) > 0 Or WU_IsRoman(prefix) Or (Len(prefix) = 1 And LCase$(prefix) >= "a" And LCase$(prefix) <= "z") Then WU_ParseMarker = "named:" & LCase$(namedKind) & ":" & prefix: Exit Function
+            If WU_IsIntegerMarker(prefix) Or WU_WordNumber(prefix) > 0 Or WU_IsRoman(prefix) Or (Len(prefix) = 1 And LCase$(prefix) >= "a" And LCase$(prefix) <= "z") Then WU_ParseMarker = "named:" & LCase$(namedKind) & ":" & prefix: Exit Function
         End If
     End If
     ' Part/Chapter prefixes also occur with the ordinary period or close
@@ -390,11 +392,26 @@ Public Function WU_ParseMarker(ByVal text As String) As String
         End If
     End If
     If Len(Trim$(rest)) = 0 Or InStr(prefix, " ") > 0 Then Exit Function
-    If IsNumeric(prefix) Then WU_ParseMarker = prefix: Exit Function
+    If WU_IsIntegerMarker(prefix) Then WU_ParseMarker = prefix: Exit Function
     If Len(prefix) = 1 And LCase$(prefix) >= "a" And LCase$(prefix) <= "z" Then WU_ParseMarker = prefix: Exit Function
     For i = 1 To Len(prefix): c = UCase$(Mid$(prefix, i, 1)): If InStr(1, "IVXLCDM", c, vbBinaryCompare) = 0 Then Exit Function
     Next i
     WU_ParseMarker = prefix
+End Function
+
+Private Function WU_IsIntegerMarker(ByVal value As String) As Boolean
+    Dim i As Long, c As String, number As Long
+    value = Trim$(value)
+    If Len(value) = 0 Or Len(value) > 3 Then Exit Function
+    For i = 1 To Len(value)
+        c = Mid$(value, i, 1)
+        If c < "0" Or c > "9" Then Exit Function
+    Next i
+    On Error Resume Next
+    number = CLng(value)
+    If Err.Number = 0 And number > 0 Then WU_IsIntegerMarker = True
+    Err.Clear
+    On Error GoTo 0
 End Function
 
 ' Keep the primary marker for the fast ladder, but expose competing readings
@@ -455,7 +472,7 @@ Private Function WU_MarkerFamily(ByVal marker As String) As String
             WU_MarkerFamily = "named_" & namedKind & "_section"
         End If
         Exit Function
-    ElseIf IsNumeric(marker) Then
+    ElseIf WU_IsIntegerMarker(marker) Then
         WU_MarkerFamily = "decimal"
     ElseIf Len(marker) = 1 And InStr(1, "IVXLCDM", UCase$(marker), vbBinaryCompare) = 0 Then
         If marker = LCase$(marker) Then WU_MarkerFamily = "lower_alpha" Else WU_MarkerFamily = "upper_alpha"
