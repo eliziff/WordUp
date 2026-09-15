@@ -388,7 +388,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.1" {
+	if item.Version != "1.0.2" {
 		t.Fatalf("text operations version=%q", item.Version)
 	}
 	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
@@ -404,6 +404,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		".Replacement.Text = WU_EscapeFindLiteral(replaceText)",
 		"find text exceeds Word's escaped 255-character limit",
 		"replacement text exceeds Word's escaped 255-character limit",
+		"story.End > story.Start",
 		".MatchWholeWord = wholeWord",
 		"WU_EscapeFindLiteral = Replace(value, \"^\", \"^^\")",
 		"Case wdFootnotesStory, wdEndnotesStory",

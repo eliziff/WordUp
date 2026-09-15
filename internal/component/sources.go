@@ -369,7 +369,7 @@ Public Function WU_ReplaceLiteral(ByVal document As Document, ByVal findText As 
     For Each firstStory In document.StoryRanges
         Set story = firstStory
         Do While Not story Is Nothing
-            If WU_StoryMatchesScope(story, storyScope) Then
+            If story.End > story.Start And WU_StoryMatchesScope(story, storyScope) Then
                 If WU_ReplaceLiteralInStory(story, findText, replaceText, matchCase, wholeWord) Then changed = True
             End If
             Set story = story.NextStoryRange
