@@ -9,6 +9,15 @@ import (
 	"testing"
 )
 
+func TestCompareRejectsNilReportsWithoutPanicking(t *testing.T) {
+	for _, reports := range [][2]*Report{{nil, nil}, {nil, &Report{}}, {&Report{}, nil}} {
+		comparison, err := Compare(reports[0], reports[1])
+		if err == nil || comparison == nil || comparison.Status != "failed" {
+			t.Fatalf("nil report was not rejected cleanly: comparison=%#v err=%v", comparison, err)
+		}
+	}
+}
+
 func TestCompareRejectsEditedRetainedArtifact(t *testing.T) {
 	root := t.TempDir()
 	artifact := filepath.Join(root, "input.dotm")

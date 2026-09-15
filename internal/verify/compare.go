@@ -2,9 +2,10 @@ package verify
 
 import (
 	"fmt"
+	"path/filepath"
+
 	"github.com/eliziff/WordUp/internal/office"
 	"github.com/eliziff/WordUp/internal/project"
-	"path/filepath"
 )
 
 type Difference struct {
@@ -34,6 +35,9 @@ type Comparison struct {
 }
 
 func checkedReport(r *Report) error {
+	if r == nil {
+		return fmt.Errorf("report required")
+	}
 	if r.Status != "passed" || !r.WordExecuted {
 		return fmt.Errorf("comparison requires passing native execution reports")
 	}
@@ -96,6 +100,9 @@ func Compare(baseline, candidate *Report) (*Comparison, error) {
 }
 
 func CompareWithPolicy(baseline, candidate *Report, policy office.XMLComparePolicy) (*Comparison, error) {
+	if baseline == nil || candidate == nil {
+		return &Comparison{Status: "failed", Differences: []Difference{}, Timings: []StepTiming{}, Coverage: "Compared asserted result fields and hash-verified XML snapshots from two recorded native runs of the same suite; does not execute Word or certify untested features. Timing ratios are observations, not performance guarantees."}, fmt.Errorf("baseline and candidate reports are required")
+	}
 	r := &Comparison{Status: "failed", BaselineSHA256: baseline.SHA256, CandidateSHA256: candidate.SHA256, SuiteSHA256: baseline.SuiteSHA256, Differences: []Difference{}, Timings: []StepTiming{}, Coverage: "Compared asserted result fields and hash-verified XML snapshots from two recorded native runs of the same suite; does not execute Word or certify untested features. Timing ratios are observations, not performance guarantees."}
 	if err := checkedReport(baseline); err != nil {
 		return r, fmt.Errorf("baseline: %w", err)
