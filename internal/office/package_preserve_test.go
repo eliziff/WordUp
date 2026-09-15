@@ -3,6 +3,7 @@ package office
 import (
 	"archive/zip"
 	"bytes"
+	"os"
 	"strings"
 	"testing"
 )
@@ -237,4 +238,59 @@ func TestChangedPackagePreservesOriginalBackslashMemberNames(t *testing.T) {
 		}
 	}
 	t.Fatal("changed package rewrote untouched backslash member name")
+}
+
+func TestPackagePreservesDirectoryMembers(t *testing.T) {
+	var raw bytes.Buffer
+	z := zip.NewWriter(&raw)
+	directory := &zip.FileHeader{Name: "customXml/", Method: zip.Store}
+	directory.SetMode(os.ModeDir | 0755)
+	if _, err := z.CreateHeader(directory); err != nil {
+		t.Fatal(err)
+	}
+	for name, data := range map[string][]byte{
+		"[Content_Types].xml": []byte("types"),
+		"word/document.xml":   []byte("before"),
+	} {
+		w, err := z.Create(name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := w.Write(data); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := z.Close(); err != nil {
+		t.Fatal(err)
+	}
+	original := raw.Bytes()
+	p, err := ReadPackage(original)
+	if err != nil {
+		t.Fatal(err)
+	}
+	unchanged, err := p.Bytes()
+	if err != nil || !bytes.Equal(unchanged, original) {
+		t.Fatalf("unchanged package lost byte identity with directory member: %v", err)
+	}
+	p.Files["word/document.xml"] = []byte("after")
+	changed, err := p.BytesChanged([]string{"word/document.xml"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	reader, err := zip.NewReader(bytes.NewReader(changed), int64(len(changed)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	foundDirectory, foundDocument := false, false
+	for _, file := range reader.File {
+		if file.Name == "customXml/" && file.FileInfo().IsDir() {
+			foundDirectory = true
+		}
+		if file.Name == "word/document.xml" {
+			foundDocument = true
+		}
+	}
+	if !foundDirectory || !foundDocument {
+		t.Fatalf("changed package dropped directory or document member: directory=%v document=%v", foundDirectory, foundDocument)
+	}
 }

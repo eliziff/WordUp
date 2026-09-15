@@ -270,13 +270,24 @@ func (p *Package) bytes(knownChanges map[string]bool, currentHashes map[string]s
 		}
 		return f.Name
 	}
-	if p.archive != nil && len(p.Files) == len(p.archive.File) {
+	archiveParts := 0
+	if p.archive != nil {
+		for _, f := range p.archive.File {
+			if !f.FileInfo().IsDir() {
+				archiveParts++
+			}
+		}
+	}
+	if p.archive != nil && len(p.Files) == archiveParts {
 		if knownChanges != nil && len(knownChanges) == 0 {
 			return append([]byte(nil), p.Original...), nil
 		}
 		if knownChanges == nil {
 			equal := true
 			for _, f := range p.archive.File {
+				if f.FileInfo().IsDir() {
+					continue
+				}
 				b, ok := p.Files[logicalName(f)]
 				if !ok {
 					equal = false
@@ -315,6 +326,12 @@ func (p *Package) bytes(knownChanges map[string]bool, currentHashes map[string]s
 	done := map[string]bool{}
 	if p.archive != nil {
 		for _, f := range p.archive.File {
+			if f.FileInfo().IsDir() {
+				if e := z.Copy(f); e != nil {
+					return nil, e
+				}
+				continue
+			}
 			name := logicalName(f)
 			b, ok := p.Files[name]
 			if !ok {
