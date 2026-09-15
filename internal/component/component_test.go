@@ -398,6 +398,18 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
 		t.Fatalf("unexpected text operations files: %#v", item.Files)
 	}
+	for _, capability := range []string{"literal replacement", "batch replacement", "character-style matching", "range-bounded edits"} {
+		found := false
+		for _, got := range item.Capabilities {
+			if got == capability {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Fatalf("text operations manifest omitted capability %q: %#v", capability, item.Capabilities)
+		}
+	}
 	source := item.Files[0].Text
 	for _, want := range []string{
 		"Public Function WU_ReplaceLiteral",

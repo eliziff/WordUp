@@ -131,9 +131,11 @@ func builtin() []Manifest {
 		}
 		if items[i].ID == "document.style-converter" {
 			items[i].Version = "1.0.4"
+			items[i].Capabilities = []string{"paragraph-style conversion", "range-bounded conversion", "story-wide conversion"}
 		}
 		if items[i].ID == "document.text-operations" {
 			items[i].Version = "1.0.6"
+			items[i].Capabilities = []string{"literal replacement", "batch replacement", "character-style matching", "range-bounded edits"}
 			items[i].Acceptance = "WU_ReplaceLiteral, WU_ReplaceLiteralBatch, and the character-style match/range operations are public, bounded, state-safe, and compile without non-Office references."
 		}
 		items[i].Schema = 1

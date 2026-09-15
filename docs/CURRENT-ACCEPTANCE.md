@@ -21,6 +21,9 @@ while this logon session refuses hidden Word. The fresh offline
 109-document structure gate resolved 109/109 documents and 22,789 paragraphs
 in 3.40 s; the slowest document was 149.9 ms. These are observed gates, not
 claims that every Word build or manuscript has identical latency.
+Long field/contents refresh and revision-review scans now reset the shared
+cooperative cancellation state, checkpoint bounded story intervals, and restore
+the caller's status bar when cancelled or failed.
 The neutral style pass also honors a resolved non-heading role over a
 tentative marker level, so ordinary numbered lists are not promoted to
 headings; native behavior for that guard remains queued behind the same host
