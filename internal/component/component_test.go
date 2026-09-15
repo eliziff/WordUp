@@ -396,6 +396,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	for _, want := range []string{
 		"Public Function WU_ReplaceLiteral",
 		"story scope must be main, notes, or all",
+		"find text exceeds Word's 255-character limit",
 		"Application.UndoRecord.StartCustomRecord \"Replace literal text\"",
 		"If captured Then Application.ScreenUpdating = updating",
 		".Replacement.Text = WU_EscapeFindLiteral(replaceText)",
