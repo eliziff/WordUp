@@ -322,6 +322,24 @@ func (p *Package) bytes(knownChanges map[string]bool, currentHashes map[string]s
 				done[name] = true
 				continue
 			}
+			// A caller supplying known changes has already validated the current
+			// hash for every part. Reuse the original ZIP member when a marked
+			// part turns out unchanged; otherwise write the new bytes directly
+			// without inflating the old member just to compare it again.
+			if knownChanges != nil {
+				if original, ok := p.hashes[name]; ok {
+					if current, hashed := currentHashes[name]; hashed {
+						if current != original {
+							continue
+						}
+						if e := z.Copy(f); e != nil {
+							return nil, e
+						}
+						done[name] = true
+						continue
+					}
+				}
+			}
 			if knownChanges == nil {
 				if original, ok := p.hashes[name]; ok {
 					current, hashed := currentHashes[name]
