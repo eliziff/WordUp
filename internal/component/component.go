@@ -130,14 +130,14 @@ func builtin() []Manifest {
 			items[i].Version = "1.0.3"
 		}
 		if items[i].ID == "document.style-converter" {
-			items[i].Version = "1.0.8"
+			items[i].Version = "1.0.9"
 			items[i].Capabilities = []string{"paragraph-style conversion", "paragraph-style application", "range-bounded conversion", "offset style runs", "story-wide conversion", "header/footer scopes", "batch style mapping"}
-			items[i].Acceptance = "WU_ConvertStyle, WU_ConvertStyleInRange, WU_ApplyParagraphStyleInRange, WU_ApplyParagraphStyleRuns, and their bounded batch equivalents support main, notes, headers, footers, and all scopes, are state-safe, and compile without non-Office references."
+			items[i].Acceptance = "WU_ConvertStyle, WU_ConvertStyleInRange, WU_ApplyParagraphStyleInRange, WU_ApplyParagraphStyleRuns, and their bounded batch equivalents support main, notes, headers, footers, and all scopes, cache each unique style handle before editing, are state-safe, and compile without non-Office references."
 		}
 		if items[i].ID == "document.text-operations" {
-			items[i].Version = "1.0.15"
+			items[i].Version = "1.0.16"
 			items[i].Capabilities = []string{"literal replacement", "literal counting", "wildcard replacement", "wildcard counting", "wildcard batch replacement", "batch replacement", "range-bounded edits", "character-style matching", "wildcard character styling", "wildcard character-style batches", "offset character-style runs", "batch character-style matching", "header/footer scopes"}
-			items[i].Acceptance = "Literal and explicit wildcard count/replacement, wildcard batch replacement, character-style match/range/batch, and exact offset-run operations support main, notes, headers, footers, and all scopes; wildcard replacement tokens are opt-in, literal searches remain escaped, one-record style batches use prevalidated style handles and cached target names, all paths remain bounded and state-safe, and the module compiles without non-Office references."
+			items[i].Acceptance = "Literal and explicit wildcard count/replacement, wildcard batch replacement, character-style match/range/batch, and exact offset-run operations support main, notes, headers, footers, and all scopes; wildcard replacement tokens are opt-in, literal searches remain escaped, one-record style batches resolve each unique style once and cache target names, all paths remain bounded and state-safe, and the module compiles without non-Office references."
 		}
 		items[i].Schema = 1
 		items[i].License = "MIT"

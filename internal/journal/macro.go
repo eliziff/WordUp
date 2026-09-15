@@ -957,17 +957,19 @@ Failed:
 End Sub
 
 Private Sub WU_ScanNotes(ByVal doc As Document, ByRef noteCount As Long, ByRef supraCount As Long)
-    Dim note As Footnote, endnote As Endnote, noteText As String
-    For Each note In doc.Footnotes
-        noteCount = noteCount + 1
-        noteText = note.Range.Text
-        If InStr(1, noteText, "supra", vbTextCompare) > 0 Then supraCount = supraCount + 1
-    Next note
-    For Each endnote In doc.Endnotes
-        noteCount = noteCount + 1
-        noteText = endnote.Range.Text
-        If InStr(1, noteText, "supra", vbTextCompare) > 0 Then supraCount = supraCount + 1
-    Next endnote
+    Dim failure As Long, failureSource As String, failureText As String
+    On Error GoTo Failed
+    ' Count note objects without materializing each note's text. The shared
+    ' text component performs the only text scan through Word's bounded Find
+    ' engine, so citation audits stay fast on long note-heavy manuscripts and
+    ' preserve every note's rich runs, fields, and hyperlinks.
+    noteCount = doc.Footnotes.Count + doc.Endnotes.Count
+    supraCount = WU_CountLiteral(doc, "supra", "notes", False, False)
+    Exit Sub
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
 End Sub
 
 Public Sub WU_JournalInstallCommands()

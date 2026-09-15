@@ -359,7 +359,7 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.8" {
+	if item.Version != "1.0.9" {
 		t.Fatalf("style converter version did not advance: %q", item.Version)
 	}
 	for _, capability := range []string{"paragraph-style conversion", "paragraph-style application", "range-bounded conversion", "offset style runs", "story-wide conversion", "header/footer scopes", "batch style mapping"} {
@@ -420,11 +420,14 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 		"scope.Style = style",
 		"Set scope = target.Duplicate",
 		"scope.End = endPosition: scope.Start = startPosition",
-		"styleNames(row) = cachedName",
+		"styleNames(row) = cachedNames(cacheIndex)",
 		`"source style " & fromStyle & " was not found"`,
 		`"style " & styleName & " was not found"`,
 		"Application.UndoRecord.StartCustomRecord \"Convert style batch\"",
 		"ReDim sourceCache(firstRow To lastRow): ReDim targetCache(firstRow To lastRow): ReDim enabled(firstRow To lastRow)",
+		"ReDim cachedSourceNames(1 To cacheCapacity): ReDim cachedTargetNames(1 To cacheCapacity)",
+		"If StrComp(fromStyle, cachedSourceNames(cacheRow), vbTextCompare) = 0 Then sourceCacheIndex = cacheRow: Exit For",
+		"If StrComp(toStyle, cachedTargetNames(cacheRow), vbTextCompare) = 0 Then targetCacheIndex = cacheRow: Exit For",
 		"Set sourceCache(row) = sourceStyle: Set targetCache(row) = targetStyle",
 		"If enabled(row) Then If WU_ConvertStyleInStory",
 		"WU_ConvertStyleInStoryChain",
@@ -448,7 +451,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.15" {
+	if item.Version != "1.0.16" {
 		t.Fatalf("text operations version=%q", item.Version)
 	}
 	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
@@ -563,6 +566,9 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"ByRef styleCache() As Style",
 		"Set styleCache(row) = style",
 		"Set style = styleCache(row)",
+		"ReDim cachedNames(1 To cacheCapacity): ReDim cachedStyles(1 To cacheCapacity)",
+		"If StrComp(styleName, cachedNames(cacheRow), vbTextCompare) = 0 Then cacheIndex = cacheRow: Exit For",
+		"cachedNames(cacheIndex) = styleName: Set cachedStyles(cacheIndex) = style",
 		"targetStyleName = style.NameLocal",
 		"If StrComp(currentStyle, targetStyleName, vbTextCompare) <> 0 Then",
 		"search.SetRange Start:=nextStart, End:=story.End",

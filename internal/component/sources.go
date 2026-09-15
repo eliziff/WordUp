@@ -525,6 +525,8 @@ End Function
 Private Function WU_ValidateStyleBatch(ByVal document As Document, ByVal mappings As Variant, ByRef sourceCache() As Style, ByRef targetCache() As Style, ByRef enabled() As Boolean) As Long
     Dim firstRow As Long, lastRow As Long, firstColumn As Long, lastColumn As Long, row As Long, dimensionError As Long
     Dim fromStyle As String, toStyle As String, sourceStyle As Style, targetStyle As Style, sourceError As Long, targetError As Long, activeRows As Long
+    Dim cachedSourceNames() As String, cachedTargetNames() As String, cachedSourceStyles() As Style, cachedTargetStyles() As Style
+    Dim sourceCacheCount As Long, targetCacheCount As Long, sourceCacheIndex As Long, targetCacheIndex As Long, cacheRow As Long, cacheCapacity As Long
     Dim failure As Long, failureSource As String, failureText As String
     On Error GoTo Failed
     If Not IsArray(mappings) Then Err.Raise 5, "WU_ConvertStyleBatch", "mappings must be a two-dimensional array"
@@ -537,7 +539,10 @@ Private Function WU_ValidateStyleBatch(ByVal document As Document, ByVal mapping
     If dimensionError <> 0 Then Err.Raise 5, "WU_ConvertStyleBatch", "mappings must be a two-dimensional array"
     If lastColumn - firstColumn + 1 <> 2 Then Err.Raise 5, "WU_ConvertStyleBatch", "mappings must have exactly two columns"
     If lastRow - firstRow + 1 > WU_MAX_STYLE_BATCH_RULES Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping count exceeds 256"
+    cacheCapacity = lastRow - firstRow + 1
     ReDim sourceCache(firstRow To lastRow): ReDim targetCache(firstRow To lastRow): ReDim enabled(firstRow To lastRow)
+    ReDim cachedSourceNames(1 To cacheCapacity): ReDim cachedTargetNames(1 To cacheCapacity)
+    ReDim cachedSourceStyles(1 To cacheCapacity): ReDim cachedTargetStyles(1 To cacheCapacity)
     For row = firstRow To lastRow
         If IsError(mappings(row, firstColumn)) Or IsNull(mappings(row, firstColumn)) Or IsObject(mappings(row, firstColumn)) Or IsArray(mappings(row, firstColumn)) Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " source must be scalar"
         If IsError(mappings(row, firstColumn + 1)) Or IsNull(mappings(row, firstColumn + 1)) Or IsObject(mappings(row, firstColumn + 1)) Or IsArray(mappings(row, firstColumn + 1)) Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " target must be scalar"
@@ -545,21 +550,41 @@ Private Function WU_ValidateStyleBatch(ByVal document As Document, ByVal mapping
         toStyle = CStr(mappings(row, firstColumn + 1))
         If Len(Trim$(fromStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " source is required"
         If Len(Trim$(toStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " target is required"
-        Set sourceStyle = Nothing: sourceError = 0
-        On Error Resume Next
-        Set sourceStyle = document.Styles(fromStyle)
-        sourceError = Err.Number
-        Err.Clear
-        On Error GoTo Failed
-        If sourceError <> 0 Or sourceStyle Is Nothing Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " names a missing source style"
+        sourceCacheIndex = 0
+        For cacheRow = 1 To sourceCacheCount
+            If StrComp(fromStyle, cachedSourceNames(cacheRow), vbTextCompare) = 0 Then sourceCacheIndex = cacheRow: Exit For
+        Next cacheRow
+        If sourceCacheIndex = 0 Then
+            Set sourceStyle = Nothing: sourceError = 0
+            On Error Resume Next
+            Set sourceStyle = document.Styles(fromStyle)
+            sourceError = Err.Number
+            Err.Clear
+            On Error GoTo Failed
+            If sourceError <> 0 Or sourceStyle Is Nothing Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " names a missing source style"
+            sourceCacheCount = sourceCacheCount + 1: sourceCacheIndex = sourceCacheCount
+            cachedSourceNames(sourceCacheIndex) = fromStyle: Set cachedSourceStyles(sourceCacheIndex) = sourceStyle
+        Else
+            Set sourceStyle = cachedSourceStyles(sourceCacheIndex)
+        End If
         If sourceStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " source is not a paragraph style"
-        Set targetStyle = Nothing: targetError = 0
-        On Error Resume Next
-        Set targetStyle = document.Styles(toStyle)
-        targetError = Err.Number
-        Err.Clear
-        On Error GoTo Failed
-        If targetError <> 0 Or targetStyle Is Nothing Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " names a missing target style"
+        targetCacheIndex = 0
+        For cacheRow = 1 To targetCacheCount
+            If StrComp(toStyle, cachedTargetNames(cacheRow), vbTextCompare) = 0 Then targetCacheIndex = cacheRow: Exit For
+        Next cacheRow
+        If targetCacheIndex = 0 Then
+            Set targetStyle = Nothing: targetError = 0
+            On Error Resume Next
+            Set targetStyle = document.Styles(toStyle)
+            targetError = Err.Number
+            Err.Clear
+            On Error GoTo Failed
+            If targetError <> 0 Or targetStyle Is Nothing Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " names a missing target style"
+            targetCacheCount = targetCacheCount + 1: targetCacheIndex = targetCacheCount
+            cachedTargetNames(targetCacheIndex) = toStyle: Set cachedTargetStyles(targetCacheIndex) = targetStyle
+        Else
+            Set targetStyle = cachedTargetStyles(targetCacheIndex)
+        End If
         If targetStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " target is not a paragraph style"
         Set sourceCache(row) = sourceStyle: Set targetCache(row) = targetStyle
         enabled(row) = (StrComp(sourceStyle.NameLocal, targetStyle.NameLocal, vbTextCompare) <> 0)
@@ -741,7 +766,8 @@ Private Function WU_ValidateParagraphStyleRuns(ByVal document As Document, ByVal
     Const WU_MAX_STYLE_RUNS As Long = 4096
     Dim firstRow As Long, lastRow As Long, firstColumn As Long, lastColumn As Long, row As Long, dimensionError As Long
     Dim targetStart As Long, targetEnd As Long, startPosition As Long, endPosition As Long, previousEnd As Long
-    Dim styleName As String, style As Style, cachedName As String, cachedStyle As Style, styleError As Long
+    Dim styleName As String, style As Style, styleError As Long
+    Dim cachedNames() As String, cachedStyles() As Style, cachedCount As Long, cacheIndex As Long, cacheRow As Long, cacheCapacity As Long
     Dim failure As Long, failureSource As String, failureText As String
     On Error GoTo Failed
     If Not IsArray(runs) Then Err.Raise 5, "WU_ApplyParagraphStyleRuns", "runs must be a two-dimensional array"
@@ -755,7 +781,9 @@ Private Function WU_ValidateParagraphStyleRuns(ByVal document As Document, ByVal
     If lastColumn - firstColumn + 1 <> 3 Then Err.Raise 5, "WU_ApplyParagraphStyleRuns", "runs must have exactly three columns"
     If lastRow - firstRow + 1 > WU_MAX_STYLE_RUNS Then Err.Raise 5, "WU_ApplyParagraphStyleRuns", "style run count exceeds 4096"
     targetStart = target.Start: targetEnd = target.End: previousEnd = targetStart
+    cacheCapacity = lastRow - firstRow + 1
     ReDim styleCache(firstRow To lastRow): ReDim styleNames(firstRow To lastRow)
+    ReDim cachedNames(1 To cacheCapacity): ReDim cachedStyles(1 To cacheCapacity)
     For row = firstRow To lastRow
         If IsError(runs(row, firstColumn)) Or IsNull(runs(row, firstColumn)) Or IsEmpty(runs(row, firstColumn)) Or IsObject(runs(row, firstColumn)) Or IsArray(runs(row, firstColumn)) Then Err.Raise 5, "WU_ApplyParagraphStyleRuns", "style run " & CStr(row) & " start must be scalar"
         If IsError(runs(row, firstColumn + 1)) Or IsNull(runs(row, firstColumn + 1)) Or IsEmpty(runs(row, firstColumn + 1)) Or IsObject(runs(row, firstColumn + 1)) Or IsArray(runs(row, firstColumn + 1)) Then Err.Raise 5, "WU_ApplyParagraphStyleRuns", "style run " & CStr(row) & " end must be scalar"
@@ -766,10 +794,12 @@ Private Function WU_ValidateParagraphStyleRuns(ByVal document As Document, ByVal
         If startPosition < previousEnd Then Err.Raise 5, "WU_ApplyParagraphStyleRuns", "style runs must be ordered and non-overlapping"
         styleName = CStr(runs(row, firstColumn + 2))
         If Len(Trim$(styleName)) = 0 Then Err.Raise 5, "WU_ApplyParagraphStyleRuns", "style run " & CStr(row) & " style name is required"
-        Set style = Nothing
-        If StrComp(styleName, cachedName, vbTextCompare) = 0 And Not cachedStyle Is Nothing Then
-            Set style = cachedStyle
-        Else
+        cacheIndex = 0
+        For cacheRow = 1 To cachedCount
+            If StrComp(styleName, cachedNames(cacheRow), vbTextCompare) = 0 Then cacheIndex = cacheRow: Exit For
+        Next cacheRow
+        If cacheIndex = 0 Then
+            Set style = Nothing
             styleError = 0
             On Error Resume Next
             Set style = document.Styles(styleName)
@@ -777,10 +807,13 @@ Private Function WU_ValidateParagraphStyleRuns(ByVal document As Document, ByVal
             Err.Clear
             On Error GoTo Failed
             If styleError <> 0 Or style Is Nothing Then Err.Raise 5, "WU_ApplyParagraphStyleRuns", "style run " & CStr(row) & " names a missing style"
-            Set cachedStyle = style: cachedName = styleName
+            cachedCount = cachedCount + 1: cacheIndex = cachedCount
+            cachedNames(cacheIndex) = styleName: Set cachedStyles(cacheIndex) = style
+        Else
+            Set style = cachedStyles(cacheIndex)
         End If
         If style.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ApplyParagraphStyleRuns", "style run " & CStr(row) & " style is not a paragraph style"
-        Set styleCache(row) = style: styleNames(row) = cachedName
+        Set styleCache(row) = style: styleNames(row) = cachedNames(cacheIndex)
         previousEnd = endPosition
     Next row
     WU_ValidateParagraphStyleRuns = lastRow - firstRow + 1
@@ -1914,6 +1947,7 @@ End Function
 Private Function WU_ValidateCharacterStyleBatch(ByVal document As Document, ByVal matches As Variant, ByRef styleCache() As Style, Optional ByVal useWildcards As Boolean = False, Optional ByVal sourceName As String = "WU_ApplyCharacterStyleBatch") As Long
     Dim firstRow As Long, lastRow As Long, firstColumn As Long, lastColumn As Long, row As Long, dimensionError As Long
     Dim findText As String, styleName As String, style As Style, activeRows As Long
+    Dim cachedNames() As String, cachedStyles() As Style, cachedCount As Long, cacheIndex As Long, cacheRow As Long, cacheCapacity As Long
     Dim failure As Long, failureSource As String, failureText As String
     On Error GoTo Failed
     If Not IsArray(matches) Then Err.Raise 5, sourceName, "matches must be a two-dimensional array"
@@ -1926,7 +1960,9 @@ Private Function WU_ValidateCharacterStyleBatch(ByVal document As Document, ByVa
     If dimensionError <> 0 Then Err.Raise 5, sourceName, "matches must be a two-dimensional array"
     If lastColumn - firstColumn + 1 <> 2 Then Err.Raise 5, sourceName, "matches must have exactly two columns"
     If lastRow - firstRow + 1 > WU_MAX_BATCH_RULES Then Err.Raise 5, sourceName, "style rule count exceeds 1024"
+    cacheCapacity = lastRow - firstRow + 1
     ReDim styleCache(firstRow To lastRow)
+    ReDim cachedNames(1 To cacheCapacity): ReDim cachedStyles(1 To cacheCapacity)
     For row = firstRow To lastRow
         If IsError(matches(row, firstColumn)) Or IsNull(matches(row, firstColumn)) Or IsObject(matches(row, firstColumn)) Or IsArray(matches(row, firstColumn)) Then Err.Raise 5, sourceName, "style rule " & CStr(row) & " pattern must be scalar"
         If IsError(matches(row, firstColumn + 1)) Or IsNull(matches(row, firstColumn + 1)) Or IsObject(matches(row, firstColumn + 1)) Or IsArray(matches(row, firstColumn + 1)) Then Err.Raise 5, sourceName, "style rule " & CStr(row) & " style name must be scalar"
@@ -1938,16 +1974,26 @@ Private Function WU_ValidateCharacterStyleBatch(ByVal document As Document, ByVa
             WU_ValidateLiteral findText, "", sourceName
         End If
         If Len(Trim$(styleName)) = 0 Then Err.Raise 5, sourceName, "style rule " & CStr(row) & " style name is required"
-        Set style = Nothing
-        On Error Resume Next
-        Set style = document.Styles(styleName)
-        If Err.Number <> 0 Or style Is Nothing Then
+        cacheIndex = 0
+        For cacheRow = 1 To cachedCount
+            If StrComp(styleName, cachedNames(cacheRow), vbTextCompare) = 0 Then cacheIndex = cacheRow: Exit For
+        Next cacheRow
+        If cacheIndex = 0 Then
+            Set style = Nothing
+            On Error Resume Next
+            Set style = document.Styles(styleName)
+            If Err.Number <> 0 Or style Is Nothing Then
+                Err.Clear
+                On Error GoTo Failed
+                Err.Raise 5, sourceName, "style rule " & CStr(row) & " names a missing style"
+            End If
             Err.Clear
             On Error GoTo Failed
-            Err.Raise 5, sourceName, "style rule " & CStr(row) & " names a missing style"
+            cachedCount = cachedCount + 1: cacheIndex = cachedCount
+            cachedNames(cacheIndex) = styleName: Set cachedStyles(cacheIndex) = style
+        Else
+            Set style = cachedStyles(cacheIndex)
         End If
-        Err.Clear
-        On Error GoTo Failed
         If style.Type <> wdStyleTypeCharacter And Not style.Linked Then Err.Raise 5, sourceName, "style rule " & CStr(row) & " style is not a character style"
         Set styleCache(row) = style
         activeRows = activeRows + 1
@@ -1964,7 +2010,8 @@ Private Function WU_ValidateCharacterStyleRuns(ByVal document As Document, ByVal
     Const WU_MAX_CHARACTER_STYLE_RUNS As Long = 4096
     Dim firstRow As Long, lastRow As Long, firstColumn As Long, lastColumn As Long, row As Long, dimensionError As Long
     Dim targetStart As Long, targetEnd As Long, startPosition As Long, endPosition As Long, previousEnd As Long
-    Dim styleName As String, style As Style, cachedName As String, cachedStyle As Style, styleError As Long
+    Dim styleName As String, style As Style, styleError As Long
+    Dim cachedNames() As String, cachedStyles() As Style, cachedCount As Long, cacheIndex As Long, cacheRow As Long, cacheCapacity As Long
     Dim failure As Long, failureSource As String, failureText As String
     On Error GoTo Failed
     If Not IsArray(runs) Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "runs must be a two-dimensional array"
@@ -1978,7 +2025,9 @@ Private Function WU_ValidateCharacterStyleRuns(ByVal document As Document, ByVal
     If lastColumn - firstColumn + 1 <> 3 Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "runs must have exactly three columns"
     If lastRow - firstRow + 1 > WU_MAX_CHARACTER_STYLE_RUNS Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "character style run count exceeds 4096"
     targetStart = target.Start: targetEnd = target.End: previousEnd = targetStart
+    cacheCapacity = lastRow - firstRow + 1
     ReDim styleCache(firstRow To lastRow): ReDim styleNames(firstRow To lastRow)
+    ReDim cachedNames(1 To cacheCapacity): ReDim cachedStyles(1 To cacheCapacity)
     For row = firstRow To lastRow
         If IsError(runs(row, firstColumn)) Or IsNull(runs(row, firstColumn)) Or IsEmpty(runs(row, firstColumn)) Or IsObject(runs(row, firstColumn)) Or IsArray(runs(row, firstColumn)) Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "character style run " & CStr(row) & " start must be scalar"
         If IsError(runs(row, firstColumn + 1)) Or IsNull(runs(row, firstColumn + 1)) Or IsEmpty(runs(row, firstColumn + 1)) Or IsObject(runs(row, firstColumn + 1)) Or IsArray(runs(row, firstColumn + 1)) Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "character style run " & CStr(row) & " end must be scalar"
@@ -1989,10 +2038,12 @@ Private Function WU_ValidateCharacterStyleRuns(ByVal document As Document, ByVal
         If startPosition < previousEnd Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "character style runs must be ordered and non-overlapping"
         styleName = CStr(runs(row, firstColumn + 2))
         If Len(Trim$(styleName)) = 0 Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "character style run " & CStr(row) & " style name is required"
-        Set style = Nothing
-        If StrComp(styleName, cachedName, vbTextCompare) = 0 And Not cachedStyle Is Nothing Then
-            Set style = cachedStyle
-        Else
+        cacheIndex = 0
+        For cacheRow = 1 To cachedCount
+            If StrComp(styleName, cachedNames(cacheRow), vbTextCompare) = 0 Then cacheIndex = cacheRow: Exit For
+        Next cacheRow
+        If cacheIndex = 0 Then
+            Set style = Nothing
             styleError = 0
             On Error Resume Next
             Set style = document.Styles(styleName)
@@ -2000,10 +2051,13 @@ Private Function WU_ValidateCharacterStyleRuns(ByVal document As Document, ByVal
             Err.Clear
             On Error GoTo Failed
             If styleError <> 0 Or style Is Nothing Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "character style run " & CStr(row) & " names a missing style"
-            Set cachedStyle = style: cachedName = styleName
+            cachedCount = cachedCount + 1: cacheIndex = cachedCount
+            cachedNames(cacheIndex) = styleName: Set cachedStyles(cacheIndex) = style
+        Else
+            Set style = cachedStyles(cacheIndex)
         End If
         If style.Type <> wdStyleTypeCharacter And Not style.Linked Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "character style run " & CStr(row) & " style is not a character style"
-        Set styleCache(row) = style: styleNames(row) = cachedName
+        Set styleCache(row) = style: styleNames(row) = cachedNames(cacheIndex)
         previousEnd = endPosition
     Next row
     WU_ValidateCharacterStyleRuns = lastRow - firstRow + 1
