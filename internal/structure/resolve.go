@@ -435,18 +435,15 @@ func intValue(v any) (int, bool) {
 		value := int(n)
 		return value, int64(value) == n
 	case uint:
-		value := int(n)
-		return value, uint(value) == n
+		return unsignedIntValue(uint64(n))
 	case uint8:
 		return int(n), true
 	case uint16:
 		return int(n), true
 	case uint32:
-		value := int(n)
-		return value, uint32(value) == n
+		return unsignedIntValue(uint64(n))
 	case uint64:
-		value := int(n)
-		return value, uint64(value) == n
+		return unsignedIntValue(n)
 	case float64:
 		return integralFloat(n)
 	case float32:
@@ -460,6 +457,14 @@ func intValue(v any) (int, bool) {
 		}
 	}
 	return 0, false
+}
+
+func unsignedIntValue(value uint64) (int, bool) {
+	maxInt := uint64(^uint(0) >> 1)
+	if value > maxInt {
+		return 0, false
+	}
+	return int(value), true
 }
 
 func integralFloat(value float64) (int, bool) {

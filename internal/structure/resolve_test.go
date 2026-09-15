@@ -24,7 +24,7 @@ func TestIntValueAcceptsNativeAndReportNumberTypes(t *testing.T) {
 			t.Fatalf("%T: got %d, %v; want %d, true", test.value, got, ok, test.want)
 		}
 	}
-	for _, value := range []any{float64(1.5), math.NaN(), math.Inf(1), json.Number("not-a-number")} {
+	for _, value := range []any{uint64(^uint64(0)), float64(1.5), math.NaN(), math.Inf(1), json.Number("not-a-number")} {
 		if _, ok := intValue(value); ok {
 			t.Fatalf("%T unexpectedly accepted as an integer: %v", value, value)
 		}
