@@ -2493,8 +2493,11 @@ Private Function WU_CountLiteralInStoryType(ByVal document As Document, ByVal st
 End Function
 
 Private Function WU_CountLiteralInStory(ByVal story As Range, ByVal findText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, Optional ByVal useWildcards As Boolean = False) As Long
-    Dim search As Range, nextStart As Long, count As Long
+    Dim search As Range, nextStart As Long, storyEnd As Long, count As Long
     Set search = story.Duplicate
+    ' Keep the fixed story boundary local; this loop may execute once per
+    ' citation and should not ask Word for the same End property repeatedly.
+    storyEnd = story.End
     With search.Find
         .ClearFormatting
         .Text = WU_FindPattern(findText, useWildcards)
@@ -2514,8 +2517,8 @@ Private Function WU_CountLiteralInStory(ByVal story As Range, ByVal findText As 
         ' A wildcard can legally match an empty span. Always advance a
         ' zero-width result so a permissive pattern cannot loop forever.
         If nextStart <= search.Start Then nextStart = search.Start + 1
-        If nextStart >= story.End Then Exit Do
-        search.SetRange Start:=nextStart, End:=story.End
+        If nextStart >= storyEnd Then Exit Do
+        search.SetRange Start:=nextStart, End:=storyEnd
     Loop
     WU_CountLiteralInStory = count
 End Function
@@ -2569,8 +2572,11 @@ Private Function WU_ApplyCharacterStyleInStoryType(ByVal document As Document, B
 End Function
 
 Private Function WU_ApplyCharacterStyleInStory(ByVal story As Range, ByVal findText As String, ByVal style As Style, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, Optional ByVal useWildcards As Boolean = False) As Long
-    Dim search As Range, nextStart As Long, changed As Long, currentStyle As String, targetStyleName As String
+    Dim search As Range, nextStart As Long, storyEnd As Long, changed As Long, currentStyle As String, targetStyleName As String
     Set search = story.Duplicate
+    ' Range.End is a COM property. Cache the fixed story boundary once rather
+    ' than crossing the host boundary for every match in a long note story.
+    storyEnd = story.End
     ' NameLocal is a COM property; resolve it once per story/rule rather
     ' than once for every match in a long citation-heavy document.
     targetStyleName = style.NameLocal
@@ -2601,8 +2607,8 @@ Private Function WU_ApplyCharacterStyleInStory(ByVal story As Range, ByVal findT
         ' Keep wildcard patterns that match an empty span from re-finding the
         ' same position forever. Literal searches are unaffected by the guard.
         If nextStart <= search.Start Then nextStart = search.Start + 1
-        If nextStart >= story.End Then Exit Do
-        search.SetRange Start:=nextStart, End:=story.End
+        If nextStart >= storyEnd Then Exit Do
+        search.SetRange Start:=nextStart, End:=storyEnd
     Loop
     WU_ApplyCharacterStyleInStory = changed
 End Function

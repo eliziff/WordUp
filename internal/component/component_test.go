@@ -479,7 +479,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.20" {
+	if item.Version != "1.0.21" {
 		t.Fatalf("text operations version=%q", item.Version)
 	}
 	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
@@ -609,8 +609,11 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		".MatchPhrase = False",
 		".MatchByte = False",
 		"targetStyleName = style.NameLocal",
+		"Dim search As Range, nextStart As Long, storyEnd As Long, changed As Long, currentStyle As String, targetStyleName As String",
+		"Dim search As Range, nextStart As Long, storyEnd As Long, count As Long",
+		"storyEnd = story.End",
+		"search.SetRange Start:=nextStart, End:=storyEnd",
 		"If StrComp(currentStyle, targetStyleName, vbTextCompare) <> 0 Then",
-		"search.SetRange Start:=nextStart, End:=story.End",
 	} {
 		if !strings.Contains(source, want) {
 			t.Fatalf("text operations source omitted %q", want)
