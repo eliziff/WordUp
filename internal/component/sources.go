@@ -523,8 +523,8 @@ Private Function WU_ValidateStyleBatch(ByVal document As Document, ByVal mapping
     If lastRow - firstRow + 1 > WU_MAX_STYLE_BATCH_RULES Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping count exceeds 256"
     ReDim sourceCache(firstRow To lastRow): ReDim targetCache(firstRow To lastRow): ReDim enabled(firstRow To lastRow)
     For row = firstRow To lastRow
-        If IsError(mappings(row, firstColumn)) Or IsNull(mappings(row, firstColumn)) Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " source must be scalar"
-        If IsError(mappings(row, firstColumn + 1)) Or IsNull(mappings(row, firstColumn + 1)) Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " target must be scalar"
+        If IsError(mappings(row, firstColumn)) Or IsNull(mappings(row, firstColumn)) Or IsObject(mappings(row, firstColumn)) Or IsArray(mappings(row, firstColumn)) Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " source must be scalar"
+        If IsError(mappings(row, firstColumn + 1)) Or IsNull(mappings(row, firstColumn + 1)) Or IsObject(mappings(row, firstColumn + 1)) Or IsArray(mappings(row, firstColumn + 1)) Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " target must be scalar"
         fromStyle = CStr(mappings(row, firstColumn))
         toStyle = CStr(mappings(row, firstColumn + 1))
         If Len(Trim$(fromStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " source is required"
@@ -1148,6 +1148,8 @@ Private Function WU_ValidateLiteralBatch(ByVal replacements As Variant, ByVal ma
     If lastColumn - firstColumn + 1 <> 2 Then Err.Raise 5, sourceName, "replacements must have exactly two columns"
     If lastRow - firstRow + 1 > WU_MAX_BATCH_RULES Then Err.Raise 5, sourceName, "replacement rule count exceeds 1024"
     For row = firstRow To lastRow
+        If IsError(replacements(row, firstColumn)) Or IsNull(replacements(row, firstColumn)) Or IsObject(replacements(row, firstColumn)) Or IsArray(replacements(row, firstColumn)) Then Err.Raise 5, sourceName, "replacement rule " & CStr(row) & " find text must be scalar"
+        If IsError(replacements(row, firstColumn + 1)) Or IsNull(replacements(row, firstColumn + 1)) Or IsObject(replacements(row, firstColumn + 1)) Or IsArray(replacements(row, firstColumn + 1)) Then Err.Raise 5, sourceName, "replacement rule " & CStr(row) & " replacement text must be scalar"
         findText = CStr(replacements(row, firstColumn))
         replaceText = CStr(replacements(row, firstColumn + 1))
         WU_ValidateLiteral findText, replaceText, sourceName
@@ -1178,8 +1180,8 @@ Private Function WU_ValidateCharacterStyleBatch(ByVal document As Document, ByVa
     If lastRow - firstRow + 1 > WU_MAX_BATCH_RULES Then Err.Raise 5, "WU_ApplyCharacterStyleBatch", "style rule count exceeds 1024"
     ReDim styleCache(firstRow To lastRow)
     For row = firstRow To lastRow
-        If IsError(matches(row, firstColumn)) Or IsNull(matches(row, firstColumn)) Then Err.Raise 5, "WU_ApplyCharacterStyleBatch", "style rule " & CStr(row) & " find text must be scalar"
-        If IsError(matches(row, firstColumn + 1)) Or IsNull(matches(row, firstColumn + 1)) Then Err.Raise 5, "WU_ApplyCharacterStyleBatch", "style rule " & CStr(row) & " style name must be scalar"
+        If IsError(matches(row, firstColumn)) Or IsNull(matches(row, firstColumn)) Or IsObject(matches(row, firstColumn)) Or IsArray(matches(row, firstColumn)) Then Err.Raise 5, "WU_ApplyCharacterStyleBatch", "style rule " & CStr(row) & " find text must be scalar"
+        If IsError(matches(row, firstColumn + 1)) Or IsNull(matches(row, firstColumn + 1)) Or IsObject(matches(row, firstColumn + 1)) Or IsArray(matches(row, firstColumn + 1)) Then Err.Raise 5, "WU_ApplyCharacterStyleBatch", "style rule " & CStr(row) & " style name must be scalar"
         findText = CStr(matches(row, firstColumn))
         styleName = CStr(matches(row, firstColumn + 1))
         WU_ValidateLiteral findText, "", "WU_ApplyCharacterStyleBatch"
