@@ -769,7 +769,8 @@ func stamp(path string) (fileStamp, error) {
 	if err != nil {
 		return fileStamp{}, err
 	}
-	return fileStamp{Size: info.Size(), ModifiedNS: info.ModTime().UnixNano()}, nil
+	changedNS, _ := fileChangeStamp(path)
+	return fileStamp{Size: info.Size(), ModifiedNS: info.ModTime().UnixNano(), ChangedNS: changedNS}, nil
 }
 
 func fileHash(path string) (string, error) {
@@ -862,7 +863,16 @@ func (w *Workspace) Build(output string) (*BuildReport, error) {
 		artifact, artifactErr := stamp(output)
 		evidence, evidenceErr := stamp(filepath.Join(w.Root, "reports", "build.json"))
 		if sourceErr == nil && artifactErr == nil && evidenceErr == nil && maps.Equal(sources, memo.Sources) && artifact == memo.Artifact && evidence == memo.Evidence {
-			if actualHash, hashErr := fileHash(output); hashErr == nil && actualHash == memo.Report.SHA256 {
+			// On Windows ChangeTime changes for same-size edits even when an
+			// editor restores LastWriteTime. Trust that stronger resident-file
+			// stamp after the artifact was hashed at build time; platforms
+			// without it retain the full digest check.
+			artifactVerified := artifact.ChangedNS != 0
+			if !artifactVerified {
+				actualHash, hashErr := fileHash(output)
+				artifactVerified = hashErr == nil && actualHash == memo.Report.SHA256
+			}
+			if artifactVerified {
 				report := memo.Report
 				report.Cached = true
 				report.DurationMS = float64(time.Since(start).Microseconds()) / 1000
