@@ -464,11 +464,14 @@ End Sub
 Public Sub WU_JournalApplyStyles()
     Dim updating As Boolean, undoStarted As Boolean, captured As Boolean
     Dim failure As Long, failureSource As String, failureText As String
+    Dim priorStatus As Variant
     Dim doc As Document, bodyStyle As Style, noteStyle As Style
     Dim heading1 As Style, heading2 As Style, heading3 As Style
     On Error GoTo Failed
     Set doc = ActiveDocument
+    priorStatus = Application.StatusBar
     WU_BeginSafeEdit updating, undoStarted, captured, "Apply %s styles"
+    WU_ResetProgress
     Set bodyStyle = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_BODY, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, False)
     Set noteStyle = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_NOTE, WU_JOURNAL_NOTE_FONT, WU_JOURNAL_NOTE_SIZE, False)
     Set heading1 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H1, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE + 1, True)
@@ -483,6 +486,7 @@ Cleanup:
     On Error Resume Next
     WU_EndSafeEdit updating, undoStarted, captured
     If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Application.StatusBar = priorStatus
     Err.Clear
     On Error GoTo 0
     If failure <> 0 Then Err.Raise failure, failureSource, failureText
@@ -531,6 +535,10 @@ Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As St
     paragraphIndex = 0
     For Each paragraph In story.Paragraphs
         paragraphIndex = paragraphIndex + 1
+        If paragraphIndex Mod 256 = 0 Then
+            Application.StatusBar = "Applying " & WU_JOURNAL_NAME & " styles (paragraph " & CStr(paragraphIndex) & ")"
+            If WU_CancelRequested() Then Err.Raise 18, "Apply styles", "style application cancelled"
+        End If
         If Not paragraph.Range.Information(wdWithInTable) Then
             level = paragraph.OutlineLevel
             If haveStructure Then
