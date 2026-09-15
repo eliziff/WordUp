@@ -1273,7 +1273,7 @@ End Function
 ' Refresh only fields inside the exact caller-supplied Range. The range is
 ' never widened and no table of contents is implicitly updated.
 Public Function WU_RefreshFieldsInRange(ByVal target As Range) As Long
-    Dim updating As Boolean, opened As Boolean, captured As Boolean, fieldResult As Long
+    Dim updating As Boolean, opened As Boolean, captured As Boolean, fieldResult As Long, updateError As Long
     Dim failure As Long, failureSource As String, failureText As String
     On Error GoTo Failed
     If target Is Nothing Then Err.Raise 91, "WU_RefreshFieldsInRange", "target range is required"
@@ -1282,9 +1282,13 @@ Public Function WU_RefreshFieldsInRange(ByVal target As Range) As Long
     captured = True
     Application.ScreenUpdating = False
     Application.UndoRecord.StartCustomRecord "Refresh fields": opened = True
+    On Error Resume Next
     Err.Clear
     fieldResult = target.Fields.Update
-    If Err.Number <> 0 Then
+    updateError = Err.Number
+    Err.Clear
+    On Error GoTo Failed
+    If updateError <> 0 Then
         WU_RefreshFieldsInRange = 1
     ElseIf fieldResult <> 0 Then
         WU_RefreshFieldsInRange = 1

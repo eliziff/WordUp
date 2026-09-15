@@ -359,7 +359,7 @@ func TestFieldRefreshChecksWordReturnCodesAndBounds(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.2" {
+	if item.Version != "1.0.3" {
 		t.Fatalf("field refresh version=%q", item.Version)
 	}
 	for _, capability := range []string{"field refresh", "table-of-contents refresh", "range-bounded refresh", "story scopes", "header/footer scopes", "return-code diagnostics"} {
@@ -387,6 +387,7 @@ func TestFieldRefreshChecksWordReturnCodesAndBounds(t *testing.T) {
 		"fieldResult = story.Fields.Update",
 		"If readError <> 0 Or fieldResult <> 0 Then failures = failures + 1",
 		"fieldResult = target.Fields.Update",
+		"updateError = Err.Number",
 		"If updateContents And (storyScope = \"main\" Or storyScope = \"all\") Then",
 		"storyStart = story.Start",
 		"storyEnd = story.End",
