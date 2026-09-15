@@ -108,8 +108,8 @@ func builtin() []Manifest {
 		vbaComponent("ui.ribbon-command", "WordUpRibbon", "WU_RibbonCommand", "Provides a stable Ribbon callback dispatch seam.", "Ribbon callbacks", ribbonSource),
 		vbaComponent("command.hotkey", "WordUpHotkey", "WU_RegisterHotkey", "Registers and removes a template-owned key binding.", "hotkeys", hotkeySource),
 		vbaComponent("command.context-menu", "WordUpContextMenu", "WU_RegisterContextMenu", "Registers and removes a tagged context-menu command.", "context menus", contextMenuSource),
-		vbaComponent("document.style-converter", "WordUpStyleConverter", "WU_ConvertStyle", "Converts one or a bounded map of paragraph styles across stories or inside an exact Range in a single safe edit.", "style conversion", styleConverterSource),
-		vbaComponent("document.text-operations", "WordUpTextOperations", "WU_ReplaceLiteral", "Counts and performs bounded literal replacement, batch replacement, and character-style matching (including batches) across selected Word stories or an exact Range without using Selection.", "text operations", textOperationsSource)}
+		vbaComponent("document.style-converter", "WordUpStyleConverter", "WU_ConvertStyle", "Converts one or a bounded map of paragraph styles across explicitly selected stories or inside an exact Range in a single safe edit.", "style conversion", styleConverterSource),
+		vbaComponent("document.text-operations", "WordUpTextOperations", "WU_ReplaceLiteral", "Counts and performs bounded literal replacement, batch replacement, and character-style matching (including batches) across explicitly selected Word stories or an exact Range without using Selection.", "text operations", textOperationsSource)}
 	for i := range items {
 		if items[i].ID == "command.hotkey" {
 			items[i].Version = "1.0.5"
@@ -130,14 +130,14 @@ func builtin() []Manifest {
 			items[i].Version = "1.0.3"
 		}
 		if items[i].ID == "document.style-converter" {
-			items[i].Version = "1.0.6"
-			items[i].Capabilities = []string{"paragraph-style conversion", "range-bounded conversion", "story-wide conversion", "batch style mapping"}
-			items[i].Acceptance = "WU_ConvertStyle, WU_ConvertStyleInRange, and their bounded batch equivalents support explicit story scopes, are state-safe, and compile without non-Office references."
+			items[i].Version = "1.0.7"
+			items[i].Capabilities = []string{"paragraph-style conversion", "range-bounded conversion", "story-wide conversion", "header/footer scopes", "batch style mapping"}
+			items[i].Acceptance = "WU_ConvertStyle, WU_ConvertStyleInRange, and their bounded batch equivalents support main, notes, headers, footers, and all scopes, are state-safe, and compile without non-Office references."
 		}
 		if items[i].ID == "document.text-operations" {
-			items[i].Version = "1.0.11"
-			items[i].Capabilities = []string{"literal replacement", "literal counting", "batch replacement", "range-bounded edits", "character-style matching", "batch character-style matching"}
-			items[i].Acceptance = "Literal count, replacement, batch, and character-style match/range operations, including one-record style batches with prevalidated style handles and cached target names, are public, bounded, state-safe, and compile without non-Office references."
+			items[i].Version = "1.0.12"
+			items[i].Capabilities = []string{"literal replacement", "literal counting", "batch replacement", "range-bounded edits", "character-style matching", "batch character-style matching", "header/footer scopes"}
+			items[i].Acceptance = "Literal count, replacement, batch, and character-style match/range operations support main, notes, headers, footers, and all scopes; one-record style batches use prevalidated style handles and cached target names, remain bounded and state-safe, and compile without non-Office references."
 		}
 		items[i].Schema = 1
 		items[i].License = "MIT"

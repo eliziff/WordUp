@@ -295,7 +295,7 @@ Public Function WU_ConvertStyle(ByVal document As Document, ByVal fromStyle As S
     If Len(Trim$(fromStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyle", "source style is required"
     If Len(Trim$(toStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyle", "target style is required"
     storyScope = LCase$(Trim$(storyScope))
-    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "all" Then Err.Raise 5, "WU_ConvertStyle", "story scope must be main, notes, or all"
+    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "headers" And storyScope <> "footers" And storyScope <> "all" Then Err.Raise 5, "WU_ConvertStyle", "story scope must be main, notes, headers, footers, or all"
     updating = Application.ScreenUpdating
     captured = True
     Set sourceStyle = document.Styles(fromStyle)
@@ -320,6 +320,14 @@ Public Function WU_ConvertStyle(ByVal document As Document, ByVal fromStyle As S
         Err.Clear
         On Error GoTo Failed
         If Not firstStory Is Nothing Then If WU_ConvertStyleInStoryChain(firstStory, sourceStyle, targetStyle) Then WU_ConvertStyle = True
+    ElseIf storyScope = "headers" Then
+        If WU_ConvertStyleInStoryType(document, wdPrimaryHeaderStory, sourceStyle, targetStyle) Then WU_ConvertStyle = True
+        If WU_ConvertStyleInStoryType(document, wdFirstPageHeaderStory, sourceStyle, targetStyle) Then WU_ConvertStyle = True
+        If WU_ConvertStyleInStoryType(document, wdEvenPagesHeaderStory, sourceStyle, targetStyle) Then WU_ConvertStyle = True
+    ElseIf storyScope = "footers" Then
+        If WU_ConvertStyleInStoryType(document, wdPrimaryFooterStory, sourceStyle, targetStyle) Then WU_ConvertStyle = True
+        If WU_ConvertStyleInStoryType(document, wdFirstPageFooterStory, sourceStyle, targetStyle) Then WU_ConvertStyle = True
+        If WU_ConvertStyleInStoryType(document, wdEvenPagesFooterStory, sourceStyle, targetStyle) Then WU_ConvertStyle = True
     Else
         For Each firstStory In document.StoryRanges
             If WU_ConvertStyleInStoryChain(firstStory, sourceStyle, targetStyle) Then WU_ConvertStyle = True
@@ -354,7 +362,7 @@ Public Function WU_ConvertStyleBatch(ByVal document As Document, ByVal mappings 
     On Error GoTo Failed
     If document Is Nothing Then Err.Raise 91, "WU_ConvertStyleBatch", "document is required"
     storyScope = LCase$(Trim$(storyScope))
-    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "all" Then Err.Raise 5, "WU_ConvertStyleBatch", "story scope must be main, notes, or all"
+    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "headers" And storyScope <> "footers" And storyScope <> "all" Then Err.Raise 5, "WU_ConvertStyleBatch", "story scope must be main, notes, headers, footers, or all"
     activeRows = WU_ValidateStyleBatch(document, mappings, sourceCache, targetCache, enabled)
     If activeRows = 0 Then Exit Function
     firstRow = LBound(mappings, 1): lastRow = UBound(mappings, 1): firstColumn = LBound(mappings, 2)
@@ -378,6 +386,14 @@ Public Function WU_ConvertStyleBatch(ByVal document As Document, ByVal mappings 
         Err.Clear
         On Error GoTo Failed
         If Not firstStory Is Nothing Then WU_ConvertStyleBatchInStoryChain firstStory, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+    ElseIf storyScope = "headers" Then
+        WU_ConvertStyleBatchInStoryType document, wdPrimaryHeaderStory, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+        WU_ConvertStyleBatchInStoryType document, wdFirstPageHeaderStory, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+        WU_ConvertStyleBatchInStoryType document, wdEvenPagesHeaderStory, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+    ElseIf storyScope = "footers" Then
+        WU_ConvertStyleBatchInStoryType document, wdPrimaryFooterStory, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+        WU_ConvertStyleBatchInStoryType document, wdFirstPageFooterStory, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+        WU_ConvertStyleBatchInStoryType document, wdEvenPagesFooterStory, sourceCache, targetCache, enabled, firstRow, lastRow, matched
     Else
         For Each firstStory In document.StoryRanges
             WU_ConvertStyleBatchInStoryChain firstStory, sourceCache, targetCache, enabled, firstRow, lastRow, matched
@@ -558,6 +574,27 @@ Private Function WU_ConvertStyleInStoryChain(ByVal firstStory As Range, ByVal so
     WU_ConvertStyleInStoryChain = changed
 End Function
 
+' Return False when a document has no story of the requested header/footer
+' type. Word raises for absent first/even-page stories, so the optional story
+' is probed once and the caller's error handler is restored before editing.
+Private Function WU_ConvertStyleInStoryType(ByVal document As Document, ByVal storyType As Long, ByVal sourceStyle As Style, ByVal targetStyle As Style) As Boolean
+    Dim firstStory As Range
+    On Error Resume Next
+    Set firstStory = document.StoryRanges(storyType)
+    Err.Clear
+    On Error GoTo 0
+    If Not firstStory Is Nothing Then WU_ConvertStyleInStoryType = WU_ConvertStyleInStoryChain(firstStory, sourceStyle, targetStyle)
+End Function
+
+Private Sub WU_ConvertStyleBatchInStoryType(ByVal document As Document, ByVal storyType As Long, ByRef sourceCache() As Style, ByRef targetCache() As Style, ByRef enabled() As Boolean, ByVal firstRow As Long, ByVal lastRow As Long, ByRef matched() As Boolean)
+    Dim firstStory As Range
+    On Error Resume Next
+    Set firstStory = document.StoryRanges(storyType)
+    Err.Clear
+    On Error GoTo 0
+    If Not firstStory Is Nothing Then WU_ConvertStyleBatchInStoryChain firstStory, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+End Sub
+
 Private Sub WU_ConvertStyleBatchInStoryChain(ByVal firstStory As Range, ByRef sourceCache() As Style, ByRef targetCache() As Style, ByRef enabled() As Boolean, ByVal firstRow As Long, ByVal lastRow As Long, ByRef matched() As Boolean)
     Dim story As Range
     Set story = firstStory
@@ -602,7 +639,7 @@ Public Function WU_ReplaceLiteral(ByVal document As Document, ByVal findText As 
     If document Is Nothing Then Err.Raise 91, "WU_ReplaceLiteral", "document is required"
     WU_ValidateLiteral findText, replaceText, "WU_ReplaceLiteral"
     storyScope = LCase$(Trim$(storyScope))
-    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "all" Then Err.Raise 5, "WU_ReplaceLiteral", "story scope must be main, notes, or all"
+    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "headers" And storyScope <> "footers" And storyScope <> "all" Then Err.Raise 5, "WU_ReplaceLiteral", "story scope must be main, notes, headers, footers, or all"
     ' With MatchCase on, identical find/replacement text is an exact no-op.
     ' When MatchCase is off, the same spelling could intentionally normalize
     ' the case of a differently-cased match, so it still runs.
@@ -634,6 +671,14 @@ Public Function WU_ReplaceLiteral(ByVal document As Document, ByVal findText As 
         Err.Clear
         On Error GoTo Failed
         If Not firstStory Is Nothing Then If WU_ReplaceLiteralInStoryChain(firstStory, findText, replaceText, matchCase, wholeWord) Then changed = True
+    ElseIf storyScope = "headers" Then
+        If WU_ReplaceLiteralInStoryType(document, wdPrimaryHeaderStory, findText, replaceText, matchCase, wholeWord) Then changed = True
+        If WU_ReplaceLiteralInStoryType(document, wdFirstPageHeaderStory, findText, replaceText, matchCase, wholeWord) Then changed = True
+        If WU_ReplaceLiteralInStoryType(document, wdEvenPagesHeaderStory, findText, replaceText, matchCase, wholeWord) Then changed = True
+    ElseIf storyScope = "footers" Then
+        If WU_ReplaceLiteralInStoryType(document, wdPrimaryFooterStory, findText, replaceText, matchCase, wholeWord) Then changed = True
+        If WU_ReplaceLiteralInStoryType(document, wdFirstPageFooterStory, findText, replaceText, matchCase, wholeWord) Then changed = True
+        If WU_ReplaceLiteralInStoryType(document, wdEvenPagesFooterStory, findText, replaceText, matchCase, wholeWord) Then changed = True
     Else
         For Each firstStory In document.StoryRanges
             If WU_ReplaceLiteralInStoryChain(firstStory, findText, replaceText, matchCase, wholeWord) Then changed = True
@@ -669,7 +714,7 @@ Public Function WU_CountLiteral(ByVal document As Document, ByVal findText As St
     If document Is Nothing Then Err.Raise 91, "WU_CountLiteral", "document is required"
     WU_ValidateLiteral findText, "", "WU_CountLiteral"
     storyScope = LCase$(Trim$(storyScope))
-    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "all" Then Err.Raise 5, "WU_CountLiteral", "story scope must be main, notes, or all"
+    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "headers" And storyScope <> "footers" And storyScope <> "all" Then Err.Raise 5, "WU_CountLiteral", "story scope must be main, notes, headers, footers, or all"
     If storyScope = "main" Then
         Set story = document.StoryRanges(wdMainTextStory)
         If Not story Is Nothing Then If story.End > story.Start Then count = WU_CountLiteralInStory(story, findText, matchCase, wholeWord)
@@ -685,6 +730,14 @@ Public Function WU_CountLiteral(ByVal document As Document, ByVal findText As St
         Err.Clear
         On Error GoTo Failed
         If Not firstStory Is Nothing Then count = count + WU_CountLiteralInStoryChain(firstStory, findText, matchCase, wholeWord)
+    ElseIf storyScope = "headers" Then
+        count = count + WU_CountLiteralInStoryType(document, wdPrimaryHeaderStory, findText, matchCase, wholeWord)
+        count = count + WU_CountLiteralInStoryType(document, wdFirstPageHeaderStory, findText, matchCase, wholeWord)
+        count = count + WU_CountLiteralInStoryType(document, wdEvenPagesHeaderStory, findText, matchCase, wholeWord)
+    ElseIf storyScope = "footers" Then
+        count = count + WU_CountLiteralInStoryType(document, wdPrimaryFooterStory, findText, matchCase, wholeWord)
+        count = count + WU_CountLiteralInStoryType(document, wdFirstPageFooterStory, findText, matchCase, wholeWord)
+        count = count + WU_CountLiteralInStoryType(document, wdEvenPagesFooterStory, findText, matchCase, wholeWord)
     Else
         For Each firstStory In document.StoryRanges
             count = count + WU_CountLiteralInStoryChain(firstStory, findText, matchCase, wholeWord)
@@ -723,7 +776,7 @@ Public Function WU_ReplaceLiteralBatch(ByVal document As Document, ByVal replace
     On Error GoTo Failed
     If document Is Nothing Then Err.Raise 91, "WU_ReplaceLiteralBatch", "document is required"
     storyScope = LCase$(Trim$(storyScope))
-    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "all" Then Err.Raise 5, "WU_ReplaceLiteralBatch", "story scope must be main, notes, or all"
+    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "headers" And storyScope <> "footers" And storyScope <> "all" Then Err.Raise 5, "WU_ReplaceLiteralBatch", "story scope must be main, notes, headers, footers, or all"
     activeRows = WU_ValidateLiteralBatch(replacements, matchCase, "WU_ReplaceLiteralBatch")
     If activeRows = 0 Then Exit Function
     firstRow = LBound(replacements, 1): lastRow = UBound(replacements, 1): firstColumn = LBound(replacements, 2)
@@ -747,6 +800,14 @@ Public Function WU_ReplaceLiteralBatch(ByVal document As Document, ByVal replace
         Err.Clear
         On Error GoTo Failed
         If Not firstStory Is Nothing Then WU_ReplaceLiteralBatchInStoryChain firstStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched
+    ElseIf storyScope = "headers" Then
+        WU_ReplaceLiteralBatchInStoryType document, wdPrimaryHeaderStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched
+        WU_ReplaceLiteralBatchInStoryType document, wdFirstPageHeaderStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched
+        WU_ReplaceLiteralBatchInStoryType document, wdEvenPagesHeaderStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched
+    ElseIf storyScope = "footers" Then
+        WU_ReplaceLiteralBatchInStoryType document, wdPrimaryFooterStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched
+        WU_ReplaceLiteralBatchInStoryType document, wdFirstPageFooterStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched
+        WU_ReplaceLiteralBatchInStoryType document, wdEvenPagesFooterStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched
     Else
         For Each firstStory In document.StoryRanges
             WU_ReplaceLiteralBatchInStoryChain firstStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched
@@ -829,7 +890,7 @@ Public Function WU_ApplyCharacterStyleToMatches(ByVal document As Document, ByVa
     WU_ValidateLiteral findText, "", "WU_ApplyCharacterStyleToMatches"
     If Len(Trim$(styleName)) = 0 Then Err.Raise 5, "WU_ApplyCharacterStyleToMatches", "style name is required"
     storyScope = LCase$(Trim$(storyScope))
-    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "all" Then Err.Raise 5, "WU_ApplyCharacterStyleToMatches", "story scope must be main, notes, or all"
+    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "headers" And storyScope <> "footers" And storyScope <> "all" Then Err.Raise 5, "WU_ApplyCharacterStyleToMatches", "story scope must be main, notes, headers, footers, or all"
     Set style = document.Styles(styleName)
     If style.Type <> wdStyleTypeCharacter And Not style.Linked Then Err.Raise 5, "WU_ApplyCharacterStyleToMatches", "style is not a character style"
     updating = Application.ScreenUpdating
@@ -851,6 +912,14 @@ Public Function WU_ApplyCharacterStyleToMatches(ByVal document As Document, ByVa
         Err.Clear
         On Error GoTo Failed
         If Not firstStory Is Nothing Then changed = changed + WU_ApplyCharacterStyleInStoryChain(firstStory, findText, style, matchCase, wholeWord)
+    ElseIf storyScope = "headers" Then
+        changed = changed + WU_ApplyCharacterStyleInStoryType(document, wdPrimaryHeaderStory, findText, style, matchCase, wholeWord)
+        changed = changed + WU_ApplyCharacterStyleInStoryType(document, wdFirstPageHeaderStory, findText, style, matchCase, wholeWord)
+        changed = changed + WU_ApplyCharacterStyleInStoryType(document, wdEvenPagesHeaderStory, findText, style, matchCase, wholeWord)
+    ElseIf storyScope = "footers" Then
+        changed = changed + WU_ApplyCharacterStyleInStoryType(document, wdPrimaryFooterStory, findText, style, matchCase, wholeWord)
+        changed = changed + WU_ApplyCharacterStyleInStoryType(document, wdFirstPageFooterStory, findText, style, matchCase, wholeWord)
+        changed = changed + WU_ApplyCharacterStyleInStoryType(document, wdEvenPagesFooterStory, findText, style, matchCase, wholeWord)
     Else
         For Each firstStory In document.StoryRanges
             changed = changed + WU_ApplyCharacterStyleInStoryChain(firstStory, findText, style, matchCase, wholeWord)
@@ -925,7 +994,7 @@ Public Function WU_ApplyCharacterStyleBatch(ByVal document As Document, ByVal ma
     On Error GoTo Failed
     If document Is Nothing Then Err.Raise 91, "WU_ApplyCharacterStyleBatch", "document is required"
     storyScope = LCase$(Trim$(storyScope))
-    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "all" Then Err.Raise 5, "WU_ApplyCharacterStyleBatch", "story scope must be main, notes, or all"
+    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "headers" And storyScope <> "footers" And storyScope <> "all" Then Err.Raise 5, "WU_ApplyCharacterStyleBatch", "story scope must be main, notes, headers, footers, or all"
     activeRows = WU_ValidateCharacterStyleBatch(document, matches, styleCache)
     If activeRows = 0 Then Exit Function
     firstRow = LBound(matches, 1): lastRow = UBound(matches, 1): firstColumn = LBound(matches, 2)
@@ -948,6 +1017,14 @@ Public Function WU_ApplyCharacterStyleBatch(ByVal document As Document, ByVal ma
         Err.Clear
         On Error GoTo Failed
         If Not firstStory Is Nothing Then changed = changed + WU_ApplyCharacterStyleBatchInStoryChain(firstStory, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+    ElseIf storyScope = "headers" Then
+        changed = changed + WU_ApplyCharacterStyleBatchInStoryType(document, wdPrimaryHeaderStory, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+        changed = changed + WU_ApplyCharacterStyleBatchInStoryType(document, wdFirstPageHeaderStory, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+        changed = changed + WU_ApplyCharacterStyleBatchInStoryType(document, wdEvenPagesHeaderStory, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+    ElseIf storyScope = "footers" Then
+        changed = changed + WU_ApplyCharacterStyleBatchInStoryType(document, wdPrimaryFooterStory, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+        changed = changed + WU_ApplyCharacterStyleBatchInStoryType(document, wdFirstPageFooterStory, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+        changed = changed + WU_ApplyCharacterStyleBatchInStoryType(document, wdEvenPagesFooterStory, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord)
     Else
         For Each firstStory In document.StoryRanges
             changed = changed + WU_ApplyCharacterStyleBatchInStoryChain(firstStory, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord)
@@ -1139,6 +1216,15 @@ Private Function WU_ApplyCharacterStyleBatchInStoryChain(ByVal firstStory As Ran
     WU_ApplyCharacterStyleBatchInStoryChain = changed
 End Function
 
+Private Function WU_ApplyCharacterStyleBatchInStoryType(ByVal document As Document, ByVal storyType As Long, ByVal matches As Variant, ByRef styleCache() As Style, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
+    Dim firstStory As Range
+    On Error Resume Next
+    Set firstStory = document.StoryRanges(storyType)
+    Err.Clear
+    On Error GoTo 0
+    If Not firstStory Is Nothing Then WU_ApplyCharacterStyleBatchInStoryType = WU_ApplyCharacterStyleBatchInStoryChain(firstStory, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+End Function
+
 Private Function WU_ApplyCharacterStyleBatchInStory(ByVal story As Range, ByVal matches As Variant, ByRef styleCache() As Style, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
     Dim row As Long, findText As String, style As Style, changed As Long
     For row = firstRow To lastRow
@@ -1157,6 +1243,15 @@ Private Function WU_CountLiteralInStoryChain(ByVal firstStory As Range, ByVal fi
         Set story = story.NextStoryRange
     Loop
     WU_CountLiteralInStoryChain = count
+End Function
+
+Private Function WU_CountLiteralInStoryType(ByVal document As Document, ByVal storyType As Long, ByVal findText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
+    Dim firstStory As Range
+    On Error Resume Next
+    Set firstStory = document.StoryRanges(storyType)
+    Err.Clear
+    On Error GoTo 0
+    If Not firstStory Is Nothing Then WU_CountLiteralInStoryType = WU_CountLiteralInStoryChain(firstStory, findText, matchCase, wholeWord)
 End Function
 
 Private Function WU_CountLiteralInStory(ByVal story As Range, ByVal findText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
@@ -1192,6 +1287,15 @@ Private Sub WU_ReplaceLiteralBatchInStoryChain(ByVal firstStory As Range, ByVal 
     Loop
 End Sub
 
+Private Sub WU_ReplaceLiteralBatchInStoryType(ByVal document As Document, ByVal storyType As Long, ByVal replacements As Variant, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, ByRef matched() As Boolean)
+    Dim firstStory As Range
+    On Error Resume Next
+    Set firstStory = document.StoryRanges(storyType)
+    Err.Clear
+    On Error GoTo 0
+    If Not firstStory Is Nothing Then WU_ReplaceLiteralBatchInStoryChain firstStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched
+End Sub
+
 Private Sub WU_ReplaceLiteralBatchInStory(ByVal story As Range, ByVal replacements As Variant, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, ByRef matched() As Boolean)
     Dim row As Long, findText As String, replaceText As String
     For row = firstRow To lastRow
@@ -1211,6 +1315,15 @@ Private Function WU_ApplyCharacterStyleInStoryChain(ByVal firstStory As Range, B
         Set story = story.NextStoryRange
     Loop
     WU_ApplyCharacterStyleInStoryChain = changed
+End Function
+
+Private Function WU_ApplyCharacterStyleInStoryType(ByVal document As Document, ByVal storyType As Long, ByVal findText As String, ByVal style As Style, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
+    Dim firstStory As Range
+    On Error Resume Next
+    Set firstStory = document.StoryRanges(storyType)
+    Err.Clear
+    On Error GoTo 0
+    If Not firstStory Is Nothing Then WU_ApplyCharacterStyleInStoryType = WU_ApplyCharacterStyleInStoryChain(firstStory, findText, style, matchCase, wholeWord)
 End Function
 
 Private Function WU_ApplyCharacterStyleInStory(ByVal story As Range, ByVal findText As String, ByVal style As Style, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
@@ -1258,6 +1371,15 @@ Private Function WU_ReplaceLiteralInStoryChain(ByVal firstStory As Range, ByVal 
         Set story = story.NextStoryRange
     Loop
     WU_ReplaceLiteralInStoryChain = changed
+End Function
+
+Private Function WU_ReplaceLiteralInStoryType(ByVal document As Document, ByVal storyType As Long, ByVal findText As String, ByVal replaceText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Boolean
+    Dim firstStory As Range
+    On Error Resume Next
+    Set firstStory = document.StoryRanges(storyType)
+    Err.Clear
+    On Error GoTo 0
+    If Not firstStory Is Nothing Then WU_ReplaceLiteralInStoryType = WU_ReplaceLiteralInStoryChain(firstStory, findText, replaceText, matchCase, wholeWord)
 End Function
 
 Private Function WU_ReplaceLiteralInStory(ByVal story As Range, ByVal findText As String, ByVal replaceText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Boolean

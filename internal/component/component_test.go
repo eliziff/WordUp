@@ -359,10 +359,10 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.6" {
+	if item.Version != "1.0.7" {
 		t.Fatalf("style converter version did not advance: %q", item.Version)
 	}
-	for _, capability := range []string{"paragraph-style conversion", "range-bounded conversion", "story-wide conversion", "batch style mapping"} {
+	for _, capability := range []string{"paragraph-style conversion", "range-bounded conversion", "story-wide conversion", "header/footer scopes", "batch style mapping"} {
 		found := false
 		for _, got := range item.Capabilities {
 			if got == capability {
@@ -390,7 +390,7 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 		`If document Is Nothing Then Err.Raise 91, "WU_ConvertStyle", "document is required"`,
 		`If Len(Trim$(fromStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyle", "source style is required"`,
 		`If Len(Trim$(toStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyle", "target style is required"`,
-		`If storyScope <> "main" And storyScope <> "notes" And storyScope <> "all" Then Err.Raise 5, "WU_ConvertStyle", "story scope must be main, notes, or all"`,
+		`If storyScope <> "main" And storyScope <> "notes" And storyScope <> "headers" And storyScope <> "footers" And storyScope <> "all" Then Err.Raise 5, "WU_ConvertStyle", "story scope must be main, notes, headers, footers, or all"`,
 		`If sourceStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ConvertStyle", "source style is not a paragraph style"`,
 		`If targetStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ConvertStyle", "target style is not a paragraph style"`,
 		"captured = True",
@@ -405,6 +405,7 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 		"Set sourceCache(row) = sourceStyle: Set targetCache(row) = targetStyle",
 		"If enabled(row) Then If WU_ConvertStyleInStory",
 		"WU_ConvertStyleInStoryChain",
+		"WU_ConvertStyleInStoryType",
 		"WU_ConvertStyleBatchInStoryChain",
 	} {
 		if !strings.Contains(source, want) {
@@ -418,13 +419,13 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.11" {
+	if item.Version != "1.0.12" {
 		t.Fatalf("text operations version=%q", item.Version)
 	}
 	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
 		t.Fatalf("unexpected text operations files: %#v", item.Files)
 	}
-	for _, capability := range []string{"literal replacement", "literal counting", "batch replacement", "range-bounded edits", "character-style matching", "batch character-style matching"} {
+	for _, capability := range []string{"literal replacement", "literal counting", "batch replacement", "range-bounded edits", "character-style matching", "batch character-style matching", "header/footer scopes"} {
 		found := false
 		for _, got := range item.Capabilities {
 			if got == capability {
@@ -450,7 +451,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"Public Function WU_ApplyCharacterStyleBatchInRange",
 		"target range is required",
 		"never opens an undo record or toggles ScreenUpdating",
-		"story scope must be main, notes, or all",
+		"story scope must be main, notes, headers, footers, or all",
 		"replacements must be a two-dimensional array",
 		"replacements must have exactly two columns",
 		"Private Const WU_MAX_BATCH_RULES As Long = 1024",
@@ -474,6 +475,10 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"WU_EscapeFindLiteral = Replace(value, \"^\", \"^^\")",
 		"Set firstStory = document.StoryRanges(wdFootnotesStory)",
 		"Set firstStory = document.StoryRanges(wdEndnotesStory)",
+		"wdPrimaryHeaderStory",
+		"wdEvenPagesHeaderStory",
+		"wdPrimaryFooterStory",
+		"wdEvenPagesFooterStory",
 		"WU_ReplaceLiteralInStoryChain",
 		"With MatchCase on, identical find/replacement text is an exact no-op.",
 		"If matchCase And StrComp(findText, replaceText, vbBinaryCompare) = 0 Then Exit Function",
@@ -485,7 +490,9 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"If matched(row) Then changed = changed + 1",
 		"ByRef matched() As Boolean",
 		"WU_ApplyCharacterStyleInStoryChain",
+		"WU_ApplyCharacterStyleInStoryType",
 		"WU_ApplyCharacterStyleBatchInStoryChain",
+		"WU_ApplyCharacterStyleBatchInStoryType",
 		"Dim styleCache() As Style",
 		"activeRows = WU_ValidateCharacterStyleBatch(document, matches, styleCache)",
 		"ByRef styleCache() As Style",

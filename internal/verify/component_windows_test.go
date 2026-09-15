@@ -179,7 +179,7 @@ Public Function CheckRibbonAndProgress() As String
     CheckRibbonAndProgress = "PASS"
 End Function
 Public Function CheckTextOperations() As String
-    Dim d As Document, result As Boolean, before As String, bodyAfterNote As String, formatted As Range, scoped As Range, rejected As Boolean, note As Footnote, priorUpdating As Boolean
+    Dim d As Document, result As Boolean, before As String, bodyAfterNote As String, formatted As Range, scoped As Range, header As Range, footer As Range, rejected As Boolean, note As Footnote, priorUpdating As Boolean
     Dim replacements(0 To 2, 0 To 1) As Variant, styleMatches(0 To 2, 0 To 1) As Variant, batchChanged As Long, rangeBatchChanged As Long, literalCount As Long, citationStyle As Style, styled As Long, styleBatchChanged As Long
     Dim i As Long, lines(1 To 400) As String, started As Single, elapsed As Single
     Set d = Documents.Add
@@ -300,6 +300,19 @@ Public Function CheckTextOperations() As String
     result = WU_ReplaceLiteral(d, "Alpha", "Omega", "notes", True, True)
     If Not result Or d.Content.Text <> bodyAfterNote Then Err.Raise 5, , "notes-scoped replacement changed the main story"
     If InStr(1, note.Range.Text, "Omega note", vbBinaryCompare) = 0 Then Err.Raise 5, , "notes-scoped replacement did not update the note story"
+    d.Content.Text = "Alpha body" & vbCr
+    Set header = d.Sections(1).Headers(wdHeaderFooterPrimary).Range.Duplicate
+    header.Text = "Alpha header" & vbCr
+    Set footer = d.Sections(1).Footers(wdHeaderFooterPrimary).Range.Duplicate
+    footer.Text = "Alpha footer" & vbCr
+    result = WU_ReplaceLiteral(d, "Alpha", "Omega", "headers", True, True)
+    If Not result Or d.Content.Text <> "Alpha body" & vbCr Or InStr(1, header.Text, "Omega header", vbBinaryCompare) = 0 Or InStr(1, footer.Text, "Alpha footer", vbBinaryCompare) = 0 Then Err.Raise 5, , "header-scoped replacement escaped its story boundary"
+    If Not d.Undo Then Err.Raise 5, , "header-scoped replacement did not create one undo record"
+    If InStr(1, header.Text, "Alpha header", vbBinaryCompare) = 0 Then Err.Raise 5, , "header-scoped replacement undo did not restore text"
+    result = WU_ReplaceLiteral(d, "Alpha", "Omega", "footers", True, True)
+    If Not result Or d.Content.Text <> "Alpha body" & vbCr Or InStr(1, footer.Text, "Omega footer", vbBinaryCompare) = 0 Or InStr(1, header.Text, "Alpha header", vbBinaryCompare) = 0 Then Err.Raise 5, , "footer-scoped replacement escaped its story boundary"
+    If Not d.Undo Then Err.Raise 5, , "footer-scoped replacement did not create one undo record"
+    If InStr(1, footer.Text, "Alpha footer", vbBinaryCompare) = 0 Then Err.Raise 5, , "footer-scoped replacement undo did not restore text"
     d.Close SaveChanges:=wdDoNotSaveChanges
     CheckTextOperations = "PASS"
 End Function
@@ -466,6 +479,10 @@ Public Function Check() As String
     If Not changed Or ActiveDocument.Paragraphs(1).Style.NameLocal <> "ProofTarget" Or headerRange.Paragraphs(1).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Then Err.Raise 5, , "main style scope touched a header or missed the body"
     If Not ActiveDocument.Undo Then Err.Raise 5, , "missing scoped style undo"
     If ActiveDocument.Paragraphs(1).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Or headerRange.Paragraphs(1).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Then Err.Raise 5, , "scoped style undo did not restore both stories"
+    changed = WU_ConvertStyle(ActiveDocument, ActiveDocument.Styles(wdStyleNormal).NameLocal, "ProofTarget", "headers")
+    If Not changed Or ActiveDocument.Paragraphs(1).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Or headerRange.Paragraphs(1).Style.NameLocal <> "ProofTarget" Then Err.Raise 5, , "header style scope touched the body or missed the header"
+    If Not ActiveDocument.Undo Then Err.Raise 5, , "missing header style undo"
+    If headerRange.Paragraphs(1).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Then Err.Raise 5, , "header style undo did not restore the source style"
     For i = 1 To 400: lines(i) = "Ordinary paragraph.": Next i
     ActiveDocument.Content.Text = Join(lines, vbCr)
     ActiveDocument.Content.Style = ActiveDocument.Styles(wdStyleNormal)
