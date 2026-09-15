@@ -1012,14 +1012,25 @@ Failed:
 End Sub
 
 Public Sub WU_JournalToggleTracking()
-    Dim doc As Document
+    Dim doc As Document, updating As Boolean, undoStarted As Boolean, captured As Boolean
+    Dim failure As Long, failureSource As String, failureText As String, enabled As Boolean
     On Error GoTo Failed
     Set doc = ActiveDocument
+    WU_BeginSafeEdit updating, undoStarted, captured, "Toggle tracked changes"
     doc.TrackRevisions = Not doc.TrackRevisions
-    MsgBox "Track changes is now " & IIf(doc.TrackRevisions, "on", "off") & " for this document.", vbInformation, "Tracked changes"
+    enabled = doc.TrackRevisions
+CleanupTracking:
+    On Error Resume Next
+    WU_EndSafeEdit updating, undoStarted, captured
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    MsgBox "Track changes is now " & IIf(enabled, "on", "off") & " for this document.", vbInformation, "Tracked changes"
     Exit Sub
 Failed:
-    MsgBox Err.Description, vbExclamation, "Tracked changes"
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanupTracking
 End Sub
 
 Public Sub WU_JournalQualityReport()
