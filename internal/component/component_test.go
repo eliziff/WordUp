@@ -362,6 +362,18 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 	if item.Version != "1.0.4" {
 		t.Fatalf("style converter version did not advance: %q", item.Version)
 	}
+	for _, capability := range []string{"paragraph-style conversion", "range-bounded conversion", "story-wide conversion"} {
+		found := false
+		for _, got := range item.Capabilities {
+			if got == capability {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Fatalf("style converter manifest omitted capability %q: %#v", capability, item.Capabilities)
+		}
+	}
 	var source string
 	for _, file := range item.Files {
 		if file.Path == "vba/WordUpStyleConverter.bas" {
