@@ -849,13 +849,21 @@ Public Sub WU_JournalRefreshFields()
     Dim updating As Boolean, undoStarted As Boolean, captured As Boolean
     Dim failure As Long, failureSource As String, failureText As String
     Dim doc As Document, story As Range, linked As Range, contents As TableOfContents
-    Dim fieldFailures As Long, contentsFailures As Long
+    Dim fieldFailures As Long, contentsFailures As Long, storyIndex As Long, contentsIndex As Long
+    Dim priorStatus As Variant
     On Error GoTo Failed
     Set doc = ActiveDocument
+    priorStatus = Application.StatusBar
     WU_BeginSafeEdit updating, undoStarted, captured, "Refresh %s fields"
+    WU_ResetProgress
     For Each story In doc.StoryRanges
         Set linked = story
         Do While Not linked Is Nothing
+            storyIndex = storyIndex + 1
+            If storyIndex Mod 8 = 0 Then
+                Application.StatusBar = "Refreshing " & WU_JOURNAL_NAME & " fields (story " & CStr(storyIndex) & ")"
+                If WU_CancelRequested() Then Err.Raise 18, "Refresh fields", "field refresh cancelled"
+            End If
             WU_UpdateFieldsInStory linked, fieldFailures
             Set linked = linked.NextStoryRange
         Loop
@@ -864,6 +872,11 @@ Public Sub WU_JournalRefreshFields()
     ' sections. Walking Sections as well updates those fields twice and can
     ' make a large manuscript needlessly repaginate.
     For Each contents In doc.TablesOfContents
+        contentsIndex = contentsIndex + 1
+        If contentsIndex Mod 4 = 0 Then
+            Application.StatusBar = "Refreshing " & WU_JOURNAL_NAME & " contents (table " & CStr(contentsIndex) & ")"
+            If WU_CancelRequested() Then Err.Raise 18, "Refresh fields", "contents refresh cancelled"
+        End If
         WU_UpdateContents contents, contentsFailures
     Next contents
     If fieldFailures + contentsFailures > 0 Then Err.Raise 5, "WU_JournalRefreshFields", "could not refresh fields in " & CStr(fieldFailures) & " story(s) and " & CStr(contentsFailures) & " table(s)"
@@ -871,6 +884,7 @@ Cleanup:
     On Error Resume Next
     WU_EndSafeEdit updating, undoStarted, captured
     If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Application.StatusBar = priorStatus
     Err.Clear
     On Error GoTo 0
     If failure <> 0 Then Err.Raise failure, failureSource, failureText
@@ -897,11 +911,14 @@ Private Sub WU_UpdateContents(ByVal contents As TableOfContents, ByRef failures 
 End Sub
 
 Public Sub WU_JournalReviewNext()
-    Dim firstStory As Range, story As Range, revision As Revision
+    Dim firstStory As Range, story As Range, revision As Revision, storyIndex As Long
     On Error GoTo Failed
+    WU_ResetProgress
     For Each firstStory In ActiveDocument.StoryRanges
         Set story = firstStory
         Do While Not story Is Nothing
+            storyIndex = storyIndex + 1
+            If storyIndex Mod 8 = 0 Then If WU_CancelRequested() Then Err.Raise 18, "Journal review", "revision review cancelled"
             Set revision = Nothing
             On Error Resume Next
             If story.Revisions.Count > 0 Then
