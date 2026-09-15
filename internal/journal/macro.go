@@ -232,25 +232,61 @@ func createAll(root string, profiles []Profile) ([]CreateReport, error) {
 	return reports, nil
 }
 
+func profileHasFeature(profile Profile, feature string) bool {
+	if len(profile.Features) == 0 {
+		return true
+	}
+	for _, candidate := range profile.Features {
+		if strings.EqualFold(strings.TrimSpace(candidate), feature) {
+			return true
+		}
+	}
+	return false
+}
+
 func formDesign(profile Profile) office.Design {
+	styles := profileHasFeature(profile, "style conversion") || profileHasFeature(profile, "heading and contents")
+	fields := profileHasFeature(profile, "field refresh")
+	citations := profileHasFeature(profile, "footnote and citation tools")
+	permalink := !strings.EqualFold(profile.PermalinkPolicy, "none") && profileHasFeature(profile, "permalink assistant")
+	supra := profileHasFeature(profile, "supra tools")
+	tracking := profileHasFeature(profile, "tracked changes")
+	quality := profileHasFeature(profile, "quality report")
+	preflight := profileHasFeature(profile, "preflight")
 	controls := []office.ControlDesign{
 		{Name: "lblTitle", Type: "Label", Properties: map[string]any{"Left": 14.0, "Top": 12.0, "Width": 348.0, "Height": 28.0, "Caption": profile.Name}},
 		{Name: "lblEvidence", Type: "Label", Properties: map[string]any{"Left": 14.0, "Top": 42.0, "Width": 348.0, "Height": 32.0, "Caption": "Profile-driven tools preserve source text and inline formatting."}},
-		{Name: "cmdStyles", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 86.0, "Width": 164.0, "Height": 28.0, "Caption": "Apply house styles"}},
-		{Name: "cmdReview", Type: "CommandButton", Properties: map[string]any{"Left": 194.0, "Top": 86.0, "Width": 164.0, "Height": 28.0, "Caption": "Review changes"}},
-		{Name: "cmdFields", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 124.0, "Width": 164.0, "Height": 28.0, "Caption": "Refresh fields"}},
-		{Name: "cmdCitations", Type: "CommandButton", Properties: map[string]any{"Left": 194.0, "Top": 124.0, "Width": 164.0, "Height": 28.0, "Caption": "Audit citations"}},
-		{Name: "cmdSupra", Type: "CommandButton", Properties: map[string]any{"Left": 194.0, "Top": 162.0, "Width": 164.0, "Height": 28.0, "Caption": "Supra audit"}},
-		{Name: "cmdCommands", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 200.0, "Width": 164.0, "Height": 28.0, "Caption": "Install commands"}},
-		{Name: "cmdRemoveCommands", Type: "CommandButton", Properties: map[string]any{"Left": 194.0, "Top": 200.0, "Width": 164.0, "Height": 28.0, "Caption": "Remove commands"}},
-		{Name: "cmdTracking", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 238.0, "Width": 164.0, "Height": 28.0, "Caption": "Toggle tracked changes"}},
-		{Name: "cmdQuality", Type: "CommandButton", Properties: map[string]any{"Left": 194.0, "Top": 238.0, "Width": 164.0, "Height": 28.0, "Caption": "Quality report"}},
-		{Name: "cmdPreflight", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 276.0, "Width": 344.0, "Height": 28.0, "Caption": "Run preflight"}},
-		{Name: "cmdClose", Type: "CommandButton", Properties: map[string]any{"Left": 274.0, "Top": 314.0, "Width": 84.0, "Height": 28.0, "Caption": "Close"}},
 	}
-	if !strings.EqualFold(profile.PermalinkPolicy, "none") {
-		controls = append(controls[:6], append([]office.ControlDesign{{Name: "cmdPerma", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 162.0, "Width": 164.0, "Height": 28.0, "Caption": "Perma assistant"}}}, controls[6:]...)...)
+	if styles {
+		controls = append(controls, office.ControlDesign{Name: "cmdStyles", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 86.0, "Width": 164.0, "Height": 28.0, "Caption": "Apply house styles"}})
 	}
+	controls = append(controls, office.ControlDesign{Name: "cmdReview", Type: "CommandButton", Properties: map[string]any{"Left": 194.0, "Top": 86.0, "Width": 164.0, "Height": 28.0, "Caption": "Review changes"}})
+	if fields {
+		controls = append(controls, office.ControlDesign{Name: "cmdFields", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 124.0, "Width": 164.0, "Height": 28.0, "Caption": "Refresh fields"}})
+	}
+	if citations {
+		controls = append(controls, office.ControlDesign{Name: "cmdCitations", Type: "CommandButton", Properties: map[string]any{"Left": 194.0, "Top": 124.0, "Width": 164.0, "Height": 28.0, "Caption": "Audit citations"}})
+	}
+	if permalink {
+		controls = append(controls, office.ControlDesign{Name: "cmdPerma", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 162.0, "Width": 164.0, "Height": 28.0, "Caption": "Perma assistant"}})
+	}
+	if supra {
+		controls = append(controls, office.ControlDesign{Name: "cmdSupra", Type: "CommandButton", Properties: map[string]any{"Left": 194.0, "Top": 162.0, "Width": 164.0, "Height": 28.0, "Caption": "Supra audit"}})
+	}
+	controls = append(controls,
+		office.ControlDesign{Name: "cmdCommands", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 200.0, "Width": 164.0, "Height": 28.0, "Caption": "Install commands"}},
+		office.ControlDesign{Name: "cmdRemoveCommands", Type: "CommandButton", Properties: map[string]any{"Left": 194.0, "Top": 200.0, "Width": 164.0, "Height": 28.0, "Caption": "Remove commands"}},
+	)
+	if tracking {
+		controls = append(controls, office.ControlDesign{Name: "cmdTracking", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 238.0, "Width": 164.0, "Height": 28.0, "Caption": "Toggle tracked changes"}})
+	}
+	if quality {
+		controls = append(controls, office.ControlDesign{Name: "cmdQuality", Type: "CommandButton", Properties: map[string]any{"Left": 194.0, "Top": 238.0, "Width": 164.0, "Height": 28.0, "Caption": "Quality report"}})
+	}
+	if preflight {
+		controls = append(controls, office.ControlDesign{Name: "cmdPreflight", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 276.0, "Width": 344.0, "Height": 28.0, "Caption": "Run preflight"}})
+	}
+	controls = append(controls, office.ControlDesign{Name: "cmdClose", Type: "CommandButton", Properties: map[string]any{"Left": 274.0, "Top": 314.0, "Width": 84.0, "Height": 28.0, "Caption": "Close"}})
 	return office.Design{
 		Name: "WUJournalSetup",
 		Mode: "replace",
@@ -263,115 +299,104 @@ func formDesign(profile Profile) office.Design {
 	}
 }
 
+func formHandler(control, macro, title string) string {
+	return fmt.Sprintf(`Private Sub %s_Click()
+    On Error GoTo Failed
+    %s
+    Exit Sub
+Failed:
+    MsgBox Err.Description, vbExclamation, %s
+End Sub`, control, macro, vbaString(title))
+}
+
 func formSource(profile Profile) string {
-	permalinkHandler := `Private Sub cmdPerma_Click()
-    On Error GoTo Failed
-    WU_JournalPermaAssistant
-    Exit Sub
-Failed:
-    MsgBox Err.Description, vbExclamation, "Perma assistant"
-End Sub
-`
-	if strings.EqualFold(profile.PermalinkPolicy, "none") {
-		permalinkHandler = ""
+	styles := profileHasFeature(profile, "style conversion") || profileHasFeature(profile, "heading and contents")
+	fields := profileHasFeature(profile, "field refresh")
+	citations := profileHasFeature(profile, "footnote and citation tools")
+	permalink := !strings.EqualFold(profile.PermalinkPolicy, "none") && profileHasFeature(profile, "permalink assistant")
+	supra := profileHasFeature(profile, "supra tools")
+	tracking := profileHasFeature(profile, "tracked changes")
+	quality := profileHasFeature(profile, "quality report")
+	preflight := profileHasFeature(profile, "preflight")
+	parts := []string{`Attribute VB_Name = "WUJournalSetup"
+Option Explicit`}
+	if styles {
+		parts = append(parts, formHandler("cmdStyles", "WU_JournalApplyStyles", "Journal setup"))
 	}
-	return fmt.Sprintf(`Attribute VB_Name = "WUJournalSetup"
-Option Explicit
-
-Private Sub cmdStyles_Click()
-    On Error GoTo Failed
-    WU_JournalApplyStyles
-    Exit Sub
-Failed:
-    MsgBox Err.Description, vbExclamation, "Journal setup"
-End Sub
-
-Private Sub cmdReview_Click()
-    On Error GoTo Failed
-    WU_JournalReviewNext
-    Exit Sub
-Failed:
-    MsgBox Err.Description, vbExclamation, "Journal review"
-End Sub
-
-Private Sub cmdFields_Click()
-    On Error GoTo Failed
-    WU_JournalRefreshFields
-    Exit Sub
-Failed:
-    MsgBox Err.Description, vbExclamation, "Journal fields"
-End Sub
-
-Private Sub cmdCitations_Click()
-    On Error GoTo Failed
-    WU_JournalCitationAudit
-    Exit Sub
-Failed:
-    MsgBox Err.Description, vbExclamation, "Citation audit"
-End Sub
-
-%s
-
-Private Sub cmdSupra_Click()
-    On Error GoTo Failed
-    WU_JournalSupraAudit
-    Exit Sub
-Failed:
-    MsgBox Err.Description, vbExclamation, "Supra audit"
-End Sub
-
-Private Sub cmdCommands_Click()
-    On Error GoTo Failed
-    WU_JournalInstallCommands
-    Exit Sub
-Failed:
-    MsgBox Err.Description, vbExclamation, "Journal commands"
-End Sub
-
-Private Sub cmdRemoveCommands_Click()
-    On Error GoTo Failed
-    WU_JournalRemoveCommands
-    Exit Sub
-Failed:
-    MsgBox Err.Description, vbExclamation, "Journal commands"
-End Sub
-
-Private Sub cmdTracking_Click()
-    On Error GoTo Failed
-    WU_JournalToggleTracking
-    Exit Sub
-Failed:
-    MsgBox Err.Description, vbExclamation, "Tracked changes"
-End Sub
-
-Private Sub cmdQuality_Click()
-    On Error GoTo Failed
-    WU_JournalQualityReport
-    Exit Sub
-Failed:
-    MsgBox Err.Description, vbExclamation, "Quality report"
-End Sub
-
-Private Sub cmdPreflight_Click()
-    On Error GoTo Failed
-    WU_JournalPreflight
-    Exit Sub
-Failed:
-    MsgBox Err.Description, vbExclamation, "Journal preflight"
-End Sub
-
-Private Sub cmdClose_Click()
+	parts = append(parts, formHandler("cmdReview", "WU_JournalReviewNext", "Journal review"))
+	if fields {
+		parts = append(parts, formHandler("cmdFields", "WU_JournalRefreshFields", "Journal fields"))
+	}
+	if citations {
+		parts = append(parts, formHandler("cmdCitations", "WU_JournalCitationAudit", "Citation audit"))
+	}
+	if permalink {
+		parts = append(parts, formHandler("cmdPerma", "WU_JournalPermaAssistant", "Perma assistant"))
+	}
+	if supra {
+		parts = append(parts, formHandler("cmdSupra", "WU_JournalSupraAudit", "Supra audit"))
+	}
+	parts = append(parts,
+		formHandler("cmdCommands", "WU_JournalInstallCommands", "Journal commands"),
+		formHandler("cmdRemoveCommands", "WU_JournalRemoveCommands", "Journal commands"),
+	)
+	if tracking {
+		parts = append(parts, formHandler("cmdTracking", "WU_JournalToggleTracking", "Tracked changes"))
+	}
+	if quality {
+		parts = append(parts, formHandler("cmdQuality", "WU_JournalQualityReport", "Quality report"))
+	}
+	if preflight {
+		parts = append(parts, formHandler("cmdPreflight", "WU_JournalPreflight", "Journal preflight"))
+	}
+	parts = append(parts, `Private Sub cmdClose_Click()
     Unload Me
-End Sub
-`, permalinkHandler)
+End Sub`)
+	return strings.Join(parts, "\n\n") + "\n"
 }
 
 func ribbonSource(profile Profile, module string) string {
 	prefix := "WU_" + module
-	permalinkButton := ""
-	if !strings.EqualFold(profile.PermalinkPolicy, "none") {
-		permalinkButton = fmt.Sprintf(`          <button id="%s_Perma" label="Perma assistant" onAction="WU_JournalPermaAssistantFromRibbon"/>
-`, prefix)
+	button := func(id, label, action string) string {
+		return fmt.Sprintf(`          <button id="%s_%s" label="%s" onAction="%s"/>`, prefix, id, EscapeXML(label), action)
+	}
+	styles := profileHasFeature(profile, "style conversion") || profileHasFeature(profile, "heading and contents")
+	fields := profileHasFeature(profile, "field refresh")
+	citations := profileHasFeature(profile, "footnote and citation tools")
+	permalink := !strings.EqualFold(profile.PermalinkPolicy, "none") && profileHasFeature(profile, "permalink assistant")
+	supra := profileHasFeature(profile, "supra tools")
+	tracking := profileHasFeature(profile, "tracked changes")
+	quality := profileHasFeature(profile, "quality report")
+	preflight := profileHasFeature(profile, "preflight")
+	buttons := []string{fmt.Sprintf(`          <button id="%s_Setup" label="Journal setup" size="large" onAction="WU_JournalOpenSetupFromRibbon"/>`, prefix)}
+	if styles {
+		buttons = append(buttons, button("Styles", "Apply house styles", "WU_JournalApplyStylesFromRibbon"))
+	}
+	buttons = append(buttons, button("Review", "Review changes", "WU_JournalReviewNextFromRibbon"))
+	if fields {
+		buttons = append(buttons, button("Fields", "Refresh fields", "WU_JournalRefreshFieldsFromRibbon"))
+	}
+	if citations {
+		buttons = append(buttons, button("Citations", "Audit citations", "WU_JournalCitationAuditFromRibbon"))
+	}
+	if permalink {
+		buttons = append(buttons, button("Perma", "Perma assistant", "WU_JournalPermaAssistantFromRibbon"))
+	}
+	if supra {
+		buttons = append(buttons, button("Supra", "Supra audit", "WU_JournalSupraAuditFromRibbon"))
+	}
+	buttons = append(buttons,
+		button("Commands", "Install commands", "WU_JournalInstallCommandsFromRibbon"),
+		button("RemoveCommands", "Remove commands", "WU_JournalRemoveCommandsFromRibbon"),
+	)
+	if tracking {
+		buttons = append(buttons, button("Tracking", "Toggle tracked changes", "WU_JournalToggleTrackingFromRibbon"))
+	}
+	if quality {
+		buttons = append(buttons, button("Quality", "Quality report", "WU_JournalQualityReportFromRibbon"))
+	}
+	if preflight {
+		buttons = append(buttons, button("Preflight", "Run preflight", "WU_JournalPreflightFromRibbon"))
 	}
 	return fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui" onLoad="WU_JournalRibbonLoad">
@@ -379,24 +404,13 @@ func ribbonSource(profile Profile, module string) string {
     <tabs>
       <tab id="%s_Tab" label="%s">
         <group id="%s_Group" label="Journal tools">
-          <button id="%s_Setup" label="Journal setup" size="large" onAction="WU_JournalOpenSetupFromRibbon"/>
-          <button id="%s_Styles" label="Apply house styles" onAction="WU_JournalApplyStylesFromRibbon"/>
-          <button id="%s_Review" label="Review changes" onAction="WU_JournalReviewNextFromRibbon"/>
-          <button id="%s_Fields" label="Refresh fields" onAction="WU_JournalRefreshFieldsFromRibbon"/>
-          <button id="%s_Citations" label="Audit citations" onAction="WU_JournalCitationAuditFromRibbon"/>
 %s
-          <button id="%s_Supra" label="Supra audit" onAction="WU_JournalSupraAuditFromRibbon"/>
-          <button id="%s_Commands" label="Install commands" onAction="WU_JournalInstallCommandsFromRibbon"/>
-          <button id="%s_RemoveCommands" label="Remove commands" onAction="WU_JournalRemoveCommandsFromRibbon"/>
-          <button id="%s_Tracking" label="Toggle tracked changes" onAction="WU_JournalToggleTrackingFromRibbon"/>
-          <button id="%s_Quality" label="Quality report" onAction="WU_JournalQualityReportFromRibbon"/>
-          <button id="%s_Preflight" label="Run preflight" onAction="WU_JournalPreflightFromRibbon"/>
         </group>
       </tab>
     </tabs>
   </ribbon>
 </customUI>
-`, prefix, EscapeXML(profile.Name), prefix, prefix, prefix, prefix, prefix, prefix, permalinkButton, prefix, prefix, prefix, prefix, prefix, prefix)
+`, prefix, EscapeXML(profile.Name), prefix, strings.Join(buttons, "\n"))
 }
 
 func coreSource(profile Profile, module string) string {

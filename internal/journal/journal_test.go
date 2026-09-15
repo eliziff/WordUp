@@ -56,6 +56,43 @@ func TestProfileWithoutPermalinksOmitsPermaWiring(t *testing.T) {
 	}
 }
 
+func TestProfileFeaturesControlGeneratedSurface(t *testing.T) {
+	profile := Profile{
+		ID:              "MINIMAL",
+		Name:            "Minimal Journal",
+		PermalinkPolicy: "assistant",
+		Features:        []string{"journal setup", "preflight"},
+	}
+	design := formDesign(profile)
+	for _, control := range design.Controls {
+		if control.Name == "cmdStyles" || control.Name == "cmdFields" || control.Name == "cmdCitations" || control.Name == "cmdPerma" || control.Name == "cmdSupra" || control.Name == "cmdTracking" || control.Name == "cmdQuality" {
+			t.Fatalf("feature-disabled form still exposes %s", control.Name)
+		}
+	}
+	form := formSource(profile)
+	for _, omitted := range []string{"cmdStyles", "cmdFields", "cmdCitations", "cmdPerma", "cmdSupra", "cmdTracking", "cmdQuality"} {
+		if strings.Contains(form, omitted) {
+			t.Fatalf("feature-disabled form still contains %s wiring", omitted)
+		}
+	}
+	for _, retained := range []string{"cmdReview", "cmdCommands", "cmdRemoveCommands", "cmdPreflight"} {
+		if !strings.Contains(form, retained) {
+			t.Fatalf("feature-enabled form lost %s wiring", retained)
+		}
+	}
+	ribbon := ribbonSource(profile, "Minimal")
+	for _, omitted := range []string{"_Styles", "_Fields", "_Citations", "_Perma", "_Supra", "_Tracking", "_Quality"} {
+		if strings.Contains(ribbon, omitted) {
+			t.Fatalf("feature-disabled Ribbon still exposes %s", omitted)
+		}
+	}
+	for _, retained := range []string{"_Setup", "_Review", "_Commands", "_RemoveCommands", "_Preflight"} {
+		if !strings.Contains(ribbon, retained) {
+			t.Fatalf("feature-enabled Ribbon lost %s", retained)
+		}
+	}
+}
+
 func TestCreateAllPreflightsDestinations(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "all")
 	if err := os.MkdirAll(filepath.Join(root, "ALTA_L_REV"), 0700); err != nil {
