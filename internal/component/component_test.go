@@ -413,8 +413,8 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"Set firstStory = document.StoryRanges(wdFootnotesStory)",
 		"Set firstStory = document.StoryRanges(wdEndnotesStory)",
 		"WU_ReplaceLiteralInStoryChain",
-		"Do not create an undo record or touch Word state for an exact no-op.",
-		"If StrComp(findText, replaceText, vbBinaryCompare) = 0 Then Exit Function",
+		"With MatchCase on, identical find/replacement text is an exact no-op.",
+		"If matchCase And StrComp(findText, replaceText, vbBinaryCompare) = 0 Then Exit Function",
 		"targetStart = target.Start: targetEnd = target.End",
 		"If targetEnd <= targetStart Then Exit Function",
 	} {

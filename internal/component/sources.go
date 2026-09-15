@@ -358,8 +358,10 @@ Public Function WU_ReplaceLiteral(ByVal document As Document, ByVal findText As 
     WU_ValidateLiteral findText, replaceText, "WU_ReplaceLiteral"
     storyScope = LCase$(Trim$(storyScope))
     If storyScope <> "main" And storyScope <> "notes" And storyScope <> "all" Then Err.Raise 5, "WU_ReplaceLiteral", "story scope must be main, notes, or all"
-    ' Do not create an undo record or touch Word state for an exact no-op.
-    If StrComp(findText, replaceText, vbBinaryCompare) = 0 Then Exit Function
+    ' With MatchCase on, identical find/replacement text is an exact no-op.
+    ' When MatchCase is off, the same spelling could intentionally normalize
+    ' the case of a differently-cased match, so it still runs.
+    If matchCase And StrComp(findText, replaceText, vbBinaryCompare) = 0 Then Exit Function
     updating = Application.ScreenUpdating
     captured = True
     Application.ScreenUpdating = False
@@ -423,7 +425,7 @@ Public Function WU_ReplaceLiteralInRange(ByVal target As Range, ByVal findText A
     WU_ValidateLiteral findText, replaceText, "WU_ReplaceLiteralInRange"
     targetStart = target.Start: targetEnd = target.End
     If targetEnd <= targetStart Then Exit Function
-    If StrComp(findText, replaceText, vbBinaryCompare) = 0 Then Exit Function
+    If matchCase And StrComp(findText, replaceText, vbBinaryCompare) = 0 Then Exit Function
     updating = Application.ScreenUpdating
     captured = True
     Application.ScreenUpdating = False

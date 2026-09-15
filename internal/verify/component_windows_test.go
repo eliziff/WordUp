@@ -189,7 +189,7 @@ Public Function CheckTextOperations() As String
     before = d.Content.Text
     priorUpdating = Application.ScreenUpdating
     d.Saved = True
-    result = WU_ReplaceLiteral(d, "Alpha", "Alpha", "main", False, False)
+    result = WU_ReplaceLiteral(d, "Alpha", "Alpha", "main", True, False)
     If result Or Not d.Saved Then Err.Raise 5, , "exact no-op opened an edit or changed the document"
     result = WU_ReplaceLiteral(d, "alpha", "omega", "main", False, True)
     If Not result Then Err.Raise 5, , "literal replacement did not report a change"

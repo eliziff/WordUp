@@ -14,8 +14,8 @@ document/story replacement path. Both paths use bounded Word Find operations,
 preserve direct formatting, create one undo record, restore `ScreenUpdating`,
 and reject Word's raw and escaped 255-character limits. The native fixture also
 covers a partial-range boundary, literal caret text, whole-word matching,
-notes-only isolation, bulk replacement and undo; exact no-ops and empty ranges
-return before touching Word state; native execution remains
+notes-only isolation, bulk replacement and undo; case-sensitive exact no-ops
+and empty ranges return before touching Word state; native execution remains
 unclaimed while this logon session refuses hidden Word. The fresh offline
 109-document structure gate resolved 109/109 documents and 22,789 paragraphs
 in 3.40 s; the slowest document was 149.9 ms. These are observed gates, not
