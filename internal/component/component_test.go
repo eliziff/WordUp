@@ -651,3 +651,33 @@ func TestRibbonMergeBundleIsPreflightedAndBuilt(t *testing.T) {
 		t.Fatalf("Ribbon source copied after rejected preflight: %v", err)
 	}
 }
+
+func TestRibbonMergePreflightNormalizesTargetCase(t *testing.T) {
+	const ns = "http://schemas.microsoft.com/office/2009/07/customui"
+	base := []byte(`<customUI xmlns="` + ns + `"><ribbon><tabs><tab id="base"/></tabs></ribbon></customUI>`)
+	first := []byte(`<customUI xmlns="` + ns + `"><ribbon><tabs><tab id="same"/></tabs></ribbon></customUI>`)
+	second := []byte(`<customUI xmlns="` + ns + `"><ribbon><tabs><tab id="same" label="collision"/></tabs></ribbon></customUI>`)
+	bundle := t.TempDir()
+	manifest := Manifest{Schema: 1, ID: "ribbon.case-conflict", Version: "1", License: "MIT", Provenance: "case-normalization test", Files: []File{{Path: "assets/first.xml"}, {Path: "assets/second.xml"}}, RibbonMerges: []RibbonMerge{{Source: "assets/first.xml", Target: "customUI/customUI14.xml"}, {Source: "assets/second.xml", Target: "customui/customui14.xml"}}}
+	if err := project.Write(bundle, "component.json", project.JSON(manifest), ""); err != nil {
+		t.Fatal(err)
+	}
+	for path, data := range map[string][]byte{"assets/first.xml": first, "assets/second.xml": second} {
+		if err := project.Write(bundle, path, data, ""); err != nil {
+			t.Fatal(err)
+		}
+	}
+	root := filepath.Join(t.TempDir(), "workspace")
+	if _, err := project.New("RibbonCaseConflict", root); err != nil {
+		t.Fatal(err)
+	}
+	if err := project.Write(root, "package/customUI/customUI14.xml", base, ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := AddBundle(root, bundle); err == nil || !strings.Contains(err.Error(), "Ribbon merge assets/second.xml") {
+		t.Fatalf("case-variant Ribbon collision was not rejected before copy: %v", err)
+	}
+	if _, err := project.Read(root, "assets/first.xml"); !os.IsNotExist(err) {
+		t.Fatalf("first Ribbon source copied after rejected preflight: %v", err)
+	}
+}

@@ -638,6 +638,7 @@ func validateRibbonMerges(root, componentID string, m Manifest) error {
 	working := map[string][]byte{}
 	loaded := map[string]bool{}
 	hasBase := map[string]bool{}
+	targetNames := map[string]string{}
 	for _, merge := range m.RibbonMerges {
 		sourceKey := strings.ToLower(filepath.ToSlash(merge.Source))
 		file, ok := files[sourceKey]
@@ -648,11 +649,17 @@ func validateRibbonMerges(root, componentID string, m Manifest) error {
 		if !office.SafePart(target) || !strings.HasSuffix(strings.ToLower(target), ".xml") {
 			return fmt.Errorf("component %s Ribbon merge target %q must be a safe XML package part", componentID, merge.Target)
 		}
-		if !loaded[target] {
-			loaded[target] = true
+		targetKey := strings.ToLower(target)
+		if canonical, exists := targetNames[targetKey]; exists {
+			target = canonical
+		} else {
+			targetNames[targetKey] = target
+		}
+		if !loaded[targetKey] {
+			loaded[targetKey] = true
 			if raw, err := project.Read(root, "package/"+target); err == nil {
-				working[target] = raw
-				hasBase[target] = true
+				working[targetKey] = raw
+				hasBase[targetKey] = true
 			} else if !os.IsNotExist(err) {
 				return err
 			} else if baseRaw, baseErr := project.Read(root, ".wordwright/base.opc"); baseErr == nil {
@@ -660,27 +667,30 @@ func validateRibbonMerges(root, componentID string, m Manifest) error {
 				if readErr != nil {
 					return fmt.Errorf("component %s Ribbon base package: %w", componentID, readErr)
 				}
-				if raw, ok := base.Files[target]; ok {
-					working[target] = append([]byte(nil), raw...)
-					hasBase[target] = true
+				for name, raw := range base.Files {
+					if strings.EqualFold(name, target) {
+						working[targetKey] = append([]byte(nil), raw...)
+						hasBase[targetKey] = true
+						break
+					}
 				}
 			} else if !os.IsNotExist(baseErr) {
 				return baseErr
 			}
 		}
-		if !hasBase[target] {
+		if !hasBase[targetKey] {
 			probe := office.BlankPackage()
 			if err := probe.MergeRibbon(target, fileData(file)); err != nil {
 				return fmt.Errorf("component %s Ribbon merge %s -> %s: %w", componentID, merge.Source, merge.Target, err)
 			}
-			working[target] = append([]byte(nil), probe.Files[target]...)
+			working[targetKey] = append([]byte(nil), probe.Files[target]...)
 			continue
 		}
-		merged, err := office.MergeRibbonXML(working[target], fileData(file))
+		merged, err := office.MergeRibbonXML(working[targetKey], fileData(file))
 		if err != nil {
 			return fmt.Errorf("component %s Ribbon merge %s -> %s: %w", componentID, merge.Source, merge.Target, err)
 		}
-		working[target] = merged
+		working[targetKey] = merged
 	}
 	return nil
 }
