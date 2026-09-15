@@ -514,6 +514,7 @@ Public Const WU_JOURNAL_STYLE_H7 As String = %s
 Public Const WU_JOURNAL_STYLE_H8 As String = %s
 Public Const WU_JOURNAL_STYLE_H9 As String = %s
 Private Const WU_JOURNAL_MAX_STORY_CHAIN As Long = 32768
+Private Const WU_WORD_STORY_MISSING As Long = 5941
 
 Public Sub WU_JournalRibbonLoad(ByVal ribbon As IRibbonUI)
     ' The callback is intentionally a no-op. Keeping it public makes the
@@ -829,18 +830,24 @@ Private Sub WU_ApplyFootnoteStyle(ByVal doc As Document, ByVal noteStyle As Styl
     ' Apply one style assignment per linked note story rather than one COM
     ' round-trip per note. Direct run formatting (italic case names,
     ' emphasis, and fields) remains untouched.
-    On Error Resume Next
-    Set story = doc.StoryRanges(wdFootnotesStory)
-    Err.Clear
-    On Error GoTo 0
+    Set story = WU_JournalStory(doc, wdFootnotesStory)
     If Not story Is Nothing Then WU_ApplyNoteStoryChain story, noteStyle
     Set story = Nothing
-    On Error Resume Next
-    Set story = doc.StoryRanges(wdEndnotesStory)
-    Err.Clear
-    On Error GoTo 0
+    Set story = WU_JournalStory(doc, wdEndnotesStory)
     If Not story Is Nothing Then WU_ApplyNoteStoryChain story, noteStyle
 End Sub
+
+Private Function WU_JournalStory(ByVal doc As Document, ByVal storyType As Long) As Range
+    Dim readError As Long
+    On Error Resume Next
+    Set WU_JournalStory = doc.StoryRanges(storyType)
+    readError = Err.Number
+    Err.Clear
+    On Error GoTo 0
+    ' 5941 is Word's normal missing-member result for a document without
+    ' footnotes or endnotes. Surface every other root retrieval failure.
+    If readError <> 0 And readError <> WU_WORD_STORY_MISSING Then Err.Raise readError, "WU_JournalStory", "story " & CStr(storyType) & " is unavailable"
+End Function
 
 Private Sub WU_ApplyNoteStoryChain(ByVal firstStory As Range, ByVal noteStyle As Style)
     Dim story As Range, storyFailed As Boolean, chainLength As Long

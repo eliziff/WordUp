@@ -359,7 +359,7 @@ func TestFieldRefreshChecksWordReturnCodesAndBounds(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.6" {
+	if item.Version != "1.0.7" {
 		t.Fatalf("field refresh version=%q", item.Version)
 	}
 	for _, capability := range []string{"field refresh", "table-of-contents refresh", "range-bounded refresh", "story scopes", "header/footer scopes", "return-code diagnostics", "bounded story traversal"} {
@@ -399,6 +399,8 @@ func TestFieldRefreshChecksWordReturnCodesAndBounds(t *testing.T) {
 		"If nextStory Is story Then failures = failures + 1: Exit Do",
 		"If nextError <> 0 Then failures = failures + 1: Exit Do",
 		"Private Const WU_MAX_FIELD_STORY_CHAIN As Long = 32768",
+		"Private Const WU_WORD_STORY_MISSING As Long = 5941",
+		"If readError <> 0 And readError <> WU_WORD_STORY_MISSING Then Err.Raise readError, \"WU_FieldStory\"",
 		"chainLength = chainLength + 1",
 		"If chainLength > WU_MAX_FIELD_STORY_CHAIN Then failures = failures + 1: Exit Do",
 		"Application.UndoRecord.StartCustomRecord \"Refresh fields\"",
@@ -415,7 +417,7 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.18" {
+	if item.Version != "1.0.19" {
 		t.Fatalf("style converter version did not advance: %q", item.Version)
 	}
 	for _, capability := range []string{"paragraph-style conversion", "character-style conversion", "paragraph-style application", "range-bounded conversion", "offset style runs", "story-wide conversion", "header/footer scopes", "batch style mapping", "character-style batch mapping", "bounded story traversal"} {
@@ -460,6 +462,9 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 		"Private Function WU_ReadStylePosition",
 		"Private Function WU_ParagraphStyleMatches",
 		"Private Function WU_StyleStoryHasContent",
+		"Private Function WU_StyleStory",
+		"Private Const WU_WORD_STORY_MISSING As Long = 5941",
+		"If readError <> 0 And readError <> WU_WORD_STORY_MISSING Then Err.Raise readError, \"WU_StyleStory\"",
 		"Private Function WU_StyleNextStory",
 		`If nextStory Is story Then Err.Raise 5, "WU_StyleNextStory", "self-referential story chain"`,
 		"ByRef styleNames() As String",
@@ -544,7 +549,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.25" {
+	if item.Version != "1.0.26" {
 		t.Fatalf("text operations version=%q", item.Version)
 	}
 	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
@@ -603,6 +608,9 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"Private Function WU_CharacterStyleMatches",
 		"Private Function WU_TextIsCharacterStyle",
 		"Private Function WU_TextStoryHasContent",
+		"Private Function WU_TextStory",
+		"Private Const WU_WORD_STORY_MISSING As Long = 5941",
+		"If readError <> 0 And readError <> WU_WORD_STORY_MISSING Then Err.Raise readError, \"WU_TextStory\"",
 		"Private Function WU_TextNextStory",
 		"A malformed package must not create a self-referential story chain.",
 		"If chainLength > WU_MAX_TEXT_STORY_CHAIN Then Err.Raise 5, \"WU_CountLiteralInStoryChain\", \"story chain exceeds 32768 linked stories\"",
@@ -644,8 +652,8 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"WU_ReplacementPattern",
 		".MatchWildcards = useWildcards",
 		"' A wildcard can legally match an empty span",
-		"Set firstStory = document.StoryRanges(wdFootnotesStory)",
-		"Set firstStory = document.StoryRanges(wdEndnotesStory)",
+		"Set firstStory = WU_TextStory(document, wdFootnotesStory)",
+		"Set firstStory = WU_TextStory(document, wdEndnotesStory)",
 		"wdPrimaryHeaderStory",
 		"wdEvenPagesHeaderStory",
 		"wdPrimaryFooterStory",
