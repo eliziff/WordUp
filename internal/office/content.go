@@ -34,10 +34,33 @@ func numeric(v any) (float64, error) {
 		if !math.IsNaN(n) && !math.IsInf(n, 0) {
 			return n, nil
 		}
+	case float32:
+		return numeric(float64(n))
 	case int:
 		return float64(n), nil
+	case int8:
+		return float64(n), nil
+	case int16:
+		return float64(n), nil
+	case int32:
+		return float64(n), nil
+	case int64:
+		return float64(n), nil
+	case uint:
+		return float64(n), nil
+	case uint8:
+		return float64(n), nil
+	case uint16:
+		return float64(n), nil
+	case uint32:
+		return float64(n), nil
+	case uint64:
+		return float64(n), nil
 	case json.Number:
-		return n.Float64()
+		value, err := n.Float64()
+		if err == nil && !math.IsNaN(value) && !math.IsInf(value, 0) {
+			return value, nil
+		}
 	}
 	return 0, fmt.Errorf("finite numeric measurement required")
 }

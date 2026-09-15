@@ -643,6 +643,21 @@ func TestNumberingRecipeRejectsUnusableLevelValues(t *testing.T) {
 	}
 }
 
+func TestRecipeAcceptsCommonTypedNumericValues(t *testing.T) {
+	run, err := props(nil, "run", map[string]any{"size_pt": float32(10.5)})
+	if err != nil || !strings.Contains(string(run), `w:sz w:val="21"`) {
+		t.Fatalf("float32 measurement was not accepted: %s (%v)", run, err)
+	}
+	paragraph, err := props(nil, "paragraph", map[string]any{
+		"before_pt":     int64(3),
+		"outline_level": int32(2),
+		"tabs":          []any{map[string]any{"position_pt": uint16(36)}},
+	})
+	if err != nil || !strings.Contains(string(paragraph), `w:before="60"`) || !strings.Contains(string(paragraph), `w:outlineLvl w:val="2"`) || !strings.Contains(string(paragraph), `w:pos="720"`) {
+		t.Fatalf("typed measurements were not accepted: %s (%v)", paragraph, err)
+	}
+}
+
 func TestComposeRejectsInvalidLayoutMeasurements(t *testing.T) {
 	cases := []struct {
 		name   string
