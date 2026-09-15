@@ -41,6 +41,17 @@ func numeric(v any) (float64, error) {
 	}
 	return 0, fmt.Errorf("finite numeric measurement required")
 }
+
+// integer is for OOXML fields whose schema is an integer, not a measurement.
+// Do not round a caller's value here: a fractional outline or numbering level
+// would otherwise produce a different document than the recipe requested.
+func integer(v any) (int, error) {
+	n, err := numeric(v)
+	if err != nil || math.Trunc(n) != n || n < -2147483648 || n > 2147483647 {
+		return 0, fmt.Errorf("32-bit integer required")
+	}
+	return int(n), nil
+}
 func scaled(v any, mult float64) (string, error) {
 	n, e := numeric(v)
 	if e != nil || math.Abs(n) > 1000000 {
@@ -314,25 +325,25 @@ func props(raw []byte, kind string, spec map[string]any) ([]byte, error) {
 			}
 		}
 		if v, ok := spec["outline_level"]; ok {
-			n, e := numeric(v)
+			n, e := integer(v)
 			if e != nil || n < 0 || n > 9 {
 				return nil, fmt.Errorf("invalid outline level")
 			}
-			val("outlineLvl", int(n))
+			val("outlineLvl", n)
 		}
 		if v, ok := spec["list_id"]; ok {
-			n, e := scaled(v, 1)
-			if e != nil {
-				return nil, e
+			n, e := integer(v)
+			if e != nil || n < 1 {
+				return nil, fmt.Errorf("invalid list id")
 			}
-			level := "0"
+			level := 0
 			if x, ok := spec["list_level"]; ok {
-				level, e = scaled(x, 1)
-				if e != nil {
-					return nil, e
+				level, e = integer(x)
+				if e != nil || level < 0 || level > 8 {
+					return nil, fmt.Errorf("invalid list level")
 				}
 			}
-			full["numPr"] = `<w:numPr><w:ilvl w:val="` + level + `"/><w:numId w:val="` + n + `"/></w:numPr>`
+			full["numPr"] = fmt.Sprintf(`<w:numPr><w:ilvl w:val="%d"/><w:numId w:val="%d"/></w:numPr>`, level, n)
 		}
 		if v, ok := spec["tabs"]; ok {
 			tabs, ok := v.([]any)

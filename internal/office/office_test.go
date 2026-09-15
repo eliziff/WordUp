@@ -567,6 +567,28 @@ func TestTypeInfoVersionUpdatePreservesDesignerFormatting(t *testing.T) {
 	}
 }
 
+func TestRecipeRejectsFractionalAndInvalidNumberingFields(t *testing.T) {
+	for name, spec := range map[string]map[string]any{
+		"fractional outline":    {"outline_level": 1.5},
+		"fractional list id":    {"list_id": 2.5},
+		"zero list id":          {"list_id": 0},
+		"negative list id":      {"list_id": -1},
+		"fractional list level": {"list_id": 2, "list_level": 1.5},
+		"negative list level":   {"list_id": 2, "list_level": -1},
+		"deep list level":       {"list_id": 2, "list_level": 9},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if _, err := props(nil, "paragraph", spec); err == nil {
+				t.Fatal("invalid integer field was rounded or accepted")
+			}
+		})
+	}
+	raw, err := props(nil, "paragraph", map[string]any{"outline_level": 1.0, "list_id": 7.0, "list_level": 8.0})
+	if err != nil || !strings.Contains(string(raw), `w:outlineLvl w:val="1"`) || !strings.Contains(string(raw), `w:numId w:val="7"`) || !strings.Contains(string(raw), `w:ilvl w:val="8"`) {
+		t.Fatalf("valid integer fields were not emitted: %s (%v)", raw, err)
+	}
+}
+
 func TestPackageRefusesSymlinkEntries(t *testing.T) {
 	var b bytes.Buffer
 	z := zip.NewWriter(&b)
