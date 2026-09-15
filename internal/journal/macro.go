@@ -63,18 +63,6 @@ func Create(root string, profile Profile) (CreateReport, error) {
 	} else if !os.IsNotExist(err) {
 		return CreateReport{}, fmt.Errorf("inspect journal workspace destination: %w", err)
 	}
-	if profile.BodyFont == "" {
-		profile.BodyFont = "Times New Roman"
-	}
-	if profile.BodySizePT <= 0 {
-		profile.BodySizePT = 11
-	}
-	if profile.NoteFont == "" {
-		profile.NoteFont = profile.BodyFont
-	}
-	if profile.NoteSizePT <= 0 {
-		profile.NoteSizePT = 9
-	}
 	if len(profile.Features) == 0 {
 		profile.Features = defaultFeatures(profile.PermalinkPolicy)
 	}
