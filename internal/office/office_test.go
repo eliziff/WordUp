@@ -163,6 +163,20 @@ func TestFormRejectsUnrepresentableGeometry(t *testing.T) {
 	}
 }
 
+func TestFormAcceptsTypedNumericProperties(t *testing.T) {
+	r, err := defaultControl("Label", "Sample")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := applyRecord(r, map[string]any{"Width": int64(100), "Height": float32(20)}, "Size"); err != nil {
+		t.Fatalf("typed form geometry was rejected: %v", err)
+	}
+	width, height := r.dimensions("Size")
+	if math.Abs(width-100) > 0.1 || math.Abs(height-20) > 0.1 {
+		t.Fatalf("typed form geometry was not stored: got %.3f x %.3f", width, height)
+	}
+}
+
 func TestFormCreate(t *testing.T) {
 	f, e := NewForm("TestForm", 1252)
 	if e != nil {

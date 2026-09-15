@@ -377,26 +377,11 @@ func floatValue(m map[string]any, key string, def float64) (float64, error) {
 	if !ok {
 		return def, nil
 	}
-	switch v := x.(type) {
-	case float64:
-		if math.IsNaN(v) || math.IsInf(v, 0) || math.Abs(v) > 100000 {
-			return 0, fmt.Errorf("invalid geometry")
-		}
-		return v, nil
-	case int:
-		value := float64(v)
-		if math.Abs(value) > 100000 {
-			return 0, fmt.Errorf("invalid geometry")
-		}
-		return value, nil
-	case int64:
-		value := float64(v)
-		if math.Abs(value) > 100000 {
-			return 0, fmt.Errorf("invalid geometry")
-		}
-		return value, nil
+	value, err := numeric(x)
+	if err != nil || math.Abs(value) > 100000 {
+		return 0, fmt.Errorf("invalid geometry")
 	}
-	return 0, fmt.Errorf("numeric %s required", key)
+	return value, nil
 }
 func applyRecord(r *formRecord, p map[string]any, size string) error {
 	w, h := r.dimensions(size)

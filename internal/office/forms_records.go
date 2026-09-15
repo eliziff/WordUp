@@ -227,25 +227,17 @@ func (r *formRecord) set(name string, value any) error {
 	return fmt.Errorf("property %s is not a stored %s field", name, r.spec.name)
 }
 func number(v any) (int64, error) {
-	switch n := v.(type) {
-	case float64:
-		if math.IsNaN(n) || math.IsInf(n, 0) || math.Trunc(n) != n || n > math.MaxInt32*2+1 || n < math.MinInt32 {
-			return 0, fmt.Errorf("number outside 32-bit property range")
-		}
-		return int64(n), nil
-	case int:
-		return int64(n), nil
-	case int64:
-		return n, nil
-	case uint32:
-		return int64(n), nil
-	case bool:
-		if n {
+	if b, ok := v.(bool); ok {
+		if b {
 			return 1, nil
 		}
 		return 0, nil
 	}
-	return 0, fmt.Errorf("expected numeric property, received %T", v)
+	n, err := numeric(v)
+	if err != nil || math.Trunc(n) != n || n > math.MaxInt32*2+1 || n < math.MinInt32 {
+		return 0, fmt.Errorf("number outside 32-bit property range")
+	}
+	return int64(n), nil
 }
 func (r *formRecord) size(name string, w, h float64) error {
 	for _, e := range r.spec.extra {
