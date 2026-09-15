@@ -17,5 +17,8 @@ func TestProcessCreationFlagsKeepWordInOwnedJob(t *testing.T) {
 		if flags&(createNewProcessGroup|createSuspended|createNoWindow) != createNewProcessGroup|createSuspended|createNoWindow {
 			t.Fatalf("required creation flags were lost: %#x", flags)
 		}
+		if flags&extendedStartupInfo == 0 {
+			t.Fatalf("extended startup info flag was lost: %#x", flags)
+		}
 	}
 }
