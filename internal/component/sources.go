@@ -297,6 +297,8 @@ Public Function WU_ConvertStyle(ByVal document As Document, ByVal fromStyle As S
     captured = True
     Set sourceStyle = document.Styles(fromStyle)
     Set targetStyle = document.Styles(toStyle)
+    If sourceStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ConvertStyle", "source style is not a paragraph style"
+    If targetStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ConvertStyle", "target style is not a paragraph style"
     If StrComp(sourceStyle.NameLocal, targetStyle.NameLocal, vbTextCompare) = 0 Then Exit Function
     Application.ScreenUpdating = False
     Application.UndoRecord.StartCustomRecord "Convert style": opened = True
