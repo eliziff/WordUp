@@ -648,7 +648,7 @@ End Function
 
 Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As Style, ByVal heading1 As Style, ByVal heading2 As Style, ByVal heading3 As Style, ByVal heading4 As Style, ByVal heading5 As Style, ByVal heading6 As Style, ByVal heading7 As Style, ByVal heading8 As Style, ByVal heading9 As Style)
     Dim story As Range, paragraph As Paragraph, paragraphRange As Range, batch As Range
-    Dim batchStyle As Style, desiredStyle As Style, currentStyle As String, detectedRole As String
+    Dim batchStyle As Style, desiredStyle As Style, currentStyle As String, detectedRole As String, useOutline As Boolean
     Dim structure As Variant, haveStructure As Boolean, paragraphIndex As Long, level As Long
     On Error Resume Next
     Set story = doc.StoryRanges(wdMainTextStory)
@@ -685,25 +685,30 @@ Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As St
                 Err.Clear
                 On Error GoTo 0
             End If
-            If level = wdOutlineLevel1 Then
+            ' A marker sequence may retain a tentative level for an ordinary
+            ' numbered list. When the detector returned a role, trust that
+            ' role over the tentative level; use Word's outline only when the
+            ' detector was unavailable or this row could not be read.
+            useOutline = (Not haveStructure Or Len(detectedRole) = 0 Or StrComp(detectedRole, "heading", vbTextCompare) = 0)
+            If useOutline And level = wdOutlineLevel1 Then
                 Set desiredStyle = heading1
-            ElseIf level = wdOutlineLevel2 Then
+            ElseIf useOutline And level = wdOutlineLevel2 Then
                 Set desiredStyle = heading2
-            ElseIf level = wdOutlineLevel3 Then
+            ElseIf useOutline And level = wdOutlineLevel3 Then
                 Set desiredStyle = heading3
-            ElseIf level = wdOutlineLevel4 Then
+            ElseIf useOutline And level = wdOutlineLevel4 Then
                 Set desiredStyle = heading4
-            ElseIf level = wdOutlineLevel5 Then
+            ElseIf useOutline And level = wdOutlineLevel5 Then
                 Set desiredStyle = heading5
-            ElseIf level = wdOutlineLevel6 Then
+            ElseIf useOutline And level = wdOutlineLevel6 Then
                 Set desiredStyle = heading6
-            ElseIf level = wdOutlineLevel7 Then
+            ElseIf useOutline And level = wdOutlineLevel7 Then
                 Set desiredStyle = heading7
-            ElseIf level = wdOutlineLevel8 Then
+            ElseIf useOutline And level = wdOutlineLevel8 Then
                 Set desiredStyle = heading8
-            ElseIf level = wdOutlineLevel9 Then
+            ElseIf useOutline And level = wdOutlineLevel9 Then
                 Set desiredStyle = heading9
-            ElseIf StrComp(detectedRole, "body", vbTextCompare) = 0 Then
+            ElseIf Not useOutline And StrComp(detectedRole, "body", vbTextCompare) = 0 Then
                 ' The neutral detector has enough evidence to distinguish an
                 ' ordinary body paragraph from a candidate, quotation, or
                 ' front-matter role. Apply the house body style even when the
