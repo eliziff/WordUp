@@ -44,10 +44,11 @@ var duplicateHandle = kernel.NewProc("DuplicateHandle")
 var currentProcess = kernel.NewProc("GetCurrentProcess")
 
 const (
-	createNewProcessGroup = 0x00080000
+	createNewProcessGroup = 0x00000200
 	createSuspended       = 0x00000004
 	createNoWindow        = 0x08000000
-	createBreakaway       = 0x00004000
+	createBreakaway       = 0x01000000
+	extendedStartupInfo   = 0x00080000
 )
 
 func processCreationFlags(job uintptr) uint32 {
