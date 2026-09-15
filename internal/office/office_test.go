@@ -137,6 +137,32 @@ func TestFormTabOrderShiftsSiblings(t *testing.T) {
 	}
 }
 
+func TestFormRejectsUnrepresentableGeometry(t *testing.T) {
+	for name, value := range map[string]any{
+		"negative": -1.0,
+		"zero":     0.0,
+		"tiny":     0.0001,
+		"huge int": int64(100001),
+	} {
+		t.Run(name, func(t *testing.T) {
+			r, err := defaultControl("Label", "Sample")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := applyRecord(r, map[string]any{"Width": value, "Height": 20.0}, "Size"); err == nil {
+				t.Fatal("invalid control geometry was accepted")
+			}
+		})
+	}
+	r, err := defaultControl("Label", "Sample")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := applyRecord(r, map[string]any{"Font": map[string]any{"Size": 0.0}}, "Size"); err == nil {
+		t.Fatal("zero font size was accepted")
+	}
+}
+
 func TestFormCreate(t *testing.T) {
 	f, e := NewForm("TestForm", 1252)
 	if e != nil {

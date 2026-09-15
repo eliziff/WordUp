@@ -250,7 +250,15 @@ func number(v any) (int64, error) {
 func (r *formRecord) size(name string, w, h float64) error {
 	for _, e := range r.spec.extra {
 		if e.name == name && e.kind == 'z' {
-			b := append(dword(uint32(int32(math.Round(w*2540/72)))), dword(uint32(int32(math.Round(h*2540/72))))...)
+			width := math.Round(w * 2540 / 72)
+			height := math.Round(h * 2540 / 72)
+			if math.IsNaN(width) || math.IsInf(width, 0) || math.IsNaN(height) || math.IsInf(height, 0) || width < math.MinInt32 || width > math.MaxInt32 || height < math.MinInt32 || height > math.MaxInt32 {
+				return fmt.Errorf("size outside 32-bit form geometry range")
+			}
+			if (name == "DisplayedSize" || name == "Size") && (width <= 0 || height <= 0) {
+				return fmt.Errorf("form size must be positive")
+			}
+			b := append(dword(uint32(int32(width))), dword(uint32(int32(height)))...)
 			if string(r.extra[name]) == string(b) && r.mask&(1<<e.bit) != 0 {
 				return nil
 			}

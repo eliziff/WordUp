@@ -384,9 +384,17 @@ func floatValue(m map[string]any, key string, def float64) (float64, error) {
 		}
 		return v, nil
 	case int:
-		return float64(v), nil
+		value := float64(v)
+		if math.Abs(value) > 100000 {
+			return 0, fmt.Errorf("invalid geometry")
+		}
+		return value, nil
 	case int64:
-		return float64(v), nil
+		value := float64(v)
+		if math.Abs(value) > 100000 {
+			return 0, fmt.Errorf("invalid geometry")
+		}
+		return value, nil
 	}
 	return 0, fmt.Errorf("numeric %s required", key)
 }
@@ -404,6 +412,9 @@ func applyRecord(r *formRecord, p map[string]any, size string) error {
 		if e != nil {
 			return e
 		}
+	}
+	if (p["Width"] != nil || p["Height"] != nil) && (w <= 0 || h <= 0) {
+		return fmt.Errorf("width and height must be positive")
 	}
 	if _, ok := p["Width"]; ok {
 		if e = r.size(size, w, h); e != nil {
@@ -523,6 +534,9 @@ func (r *formRecord) applyFont(m map[string]any) error {
 			var n float64
 			n, e = floatValue(m, k, 8.25)
 			if e == nil {
+				if n <= 0 {
+					return fmt.Errorf("font size must be positive")
+				}
 				e = f.set("FontHeight", int(math.Round(n*20)))
 			}
 		case "Bold", "Italic", "Underline", "Strikethrough":
