@@ -359,7 +359,7 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.5" {
+	if item.Version != "1.0.6" {
 		t.Fatalf("style converter version did not advance: %q", item.Version)
 	}
 	for _, capability := range []string{"paragraph-style conversion", "range-bounded conversion", "story-wide conversion", "batch style mapping"} {
@@ -390,6 +390,7 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 		`If document Is Nothing Then Err.Raise 91, "WU_ConvertStyle", "document is required"`,
 		`If Len(Trim$(fromStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyle", "source style is required"`,
 		`If Len(Trim$(toStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyle", "target style is required"`,
+		`If storyScope <> "main" And storyScope <> "notes" And storyScope <> "all" Then Err.Raise 5, "WU_ConvertStyle", "story scope must be main, notes, or all"`,
 		`If sourceStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ConvertStyle", "source style is not a paragraph style"`,
 		`If targetStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ConvertStyle", "target style is not a paragraph style"`,
 		"captured = True",
@@ -403,6 +404,8 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 		"ReDim sourceCache(firstRow To lastRow): ReDim targetCache(firstRow To lastRow): ReDim enabled(firstRow To lastRow)",
 		"Set sourceCache(row) = sourceStyle: Set targetCache(row) = targetStyle",
 		"If enabled(row) Then If WU_ConvertStyleInStory",
+		"WU_ConvertStyleInStoryChain",
+		"WU_ConvertStyleBatchInStoryChain",
 	} {
 		if !strings.Contains(source, want) {
 			t.Fatalf("style converter source omitted %q", want)

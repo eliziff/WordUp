@@ -286,7 +286,7 @@ End Function
 const styleConverterSource = `Attribute VB_Name = "WordUpStyleConverter"
 Option Explicit
 Private Const WU_MAX_STYLE_BATCH_RULES As Long = 256
-Public Function WU_ConvertStyle(ByVal document As Document, ByVal fromStyle As String, ByVal toStyle As String) As Boolean
+Public Function WU_ConvertStyle(ByVal document As Document, ByVal fromStyle As String, ByVal toStyle As String, Optional ByVal storyScope As String = "all") As Boolean
     Dim firstStory As Range, story As Range, updating As Boolean, opened As Boolean, captured As Boolean
     Dim failure As Long, failureSource As String, failureText As String
     Dim sourceStyle As Style, targetStyle As Style
@@ -294,6 +294,8 @@ Public Function WU_ConvertStyle(ByVal document As Document, ByVal fromStyle As S
     If document Is Nothing Then Err.Raise 91, "WU_ConvertStyle", "document is required"
     If Len(Trim$(fromStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyle", "source style is required"
     If Len(Trim$(toStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyle", "target style is required"
+    storyScope = LCase$(Trim$(storyScope))
+    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "all" Then Err.Raise 5, "WU_ConvertStyle", "story scope must be main, notes, or all"
     updating = Application.ScreenUpdating
     captured = True
     Set sourceStyle = document.Styles(fromStyle)
@@ -303,13 +305,26 @@ Public Function WU_ConvertStyle(ByVal document As Document, ByVal fromStyle As S
     If StrComp(sourceStyle.NameLocal, targetStyle.NameLocal, vbTextCompare) = 0 Then Exit Function
     Application.ScreenUpdating = False
     Application.UndoRecord.StartCustomRecord "Convert style": opened = True
-    For Each firstStory In document.StoryRanges
-        Set story = firstStory
-        Do
-            If story.End > story.Start Then If WU_ConvertStyleInStory(story, sourceStyle, targetStyle) Then WU_ConvertStyle = True
-            Set story = story.NextStoryRange
-        Loop Until story Is Nothing
-    Next firstStory
+    If storyScope = "main" Then
+        Set story = document.StoryRanges(wdMainTextStory)
+        If Not story Is Nothing Then If story.End > story.Start Then WU_ConvertStyle = WU_ConvertStyleInStory(story, sourceStyle, targetStyle)
+    ElseIf storyScope = "notes" Then
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdFootnotesStory)
+        Err.Clear
+        On Error GoTo Failed
+        If Not firstStory Is Nothing Then WU_ConvertStyle = WU_ConvertStyleInStoryChain(firstStory, sourceStyle, targetStyle)
+        Set firstStory = Nothing
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdEndnotesStory)
+        Err.Clear
+        On Error GoTo Failed
+        If Not firstStory Is Nothing Then If WU_ConvertStyleInStoryChain(firstStory, sourceStyle, targetStyle) Then WU_ConvertStyle = True
+    Else
+        For Each firstStory In document.StoryRanges
+            If WU_ConvertStyleInStoryChain(firstStory, sourceStyle, targetStyle) Then WU_ConvertStyle = True
+        Next firstStory
+    End If
 CleanUp:
     On Error Resume Next
     If opened Then
@@ -331,13 +346,15 @@ End Function
 ' in order, so an intentional chain such as A -> B followed by B -> C is
 ' deterministic. Word remains the source of truth for paragraphs and styles;
 ' the two-column Variant array is only a compact command list.
-Public Function WU_ConvertStyleBatch(ByVal document As Document, ByVal mappings As Variant) As Long
+Public Function WU_ConvertStyleBatch(ByVal document As Document, ByVal mappings As Variant, Optional ByVal storyScope As String = "all") As Long
     Dim firstStory As Range, story As Range, updating As Boolean, opened As Boolean, captured As Boolean
     Dim failure As Long, failureSource As String, failureText As String
     Dim firstRow As Long, lastRow As Long, firstColumn As Long, activeRows As Long, changed As Long, row As Long
     Dim sourceCache() As Style, targetCache() As Style, enabled() As Boolean, matched() As Boolean
     On Error GoTo Failed
     If document Is Nothing Then Err.Raise 91, "WU_ConvertStyleBatch", "document is required"
+    storyScope = LCase$(Trim$(storyScope))
+    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "all" Then Err.Raise 5, "WU_ConvertStyleBatch", "story scope must be main, notes, or all"
     activeRows = WU_ValidateStyleBatch(document, mappings, sourceCache, targetCache, enabled)
     If activeRows = 0 Then Exit Function
     firstRow = LBound(mappings, 1): lastRow = UBound(mappings, 1): firstColumn = LBound(mappings, 2)
@@ -346,13 +363,26 @@ Public Function WU_ConvertStyleBatch(ByVal document As Document, ByVal mappings 
     captured = True
     Application.ScreenUpdating = False
     Application.UndoRecord.StartCustomRecord "Convert style batch": opened = True
-    For Each firstStory In document.StoryRanges
-        Set story = firstStory
-        Do While Not story Is Nothing
-            If story.End > story.Start Then WU_ConvertStyleBatchInStory story, sourceCache, targetCache, enabled, firstRow, lastRow, matched
-            Set story = story.NextStoryRange
-        Loop
-    Next firstStory
+    If storyScope = "main" Then
+        Set story = document.StoryRanges(wdMainTextStory)
+        If Not story Is Nothing Then If story.End > story.Start Then WU_ConvertStyleBatchInStory story, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+    ElseIf storyScope = "notes" Then
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdFootnotesStory)
+        Err.Clear
+        On Error GoTo Failed
+        If Not firstStory Is Nothing Then WU_ConvertStyleBatchInStoryChain firstStory, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+        Set firstStory = Nothing
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdEndnotesStory)
+        Err.Clear
+        On Error GoTo Failed
+        If Not firstStory Is Nothing Then WU_ConvertStyleBatchInStoryChain firstStory, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+    Else
+        For Each firstStory In document.StoryRanges
+            WU_ConvertStyleBatchInStoryChain firstStory, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+        Next firstStory
+    End If
     For row = firstRow To lastRow
         If matched(row) Then changed = changed + 1
     Next row
@@ -516,6 +546,25 @@ Private Sub WU_ConvertStyleBatchInStory(ByVal story As Range, ByRef sourceCache(
     For row = firstRow To lastRow
         If enabled(row) Then If WU_ConvertStyleInStory(story, sourceCache(row), targetCache(row)) Then matched(row) = True
     Next row
+End Sub
+
+Private Function WU_ConvertStyleInStoryChain(ByVal firstStory As Range, ByVal sourceStyle As Style, ByVal targetStyle As Style) As Boolean
+    Dim story As Range, changed As Boolean
+    Set story = firstStory
+    Do While Not story Is Nothing
+        If story.End > story.Start Then If WU_ConvertStyleInStory(story, sourceStyle, targetStyle) Then changed = True
+        Set story = story.NextStoryRange
+    Loop
+    WU_ConvertStyleInStoryChain = changed
+End Function
+
+Private Sub WU_ConvertStyleBatchInStoryChain(ByVal firstStory As Range, ByRef sourceCache() As Style, ByRef targetCache() As Style, ByRef enabled() As Boolean, ByVal firstRow As Long, ByVal lastRow As Long, ByRef matched() As Boolean)
+    Dim story As Range
+    Set story = firstStory
+    Do While Not story Is Nothing
+        If story.End > story.Start Then WU_ConvertStyleBatchInStory story, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+        Set story = story.NextStoryRange
+    Loop
 End Sub
 
 Private Function WU_ConvertStyleInStory(ByVal story As Range, ByVal sourceStyle As Style, ByVal targetStyle As Style) As Boolean

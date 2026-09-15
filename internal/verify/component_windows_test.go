@@ -392,7 +392,7 @@ Failed:
     Resume CleanUp
 End Sub
 Public Function Check() As String
-    Dim number As Long, source As String, description As String, changed As Boolean, i As Long, bounded As Range
+    Dim number As Long, source As String, description As String, changed As Boolean, i As Long, bounded As Range, headerRange As Range
     Dim styleMap(0 To 1, 0 To 1) As Variant, styleBatchChanged As Long
     Dim lines(1 To 400) As String, started As Single, elapsed As Single
     ActiveDocument.Content.Text = "original"
@@ -457,6 +457,15 @@ Public Function Check() As String
     Err.Clear
     On Error GoTo 0
     If number = 0 Or Not ActiveDocument.Saved Then Err.Raise 5, , "invalid style batch was not rejected before mutation"
+    Set headerRange = ActiveDocument.Sections(1).Headers(wdHeaderFooterPrimary).Range.Duplicate
+    headerRange.Text = "header" & vbCr
+    headerRange.Style = ActiveDocument.Styles(wdStyleNormal)
+    ActiveDocument.Content.Text = "body" & vbCr
+    ActiveDocument.Content.Style = ActiveDocument.Styles(wdStyleNormal)
+    changed = WU_ConvertStyle(ActiveDocument, ActiveDocument.Styles(wdStyleNormal).NameLocal, "ProofTarget", "main")
+    If Not changed Or ActiveDocument.Paragraphs(1).Style.NameLocal <> "ProofTarget" Or headerRange.Paragraphs(1).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Then Err.Raise 5, , "main style scope touched a header or missed the body"
+    If Not ActiveDocument.Undo Then Err.Raise 5, , "missing scoped style undo"
+    If ActiveDocument.Paragraphs(1).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Or headerRange.Paragraphs(1).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Then Err.Raise 5, , "scoped style undo did not restore both stories"
     For i = 1 To 400: lines(i) = "Ordinary paragraph.": Next i
     ActiveDocument.Content.Text = Join(lines, vbCr)
     ActiveDocument.Content.Style = ActiveDocument.Styles(wdStyleNormal)

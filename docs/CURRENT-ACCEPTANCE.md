@@ -10,8 +10,8 @@ The full harness goal is **not complete**. This index distinguishes current evid
 | UBC template | `b901717545fd83de79005ad17ea712ee28250e9ef40e7cb4f73713812d317ad8` | `workspaces/ubc-template/reports/footer-preservation-core.json`, `publication-footer-ui.json`, `publication-footer-visual.json` | Native core 10.627 s; actual Ribbon/form suite 7.690 s. Real manuscript preserves 146 notes, body text, fields/bookmarks and table formatting under the explicit layout policy. TOC closing paragraph stays unchanged. Publication headers continue section numbering and remove duplicate footer PAGE fields; one-step undo restores the original restart. Linked footer text and NUMPAGES fields are preserved; undo restores the removed PAGE field after a paginated baseline. Native pages 2-3 inspected: blank page and duplicate page numbers resolved. Title/author editorial roles and complete house-style fidelity remain open. |
 
 The current neutral journal slice adds read-only literal counting, bounded
-batch replacement (including an exact Range path), paragraph-style map
-conversion, and direct character-style match/range/batch operations beside
+batch replacement (including an exact Range path), explicitly scoped
+paragraph-style map conversion, and direct character-style match/range/batch operations beside
 the document/story replacement path. All paths use bounded Word Find operations, preserve text and unrelated
 direct formatting, create one undo record, restore `ScreenUpdating`, and reject
 Word's raw and escaped 255-character limits. The native fixture also covers a
