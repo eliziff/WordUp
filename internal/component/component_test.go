@@ -408,7 +408,7 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.15" {
+	if item.Version != "1.0.16" {
 		t.Fatalf("style converter version did not advance: %q", item.Version)
 	}
 	for _, capability := range []string{"paragraph-style conversion", "character-style conversion", "paragraph-style application", "range-bounded conversion", "offset style runs", "story-wide conversion", "header/footer scopes", "batch style mapping", "character-style batch mapping"} {
@@ -444,6 +444,7 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 		"Private Function WU_ConvertCharacterStyleInStoryChain",
 		"Private Function WU_ConvertCharacterStyleInStoryType",
 		"Private Function WU_IsCharacterStyle",
+		"Reading Linked raises 5891",
 		"Private Sub WU_ConvertCharacterStyleBatchInStory",
 		"Private Sub WU_ConvertCharacterStyleBatchInStoryChain",
 		"Private Sub WU_ConvertCharacterStyleBatchInStoryType",
@@ -528,7 +529,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.22" {
+	if item.Version != "1.0.23" {
 		t.Fatalf("text operations version=%q", item.Version)
 	}
 	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
@@ -584,6 +585,8 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"Private Function WU_ValidateCharacterStyleRuns",
 		"Private Function WU_ReadCharacterStylePosition",
 		"Private Function WU_CharacterStyleMatches",
+		"Private Function WU_TextIsCharacterStyle",
+		"Plain character styles can raise when Linked is read on some Word",
 		"character style run count exceeds 4096",
 		"character style runs must be ordered and non-overlapping",
 		"character style run ",

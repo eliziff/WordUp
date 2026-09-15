@@ -131,14 +131,14 @@ func builtin() []Manifest {
 			items[i].Version = "1.0.3"
 		}
 		if items[i].ID == "document.style-converter" {
-			items[i].Version = "1.0.15"
+			items[i].Version = "1.0.16"
 			items[i].Capabilities = []string{"paragraph-style conversion", "character-style conversion", "paragraph-style application", "range-bounded conversion", "offset style runs", "story-wide conversion", "header/footer scopes", "batch style mapping", "character-style batch mapping"}
-			items[i].Acceptance = "WU_ConvertStyle and WU_ConvertCharacterStyle (including exact-range and bounded batch forms), WU_ApplyParagraphStyleInRange, WU_ApplyParagraphStyleRuns, and their bounded paragraph batch equivalents support main, notes, headers, footers, and all scopes, cache each unique style handle before editing, pin Word's sticky Find flags where the host exposes them, preserve text and inline structure on formatting-only conversion, are state-safe, and compile without non-Office references."
+			items[i].Acceptance = "WU_ConvertStyle and WU_ConvertCharacterStyle (including exact-range and bounded batch forms), WU_ApplyParagraphStyleInRange, WU_ApplyParagraphStyleRuns, and their bounded paragraph batch equivalents support main, notes, headers, footers, and all scopes, cache each unique style handle before editing, recognize plain and linked character styles without unsafe Linked reads, pin Word's sticky Find flags where the host exposes them, preserve text and inline structure on formatting-only conversion, are state-safe, and compile without non-Office references."
 		}
 		if items[i].ID == "document.text-operations" {
-			items[i].Version = "1.0.22"
+			items[i].Version = "1.0.23"
 			items[i].Capabilities = []string{"literal replacement", "literal counting", "wildcard replacement", "wildcard counting", "wildcard batch replacement", "batch replacement", "range-bounded edits", "character-style matching", "exact character-style application", "wildcard character styling", "wildcard character-style batches", "offset character-style runs", "batch character-style matching", "header/footer scopes"}
-			items[i].Acceptance = "Literal and explicit wildcard count/replacement, wildcard batch replacement, exact character-style application, character-style match/range/batch, and exact offset-run operations support main, notes, headers, footers, and all scopes; wildcard replacement tokens are opt-in, literal searches remain escaped, Find's sticky fuzzy/phrase/width/Unicode/control/prefix flags are pinned where exposed, one-record style batches resolve each unique style once, cache target names and story boundaries, all paths remain bounded and state-safe, and the module compiles without non-Office references."
+			items[i].Acceptance = "Literal and explicit wildcard count/replacement, wildcard batch replacement, exact character-style application, character-style match/range/batch, and exact offset-run operations support main, notes, headers, footers, and all scopes; plain and linked character styles are recognized without unsafe Linked reads, wildcard replacement tokens are opt-in, literal searches remain escaped, Find's sticky fuzzy/phrase/width/Unicode/control/prefix flags are pinned where exposed, one-record style batches resolve each unique style once, cache target names and story boundaries, all paths remain bounded and state-safe, and the module compiles without non-Office references."
 		}
 		if items[i].ID == "document.field-refresh" {
 			items[i].Version = "1.0.3"

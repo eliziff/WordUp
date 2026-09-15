@@ -1003,7 +1003,15 @@ End Function
 
 Private Function WU_IsCharacterStyle(ByVal style As Style) As Boolean
     If style Is Nothing Then Exit Function
-    WU_IsCharacterStyle = (style.Type = wdStyleTypeCharacter Or style.Linked)
+    WU_IsCharacterStyle = (style.Type = wdStyleTypeCharacter)
+    If WU_IsCharacterStyle Then Exit Function
+    ' Reading Linked raises 5891 on plain character styles, and the property is
+    ' only needed to recognize linked paragraph styles. Guard the read so an
+    ' unavailable property reports "not a character style" instead of failing.
+    On Error Resume Next
+    WU_IsCharacterStyle = style.Linked
+    Err.Clear
+    On Error GoTo 0
 End Function
 
 ' Apply a paragraph style to one exact Range. Word applies a paragraph style
@@ -1651,7 +1659,7 @@ Public Function WU_ApplyCharacterStyleToMatches(ByVal document As Document, ByVa
     Err.Clear
     On Error GoTo Failed
     If styleError <> 0 Or style Is Nothing Then Err.Raise 5, "WU_ApplyCharacterStyleToMatches", "style " & styleName & " was not found"
-    If style.Type <> wdStyleTypeCharacter And Not style.Linked Then Err.Raise 5, "WU_ApplyCharacterStyleToMatches", "style is not a character style"
+    If Not WU_TextIsCharacterStyle(style) Then Err.Raise 5, "WU_ApplyCharacterStyleToMatches", "style is not a character style"
     updating = Application.ScreenUpdating
     captured = True
     Application.ScreenUpdating = False
@@ -1719,7 +1727,7 @@ Public Function WU_ApplyCharacterStyleToRange(ByVal target As Range, ByVal findT
     Err.Clear
     On Error GoTo Failed
     If styleError <> 0 Or style Is Nothing Then Err.Raise 5, "WU_ApplyCharacterStyleToRange", "style " & styleName & " was not found"
-    If style.Type <> wdStyleTypeCharacter And Not style.Linked Then Err.Raise 5, "WU_ApplyCharacterStyleToRange", "style is not a character style"
+    If Not WU_TextIsCharacterStyle(style) Then Err.Raise 5, "WU_ApplyCharacterStyleToRange", "style is not a character style"
     targetStart = target.Start: targetEnd = target.End
     If targetEnd <= targetStart Then Exit Function
     updating = Application.ScreenUpdating
@@ -1763,7 +1771,7 @@ Public Function WU_ApplyCharacterStyleInRange(ByVal target As Range, ByVal style
     Err.Clear
     On Error GoTo Failed
     If styleError <> 0 Or style Is Nothing Then Err.Raise 5, "WU_ApplyCharacterStyleInRange", "style " & styleName & " was not found"
-    If style.Type <> wdStyleTypeCharacter And Not style.Linked Then Err.Raise 5, "WU_ApplyCharacterStyleInRange", "style is not a character style"
+    If Not WU_TextIsCharacterStyle(style) Then Err.Raise 5, "WU_ApplyCharacterStyleInRange", "style is not a character style"
     If target.End <= target.Start Then Exit Function
     expectedName = style.NameLocal
     If WU_CharacterStyleMatches(target, expectedName) Then Exit Function
@@ -2170,7 +2178,7 @@ Public Function WU_ApplyCharacterStyleToWildcardMatches(ByVal document As Docume
     Err.Clear
     On Error GoTo Failed
     If styleError <> 0 Or style Is Nothing Then Err.Raise 5, "WU_ApplyCharacterStyleToWildcardMatches", "style " & styleName & " was not found"
-    If style.Type <> wdStyleTypeCharacter And Not style.Linked Then Err.Raise 5, "WU_ApplyCharacterStyleToWildcardMatches", "style is not a character style"
+    If Not WU_TextIsCharacterStyle(style) Then Err.Raise 5, "WU_ApplyCharacterStyleToWildcardMatches", "style is not a character style"
     updating = Application.ScreenUpdating
     captured = True
     Application.ScreenUpdating = False
@@ -2209,7 +2217,7 @@ Public Function WU_ApplyCharacterStyleToWildcardRange(ByVal target As Range, ByV
     Err.Clear
     On Error GoTo Failed
     If styleError <> 0 Or style Is Nothing Then Err.Raise 5, "WU_ApplyCharacterStyleToWildcardRange", "style " & styleName & " was not found"
-    If style.Type <> wdStyleTypeCharacter And Not style.Linked Then Err.Raise 5, "WU_ApplyCharacterStyleToWildcardRange", "style is not a character style"
+    If Not WU_TextIsCharacterStyle(style) Then Err.Raise 5, "WU_ApplyCharacterStyleToWildcardRange", "style is not a character style"
     If target.End <= target.Start Then Exit Function
     updating = Application.ScreenUpdating
     captured = True
@@ -2481,6 +2489,18 @@ Private Sub WU_ValidateWildcard(ByVal pattern As String, ByVal replacement As St
     If Len(replacement) > 255 Then Err.Raise 5, sourceName, "wildcard replacement exceeds Word's 255-character limit"
 End Sub
 
+Private Function WU_TextIsCharacterStyle(ByVal style As Style) As Boolean
+    If style Is Nothing Then Exit Function
+    WU_TextIsCharacterStyle = (style.Type = wdStyleTypeCharacter)
+    If WU_TextIsCharacterStyle Then Exit Function
+    ' Plain character styles can raise when Linked is read on some Word
+    ' builds; only inspect it for styles that are not already character styles.
+    On Error Resume Next
+    WU_TextIsCharacterStyle = style.Linked
+    Err.Clear
+    On Error GoTo 0
+End Function
+
 Private Function WU_ValidateLiteralBatch(ByVal replacements As Variant, ByVal matchCase As Boolean, ByVal sourceName As String, Optional ByVal useWildcards As Boolean = False) As Long
     Dim firstRow As Long, lastRow As Long, firstColumn As Long, lastColumn As Long, row As Long
     Dim findText As String, replaceText As String, activeRows As Long, dimensionError As Long
@@ -2567,7 +2587,7 @@ Private Function WU_ValidateCharacterStyleBatch(ByVal document As Document, ByVa
         Else
             Set style = cachedStyles(cacheIndex)
         End If
-        If style.Type <> wdStyleTypeCharacter And Not style.Linked Then Err.Raise 5, sourceName, "style rule " & CStr(row) & " style is not a character style"
+        If Not WU_TextIsCharacterStyle(style) Then Err.Raise 5, sourceName, "style rule " & CStr(row) & " style is not a character style"
         Set styleCache(row) = style
         activeRows = activeRows + 1
     Next row
@@ -2629,7 +2649,7 @@ Private Function WU_ValidateCharacterStyleRuns(ByVal document As Document, ByVal
         Else
             Set style = cachedStyles(cacheIndex)
         End If
-        If style.Type <> wdStyleTypeCharacter And Not style.Linked Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "character style run " & CStr(row) & " style is not a character style"
+        If Not WU_TextIsCharacterStyle(style) Then Err.Raise 5, "WU_ApplyCharacterStyleRuns", "character style run " & CStr(row) & " style is not a character style"
         Set styleCache(row) = style: styleNames(row) = cachedNames(cacheIndex)
         previousEnd = endPosition
     Next row
