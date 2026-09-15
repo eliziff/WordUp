@@ -686,6 +686,15 @@ func StyleReference(file string) (map[string]any, error) {
 	} {
 		if data := p.Files[part]; len(data) > 0 {
 			out[key+"_part_sha256"] = office.Hash(data)
+			// Settings are not merely package metadata: default tab stops,
+			// compatibility mode, embedded-font policy, and header behavior can
+			// change the rendered result. Keep this one exact source part beside
+			// the other formatting inputs; hashes remain available for the
+			// relationship and web-settings parts without copying unrelated XML.
+			if part == "word/settings.xml" {
+				out["settings_xml"] = string(data)
+				out["settings_sha256"] = office.Hash(data)
+			}
 		}
 	}
 	// Headers, footers, notes, comments, and glossary entries carry real

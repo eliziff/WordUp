@@ -714,6 +714,7 @@ func StructureReference(file string) (map[string]any, error) {
 		{part: "word/numbering.xml", key: "numbering_xml", hashKey: "numbering_sha256"},
 		{part: "word/theme/theme1.xml", key: "theme_xml", hashKey: "theme_sha256"},
 		{part: "word/fontTable.xml", key: "font_table_xml", hashKey: "font_table_sha256"},
+		{part: "word/settings.xml", key: "settings_xml", hashKey: "settings_sha256"},
 	} {
 		if raw := p.Files[source.part]; len(raw) > 0 {
 			out[source.key] = string(raw)

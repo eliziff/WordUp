@@ -481,4 +481,7 @@ func TestStyleReferenceIncludesSectionAndDocumentSettings(t *testing.T) {
 	if reference["document_xml_sha256"] != office.Hash(p.Files["word/document.xml"]) || reference["settings_part_sha256"] != office.Hash(p.Files["word/settings.xml"]) || reference["document_relationships_part_sha256"] != office.Hash(p.Files["word/_rels/document.xml.rels"]) {
 		t.Fatalf("lost document-level source hashes: %#v", reference)
 	}
+	if reference["settings_xml"] != string(p.Files["word/settings.xml"]) || reference["settings_sha256"] != office.Hash(p.Files["word/settings.xml"]) {
+		t.Fatalf("lost exact settings input: %#v", reference)
+	}
 }

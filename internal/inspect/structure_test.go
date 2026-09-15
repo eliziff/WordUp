@@ -9,6 +9,7 @@ import (
 
 func TestStructureEvidenceInheritanceOverrideAndContainment(t *testing.T) {
 	p := office.BlankPackage()
+	p.Files["word/settings.xml"] = []byte(`<w:settings xmlns:w="` + office.W + `"><w:defaultTabStop w:val="720"/></w:settings>`)
 	p.Files["word/styles.xml"] = []byte(`<w:styles xmlns:w="` + office.W + `"><w:style w:type="paragraph" w:styleId="Normal" w:default="1"/><w:style w:type="paragraph" w:styleId="Base"><w:pPr><w:outlineLvl w:val="1"/></w:pPr></w:style><w:style w:type="paragraph" w:styleId="Child"><w:basedOn w:val="Base"/></w:style><w:style w:type="paragraph" w:styleId="Cycle"><w:basedOn w:val="Cycle"/></w:style></w:styles>`)
 	p.Files["word/document.xml"] = []byte(`<w:document xmlns:w="` + office.W + `"><w:body><w:p><w:pPr><w:pStyle w:val="Child"/></w:pPr><w:r><w:t>Inherited</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="Child"/></w:pPr><w:r><w:t>Another native heading</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="Child"/><w:outlineLvl w:val="9"/></w:pPr><w:r><w:t>Explicit body</w:t></w:r></w:p><w:tbl><w:tr><w:tc><w:p><w:pPr><w:pStyle w:val="Child"/></w:pPr><w:r><w:t>Table heading</w:t></w:r></w:p></w:tc></w:tr></w:tbl><w:p><w:pPr><w:pStyle w:val="Cycle"/></w:pPr></w:p></w:body></w:document>`)
 	b, err := p.Bytes()
@@ -50,6 +51,9 @@ func TestStructureEvidenceInheritanceOverrideAndContainment(t *testing.T) {
 	}
 	if result["styles_xml"] != string(p.Files["word/styles.xml"]) || result["styles_sha256"] != office.Hash(p.Files["word/styles.xml"]) || result["document_xml_sha256"] != office.Hash(p.Files["word/document.xml"]) {
 		t.Fatalf("exact style/document inputs were not retained: %#v", result)
+	}
+	if result["settings_xml"] != string(p.Files["word/settings.xml"]) || result["settings_sha256"] != office.Hash(p.Files["word/settings.xml"]) {
+		t.Fatalf("exact settings input was not retained: %#v", result)
 	}
 }
 
