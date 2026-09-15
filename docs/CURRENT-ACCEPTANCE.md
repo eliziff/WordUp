@@ -19,6 +19,10 @@ unclaimed while this logon session refuses hidden Word. The fresh offline
 109-document structure gate resolved 109/109 documents and 22,789 paragraphs
 in 5.61 s; the slowest document was 241.6 ms. These are observed gates, not
 claims that every Word build or manuscript has identical latency.
+The neutral style pass also honors a resolved non-heading role over a
+tentative marker level, so ordinary numbered lists are not promoted to
+headings; native behavior for that guard remains queued behind the same host
+boundary.
 
 Timings are individual observations, not latency guarantees or controlled speedup measurements. Report assertions and source suites define the actual coverage; assertion counts alone do not establish completeness.
 
