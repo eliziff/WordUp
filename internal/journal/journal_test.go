@@ -229,8 +229,8 @@ func TestCreateBuildsIndependentJournalWorkspace(t *testing.T) {
 func TestCreateAllRejectsSanitizedDestinationCollisions(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "all")
 	profiles := []Profile{
-		{ID: "A-B", Name: "First"},
-		{ID: "A_B", Name: "Second"},
+		{ID: "A-B", Name: "First", BodyFont: "Times New Roman", NoteFont: "Times New Roman", BodySizePT: 11, NoteSizePT: 9},
+		{ID: "A_B", Name: "Second", BodyFont: "Times New Roman", NoteFont: "Times New Roman", BodySizePT: 11, NoteSizePT: 9},
 	}
 	if _, err := createAll(root, profiles); err == nil || !strings.Contains(err.Error(), "collides") {
 		t.Fatalf("sanitized destination collision was accepted: %v", err)
@@ -252,5 +252,15 @@ func TestCreateRejectsUnsafeProfileValuesBeforeWriting(t *testing.T) {
 	profile = Profile{ID: "BAD-SIZE", Name: "Unsafe", BodySizePT: math.NaN(), NoteSizePT: 9}
 	if _, err := Create(root, profile); err == nil || !strings.Contains(err.Error(), "finite") {
 		t.Fatalf("non-finite profile size was accepted: %v", err)
+	}
+	for name, profile := range map[string]Profile{
+		"zero size": {ID: "BAD-ZERO", Name: "Unsafe", BodyFont: "Times New Roman", NoteFont: "Times New Roman", BodySizePT: 0, NoteSizePT: 9},
+		"missing font": {ID: "BAD-FONT", Name: "Unsafe", BodyFont: "", NoteFont: "Times New Roman", BodySizePT: 11, NoteSizePT: 9},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if _, err := Create(filepath.Join(t.TempDir(), "workspace"), profile); err == nil {
+				t.Fatal("invalid style profile was accepted")
+			}
+		})
 	}
 }

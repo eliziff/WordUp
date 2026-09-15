@@ -178,6 +178,12 @@ func validateProfile(profile Profile) error {
 	if math.IsNaN(profile.BodySizePT) || math.IsInf(profile.BodySizePT, 0) || math.IsNaN(profile.NoteSizePT) || math.IsInf(profile.NoteSizePT, 0) {
 		return fmt.Errorf("journal profile font sizes must be finite")
 	}
+	if profile.BodySizePT <= 0 || profile.NoteSizePT <= 0 {
+		return fmt.Errorf("journal profile font sizes must be positive")
+	}
+	if strings.TrimSpace(profile.BodyFont) == "" || strings.TrimSpace(profile.NoteFont) == "" {
+		return fmt.Errorf("journal profile body and note fonts are required")
+	}
 	return nil
 }
 
