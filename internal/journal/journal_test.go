@@ -210,6 +210,9 @@ func TestCreateBuildsIndependentJournalWorkspace(t *testing.T) {
 			t.Fatalf("generated source lacks %s", marker)
 		}
 	}
+	if strings.Contains(string(core), "paragraphRange.Style =") {
+		t.Fatal("generated style pass reverted to one COM style setter per paragraph")
+	}
 	w, err := project.Open(root)
 	if err != nil {
 		t.Fatal(err)
