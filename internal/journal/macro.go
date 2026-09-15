@@ -625,6 +625,7 @@ Public Sub WU_JournalReviewNext()
     For Each firstStory In ActiveDocument.StoryRanges
         Set story = firstStory
         Do While Not story Is Nothing
+            Set revision = Nothing
             On Error Resume Next
             If story.Revisions.Count > 0 Then
                 Set revision = story.Revisions(1)
