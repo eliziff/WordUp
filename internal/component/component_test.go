@@ -448,13 +448,13 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.13" {
+	if item.Version != "1.0.14" {
 		t.Fatalf("text operations version=%q", item.Version)
 	}
 	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
 		t.Fatalf("unexpected text operations files: %#v", item.Files)
 	}
-	for _, capability := range []string{"literal replacement", "literal counting", "batch replacement", "range-bounded edits", "character-style matching", "offset character-style runs", "batch character-style matching", "header/footer scopes"} {
+	for _, capability := range []string{"literal replacement", "literal counting", "wildcard replacement", "wildcard counting", "wildcard batch replacement", "batch replacement", "range-bounded edits", "character-style matching", "wildcard character styling", "offset character-style runs", "batch character-style matching", "header/footer scopes"} {
 		found := false
 		for _, got := range item.Capabilities {
 			if got == capability {
@@ -474,8 +474,16 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"Public Function WU_ReplaceLiteralBatch",
 		"Public Function WU_ReplaceLiteralBatchInRange",
 		"Public Function WU_ReplaceLiteralInRange",
+		"Public Function WU_ReplaceWildcard",
+		"Public Function WU_ReplaceWildcardInRange",
+		"Public Function WU_ReplaceWildcardBatch",
+		"Public Function WU_ReplaceWildcardBatchInRange",
+		"Public Function WU_CountWildcard",
+		"Public Function WU_CountWildcardInRange",
 		"Public Function WU_ApplyCharacterStyleToMatches",
 		"Public Function WU_ApplyCharacterStyleToRange",
+		"Public Function WU_ApplyCharacterStyleToWildcardMatches",
+		"Public Function WU_ApplyCharacterStyleToWildcardRange",
 		"Public Function WU_ApplyCharacterStyleRuns",
 		"Public Function WU_ApplyCharacterStyleBatch",
 		"Public Function WU_ApplyCharacterStyleBatchInRange",
@@ -500,12 +508,15 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"Application.UndoRecord.StartCustomRecord \"Apply character style runs\"",
 		"style is not a character style",
 		"find text exceeds Word's 255-character limit",
+		"wildcard pattern exceeds Word's 255-character limit",
+		"wildcard replacement exceeds Word's 255-character limit",
 		"Application.UndoRecord.StartCustomRecord \"Replace literal text\"",
 		"Application.UndoRecord.StartCustomRecord \"Replace literal text batch\"",
+		"Application.UndoRecord.StartCustomRecord \"Replace wildcard text batch\"",
 		"Application.UndoRecord.StartCustomRecord \"Style literal matches\"",
 		"Application.UndoRecord.StartCustomRecord \"Style literal matches batch\"",
 		"If captured Then Application.ScreenUpdating = updating",
-		".Replacement.Text = WU_EscapeFindLiteral(replaceText)",
+		".Replacement.Text = WU_ReplacementPattern(replaceText, useWildcards)",
 		"find text exceeds Word's escaped 255-character limit",
 		"replacement text exceeds Word's escaped 255-character limit",
 		"story.End > story.Start",
@@ -514,6 +525,10 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		".MatchSoundsLike = False",
 		".MatchAllWordForms = False",
 		"WU_EscapeFindLiteral = Replace(value, \"^\", \"^^\")",
+		"WU_FindPattern",
+		"WU_ReplacementPattern",
+		".MatchWildcards = useWildcards",
+		"' A wildcard can legally match an empty span",
 		"Set firstStory = document.StoryRanges(wdFootnotesStory)",
 		"Set firstStory = document.StoryRanges(wdEndnotesStory)",
 		"wdPrimaryHeaderStory",
@@ -527,6 +542,8 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"If targetEnd <= targetStart Then Exit Function",
 		"WU_ValidateLiteralBatch(replacements, matchCase, \"WU_ReplaceLiteralBatch\")",
 		"WU_ValidateLiteralBatch(replacements, matchCase, \"WU_ReplaceLiteralBatchInRange\")",
+		"WU_ValidateLiteralBatch(replacements, matchCase, \"WU_ReplaceWildcardBatch\", True)",
+		"WU_ReplaceWildcardBatchInScope",
 		"ReDim matched(firstRow To lastRow)",
 		"If matched(row) Then changed = changed + 1",
 		"ByRef matched() As Boolean",

@@ -1382,6 +1382,383 @@ Failed:
     Resume CleanUp
 End Function
 
+' Explicit wildcard counterparts for journal rules that need Word's native
+' pattern language (for example, citation variants with a variable year or
+' pin). Literal APIs above always escape wildcard syntax; callers must opt in
+' here when they want pattern matching or replacement backreferences such as
+' \1. The same story scoping, one-record undo, and exact-range guarantees
+' apply.
+Public Function WU_ReplaceWildcard(ByVal document As Document, ByVal pattern As String, ByVal replacement As String, Optional ByVal storyScope As String = "main", Optional ByVal matchCase As Boolean = False, Optional ByVal wholeWord As Boolean = False) As Boolean
+    Dim updating As Boolean, opened As Boolean, captured As Boolean, changed As Boolean
+    Dim failure As Long, failureSource As String, failureText As String
+    On Error GoTo Failed
+    If document Is Nothing Then Err.Raise 91, "WU_ReplaceWildcard", "document is required"
+    WU_ValidateWildcard pattern, replacement, "WU_ReplaceWildcard"
+    storyScope = LCase$(Trim$(storyScope))
+    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "headers" And storyScope <> "footers" And storyScope <> "all" Then Err.Raise 5, "WU_ReplaceWildcard", "story scope must be main, notes, headers, footers, or all"
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Replace wildcard text": opened = True
+    changed = WU_ReplaceWildcardInScope(document, pattern, replacement, storyScope, matchCase, wholeWord)
+    WU_ReplaceWildcard = changed
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
+' Replace only inside the exact caller-supplied Range using Word wildcards.
+Public Function WU_ReplaceWildcardInRange(ByVal target As Range, ByVal pattern As String, ByVal replacement As String, Optional ByVal matchCase As Boolean = False, Optional ByVal wholeWord As Boolean = False) As Boolean
+    Dim updating As Boolean, opened As Boolean, captured As Boolean
+    Dim failure As Long, failureSource As String, failureText As String
+    On Error GoTo Failed
+    If target Is Nothing Then Err.Raise 91, "WU_ReplaceWildcardInRange", "target range is required"
+    WU_ValidateWildcard pattern, replacement, "WU_ReplaceWildcardInRange"
+    If target.End <= target.Start Then Exit Function
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Replace wildcard text": opened = True
+    WU_ReplaceWildcardInRange = WU_ReplaceLiteralInStory(target, pattern, replacement, matchCase, wholeWord, True)
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
+' Apply an ordered two-column wildcard replacement table in one edit. Rows
+' remain the compact command list; Word owns matching, text, and formatting.
+Public Function WU_ReplaceWildcardBatch(ByVal document As Document, ByVal replacements As Variant, Optional ByVal storyScope As String = "main", Optional ByVal matchCase As Boolean = False, Optional ByVal wholeWord As Boolean = False) As Long
+    Dim updating As Boolean, opened As Boolean, captured As Boolean, activeRows As Long
+    Dim firstRow As Long, lastRow As Long, firstColumn As Long, row As Long, changed As Long
+    Dim matched() As Boolean, failure As Long, failureSource As String, failureText As String
+    On Error GoTo Failed
+    If document Is Nothing Then Err.Raise 91, "WU_ReplaceWildcardBatch", "document is required"
+    storyScope = LCase$(Trim$(storyScope))
+    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "headers" And storyScope <> "footers" And storyScope <> "all" Then Err.Raise 5, "WU_ReplaceWildcardBatch", "story scope must be main, notes, headers, footers, or all"
+    activeRows = WU_ValidateLiteralBatch(replacements, matchCase, "WU_ReplaceWildcardBatch", True)
+    If activeRows = 0 Then Exit Function
+    firstRow = LBound(replacements, 1): lastRow = UBound(replacements, 1): firstColumn = LBound(replacements, 2)
+    ReDim matched(firstRow To lastRow)
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Replace wildcard text batch": opened = True
+    WU_ReplaceWildcardBatchInScope document, replacements, firstRow, lastRow, firstColumn, storyScope, matchCase, wholeWord, matched
+    For row = firstRow To lastRow
+        If matched(row) Then changed = changed + 1
+    Next row
+    WU_ReplaceWildcardBatch = changed
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
+Public Function WU_ReplaceWildcardBatchInRange(ByVal target As Range, ByVal replacements As Variant, Optional ByVal matchCase As Boolean = False, Optional ByVal wholeWord As Boolean = False) As Long
+    Dim updating As Boolean, opened As Boolean, captured As Boolean, activeRows As Long
+    Dim firstRow As Long, lastRow As Long, firstColumn As Long, row As Long, changed As Long
+    Dim matched() As Boolean, failure As Long, failureSource As String, failureText As String
+    On Error GoTo Failed
+    If target Is Nothing Then Err.Raise 91, "WU_ReplaceWildcardBatchInRange", "target range is required"
+    activeRows = WU_ValidateLiteralBatch(replacements, matchCase, "WU_ReplaceWildcardBatchInRange", True)
+    If activeRows = 0 Or target.End <= target.Start Then Exit Function
+    firstRow = LBound(replacements, 1): lastRow = UBound(replacements, 1): firstColumn = LBound(replacements, 2)
+    ReDim matched(firstRow To lastRow)
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Replace wildcard text batch": opened = True
+    WU_ReplaceLiteralBatchInStory target, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched, True
+    For row = firstRow To lastRow
+        If matched(row) Then changed = changed + 1
+    Next row
+    WU_ReplaceWildcardBatchInRange = changed
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
+' Read-only wildcard count. It never opens an undo record or changes
+' ScreenUpdating, so agents can cheaply preflight a rule before editing.
+Public Function WU_CountWildcard(ByVal document As Document, ByVal pattern As String, Optional ByVal storyScope As String = "main", Optional ByVal matchCase As Boolean = False, Optional ByVal wholeWord As Boolean = False) As Long
+    If document Is Nothing Then Err.Raise 91, "WU_CountWildcard", "document is required"
+    WU_ValidateWildcard pattern, "", "WU_CountWildcard"
+    storyScope = LCase$(Trim$(storyScope))
+    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "headers" And storyScope <> "footers" And storyScope <> "all" Then Err.Raise 5, "WU_CountWildcard", "story scope must be main, notes, headers, footers, or all"
+    WU_CountWildcard = WU_CountWildcardInScope(document, pattern, storyScope, matchCase, wholeWord)
+End Function
+
+Public Function WU_CountWildcardInRange(ByVal target As Range, ByVal pattern As String, Optional ByVal matchCase As Boolean = False, Optional ByVal wholeWord As Boolean = False) As Long
+    If target Is Nothing Then Err.Raise 91, "WU_CountWildcardInRange", "target range is required"
+    WU_ValidateWildcard pattern, "", "WU_CountWildcardInRange"
+    If target.End <= target.Start Then Exit Function
+    WU_CountWildcardInRange = WU_CountLiteralInStory(target, pattern, matchCase, wholeWord, True)
+End Function
+
+' Apply a character or linked style to wildcard matches without rewriting
+' their text. This is useful for citation variants where literal matching is
+' too narrow but the intended styling is still a named, editable style.
+Public Function WU_ApplyCharacterStyleToWildcardMatches(ByVal document As Document, ByVal pattern As String, ByVal styleName As String, Optional ByVal storyScope As String = "main", Optional ByVal matchCase As Boolean = False, Optional ByVal wholeWord As Boolean = True) As Long
+    Dim updating As Boolean, opened As Boolean, captured As Boolean, changed As Long, styleError As Long
+    Dim failure As Long, failureSource As String, failureText As String, style As Style
+    On Error GoTo Failed
+    If document Is Nothing Then Err.Raise 91, "WU_ApplyCharacterStyleToWildcardMatches", "document is required"
+    WU_ValidateWildcard pattern, "", "WU_ApplyCharacterStyleToWildcardMatches"
+    If Len(Trim$(styleName)) = 0 Then Err.Raise 5, "WU_ApplyCharacterStyleToWildcardMatches", "style name is required"
+    storyScope = LCase$(Trim$(storyScope))
+    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "headers" And storyScope <> "footers" And storyScope <> "all" Then Err.Raise 5, "WU_ApplyCharacterStyleToWildcardMatches", "story scope must be main, notes, headers, footers, or all"
+    On Error Resume Next
+    Set style = document.Styles(styleName)
+    styleError = Err.Number
+    Err.Clear
+    On Error GoTo Failed
+    If styleError <> 0 Or style Is Nothing Then Err.Raise 5, "WU_ApplyCharacterStyleToWildcardMatches", "style " & styleName & " was not found"
+    If style.Type <> wdStyleTypeCharacter And Not style.Linked Then Err.Raise 5, "WU_ApplyCharacterStyleToWildcardMatches", "style is not a character style"
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Style wildcard matches": opened = True
+    changed = WU_ApplyWildcardStyleInScope(document, pattern, style, storyScope, matchCase, wholeWord)
+    WU_ApplyCharacterStyleToWildcardMatches = changed
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
+Public Function WU_ApplyCharacterStyleToWildcardRange(ByVal target As Range, ByVal pattern As String, ByVal styleName As String, Optional ByVal matchCase As Boolean = False, Optional ByVal wholeWord As Boolean = True) As Long
+    Dim updating As Boolean, opened As Boolean, captured As Boolean, styleError As Long
+    Dim failure As Long, failureSource As String, failureText As String, style As Style, document As Document
+    On Error GoTo Failed
+    If target Is Nothing Then Err.Raise 91, "WU_ApplyCharacterStyleToWildcardRange", "target range is required"
+    WU_ValidateWildcard pattern, "", "WU_ApplyCharacterStyleToWildcardRange"
+    If Len(Trim$(styleName)) = 0 Then Err.Raise 5, "WU_ApplyCharacterStyleToWildcardRange", "style name is required"
+    Set document = target.Document
+    On Error Resume Next
+    Set style = document.Styles(styleName)
+    styleError = Err.Number
+    Err.Clear
+    On Error GoTo Failed
+    If styleError <> 0 Or style Is Nothing Then Err.Raise 5, "WU_ApplyCharacterStyleToWildcardRange", "style " & styleName & " was not found"
+    If style.Type <> wdStyleTypeCharacter And Not style.Linked Then Err.Raise 5, "WU_ApplyCharacterStyleToWildcardRange", "style is not a character style"
+    If target.End <= target.Start Then Exit Function
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Style wildcard matches": opened = True
+    WU_ApplyCharacterStyleToWildcardRange = WU_ApplyCharacterStyleInStory(target, pattern, style, matchCase, wholeWord, True)
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
+Private Function WU_ReplaceWildcardInScope(ByVal document As Document, ByVal pattern As String, ByVal replacement As String, ByVal storyScope As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Boolean
+    Dim firstStory As Range, story As Range, changed As Boolean
+    If storyScope = "main" Then
+        Set story = document.StoryRanges(wdMainTextStory)
+        If Not story Is Nothing Then If story.End > story.Start Then changed = WU_ReplaceLiteralInStory(story, pattern, replacement, matchCase, wholeWord, True)
+    ElseIf storyScope = "notes" Then
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdFootnotesStory)
+        Err.Clear
+        On Error GoTo 0
+        If Not firstStory Is Nothing Then changed = WU_ReplaceLiteralInStoryChain(firstStory, pattern, replacement, matchCase, wholeWord, True)
+        Set firstStory = Nothing
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdEndnotesStory)
+        Err.Clear
+        On Error GoTo 0
+        If Not firstStory Is Nothing Then If WU_ReplaceLiteralInStoryChain(firstStory, pattern, replacement, matchCase, wholeWord, True) Then changed = True
+    ElseIf storyScope = "headers" Then
+        If WU_ReplaceLiteralInStoryType(document, wdPrimaryHeaderStory, pattern, replacement, matchCase, wholeWord, True) Then changed = True
+        If WU_ReplaceLiteralInStoryType(document, wdFirstPageHeaderStory, pattern, replacement, matchCase, wholeWord, True) Then changed = True
+        If WU_ReplaceLiteralInStoryType(document, wdEvenPagesHeaderStory, pattern, replacement, matchCase, wholeWord, True) Then changed = True
+    ElseIf storyScope = "footers" Then
+        If WU_ReplaceLiteralInStoryType(document, wdPrimaryFooterStory, pattern, replacement, matchCase, wholeWord, True) Then changed = True
+        If WU_ReplaceLiteralInStoryType(document, wdFirstPageFooterStory, pattern, replacement, matchCase, wholeWord, True) Then changed = True
+        If WU_ReplaceLiteralInStoryType(document, wdEvenPagesFooterStory, pattern, replacement, matchCase, wholeWord, True) Then changed = True
+    Else
+        For Each firstStory In document.StoryRanges
+            If WU_ReplaceLiteralInStoryChain(firstStory, pattern, replacement, matchCase, wholeWord, True) Then changed = True
+        Next firstStory
+    End If
+    WU_ReplaceWildcardInScope = changed
+End Function
+
+Private Sub WU_ReplaceWildcardBatchInScope(ByVal document As Document, ByVal replacements As Variant, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal storyScope As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, ByRef matched() As Boolean)
+    Dim firstStory As Range, story As Range
+    If storyScope = "main" Then
+        Set story = document.StoryRanges(wdMainTextStory)
+        If Not story Is Nothing Then If story.End > story.Start Then WU_ReplaceLiteralBatchInStory story, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched, True
+    ElseIf storyScope = "notes" Then
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdFootnotesStory)
+        Err.Clear
+        On Error GoTo 0
+        If Not firstStory Is Nothing Then WU_ReplaceLiteralBatchInStoryChain firstStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched, True
+        Set firstStory = Nothing
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdEndnotesStory)
+        Err.Clear
+        On Error GoTo 0
+        If Not firstStory Is Nothing Then WU_ReplaceLiteralBatchInStoryChain firstStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched, True
+    ElseIf storyScope = "headers" Then
+        WU_ReplaceLiteralBatchInStoryType document, wdPrimaryHeaderStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched, True
+        WU_ReplaceLiteralBatchInStoryType document, wdFirstPageHeaderStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched, True
+        WU_ReplaceLiteralBatchInStoryType document, wdEvenPagesHeaderStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched, True
+    ElseIf storyScope = "footers" Then
+        WU_ReplaceLiteralBatchInStoryType document, wdPrimaryFooterStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched, True
+        WU_ReplaceLiteralBatchInStoryType document, wdFirstPageFooterStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched, True
+        WU_ReplaceLiteralBatchInStoryType document, wdEvenPagesFooterStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched, True
+    Else
+        For Each firstStory In document.StoryRanges
+            WU_ReplaceLiteralBatchInStoryChain firstStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched, True
+        Next firstStory
+    End If
+End Sub
+
+Private Function WU_CountWildcardInScope(ByVal document As Document, ByVal pattern As String, ByVal storyScope As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
+    Dim firstStory As Range, story As Range, count As Long
+    If storyScope = "main" Then
+        Set story = document.StoryRanges(wdMainTextStory)
+        If Not story Is Nothing Then If story.End > story.Start Then count = WU_CountLiteralInStory(story, pattern, matchCase, wholeWord, True)
+    ElseIf storyScope = "notes" Then
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdFootnotesStory)
+        Err.Clear
+        On Error GoTo 0
+        If Not firstStory Is Nothing Then count = WU_CountLiteralInStoryChain(firstStory, pattern, matchCase, wholeWord, True)
+        Set firstStory = Nothing
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdEndnotesStory)
+        Err.Clear
+        On Error GoTo 0
+        If Not firstStory Is Nothing Then count = count + WU_CountLiteralInStoryChain(firstStory, pattern, matchCase, wholeWord, True)
+    ElseIf storyScope = "headers" Then
+        count = count + WU_CountLiteralInStoryType(document, wdPrimaryHeaderStory, pattern, matchCase, wholeWord, True)
+        count = count + WU_CountLiteralInStoryType(document, wdFirstPageHeaderStory, pattern, matchCase, wholeWord, True)
+        count = count + WU_CountLiteralInStoryType(document, wdEvenPagesHeaderStory, pattern, matchCase, wholeWord, True)
+    ElseIf storyScope = "footers" Then
+        count = count + WU_CountLiteralInStoryType(document, wdPrimaryFooterStory, pattern, matchCase, wholeWord, True)
+        count = count + WU_CountLiteralInStoryType(document, wdFirstPageFooterStory, pattern, matchCase, wholeWord, True)
+        count = count + WU_CountLiteralInStoryType(document, wdEvenPagesFooterStory, pattern, matchCase, wholeWord, True)
+    Else
+        For Each firstStory In document.StoryRanges
+            count = count + WU_CountLiteralInStoryChain(firstStory, pattern, matchCase, wholeWord, True)
+        Next firstStory
+    End If
+    WU_CountWildcardInScope = count
+End Function
+
+Private Function WU_ApplyWildcardStyleInScope(ByVal document As Document, ByVal pattern As String, ByVal style As Style, ByVal storyScope As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
+    Dim firstStory As Range, story As Range, changed As Long
+    If storyScope = "main" Then
+        Set story = document.StoryRanges(wdMainTextStory)
+        If Not story Is Nothing Then If story.End > story.Start Then changed = WU_ApplyCharacterStyleInStory(story, pattern, style, matchCase, wholeWord, True)
+    ElseIf storyScope = "notes" Then
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdFootnotesStory)
+        Err.Clear
+        On Error GoTo 0
+        If Not firstStory Is Nothing Then changed = WU_ApplyCharacterStyleInStoryChain(firstStory, pattern, style, matchCase, wholeWord, True)
+        Set firstStory = Nothing
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdEndnotesStory)
+        Err.Clear
+        On Error GoTo 0
+        If Not firstStory Is Nothing Then changed = changed + WU_ApplyCharacterStyleInStoryChain(firstStory, pattern, style, matchCase, wholeWord, True)
+    ElseIf storyScope = "headers" Then
+        changed = changed + WU_ApplyCharacterStyleInStoryType(document, wdPrimaryHeaderStory, pattern, style, matchCase, wholeWord, True)
+        changed = changed + WU_ApplyCharacterStyleInStoryType(document, wdFirstPageHeaderStory, pattern, style, matchCase, wholeWord, True)
+        changed = changed + WU_ApplyCharacterStyleInStoryType(document, wdEvenPagesHeaderStory, pattern, style, matchCase, wholeWord, True)
+    ElseIf storyScope = "footers" Then
+        changed = changed + WU_ApplyCharacterStyleInStoryType(document, wdPrimaryFooterStory, pattern, style, matchCase, wholeWord, True)
+        changed = changed + WU_ApplyCharacterStyleInStoryType(document, wdFirstPageFooterStory, pattern, style, matchCase, wholeWord, True)
+        changed = changed + WU_ApplyCharacterStyleInStoryType(document, wdEvenPagesFooterStory, pattern, style, matchCase, wholeWord, True)
+    Else
+        For Each firstStory In document.StoryRanges
+            changed = changed + WU_ApplyCharacterStyleInStoryChain(firstStory, pattern, style, matchCase, wholeWord, True)
+        Next firstStory
+    End If
+    WU_ApplyWildcardStyleInScope = changed
+End Function
+
 Private Sub WU_ValidateLiteral(ByVal findText As String, ByVal replaceText As String, ByVal sourceName As String)
     If Len(findText) = 0 Then Err.Raise 5, sourceName, "find text is required"
     If Len(findText) > 255 Then Err.Raise 5, sourceName, "find text exceeds Word's 255-character limit"
@@ -1390,7 +1767,13 @@ Private Sub WU_ValidateLiteral(ByVal findText As String, ByVal replaceText As St
     If Len(WU_EscapeFindLiteral(replaceText)) > 255 Then Err.Raise 5, sourceName, "replacement text exceeds Word's escaped 255-character limit"
 End Sub
 
-Private Function WU_ValidateLiteralBatch(ByVal replacements As Variant, ByVal matchCase As Boolean, ByVal sourceName As String) As Long
+Private Sub WU_ValidateWildcard(ByVal pattern As String, ByVal replacement As String, ByVal sourceName As String)
+    If Len(pattern) = 0 Then Err.Raise 5, sourceName, "wildcard pattern is required"
+    If Len(pattern) > 255 Then Err.Raise 5, sourceName, "wildcard pattern exceeds Word's 255-character limit"
+    If Len(replacement) > 255 Then Err.Raise 5, sourceName, "wildcard replacement exceeds Word's 255-character limit"
+End Sub
+
+Private Function WU_ValidateLiteralBatch(ByVal replacements As Variant, ByVal matchCase As Boolean, ByVal sourceName As String, Optional ByVal useWildcards As Boolean = False) As Long
     Dim firstRow As Long, lastRow As Long, firstColumn As Long, lastColumn As Long, row As Long
     Dim findText As String, replaceText As String, activeRows As Long, dimensionError As Long
     Dim failure As Long, failureSource As String, failureText As String
@@ -1410,8 +1793,13 @@ Private Function WU_ValidateLiteralBatch(ByVal replacements As Variant, ByVal ma
         If IsError(replacements(row, firstColumn + 1)) Or IsNull(replacements(row, firstColumn + 1)) Or IsObject(replacements(row, firstColumn + 1)) Or IsArray(replacements(row, firstColumn + 1)) Then Err.Raise 5, sourceName, "replacement rule " & CStr(row) & " replacement text must be scalar"
         findText = CStr(replacements(row, firstColumn))
         replaceText = CStr(replacements(row, firstColumn + 1))
-        WU_ValidateLiteral findText, replaceText, sourceName
-        If Not (matchCase And StrComp(findText, replaceText, vbBinaryCompare) = 0) Then activeRows = activeRows + 1
+        If useWildcards Then
+            WU_ValidateWildcard findText, replaceText, sourceName
+            activeRows = activeRows + 1
+        Else
+            WU_ValidateLiteral findText, replaceText, sourceName
+            If Not (matchCase And StrComp(findText, replaceText, vbBinaryCompare) = 0) Then activeRows = activeRows + 1
+        End If
     Next row
     WU_ValidateLiteralBatch = activeRows
     Exit Function
@@ -1575,98 +1963,101 @@ Private Function WU_ApplyCharacterStyleBatchInStory(ByVal story As Range, ByVal 
     WU_ApplyCharacterStyleBatchInStory = changed
 End Function
 
-Private Function WU_CountLiteralInStoryChain(ByVal firstStory As Range, ByVal findText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
+Private Function WU_CountLiteralInStoryChain(ByVal firstStory As Range, ByVal findText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, Optional ByVal useWildcards As Boolean = False) As Long
     Dim story As Range, count As Long
     Set story = firstStory
     Do While Not story Is Nothing
-        If story.End > story.Start Then count = count + WU_CountLiteralInStory(story, findText, matchCase, wholeWord)
+        If story.End > story.Start Then count = count + WU_CountLiteralInStory(story, findText, matchCase, wholeWord, useWildcards)
         Set story = story.NextStoryRange
     Loop
     WU_CountLiteralInStoryChain = count
 End Function
 
-Private Function WU_CountLiteralInStoryType(ByVal document As Document, ByVal storyType As Long, ByVal findText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
+Private Function WU_CountLiteralInStoryType(ByVal document As Document, ByVal storyType As Long, ByVal findText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, Optional ByVal useWildcards As Boolean = False) As Long
     Dim firstStory As Range
     On Error Resume Next
     Set firstStory = document.StoryRanges(storyType)
     Err.Clear
     On Error GoTo 0
-    If Not firstStory Is Nothing Then WU_CountLiteralInStoryType = WU_CountLiteralInStoryChain(firstStory, findText, matchCase, wholeWord)
+    If Not firstStory Is Nothing Then WU_CountLiteralInStoryType = WU_CountLiteralInStoryChain(firstStory, findText, matchCase, wholeWord, useWildcards)
 End Function
 
-Private Function WU_CountLiteralInStory(ByVal story As Range, ByVal findText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
+Private Function WU_CountLiteralInStory(ByVal story As Range, ByVal findText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, Optional ByVal useWildcards As Boolean = False) As Long
     Dim search As Range, nextStart As Long, count As Long
     Set search = story.Duplicate
     With search.Find
         .ClearFormatting
-        .Text = WU_EscapeFindLiteral(findText)
+        .Text = WU_FindPattern(findText, useWildcards)
         .Forward = True
         .Wrap = wdFindStop
         .Format = False
         .MatchCase = matchCase
         .MatchWholeWord = wholeWord
-        .MatchWildcards = False
+        .MatchWildcards = useWildcards
         .MatchSoundsLike = False
         .MatchAllWordForms = False
     End With
     Do While search.Find.Execute
         count = count + 1
         nextStart = search.End
+        ' A wildcard can legally match an empty span. Always advance a
+        ' zero-width result so a permissive pattern cannot loop forever.
+        If nextStart <= search.Start Then nextStart = search.Start + 1
         If nextStart >= story.End Then Exit Do
         search.SetRange Start:=nextStart, End:=story.End
     Loop
     WU_CountLiteralInStory = count
 End Function
 
-Private Sub WU_ReplaceLiteralBatchInStoryChain(ByVal firstStory As Range, ByVal replacements As Variant, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, ByRef matched() As Boolean)
+Private Sub WU_ReplaceLiteralBatchInStoryChain(ByVal firstStory As Range, ByVal replacements As Variant, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, ByRef matched() As Boolean, Optional ByVal useWildcards As Boolean = False)
     Dim story As Range
     Set story = firstStory
     Do While Not story Is Nothing
-        If story.End > story.Start Then WU_ReplaceLiteralBatchInStory story, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched
+        If story.End > story.Start Then WU_ReplaceLiteralBatchInStory story, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched, useWildcards
         Set story = story.NextStoryRange
     Loop
 End Sub
 
-Private Sub WU_ReplaceLiteralBatchInStoryType(ByVal document As Document, ByVal storyType As Long, ByVal replacements As Variant, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, ByRef matched() As Boolean)
+Private Sub WU_ReplaceLiteralBatchInStoryType(ByVal document As Document, ByVal storyType As Long, ByVal replacements As Variant, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, ByRef matched() As Boolean, Optional ByVal useWildcards As Boolean = False)
     Dim firstStory As Range
     On Error Resume Next
     Set firstStory = document.StoryRanges(storyType)
     Err.Clear
     On Error GoTo 0
-    If Not firstStory Is Nothing Then WU_ReplaceLiteralBatchInStoryChain firstStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched
+    If Not firstStory Is Nothing Then WU_ReplaceLiteralBatchInStoryChain firstStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched, useWildcards
 End Sub
 
-Private Sub WU_ReplaceLiteralBatchInStory(ByVal story As Range, ByVal replacements As Variant, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, ByRef matched() As Boolean)
+Private Sub WU_ReplaceLiteralBatchInStory(ByVal story As Range, ByVal replacements As Variant, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, ByRef matched() As Boolean, Optional ByVal useWildcards As Boolean = False)
     Dim row As Long, findText As String, replaceText As String
     For row = firstRow To lastRow
         findText = CStr(replacements(row, firstColumn))
         replaceText = CStr(replacements(row, firstColumn + 1))
-        If Not (matchCase And StrComp(findText, replaceText, vbBinaryCompare) = 0) Then
-            If WU_ReplaceLiteralInStory(story, findText, replaceText, matchCase, wholeWord) Then matched(row) = True
+        If useWildcards Or Not (matchCase And StrComp(findText, replaceText, vbBinaryCompare) = 0) Then
+            If WU_ReplaceLiteralInStory(story, findText, replaceText, matchCase, wholeWord, useWildcards) Then matched(row) = True
         End If
     Next row
 End Sub
 
-Private Function WU_ApplyCharacterStyleInStoryChain(ByVal firstStory As Range, ByVal findText As String, ByVal style As Style, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
+Private Function WU_ApplyCharacterStyleInStoryChain(ByVal firstStory As Range, ByVal findText As String, ByVal style As Style, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, Optional ByVal useWildcards As Boolean = False) As Long
     Dim story As Range, changed As Long
     Set story = firstStory
     Do While Not story Is Nothing
-        If story.End > story.Start Then changed = changed + WU_ApplyCharacterStyleInStory(story, findText, style, matchCase, wholeWord)
+        If story.End > story.Start Then changed = changed + WU_ApplyCharacterStyleInStory(story, findText, style, matchCase, wholeWord, useWildcards)
         Set story = story.NextStoryRange
     Loop
     WU_ApplyCharacterStyleInStoryChain = changed
 End Function
 
-Private Function WU_ApplyCharacterStyleInStoryType(ByVal document As Document, ByVal storyType As Long, ByVal findText As String, ByVal style As Style, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
+Private Function WU_ApplyCharacterStyleInStoryType(ByVal document As Document, ByVal storyType As Long, ByVal findText As String, ByVal style As Style, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, Optional ByVal useWildcards As Boolean = False) As Long
     Dim firstStory As Range
     On Error Resume Next
     Set firstStory = document.StoryRanges(storyType)
     Err.Clear
     On Error GoTo 0
-    If Not firstStory Is Nothing Then WU_ApplyCharacterStyleInStoryType = WU_ApplyCharacterStyleInStoryChain(firstStory, findText, style, matchCase, wholeWord)
+    If Not firstStory Is Nothing Then WU_ApplyCharacterStyleInStoryType = WU_ApplyCharacterStyleInStoryChain(firstStory, findText, style, matchCase, wholeWord, useWildcards)
 End Function
 
-Private Function WU_ApplyCharacterStyleInStory(ByVal story As Range, ByVal findText As String, ByVal style As Style, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
+Private Function WU_ApplyCharacterStyleInStory(ByVal story As Range, ByVal findText As String, ByVal style As Style, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, Optional ByVal useWildcards As Boolean = False) As Long
     Dim search As Range, nextStart As Long, changed As Long, currentStyle As String, targetStyleName As String
     Set search = story.Duplicate
     ' NameLocal is a COM property; resolve it once per story/rule rather
@@ -1674,13 +2065,13 @@ Private Function WU_ApplyCharacterStyleInStory(ByVal story As Range, ByVal findT
     targetStyleName = style.NameLocal
     With search.Find
         .ClearFormatting
-        .Text = WU_EscapeFindLiteral(findText)
+        .Text = WU_FindPattern(findText, useWildcards)
         .Forward = True
         .Wrap = wdFindStop
         .Format = False
         .MatchCase = matchCase
         .MatchWholeWord = wholeWord
-        .MatchWildcards = False
+        .MatchWildcards = useWildcards
         .MatchSoundsLike = False
         .MatchAllWordForms = False
     End With
@@ -1695,34 +2086,37 @@ Private Function WU_ApplyCharacterStyleInStory(ByVal story As Range, ByVal findT
             changed = changed + 1
         End If
         nextStart = search.End
+        ' Keep wildcard patterns that match an empty span from re-finding the
+        ' same position forever. Literal searches are unaffected by the guard.
+        If nextStart <= search.Start Then nextStart = search.Start + 1
         If nextStart >= story.End Then Exit Do
         search.SetRange Start:=nextStart, End:=story.End
     Loop
     WU_ApplyCharacterStyleInStory = changed
 End Function
 
-Private Function WU_ReplaceLiteralInStoryChain(ByVal firstStory As Range, ByVal findText As String, ByVal replaceText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Boolean
+Private Function WU_ReplaceLiteralInStoryChain(ByVal firstStory As Range, ByVal findText As String, ByVal replaceText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, Optional ByVal useWildcards As Boolean = False) As Boolean
     Dim story As Range, changed As Boolean
     Set story = firstStory
     Do While Not story Is Nothing
         If story.End > story.Start Then
-            If WU_ReplaceLiteralInStory(story, findText, replaceText, matchCase, wholeWord) Then changed = True
+            If WU_ReplaceLiteralInStory(story, findText, replaceText, matchCase, wholeWord, useWildcards) Then changed = True
         End If
         Set story = story.NextStoryRange
     Loop
     WU_ReplaceLiteralInStoryChain = changed
 End Function
 
-Private Function WU_ReplaceLiteralInStoryType(ByVal document As Document, ByVal storyType As Long, ByVal findText As String, ByVal replaceText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Boolean
+Private Function WU_ReplaceLiteralInStoryType(ByVal document As Document, ByVal storyType As Long, ByVal findText As String, ByVal replaceText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, Optional ByVal useWildcards As Boolean = False) As Boolean
     Dim firstStory As Range
     On Error Resume Next
     Set firstStory = document.StoryRanges(storyType)
     Err.Clear
     On Error GoTo 0
-    If Not firstStory Is Nothing Then WU_ReplaceLiteralInStoryType = WU_ReplaceLiteralInStoryChain(firstStory, findText, replaceText, matchCase, wholeWord)
+    If Not firstStory Is Nothing Then WU_ReplaceLiteralInStoryType = WU_ReplaceLiteralInStoryChain(firstStory, findText, replaceText, matchCase, wholeWord, useWildcards)
 End Function
 
-Private Function WU_ReplaceLiteralInStory(ByVal story As Range, ByVal findText As String, ByVal replaceText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Boolean
+Private Function WU_ReplaceLiteralInStory(ByVal story As Range, ByVal findText As String, ByVal replaceText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, Optional ByVal useWildcards As Boolean = False) As Boolean
     Dim search As Range
     Set search = story.Duplicate
     With search.Find
@@ -1730,14 +2124,14 @@ Private Function WU_ReplaceLiteralInStory(ByVal story As Range, ByVal findText A
         .Replacement.ClearFormatting
         ' Find/Replace treats ^p, ^t, and similar sequences as structural
         ' tokens. Doubling the marker keeps this helper literal by default.
-        .Text = WU_EscapeFindLiteral(findText)
-        .Replacement.Text = WU_EscapeFindLiteral(replaceText)
+        .Text = WU_FindPattern(findText, useWildcards)
+        .Replacement.Text = WU_ReplacementPattern(replaceText, useWildcards)
         .Forward = True
         .Wrap = wdFindStop
         .Format = False
         .MatchCase = matchCase
         .MatchWholeWord = wholeWord
-        .MatchWildcards = False
+        .MatchWildcards = useWildcards
         .MatchSoundsLike = False
         .MatchAllWordForms = False
     End With
@@ -1746,5 +2140,15 @@ End Function
 
 Private Function WU_EscapeFindLiteral(ByVal value As String) As String
     WU_EscapeFindLiteral = Replace(value, "^", "^^")
+End Function
+
+Private Function WU_FindPattern(ByVal value As String, ByVal useWildcards As Boolean) As String
+    If useWildcards Then WU_FindPattern = value Else WU_FindPattern = WU_EscapeFindLiteral(value)
+End Function
+
+Private Function WU_ReplacementPattern(ByVal value As String, ByVal useWildcards As Boolean) As String
+    ' Wildcard callers may intentionally use Word replacement tokens such as
+    ' \1. Literal callers retain the structural-token escaping contract.
+    If useWildcards Then WU_ReplacementPattern = value Else WU_ReplacementPattern = WU_EscapeFindLiteral(value)
 End Function
 `

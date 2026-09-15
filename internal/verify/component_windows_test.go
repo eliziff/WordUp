@@ -181,7 +181,7 @@ End Function
 Public Function CheckTextOperations() As String
     Dim d As Document, result As Boolean, before As String, bodyAfterNote As String, unicodeText As String, formatted As Range, scoped As Range, header As Range, footer As Range, rejected As Boolean, note As Footnote, priorUpdating As Boolean, table As Table
     Dim replacements(0 To 2, 0 To 1) As Variant, styleMatches(0 To 2, 0 To 1) As Variant, characterRuns(0 To 1, 0 To 2) As Variant, batchChanged As Long, rangeBatchChanged As Long, literalCount As Long, citationStyle As Style, styled As Long, styleBatchChanged As Long, styleRunChanged As Long
-    Dim i As Long, lines(1 To 400) As String, started As Single, elapsed As Single
+    Dim i As Long, lines(1 To 400) As String, started As Single, elapsed As Single, wildcardCount As Long, wildcardRangeCount As Long
     Set d = Documents.Add
     d.Content.Text = "Alpha alpha alphabet" & vbCr
     Set formatted = d.Paragraphs(1).Range.Duplicate
@@ -207,6 +207,29 @@ Public Function CheckTextOperations() As String
     If Application.ScreenUpdating <> priorUpdating Then Err.Raise 5, , "range replacement did not restore ScreenUpdating"
     If Not d.Undo Then Err.Raise 5, , "range replacement did not create one undo record"
     If d.Content.Text <> before Then Err.Raise 5, , "range replacement undo did not restore text"
+    d.Content.Text = "Case 12; Case 34" & vbCr
+    d.Saved = True
+    wildcardCount = WU_CountWildcard(d, "Case [0-9]{2}", "main", True, True)
+    If wildcardCount <> 2 Or Not d.Saved Then Err.Raise 5, , "wildcard count missed a native pattern match or changed document state"
+    Set scoped = d.Paragraphs(1).Range.Duplicate
+    wildcardRangeCount = WU_CountWildcardInRange(scoped, "Case [0-9]{2}", True, True)
+    If wildcardRangeCount <> 2 Then Err.Raise 5, , "range wildcard count missed a bounded pattern match"
+    d.Saved = True
+    result = WU_ReplaceWildcard(d, "Case ([0-9]{2})", "Matter \1", "main", True, True)
+    If Not result Or d.Content.Text <> "Matter 12; Matter 34" & vbCr Then Err.Raise 5, , "wildcard replacement did not preserve its capture"
+    If Application.ScreenUpdating <> priorUpdating Then Err.Raise 5, , "wildcard replacement did not restore ScreenUpdating"
+    If Not d.Undo Then Err.Raise 5, , "wildcard replacement did not create one undo record"
+    If d.Content.Text <> "Case 12; Case 34" & vbCr Then Err.Raise 5, , "wildcard replacement undo did not restore text"
+    d.Content.Text = "Case 12; Case 34" & vbCr
+    replacements(0, 0) = "Case ([0-9]{2})": replacements(0, 1) = "Matter \1"
+    replacements(1, 0) = "Unused ([0-9]{2})": replacements(1, 1) = "Still unused"
+    replacements(2, 0) = "Never ([0-9]{2})": replacements(2, 1) = "Still never"
+    d.Saved = True
+    batchChanged = WU_ReplaceWildcardBatch(d, replacements, "main", True, True)
+    If batchChanged <> 1 Or d.Content.Text <> "Matter 12; Matter 34" & vbCr Then Err.Raise 5, , "wildcard replacement batch did not apply exactly its matching rule"
+    If Application.ScreenUpdating <> priorUpdating Then Err.Raise 5, , "wildcard replacement batch did not restore ScreenUpdating"
+    If Not d.Undo Then Err.Raise 5, , "wildcard replacement batch did not create one undo record"
+    If d.Content.Text <> "Case 12; Case 34" & vbCr Then Err.Raise 5, , "wildcard replacement batch undo did not restore text"
     d.Content.Text = "Alpha alpha Gamma" & vbCr
     replacements(0, 0) = "Alpha": replacements(0, 1) = "Omega"
     replacements(1, 0) = "Gamma": replacements(1, 1) = "Delta"
@@ -239,6 +262,12 @@ Public Function CheckTextOperations() As String
     If Not d.Paragraphs(1).Range.Characters(1).Italic Or Not d.Paragraphs(1).Range.Characters(7).Italic Then Err.Raise 5, , "character style matcher did not apply the requested style"
     If Not d.Undo Then Err.Raise 5, , "character style matcher did not create one undo record"
     If d.Paragraphs(1).Range.Characters(1).Italic Or d.Paragraphs(1).Range.Characters(7).Italic Then Err.Raise 5, , "character style matcher undo did not restore formatting"
+    d.Content.Text = "Case 12; Case 34" & vbCr
+    styled = WU_ApplyCharacterStyleToWildcardMatches(d, "Case [0-9]{2}", citationStyle.NameLocal, "main", True, True)
+    If styled <> 2 Or d.Content.Text <> "Case 12; Case 34" & vbCr Then Err.Raise 5, , "wildcard character style matcher changed text or missed a match"
+    If Not d.Paragraphs(1).Range.Characters(1).Italic Or Not d.Paragraphs(1).Range.Characters(9).Italic Then Err.Raise 5, , "wildcard character style matcher missed a citation span"
+    If Not d.Undo Then Err.Raise 5, , "wildcard character style matcher did not create one undo record"
+    If d.Paragraphs(1).Range.Characters(1).Italic Or d.Paragraphs(1).Range.Characters(9).Italic Then Err.Raise 5, , "wildcard character style matcher undo did not restore formatting"
     d.Content.Text = "Alpha Alpha Gamma" & vbCr
     styleMatches(0, 0) = "Alpha": styleMatches(0, 1) = citationStyle.NameLocal
     styleMatches(1, 0) = "Gamma": styleMatches(1, 1) = citationStyle.NameLocal
