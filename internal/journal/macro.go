@@ -513,6 +513,7 @@ Public Const WU_JOURNAL_STYLE_H6 As String = %s
 Public Const WU_JOURNAL_STYLE_H7 As String = %s
 Public Const WU_JOURNAL_STYLE_H8 As String = %s
 Public Const WU_JOURNAL_STYLE_H9 As String = %s
+Private Const WU_JOURNAL_MAX_STORY_CHAIN As Long = 32768
 
 Public Sub WU_JournalRibbonLoad(ByVal ribbon As IRibbonUI)
     ' The callback is intentionally a no-op. Keeping it public makes the
@@ -648,7 +649,7 @@ Private Function WU_EnsureStyle(ByVal doc As Document, ByVal styleName As String
 End Function
 
 Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As Style, ByVal heading1 As Style, ByVal heading2 As Style, ByVal heading3 As Style, ByVal heading4 As Style, ByVal heading5 As Style, ByVal heading6 As Style, ByVal heading7 As Style, ByVal heading8 As Style, ByVal heading9 As Style)
-    Dim story As Range, paragraphCount As Long, structureRows As Long, structureColumns As Long, storyStart As Long, storyEnd As Long
+    Dim story As Range, paragraphCount As Long, structureRows As Long, structureColumns As Long, storyStart As Long, storyEnd As Long, readError As Long
     Dim offset As Long, startPosition As Long, endPosition As Long, priorEnd As Long, offsetValid As Boolean
     Dim structure As Variant, haveStructure As Boolean
     On Error Resume Next
@@ -657,8 +658,10 @@ Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As St
         paragraphCount = story.Paragraphs.Count
         storyStart = story.Start: storyEnd = story.End
     End If
+    readError = Err.Number
     Err.Clear
     On Error GoTo 0
+    If readError <> 0 Then Err.Raise readError, "Apply styles", "main story boundaries are unavailable"
     If story Is Nothing Or paragraphCount = 0 Then Exit Sub
     ' Run the detector once. Its offsets and roles let the normal path create
     ' only one Range per contiguous style run instead of re-reading every
@@ -840,9 +843,15 @@ Private Sub WU_ApplyFootnoteStyle(ByVal doc As Document, ByVal noteStyle As Styl
 End Sub
 
 Private Sub WU_ApplyNoteStoryStyle(ByVal story As Range, ByVal noteStyle As Style)
-    Dim currentStyle As String
+    Dim currentStyle As String, storyStart As Long, storyEnd As Long, readError As Long
     If story Is Nothing Then Exit Sub
-    If story.End <= story.Start Then Exit Sub
+    On Error Resume Next
+    storyStart = story.Start: storyEnd = story.End
+    readError = Err.Number
+    Err.Clear
+    On Error GoTo 0
+    If readError <> 0 Then Err.Raise readError, "WU_ApplyNoteStoryStyle", "note story boundaries are unavailable"
+    If storyEnd <= storyStart Then Exit Sub
     ' Story.Style can be mixed (or unavailable for a malformed story). Only
     ' skip an assignment when Word positively reports the target style; a
     ' mixed/failed read remains a deliberate full-story conversion.
@@ -875,12 +884,15 @@ Failed:
 End Sub
 
 Public Sub WU_JournalReviewNext()
-    Dim firstStory As Range, story As Range, revision As Revision, storyIndex As Long, storyFailed As Boolean
+    Dim firstStory As Range, story As Range, revision As Revision, storyIndex As Long, chainLength As Long, storyFailed As Boolean
     On Error GoTo Failed
     WU_ResetProgress
     For Each firstStory In ActiveDocument.StoryRanges
         Set story = firstStory
+        chainLength = 0
         Do While Not story Is Nothing
+            chainLength = chainLength + 1
+            If chainLength > WU_JOURNAL_MAX_STORY_CHAIN Then Err.Raise 5, "Journal review", "story chain exceeds 32768 linked stories"
             storyIndex = storyIndex + 1
             If storyIndex Mod 8 = 0 Then If WU_CancelRequested() Then Err.Raise 18, "Journal review", "revision review cancelled"
             Set revision = Nothing
@@ -1016,10 +1028,13 @@ Failed:
 End Sub
 
 Private Sub WU_CountStoryItems(ByVal doc As Document, ByRef fieldCount As Long, ByRef tableCount As Long, ByRef revisionCount As Long, ByRef hyperlinkCount As Long, ByRef failures As Long)
-    Dim firstStory As Range, story As Range, storyFailed As Boolean
+    Dim firstStory As Range, story As Range, chainLength As Long, storyFailed As Boolean
     For Each firstStory In doc.StoryRanges
         Set story = firstStory
+        chainLength = 0
         Do While Not story Is Nothing
+            chainLength = chainLength + 1
+            If chainLength > WU_JOURNAL_MAX_STORY_CHAIN Then failures = failures + 1: Exit Do
             storyFailed = False
             On Error Resume Next
             fieldCount = fieldCount + story.Fields.Count

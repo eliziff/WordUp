@@ -359,7 +359,7 @@ func TestFieldRefreshChecksWordReturnCodesAndBounds(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.4" {
+	if item.Version != "1.0.5" {
 		t.Fatalf("field refresh version=%q", item.Version)
 	}
 	for _, capability := range []string{"field refresh", "table-of-contents refresh", "range-bounded refresh", "story scopes", "header/footer scopes", "return-code diagnostics", "bounded story traversal"} {
@@ -395,6 +395,9 @@ func TestFieldRefreshChecksWordReturnCodesAndBounds(t *testing.T) {
 		"Set nextStory = story.NextStoryRange",
 		"If nextStory Is story Then failures = failures + 1: Exit Do",
 		"If nextError <> 0 Then failures = failures + 1: Exit Do",
+		"Private Const WU_MAX_FIELD_STORY_CHAIN As Long = 32768",
+		"chainLength = chainLength + 1",
+		"If chainLength > WU_MAX_FIELD_STORY_CHAIN Then failures = failures + 1: Exit Do",
 		"Application.UndoRecord.StartCustomRecord \"Refresh fields\"",
 		"If captured Then Application.ScreenUpdating = updating",
 	} {
@@ -409,7 +412,7 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.17" {
+	if item.Version != "1.0.18" {
 		t.Fatalf("style converter version did not advance: %q", item.Version)
 	}
 	for _, capability := range []string{"paragraph-style conversion", "character-style conversion", "paragraph-style application", "range-bounded conversion", "offset style runs", "story-wide conversion", "header/footer scopes", "batch style mapping", "character-style batch mapping", "bounded story traversal"} {
@@ -458,6 +461,8 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 		`If nextStory Is story Then Err.Raise 5, "WU_StyleNextStory", "self-referential story chain"`,
 		"ByRef styleNames() As String",
 		"Private Const WU_MAX_STYLE_BATCH_RULES As Long = 256",
+		"Private Const WU_MAX_STYLE_STORY_CHAIN As Long = 32768",
+		"If chainLength > WU_MAX_STYLE_STORY_CHAIN Then Err.Raise 5, \"WU_ConvertStyleInStoryChain\", \"story chain exceeds 32768 linked stories\"",
 		`If document Is Nothing Then Err.Raise 91, "WU_ConvertStyle", "document is required"`,
 		`If Len(Trim$(fromStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyle", "source style is required"`,
 		`If Len(Trim$(toStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyle", "target style is required"`,
@@ -536,7 +541,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.24" {
+	if item.Version != "1.0.25" {
 		t.Fatalf("text operations version=%q", item.Version)
 	}
 	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
@@ -584,6 +589,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"replacements must be a two-dimensional array",
 		"replacements must have exactly two columns",
 		"Private Const WU_MAX_BATCH_RULES As Long = 1024",
+		"Private Const WU_MAX_TEXT_STORY_CHAIN As Long = 32768",
 		"replacement rule count exceeds 1024",
 		"replacement text must be scalar",
 		"IsObject(replacements(row, firstColumn))",
@@ -596,6 +602,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"Private Function WU_TextStoryHasContent",
 		"Private Function WU_TextNextStory",
 		"A malformed package must not create a self-referential story chain.",
+		"If chainLength > WU_MAX_TEXT_STORY_CHAIN Then Err.Raise 5, \"WU_CountLiteralInStoryChain\", \"story chain exceeds 32768 linked stories\"",
 		"Plain character styles can raise when Linked is read on some Word",
 		"character style run count exceeds 4096",
 		"character style runs must be ordered and non-overlapping",

@@ -171,6 +171,8 @@ The bundled `document.style-converter` component provides `WU_ConvertStyle(docum
 
 The same component also exposes opt-in `WU_ReplaceWildcard` / `WU_ReplaceWildcardInRange` and their bounded `WU_ReplaceWildcardBatch` / `WU_ReplaceWildcardBatchInRange` forms, read-only `WU_CountWildcard` / `WU_CountWildcardInRange`, and `WU_ApplyCharacterStyleToWildcardMatches` / `WU_ApplyCharacterStyleToWildcardRange` plus `WU_ApplyCharacterStyleToWildcardBatch` / `WU_ApplyCharacterStyleToWildcardBatchInRange`. The wildcard style batch takes the same compact two-column `[pattern, styleName]` table as literal style batches, resolves each destination style once, and applies all rules under one undo record. These pass Word's native wildcard grammar through unchanged (including replacement backreferences such as `\1`); literal functions never interpret wildcard syntax. Wildcard operations keep the same story scopes, exact Range bounds, state restoration, and one undo record as the literal paths, guard zero-width matches so permissive patterns cannot loop forever, and skip empty linked stories while reporting unavailable or self-referential chains as controlled errors rather than widening the edit.
 
+All linked-story loops in the shared style, field, and text components and in generated journal review/quality scans have a 32,768-story ceiling. A malformed cyclic package therefore fails or reports a bounded diagnostic instead of consuming the agent's run indefinitely; ordinary Word section/header chains remain well below the ceiling.
+
 `xml.verify` compares expected XML `reference` directly with actual XML `path`.
 Set `part` (for example `word/document.xml`) when either path is a DOCX/DOTM
 or Flat OPC export; the named package part is selected in memory, so no

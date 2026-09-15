@@ -286,6 +286,7 @@ End Function
 const styleConverterSource = `Attribute VB_Name = "WordUpStyleConverter"
 Option Explicit
 Private Const WU_MAX_STYLE_BATCH_RULES As Long = 256
+Private Const WU_MAX_STYLE_STORY_CHAIN As Long = 32768
 Public Function WU_ConvertStyle(ByVal document As Document, ByVal fromStyle As String, ByVal toStyle As String, Optional ByVal storyScope As String = "all") As Boolean
     Dim firstStory As Range, story As Range, updating As Boolean, opened As Boolean, captured As Boolean
     Dim failure As Long, failureSource As String, failureText As String, sourceError As Long, targetError As Long
@@ -865,9 +866,11 @@ Private Sub WU_ConvertStyleBatchInStory(ByVal story As Range, ByRef sourceCache(
 End Sub
 
 Private Function WU_ConvertStyleInStoryChain(ByVal firstStory As Range, ByVal sourceStyle As Style, ByVal targetStyle As Style) As Boolean
-    Dim story As Range, changed As Boolean
+    Dim story As Range, changed As Boolean, chainLength As Long
     Set story = firstStory
     Do While Not story Is Nothing
+        chainLength = chainLength + 1
+        If chainLength > WU_MAX_STYLE_STORY_CHAIN Then Err.Raise 5, "WU_ConvertStyleInStoryChain", "story chain exceeds 32768 linked stories"
         If WU_StyleStoryHasContent(story) Then If WU_ConvertStyleInStory(story, sourceStyle, targetStyle) Then changed = True
         Set story = WU_StyleNextStory(story)
     Loop
@@ -896,9 +899,11 @@ Private Sub WU_ConvertStyleBatchInStoryType(ByVal document As Document, ByVal st
 End Sub
 
 Private Sub WU_ConvertStyleBatchInStoryChain(ByVal firstStory As Range, ByRef sourceCache() As Style, ByRef targetCache() As Style, ByRef enabled() As Boolean, ByVal firstRow As Long, ByVal lastRow As Long, ByRef matched() As Boolean)
-    Dim story As Range
+    Dim story As Range, chainLength As Long
     Set story = firstStory
     Do While Not story Is Nothing
+        chainLength = chainLength + 1
+        If chainLength > WU_MAX_STYLE_STORY_CHAIN Then Err.Raise 5, "WU_ConvertStyleBatchInStoryChain", "story chain exceeds 32768 linked stories"
         If WU_StyleStoryHasContent(story) Then WU_ConvertStyleBatchInStory story, sourceCache, targetCache, enabled, firstRow, lastRow, matched
         Set story = WU_StyleNextStory(story)
     Loop
@@ -912,9 +917,11 @@ Private Sub WU_ConvertCharacterStyleBatchInStory(ByVal story As Range, ByRef sou
 End Sub
 
 Private Sub WU_ConvertCharacterStyleBatchInStoryChain(ByVal firstStory As Range, ByRef sourceCache() As Style, ByRef targetCache() As Style, ByRef enabled() As Boolean, ByVal firstRow As Long, ByVal lastRow As Long, ByRef matched() As Boolean)
-    Dim story As Range
+    Dim story As Range, chainLength As Long
     Set story = firstStory
     Do While Not story Is Nothing
+        chainLength = chainLength + 1
+        If chainLength > WU_MAX_STYLE_STORY_CHAIN Then Err.Raise 5, "WU_ConvertCharacterStyleBatchInStoryChain", "story chain exceeds 32768 linked stories"
         If WU_StyleStoryHasContent(story) Then WU_ConvertCharacterStyleBatchInStory story, sourceCache, targetCache, enabled, firstRow, lastRow, matched
         Set story = WU_StyleNextStory(story)
     Loop
@@ -983,9 +990,11 @@ Private Function WU_ConvertCharacterStyleInStory(ByVal story As Range, ByVal sou
 End Function
 
 Private Function WU_ConvertCharacterStyleInStoryChain(ByVal firstStory As Range, ByVal sourceStyle As Style, ByVal targetStyle As Style) As Boolean
-    Dim story As Range, changed As Boolean
+    Dim story As Range, changed As Boolean, chainLength As Long
     Set story = firstStory
     Do While Not story Is Nothing
+        chainLength = chainLength + 1
+        If chainLength > WU_MAX_STYLE_STORY_CHAIN Then Err.Raise 5, "WU_ConvertCharacterStyleInStoryChain", "story chain exceeds 32768 linked stories"
         If WU_StyleStoryHasContent(story) Then If WU_ConvertCharacterStyleInStory(story, sourceStyle, targetStyle) Then changed = True
         Set story = WU_StyleNextStory(story)
     Loop
@@ -1252,6 +1261,7 @@ End Sub
 
 const fieldRefreshSource = `Attribute VB_Name = "WordUpFieldRefresh"
 Option Explicit
+Private Const WU_MAX_FIELD_STORY_CHAIN As Long = 32768
 
 ' Refresh fields in explicitly selected Word stories. The return value is the
 ' number of stories/tables that reported an update failure; Word's Fields.Update
@@ -1369,9 +1379,11 @@ Private Sub WU_RefreshFieldStoryType(ByVal document As Document, ByVal storyType
 End Sub
 
 Private Sub WU_RefreshFieldStoryChain(ByVal firstStory As Range, ByRef failures As Long)
-    Dim story As Range, nextStory As Range, nextError As Long
+    Dim story As Range, nextStory As Range, nextError As Long, chainLength As Long
     Set story = firstStory
     Do While Not story Is Nothing
+        chainLength = chainLength + 1
+        If chainLength > WU_MAX_FIELD_STORY_CHAIN Then failures = failures + 1: Exit Do
         WU_RefreshFieldStory story, failures
         On Error Resume Next
         Set nextStory = story.NextStoryRange
@@ -1421,6 +1433,7 @@ End Sub
 const textOperationsSource = `Attribute VB_Name = "WordUpTextOperations"
 Option Explicit
 Private Const WU_MAX_BATCH_RULES As Long = 1024
+Private Const WU_MAX_TEXT_STORY_CHAIN As Long = 32768
 
 ' Replace visible literal text with one bounded Word Find pass per story.
 ' The operation never uses Selection and keeps Word's existing formatting on
@@ -2720,9 +2733,11 @@ Private Function WU_CharacterStyleMatches(ByVal target As Range, ByVal expectedN
 End Function
 
 Private Function WU_ApplyCharacterStyleBatchInStoryChain(ByVal firstStory As Range, ByVal matches As Variant, ByRef styleCache() As Style, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, Optional ByVal useWildcards As Boolean = False) As Long
-    Dim story As Range, changed As Long
+    Dim story As Range, changed As Long, chainLength As Long
     Set story = firstStory
     Do While Not story Is Nothing
+        chainLength = chainLength + 1
+        If chainLength > WU_MAX_TEXT_STORY_CHAIN Then Err.Raise 5, "WU_ApplyCharacterStyleBatchInStoryChain", "story chain exceeds 32768 linked stories"
         If WU_TextStoryHasContent(story) Then changed = changed + WU_ApplyCharacterStyleBatchInStory(story, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord, useWildcards)
         Set story = WU_TextNextStory(story)
     Loop
@@ -2749,9 +2764,11 @@ Private Function WU_ApplyCharacterStyleBatchInStory(ByVal story As Range, ByVal 
 End Function
 
 Private Function WU_CountLiteralInStoryChain(ByVal firstStory As Range, ByVal findText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, Optional ByVal useWildcards As Boolean = False) As Long
-    Dim story As Range, count As Long
+    Dim story As Range, count As Long, chainLength As Long
     Set story = firstStory
     Do While Not story Is Nothing
+        chainLength = chainLength + 1
+        If chainLength > WU_MAX_TEXT_STORY_CHAIN Then Err.Raise 5, "WU_CountLiteralInStoryChain", "story chain exceeds 32768 linked stories"
         If WU_TextStoryHasContent(story) Then count = count + WU_CountLiteralInStory(story, findText, matchCase, wholeWord, useWildcards)
         Set story = WU_TextNextStory(story)
     Loop
@@ -2799,9 +2816,11 @@ Private Function WU_CountLiteralInStory(ByVal story As Range, ByVal findText As 
 End Function
 
 Private Sub WU_ReplaceLiteralBatchInStoryChain(ByVal firstStory As Range, ByVal replacements As Variant, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, ByRef matched() As Boolean, Optional ByVal useWildcards As Boolean = False)
-    Dim story As Range
+    Dim story As Range, chainLength As Long
     Set story = firstStory
     Do While Not story Is Nothing
+        chainLength = chainLength + 1
+        If chainLength > WU_MAX_TEXT_STORY_CHAIN Then Err.Raise 5, "WU_ReplaceLiteralBatchInStoryChain", "story chain exceeds 32768 linked stories"
         If WU_TextStoryHasContent(story) Then WU_ReplaceLiteralBatchInStory story, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched, useWildcards
         Set story = WU_TextNextStory(story)
     Loop
@@ -2828,9 +2847,11 @@ Private Sub WU_ReplaceLiteralBatchInStory(ByVal story As Range, ByVal replacemen
 End Sub
 
 Private Function WU_ApplyCharacterStyleInStoryChain(ByVal firstStory As Range, ByVal findText As String, ByVal style As Style, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, Optional ByVal useWildcards As Boolean = False) As Long
-    Dim story As Range, changed As Long
+    Dim story As Range, changed As Long, chainLength As Long
     Set story = firstStory
     Do While Not story Is Nothing
+        chainLength = chainLength + 1
+        If chainLength > WU_MAX_TEXT_STORY_CHAIN Then Err.Raise 5, "WU_ApplyCharacterStyleInStoryChain", "story chain exceeds 32768 linked stories"
         If WU_TextStoryHasContent(story) Then changed = changed + WU_ApplyCharacterStyleInStory(story, findText, style, matchCase, wholeWord, useWildcards)
         Set story = WU_TextNextStory(story)
     Loop
@@ -2895,9 +2916,11 @@ Private Function WU_ApplyCharacterStyleInStory(ByVal story As Range, ByVal findT
 End Function
 
 Private Function WU_ReplaceLiteralInStoryChain(ByVal firstStory As Range, ByVal findText As String, ByVal replaceText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, Optional ByVal useWildcards As Boolean = False) As Boolean
-    Dim story As Range, changed As Boolean
+    Dim story As Range, changed As Boolean, chainLength As Long
     Set story = firstStory
     Do While Not story Is Nothing
+        chainLength = chainLength + 1
+        If chainLength > WU_MAX_TEXT_STORY_CHAIN Then Err.Raise 5, "WU_ReplaceLiteralInStoryChain", "story chain exceeds 32768 linked stories"
         If WU_TextStoryHasContent(story) Then
             If WU_ReplaceLiteralInStory(story, findText, replaceText, matchCase, wholeWord, useWildcards) Then changed = True
         End If
