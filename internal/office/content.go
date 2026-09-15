@@ -598,6 +598,9 @@ func applyStyles(p *Package, r StyleRecipe) error {
 				if start == 0 {
 					start = 1
 				}
+				if start < 1 || l.Format == "" || l.Text == "" {
+					return fmt.Errorf("numbering level needs a positive start, format, and text")
+				}
 				x.WriteString(fmt.Sprintf(`<w:lvl w:ilvl="%d"><w:start w:val="%d"/><w:numFmt w:val="%s"/><w:lvlText w:val="%s"/>`, l.Level, start, Esc(l.Format), Esc(l.Text)))
 				if l.Suffix != "" {
 					x.WriteString(`<w:suff w:val="` + Esc(l.Suffix) + `"/>`)

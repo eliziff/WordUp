@@ -629,6 +629,20 @@ func TestNumberingRecipePreservesExistingLevelOverrides(t *testing.T) {
 	}
 }
 
+func TestNumberingRecipeRejectsUnusableLevelValues(t *testing.T) {
+	for _, level := range []NumberLevel{
+		{Level: 0, Start: -1, Format: "decimal", Text: "%1."},
+		{Level: 0, Format: "", Text: "%1."},
+		{Level: 0, Format: "decimal", Text: ""},
+	} {
+		p := BlankPackage()
+		err := ApplyStyles(p, StyleRecipe{Numbering: []NumberingSpec{{ID: 4, Levels: []NumberLevel{level}}}})
+		if err == nil {
+			t.Fatalf("accepted unusable numbering level: %#v", level)
+		}
+	}
+}
+
 func TestComposeRejectsInvalidLayoutMeasurements(t *testing.T) {
 	cases := []struct {
 		name   string
