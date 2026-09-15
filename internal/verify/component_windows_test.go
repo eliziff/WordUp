@@ -249,6 +249,23 @@ Public Function CheckTextOperations() As String
     If Not d.Paragraphs(1).Range.Characters(1).Italic Or Not d.Paragraphs(1).Range.Characters(7).Italic Or Not d.Paragraphs(1).Range.Characters(13).Italic Then Err.Raise 5, , "character style batch missed a match"
     If Not d.Undo Then Err.Raise 5, , "character style batch did not create one undo record"
     If d.Paragraphs(1).Range.Characters(1).Italic Or d.Paragraphs(1).Range.Characters(7).Italic Or d.Paragraphs(1).Range.Characters(13).Italic Then Err.Raise 5, , "character style batch undo did not restore formatting"
+    d.Content.Text = "First Alpha Gamma" & vbCr & "Second Alpha Gamma" & vbCr
+    Set scoped = d.Paragraphs(1).Range.Duplicate
+    styleBatchChanged = WU_ApplyCharacterStyleBatchInRange(scoped, styleMatches, True, True)
+    If styleBatchChanged <> 2 Then Err.Raise 5, , "range character style batch did not style only its matches"
+    If Not d.Paragraphs(1).Range.Characters(7).Italic Or Not d.Paragraphs(1).Range.Characters(13).Italic Then Err.Raise 5, , "range character style batch missed a match"
+    If d.Paragraphs(2).Range.Characters(8).Italic Or d.Paragraphs(2).Range.Characters(14).Italic Then Err.Raise 5, , "range character style batch escaped its boundary"
+    If Not d.Undo Then Err.Raise 5, , "range character style batch did not create one undo record"
+    If d.Paragraphs(1).Range.Characters(7).Italic Or d.Paragraphs(1).Range.Characters(13).Italic Then Err.Raise 5, , "range character style batch undo did not restore formatting"
+    d.Saved = True
+    styleMatches(1, 1) = "Missing proof style"
+    On Error Resume Next
+    styleBatchChanged = WU_ApplyCharacterStyleBatch(d, styleMatches, "main", True, True)
+    rejected = (Err.Number <> 0)
+    Err.Clear
+    On Error GoTo 0
+    If Not rejected Or Not d.Saved Then Err.Raise 5, , "invalid style batch was not rejected before mutation"
+    styleMatches(1, 1) = citationStyle.NameLocal
     d.Content.Text = before
     Set scoped = d.Paragraphs(1).Range.Duplicate
     scoped.Collapse wdCollapseStart

@@ -404,7 +404,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.8" {
+	if item.Version != "1.0.9" {
 		t.Fatalf("text operations version=%q", item.Version)
 	}
 	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
@@ -433,6 +433,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"Public Function WU_ApplyCharacterStyleToMatches",
 		"Public Function WU_ApplyCharacterStyleToRange",
 		"Public Function WU_ApplyCharacterStyleBatch",
+		"Public Function WU_ApplyCharacterStyleBatchInRange",
 		"target range is required",
 		"never opens an undo record or toggles ScreenUpdating",
 		"story scope must be main, notes, or all",
@@ -465,6 +466,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"targetStart = target.Start: targetEnd = target.End",
 		"If targetEnd <= targetStart Then Exit Function",
 		"WU_ValidateLiteralBatch(replacements, matchCase, \"WU_ReplaceLiteralBatch\")",
+		"WU_ValidateLiteralBatch(replacements, matchCase, \"WU_ReplaceLiteralBatchInRange\")",
 		"ReDim matched(firstRow To lastRow)",
 		"If matched(row) Then changed = changed + 1",
 		"ByRef matched() As Boolean",

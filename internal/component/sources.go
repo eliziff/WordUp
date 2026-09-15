@@ -772,6 +772,44 @@ Failed:
     Resume CleanUp
 End Function
 
+' Apply the same literal/style pairs only inside an exact caller-supplied
+' Range. This keeps a multi-rule citation pass from leaking into adjacent
+' paragraphs, notes, or other stories while retaining one undo record.
+Public Function WU_ApplyCharacterStyleBatchInRange(ByVal target As Range, ByVal matches As Variant, Optional ByVal matchCase As Boolean = False, Optional ByVal wholeWord As Boolean = True) As Long
+    Dim document As Document, updating As Boolean, opened As Boolean, captured As Boolean
+    Dim failure As Long, failureSource As String, failureText As String
+    Dim targetStart As Long, targetEnd As Long, firstRow As Long, lastRow As Long, firstColumn As Long, activeRows As Long
+    On Error GoTo Failed
+    If target Is Nothing Then Err.Raise 91, "WU_ApplyCharacterStyleBatchInRange", "target range is required"
+    Set document = target.Document
+    activeRows = WU_ValidateCharacterStyleBatch(document, matches)
+    If activeRows = 0 Then Exit Function
+    targetStart = target.Start: targetEnd = target.End
+    If targetEnd <= targetStart Then Exit Function
+    firstRow = LBound(matches, 1): lastRow = UBound(matches, 1): firstColumn = LBound(matches, 2)
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Style literal matches batch": opened = True
+    WU_ApplyCharacterStyleBatchInRange = WU_ApplyCharacterStyleBatchInStory(target, document, matches, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
 ' Replace only inside an already-bounded Range. This is the fast path for
 ' callers that have an exact paragraph, content control, table cell, or other
 ' Word range and must not touch any other story. The range's direct formatting
