@@ -28,6 +28,7 @@ falls back to Word's paragraph enumeration when an adapted detector's shape
 or spans do not match the main story. Ignored style/story lookups clear VBA's
 `Err` state before returning, so a missing optional notes story cannot force a
 false cleanup failure or disable the detector fast path.
+Heading outline assignments are guarded by the same idempotent check.
 
 Timings are individual observations, not latency guarantees or controlled speedup measurements. Report assertions and source suites define the actual coverage; assertion counts alone do not establish completeness.
 

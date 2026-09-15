@@ -600,15 +600,17 @@ Public Sub WU_JournalApplyStyles()
     Set heading7 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H7, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True)
     Set heading8 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H8, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True)
     Set heading9 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H9, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True)
-    heading1.ParagraphFormat.OutlineLevel = wdOutlineLevel1
-    heading2.ParagraphFormat.OutlineLevel = wdOutlineLevel2
-    heading3.ParagraphFormat.OutlineLevel = wdOutlineLevel3
-    heading4.ParagraphFormat.OutlineLevel = wdOutlineLevel4
-    heading5.ParagraphFormat.OutlineLevel = wdOutlineLevel5
-    heading6.ParagraphFormat.OutlineLevel = wdOutlineLevel6
-    heading7.ParagraphFormat.OutlineLevel = wdOutlineLevel7
-    heading8.ParagraphFormat.OutlineLevel = wdOutlineLevel8
-    heading9.ParagraphFormat.OutlineLevel = wdOutlineLevel9
+    ' Outline levels are shared style state too; avoid dirtying each heading
+    ' definition on every repeat of an otherwise idempotent operation.
+    If heading1.ParagraphFormat.OutlineLevel <> wdOutlineLevel1 Then heading1.ParagraphFormat.OutlineLevel = wdOutlineLevel1
+    If heading2.ParagraphFormat.OutlineLevel <> wdOutlineLevel2 Then heading2.ParagraphFormat.OutlineLevel = wdOutlineLevel2
+    If heading3.ParagraphFormat.OutlineLevel <> wdOutlineLevel3 Then heading3.ParagraphFormat.OutlineLevel = wdOutlineLevel3
+    If heading4.ParagraphFormat.OutlineLevel <> wdOutlineLevel4 Then heading4.ParagraphFormat.OutlineLevel = wdOutlineLevel4
+    If heading5.ParagraphFormat.OutlineLevel <> wdOutlineLevel5 Then heading5.ParagraphFormat.OutlineLevel = wdOutlineLevel5
+    If heading6.ParagraphFormat.OutlineLevel <> wdOutlineLevel6 Then heading6.ParagraphFormat.OutlineLevel = wdOutlineLevel6
+    If heading7.ParagraphFormat.OutlineLevel <> wdOutlineLevel7 Then heading7.ParagraphFormat.OutlineLevel = wdOutlineLevel7
+    If heading8.ParagraphFormat.OutlineLevel <> wdOutlineLevel8 Then heading8.ParagraphFormat.OutlineLevel = wdOutlineLevel8
+    If heading9.ParagraphFormat.OutlineLevel <> wdOutlineLevel9 Then heading9.ParagraphFormat.OutlineLevel = wdOutlineLevel9
     WU_ApplyParagraphStyles doc, bodyStyle, heading1, heading2, heading3, heading4, heading5, heading6, heading7, heading8, heading9
     WU_ApplyFootnoteStyle doc, noteStyle
 Cleanup:
