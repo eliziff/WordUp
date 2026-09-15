@@ -1,7 +1,7 @@
 Attribute VB_Name = "WordUpStructure"
 Option Explicit
 
-' WordUp structure contract 1.2.8. MIT licensed; editable and dependency-free.
+' WordUp structure contract 1.2.9. MIT licensed; editable and dependency-free.
 ' Detection is separate from publication-specific style mapping.
 Public Const WU_ROLE As Long = 0
 Public Const WU_LEVEL As Long = 1
@@ -323,7 +323,11 @@ End Sub
 
 Public Function WU_ParseMarker(ByVal text As String) As String
     Dim at As Long, dashAt As Long, prefix As String, namedKind As String, rest As String, i As Long, c As String, lowerText As String, candidate As Variant, periodOrClose As Boolean
-    text = Trim$(Replace(Replace(text, vbTab, " "), ChrW(160), " "))
+    ' Pasted publisher text may use NBSP, narrow NBSP, figure or thin
+    ' spaces around a marker. Normalize those separators only for grammar;
+    ' the original paragraph text remains unchanged in the result table.
+    text = Replace(Replace(Replace(Replace(Replace(text, vbTab, " "), ChrW(160), " "), ChrW(&H202F), " "), ChrW(&H2007), " "), ChrW(&H2009), " ")
+    text = Trim$(text)
     lowerText = LCase$(text)
     If WU_IsNamedHeading(lowerText) Then
         at = InStr(text, ":"): If at = 0 Then at = InStr(text, " - ")

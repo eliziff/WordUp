@@ -541,6 +541,10 @@ Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As St
         End If
         If Not paragraph.Range.Information(wdWithInTable) Then
             level = paragraph.OutlineLevel
+            ' Reset before the guarded array read. A malformed or stale
+            ' detector result must fall back to Word's native outline level,
+            ' never reuse the previous paragraph's role.
+            detectedRole = vbNullString
             If haveStructure Then
                 On Error Resume Next
                 detectedRole = CStr(structure(paragraphIndex - 1, WU_ROLE))
@@ -580,7 +584,7 @@ End Sub
 Public Sub WU_JournalRefreshFields()
     Dim updating As Boolean, undoStarted As Boolean, captured As Boolean
     Dim failure As Long, failureSource As String, failureText As String
-    Dim doc As Document, story As Range, linked As Range, section As Section, header As HeaderFooter, footer As HeaderFooter, contents As TableOfContents
+    Dim doc As Document, story As Range, linked As Range, contents As TableOfContents
     On Error GoTo Failed
     Set doc = ActiveDocument
     WU_BeginSafeEdit updating, undoStarted, captured, "Refresh %s fields"
@@ -591,14 +595,9 @@ Public Sub WU_JournalRefreshFields()
             Set linked = linked.NextStoryRange
         Loop
     Next story
-    For Each section In doc.Sections
-        For Each header In section.Headers
-            If header.Exists Then WU_UpdateFieldsInStory header.Range
-        Next header
-        For Each footer In section.Footers
-            If footer.Exists Then WU_UpdateFieldsInStory footer.Range
-        Next footer
-    Next section
+    ' StoryRanges already contains every header/footer story and its linked
+    ' sections. Walking Sections as well updates those fields twice and can
+    ' make a large manuscript needlessly repaginate.
     For Each contents In doc.TablesOfContents
         WU_UpdateContents contents
     Next contents

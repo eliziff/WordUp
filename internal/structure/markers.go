@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 var namedHeadingPrefix = regexp.MustCompile(`^\s*((?i:part|chapter|theme|section|article|appendix|schedule|division|book|title))\s+((?i:[IVXLCDM]){1,7}|[A-Za-z]|[0-9]{1,3}|(?i:one|two|three|four|five|six|seven|eight|nine|ten))\s*([:\-\x{2013}\x{2014}])\s*(.+)$`)
@@ -15,6 +16,11 @@ var parenthesizedHeadingPrefix = regexp.MustCompile(`^\s*\(((?i:[IVXLCDM]){1,7}|
 // MarkerChoices retains ambiguous Roman/letter interpretations. It recognizes
 // candidates only; prose, lists and quoted instruments can have these prefixes.
 func MarkerChoices(text string) []Interpretation {
+	// Word frequently emits non-breaking or narrow spaces when a heading is
+	// pasted from a PDF or publisher template. The grammar is intentionally
+	// ASCII-shaped, so normalize Unicode whitespace at this boundary while
+	// leaving the paragraph's original text untouched in the evidence row.
+	text = normalizeMarkerWhitespace(text)
 	parts := namedHeadingPrefix.FindStringSubmatch(text)
 	named := parts != nil
 	parenthesized := false
@@ -81,4 +87,22 @@ func MarkerChoices(text string) []Interpretation {
 		}
 	}
 	return out
+}
+
+func normalizeMarkerWhitespace(text string) string {
+	var out strings.Builder
+	out.Grow(len(text))
+	space := false
+	for _, r := range text {
+		if unicode.IsSpace(r) {
+			if !space {
+				out.WriteByte(' ')
+				space = true
+			}
+			continue
+		}
+		out.WriteRune(r)
+		space = false
+	}
+	return strings.TrimSpace(out.String())
 }

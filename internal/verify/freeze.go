@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/eliziff/WordUp/internal/office"
@@ -92,7 +93,16 @@ func Freeze(reference, destination string) (map[string]any, error) {
 	if err := copyFile(report.ArtifactSnapshot, "artifact"+filepath.Ext(report.ArtifactSnapshot)); err != nil {
 		return nil, err
 	}
-	for name, input := range report.InputSnapshots {
+	// Map iteration order is deliberately randomized. Keep frozen bundles
+	// byte-stable so moving or regenerating the same parity fixture produces a
+	// useful Git diff instead of noise.
+	inputNames := make([]string, 0, len(report.InputSnapshots))
+	for name := range report.InputSnapshots {
+		inputNames = append(inputNames, name)
+	}
+	sort.Strings(inputNames)
+	for _, name := range inputNames {
+		input := report.InputSnapshots[name]
 		if err := copyFile(input.File, "inputs/"+name+filepath.Ext(input.Source)); err != nil {
 			return nil, err
 		}

@@ -1,11 +1,13 @@
 package verify
 
 import (
+	"encoding/json"
 	"github.com/eliziff/WordUp/internal/native"
 	"github.com/eliziff/WordUp/internal/office"
 	"github.com/eliziff/WordUp/internal/project"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -21,14 +23,39 @@ func TestFreezeRelocationAndTamper(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	suite := Suite{Schema: 1, Name: "synthetic freeze", Steps: []Step{{Name: "capture", Operation: native.Operation{Op: "xml.snapshot"}, Assert: []Assertion{{Path: "/text", Kind: "equals", Expected: snapshot}}}}}
-	report := &Report{Schema: 1, Status: "passed", WordExecuted: true, OS: "synthetic", Arch: "synthetic", ArtifactSnapshot: artifact, EvidenceDirectory: evidence, SHA256: office.Hash([]byte("synthetic artifact")), Suite: suite, SuiteSHA256: office.Hash(project.JSON(suite)), Assertions: 1, Observations: []Observation{{Name: "capture", Passed: true, Assertions: 1, Result: map[string]any{"file": snapshot, "sha256": office.Hash(xml), "text": snapshot}}}}
+	alpha := filepath.Join(root, "alpha.docx")
+	zeta := filepath.Join(root, "zeta.docx")
+	if err := os.WriteFile(alpha, []byte("alpha"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(zeta, []byte("zeta"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	suite := Suite{Inputs: map[string]string{"zeta": zeta, "alpha": alpha}, Schema: 1, Name: "synthetic freeze", Steps: []Step{{Name: "capture", Operation: native.Operation{Op: "xml.snapshot"}, Assert: []Assertion{{Path: "/text", Kind: "equals", Expected: snapshot}}}}}
+	report := &Report{Schema: 1, Status: "passed", WordExecuted: true, OS: "synthetic", Arch: "synthetic", ArtifactSnapshot: artifact, EvidenceDirectory: evidence, SHA256: office.Hash([]byte("synthetic artifact")), Suite: suite, SuiteSHA256: office.Hash(project.JSON(suite)), Assertions: 1, InputSnapshots: map[string]InputSnapshot{"zeta": {File: zeta, Source: zeta, SHA256: office.Hash([]byte("zeta"))}, "alpha": {File: alpha, Source: alpha, SHA256: office.Hash([]byte("alpha"))}}, Observations: []Observation{{Name: "capture", Passed: true, Assertions: 1, Result: map[string]any{"file": snapshot, "sha256": office.Hash(xml), "text": snapshot}}}}
 	if err := SaveReport(root, report); err != nil {
 		t.Fatal(err)
 	}
 	bundle := filepath.Join(root, "bundle")
 	if _, err := Freeze(report.SavedReport, bundle); err != nil {
 		t.Fatal(err)
+	}
+	bundleBytes, err := os.ReadFile(filepath.Join(bundle, "bundle.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var frozen frozenBundle
+	if err := json.Unmarshal(bundleBytes, &frozen); err != nil {
+		t.Fatal(err)
+	}
+	inputOrder := []string{}
+	for _, file := range frozen.Files {
+		if strings.HasPrefix(file.Path, "inputs/") {
+			inputOrder = append(inputOrder, file.Path)
+		}
+	}
+	if len(inputOrder) != 2 || inputOrder[0] != "inputs/alpha.docx" || inputOrder[1] != "inputs/zeta.docx" {
+		t.Fatalf("frozen input order is not deterministic: %#v", inputOrder)
 	}
 	if _, err := Freeze(report.SavedReport, bundle); err == nil {
 		t.Fatal("existing bundle overwritten")

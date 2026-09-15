@@ -110,3 +110,15 @@ func TestParenthesizedMarkersRemainEvidence(t *testing.T) {
 		t.Fatalf("decimal prose was treated as a parenthesized marker: %#v", got)
 	}
 }
+
+func TestMarkerChoicesNormalizePublisherWhitespace(t *testing.T) {
+	for _, text := range []string{
+		"I\u00a0-\u00a0Introduction",
+		"II.\u202fScope",
+		"(A)\u2007Sources",
+	} {
+		if got := MarkerChoices(text); len(got) == 0 {
+			t.Fatalf("marker with Unicode whitespace was not recognized: %q", text)
+		}
+	}
+}
