@@ -109,7 +109,7 @@ func builtin() []Manifest {
 		vbaComponent("command.hotkey", "WordUpHotkey", "WU_RegisterHotkey", "Registers and removes a template-owned key binding.", "hotkeys", hotkeySource),
 		vbaComponent("command.context-menu", "WordUpContextMenu", "WU_RegisterContextMenu", "Registers and removes a tagged context-menu command.", "context menus", contextMenuSource),
 		vbaComponent("document.style-converter", "WordUpStyleConverter", "WU_ConvertStyle", "Converts one paragraph style in a single safe edit.", "style conversion", styleConverterSource),
-		vbaComponent("document.text-operations", "WordUpTextOperations", "WU_ReplaceLiteral", "Performs bounded literal text replacements across selected Word stories without using Selection.", "text operations", textOperationsSource)}
+		vbaComponent("document.text-operations", "WordUpTextOperations", "WU_ReplaceLiteral", "Performs bounded literal text replacements across selected Word stories or an exact Range without using Selection.", "text operations", textOperationsSource)}
 	for i := range items {
 		if items[i].ID == "command.hotkey" {
 			items[i].Version = "1.0.5"
@@ -133,7 +133,8 @@ func builtin() []Manifest {
 			items[i].Version = "1.0.3"
 		}
 		if items[i].ID == "document.text-operations" {
-			items[i].Version = "1.0.3"
+			items[i].Version = "1.0.4"
+			items[i].Acceptance = "WU_ReplaceLiteral and WU_ReplaceLiteralInRange are public, bounded, and compile without non-Office references."
 		}
 		items[i].Schema = 1
 		items[i].License = "MIT"

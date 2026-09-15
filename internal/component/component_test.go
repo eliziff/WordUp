@@ -388,7 +388,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.3" {
+	if item.Version != "1.0.4" {
 		t.Fatalf("text operations version=%q", item.Version)
 	}
 	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
@@ -397,6 +397,8 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	source := item.Files[0].Text
 	for _, want := range []string{
 		"Public Function WU_ReplaceLiteral",
+		"Public Function WU_ReplaceLiteralInRange",
+		"target range is required",
 		"story scope must be main, notes, or all",
 		"find text exceeds Word's 255-character limit",
 		"Application.UndoRecord.StartCustomRecord \"Replace literal text\"",
@@ -409,6 +411,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		".MatchWholeWord = wholeWord",
 		"WU_EscapeFindLiteral = Replace(value, \"^\", \"^^\")",
 		"Case wdFootnotesStory, wdEndnotesStory",
+		"If target.End > target.Start Then WU_ReplaceLiteralInRange",
 	} {
 		if !strings.Contains(source, want) {
 			t.Fatalf("text operations source omitted %q", want)

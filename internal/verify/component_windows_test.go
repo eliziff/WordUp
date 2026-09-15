@@ -179,7 +179,7 @@ Public Function CheckRibbonAndProgress() As String
     CheckRibbonAndProgress = "PASS"
 End Function
 Public Function CheckTextOperations() As String
-    Dim d As Document, result As Boolean, before As String, bodyAfterNote As String, formatted As Range, rejected As Boolean, note As Footnote, priorUpdating As Boolean
+    Dim d As Document, result As Boolean, before As String, bodyAfterNote As String, formatted As Range, scoped As Range, rejected As Boolean, note As Footnote, priorUpdating As Boolean
     Dim i As Long, lines(1 To 400) As String, started As Single, elapsed As Single
     Set d = Documents.Add
     d.Content.Text = "Alpha alpha alphabet" & vbCr
@@ -195,6 +195,14 @@ Public Function CheckTextOperations() As String
     If Not d.Paragraphs(1).Range.Characters(1).Italic Then Err.Raise 5, , "replacement lost direct italic formatting"
     If Not d.Undo Then Err.Raise 5, , "replacement did not create one undo record"
     If d.Content.Text <> before Then Err.Raise 5, , "replacement undo did not restore text"
+    Set scoped = d.Paragraphs(1).Range.Duplicate
+    scoped.Start = scoped.Start + 6
+    scoped.End = scoped.Start + 5
+    result = WU_ReplaceLiteralInRange(scoped, "alpha", "beta", True, True)
+    If Not result Or d.Content.Text <> "Alpha beta alphabet" & vbCr Then Err.Raise 5, , "range replacement escaped its requested boundary"
+    If Application.ScreenUpdating <> priorUpdating Then Err.Raise 5, , "range replacement did not restore ScreenUpdating"
+    If Not d.Undo Then Err.Raise 5, , "range replacement did not create one undo record"
+    If d.Content.Text <> before Then Err.Raise 5, , "range replacement undo did not restore text"
     On Error Resume Next
     result = WU_ReplaceLiteral(d, "alpha", "omega", "invalid", False, False)
     rejected = (Err.Number <> 0)

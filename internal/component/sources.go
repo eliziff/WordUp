@@ -355,11 +355,7 @@ Public Function WU_ReplaceLiteral(ByVal document As Document, ByVal findText As 
     Dim failure As Long, failureSource As String, failureText As String, changed As Boolean
     On Error GoTo Failed
     If document Is Nothing Then Err.Raise 91, "WU_ReplaceLiteral", "document is required"
-    If Len(findText) = 0 Then Err.Raise 5, "WU_ReplaceLiteral", "find text is required"
-    If Len(findText) > 255 Then Err.Raise 5, "WU_ReplaceLiteral", "find text exceeds Word's 255-character limit"
-    If Len(replaceText) > 255 Then Err.Raise 5, "WU_ReplaceLiteral", "replacement text exceeds Word's 255-character limit"
-    If Len(WU_EscapeFindLiteral(findText)) > 255 Then Err.Raise 5, "WU_ReplaceLiteral", "find text exceeds Word's escaped 255-character limit"
-    If Len(WU_EscapeFindLiteral(replaceText)) > 255 Then Err.Raise 5, "WU_ReplaceLiteral", "replacement text exceeds Word's escaped 255-character limit"
+    WU_ValidateLiteral findText, replaceText, "WU_ReplaceLiteral"
     storyScope = LCase$(Trim$(storyScope))
     If storyScope <> "main" And storyScope <> "notes" And storyScope <> "all" Then Err.Raise 5, "WU_ReplaceLiteral", "story scope must be main, notes, or all"
     updating = Application.ScreenUpdating
@@ -403,6 +399,47 @@ Failed:
     failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
     Resume CleanUp
 End Function
+
+' Replace only inside an already-bounded Range. This is the fast path for
+' callers that have an exact paragraph, content control, table cell, or other
+' Word range and must not touch any other story. The range's direct formatting
+' is retained by Word's formatting-neutral replacement.
+Public Function WU_ReplaceLiteralInRange(ByVal target As Range, ByVal findText As String, ByVal replaceText As String, Optional ByVal matchCase As Boolean = False, Optional ByVal wholeWord As Boolean = False) As Boolean
+    Dim updating As Boolean, opened As Boolean, captured As Boolean
+    Dim failure As Long, failureSource As String, failureText As String
+    On Error GoTo Failed
+    If target Is Nothing Then Err.Raise 91, "WU_ReplaceLiteralInRange", "target range is required"
+    WU_ValidateLiteral findText, replaceText, "WU_ReplaceLiteralInRange"
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Replace literal text": opened = True
+    If target.End > target.Start Then WU_ReplaceLiteralInRange = WU_ReplaceLiteralInStory(target, findText, replaceText, matchCase, wholeWord)
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
+Private Sub WU_ValidateLiteral(ByVal findText As String, ByVal replaceText As String, ByVal sourceName As String)
+    If Len(findText) = 0 Then Err.Raise 5, sourceName, "find text is required"
+    If Len(findText) > 255 Then Err.Raise 5, sourceName, "find text exceeds Word's 255-character limit"
+    If Len(replaceText) > 255 Then Err.Raise 5, sourceName, "replacement text exceeds Word's 255-character limit"
+    If Len(WU_EscapeFindLiteral(findText)) > 255 Then Err.Raise 5, sourceName, "find text exceeds Word's escaped 255-character limit"
+    If Len(WU_EscapeFindLiteral(replaceText)) > 255 Then Err.Raise 5, sourceName, "replacement text exceeds Word's escaped 255-character limit"
+End Sub
 
 Private Function WU_StoryMatchesScope(ByVal story As Range, ByVal storyScope As String) As Boolean
     Select Case storyScope
