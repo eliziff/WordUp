@@ -647,11 +647,15 @@ Private Function WU_EnsureStyle(ByVal doc As Document, ByVal styleName As String
 End Function
 
 Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As Style, ByVal heading1 As Style, ByVal heading2 As Style, ByVal heading3 As Style, ByVal heading4 As Style, ByVal heading5 As Style, ByVal heading6 As Style, ByVal heading7 As Style, ByVal heading8 As Style, ByVal heading9 As Style)
-    Dim story As Range, paragraphCount As Long, structureRows As Long, structureColumns As Long
+    Dim story As Range, paragraphCount As Long, structureRows As Long, structureColumns As Long, storyStart As Long, storyEnd As Long
+    Dim offset As Long, startPosition As Long, endPosition As Long, priorEnd As Long, offsetValid As Boolean
     Dim structure As Variant, haveStructure As Boolean
     On Error Resume Next
     Set story = doc.StoryRanges(wdMainTextStory)
-    If Not story Is Nothing Then paragraphCount = story.Paragraphs.Count
+    If Not story Is Nothing Then
+        paragraphCount = story.Paragraphs.Count
+        storyStart = story.Start: storyEnd = story.End
+    End If
     On Error GoTo 0
     If story Is Nothing Or paragraphCount = 0 Then Exit Sub
     ' Run the detector once. Its offsets and roles let the normal path create
@@ -665,6 +669,21 @@ Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As St
         structureRows = UBound(structure, 1) - LBound(structure, 1) + 1
         structureColumns = UBound(structure, 2) - LBound(structure, 2) + 1
         If Err.Number <> 0 Or structureRows <> paragraphCount Or structureColumns < WU_COLUMNS Then haveStructure = False
+    End If
+    If haveStructure Then
+        priorEnd = storyStart
+        For offset = LBound(structure, 1) To UBound(structure, 1)
+            startPosition = 0: endPosition = 0: offsetValid = False
+            On Error Resume Next
+            startPosition = CLng(structure(offset, WU_START))
+            endPosition = CLng(structure(offset, WU_END))
+            offsetValid = (Err.Number = 0)
+            Err.Clear
+            On Error GoTo 0
+            If Not offsetValid Or startPosition <> priorEnd Or endPosition <= startPosition Or endPosition > storyEnd Then haveStructure = False: Exit For
+            priorEnd = endPosition
+        Next offset
+        If haveStructure And priorEnd <> storyEnd Then haveStructure = False
     End If
     Err.Clear
     On Error GoTo 0

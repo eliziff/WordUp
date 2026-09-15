@@ -205,7 +205,7 @@ func TestCreateBuildsIndependentJournalWorkspace(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, marker := range []string{"WU_JournalOpenSetupFromRibbon", "WU_JournalApplyStyles", "WU_JournalPermaAssistant", "WU_DetectStructure", "WU_BeginSafeEdit", "StoryRanges already contains every header/footer story", "structureColumns < WU_COLUMNS", "WU_ApplyResolvedParagraphStyles", "role = vbNullString", "StrComp(role, \"body\", vbTextCompare)", "WU_JOURNAL_STYLE_H9", "wdOutlineLevel9", "paragraphRange As Range", "WU_FlushParagraphStyleBatch", "wdFootnotesStory", "WU_CountStoryItems", "Unavailable story scans", "fieldFailures", "could not refresh fields in", "is not a paragraph style"} {
+	for _, marker := range []string{"WU_JournalOpenSetupFromRibbon", "WU_JournalApplyStyles", "WU_JournalPermaAssistant", "WU_DetectStructure", "WU_BeginSafeEdit", "StoryRanges already contains every header/footer story", "structureColumns < WU_COLUMNS", "startPosition <> priorEnd", "priorEnd <> storyEnd", "WU_ApplyResolvedParagraphStyles", "role = vbNullString", "StrComp(role, \"body\", vbTextCompare)", "WU_JOURNAL_STYLE_H9", "wdOutlineLevel9", "paragraphRange As Range", "WU_FlushParagraphStyleBatch", "wdFootnotesStory", "WU_CountStoryItems", "Unavailable story scans", "fieldFailures", "could not refresh fields in", "is not a paragraph style"} {
 		if !strings.Contains(string(core), marker) {
 			t.Fatalf("generated source lacks %s", marker)
 		}
