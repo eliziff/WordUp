@@ -448,13 +448,13 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.14" {
+	if item.Version != "1.0.15" {
 		t.Fatalf("text operations version=%q", item.Version)
 	}
 	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
 		t.Fatalf("unexpected text operations files: %#v", item.Files)
 	}
-	for _, capability := range []string{"literal replacement", "literal counting", "wildcard replacement", "wildcard counting", "wildcard batch replacement", "batch replacement", "range-bounded edits", "character-style matching", "wildcard character styling", "offset character-style runs", "batch character-style matching", "header/footer scopes"} {
+	for _, capability := range []string{"literal replacement", "literal counting", "wildcard replacement", "wildcard counting", "wildcard batch replacement", "batch replacement", "range-bounded edits", "character-style matching", "wildcard character styling", "wildcard character-style batches", "offset character-style runs", "batch character-style matching", "header/footer scopes"} {
 		found := false
 		for _, got := range item.Capabilities {
 			if got == capability {
@@ -484,6 +484,8 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"Public Function WU_ApplyCharacterStyleToRange",
 		"Public Function WU_ApplyCharacterStyleToWildcardMatches",
 		"Public Function WU_ApplyCharacterStyleToWildcardRange",
+		"Public Function WU_ApplyCharacterStyleToWildcardBatch",
+		"Public Function WU_ApplyCharacterStyleToWildcardBatchInRange",
 		"Public Function WU_ApplyCharacterStyleRuns",
 		"Public Function WU_ApplyCharacterStyleBatch",
 		"Public Function WU_ApplyCharacterStyleBatchInRange",
@@ -515,6 +517,8 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"Application.UndoRecord.StartCustomRecord \"Replace wildcard text batch\"",
 		"Application.UndoRecord.StartCustomRecord \"Style literal matches\"",
 		"Application.UndoRecord.StartCustomRecord \"Style literal matches batch\"",
+		"WU_ValidateCharacterStyleBatch(document, matches, styleCache, True, \"WU_ApplyCharacterStyleToWildcardBatch\")",
+		"WU_ValidateCharacterStyleBatch(document, matches, styleCache, True, \"WU_ApplyCharacterStyleToWildcardBatchInRange\")",
 		"If captured Then Application.ScreenUpdating = updating",
 		".Replacement.Text = WU_ReplacementPattern(replaceText, useWildcards)",
 		"find text exceeds Word's escaped 255-character limit",
@@ -553,6 +557,9 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"WU_ApplyCharacterStyleBatchInStoryType",
 		"Dim styleCache() As Style",
 		"activeRows = WU_ValidateCharacterStyleBatch(document, matches, styleCache)",
+		"If useWildcards Then",
+		"WU_ValidateWildcard findText, \"\", sourceName",
+		"Optional ByVal useWildcards As Boolean = False, Optional ByVal sourceName As String = \"WU_ApplyCharacterStyleBatch\"",
 		"ByRef styleCache() As Style",
 		"Set styleCache(row) = style",
 		"Set style = styleCache(row)",

@@ -180,7 +180,7 @@ Public Function CheckRibbonAndProgress() As String
 End Function
 Public Function CheckTextOperations() As String
     Dim d As Document, result As Boolean, before As String, bodyAfterNote As String, unicodeText As String, formatted As Range, scoped As Range, header As Range, footer As Range, rejected As Boolean, note As Footnote, priorUpdating As Boolean, table As Table
-    Dim replacements(0 To 2, 0 To 1) As Variant, styleMatches(0 To 2, 0 To 1) As Variant, characterRuns(0 To 1, 0 To 2) As Variant, batchChanged As Long, rangeBatchChanged As Long, literalCount As Long, citationStyle As Style, styled As Long, styleBatchChanged As Long, styleRunChanged As Long
+    Dim replacements(0 To 2, 0 To 1) As Variant, styleMatches(0 To 2, 0 To 1) As Variant, wildcardStyleMatches(0 To 1, 0 To 1) As Variant, characterRuns(0 To 1, 0 To 2) As Variant, batchChanged As Long, rangeBatchChanged As Long, literalCount As Long, citationStyle As Style, pinStyle As Style, styled As Long, styleBatchChanged As Long, wildcardStyleBatchChanged As Long, styleRunChanged As Long
     Dim i As Long, lines(1 To 400) As String, started As Single, elapsed As Single, wildcardCount As Long, wildcardRangeCount As Long
     Set d = Documents.Add
     d.Content.Text = "Alpha alpha alphabet" & vbCr
@@ -275,6 +275,24 @@ Public Function CheckTextOperations() As String
     If Not d.Paragraphs(1).Range.Characters(1).Italic Or Not d.Paragraphs(1).Range.Characters(9).Italic Then Err.Raise 5, , "wildcard character style matcher missed a citation span"
     If Not d.Undo Then Err.Raise 5, , "wildcard character style matcher did not create one undo record"
     If d.Paragraphs(1).Range.Characters(1).Italic Or d.Paragraphs(1).Range.Characters(9).Italic Then Err.Raise 5, , "wildcard character style matcher undo did not restore formatting"
+    Set pinStyle = d.Styles.Add(Name:="Proof Pin", Type:=wdStyleTypeCharacter)
+    pinStyle.Font.Bold = True
+    d.Content.Text = "Case 12; Matter 34" & vbCr
+    wildcardStyleMatches(0, 0) = "Case [0-9]{2}": wildcardStyleMatches(0, 1) = citationStyle.NameLocal
+    wildcardStyleMatches(1, 0) = "Matter [0-9]{2}": wildcardStyleMatches(1, 1) = pinStyle.NameLocal
+    wildcardStyleBatchChanged = WU_ApplyCharacterStyleToWildcardBatch(d, wildcardStyleMatches, "main", True, True)
+    If wildcardStyleBatchChanged <> 2 Or d.Content.Text <> "Case 12; Matter 34" & vbCr Then Err.Raise 5, , "wildcard character style batch changed text or missed a pattern"
+    If Not d.Paragraphs(1).Range.Characters(1).Italic Or Not d.Paragraphs(1).Range.Characters(9).Bold Then Err.Raise 5, , "wildcard character style batch missed its destination styles"
+    If Application.ScreenUpdating <> priorUpdating Then Err.Raise 5, , "wildcard character style batch did not restore ScreenUpdating"
+    If Not d.Undo Then Err.Raise 5, , "wildcard character style batch did not create one undo record"
+    If d.Paragraphs(1).Range.Characters(1).Italic Or d.Paragraphs(1).Range.Characters(9).Bold Then Err.Raise 5, , "wildcard character style batch undo did not restore formatting"
+    d.Content.Text = "First Case 12" & vbCr & "Second Matter 34" & vbCr
+    Set scoped = d.Paragraphs(1).Range.Duplicate
+    wildcardStyleBatchChanged = WU_ApplyCharacterStyleToWildcardBatchInRange(scoped, wildcardStyleMatches, True, True)
+    If wildcardStyleBatchChanged <> 1 Or Not d.Paragraphs(1).Range.Characters(7).Italic Then Err.Raise 5, , "range wildcard character style batch missed its bounded pattern"
+    If d.Paragraphs(2).Range.Characters(8).Bold Then Err.Raise 5, , "range wildcard character style batch escaped its boundary"
+    If Not d.Undo Then Err.Raise 5, , "range wildcard character style batch did not create one undo record"
+    If d.Paragraphs(1).Range.Characters(7).Italic Then Err.Raise 5, , "range wildcard character style batch undo did not restore formatting"
     d.Content.Text = "Alpha Alpha Gamma" & vbCr
     styleMatches(0, 0) = "Alpha": styleMatches(0, 1) = citationStyle.NameLocal
     styleMatches(1, 0) = "Gamma": styleMatches(1, 1) = citationStyle.NameLocal

@@ -1628,6 +1628,108 @@ Failed:
     Resume CleanUp
 End Function
 
+' Apply a bounded two-column [wildcard pattern, character-style] table in one
+' edit. This is the multi-rule citation path: each style is resolved once,
+' Word performs the native wildcard search, and all matches share one undo
+' record. Literal batch styling remains separate and keeps its escaping rules.
+Public Function WU_ApplyCharacterStyleToWildcardBatch(ByVal document As Document, ByVal matches As Variant, Optional ByVal storyScope As String = "main", Optional ByVal matchCase As Boolean = False, Optional ByVal wholeWord As Boolean = True) As Long
+    Dim firstStory As Range, story As Range, updating As Boolean, opened As Boolean, captured As Boolean
+    Dim failure As Long, failureSource As String, failureText As String
+    Dim firstRow As Long, lastRow As Long, firstColumn As Long, activeRows As Long, changed As Long
+    Dim styleCache() As Style
+    On Error GoTo Failed
+    If document Is Nothing Then Err.Raise 91, "WU_ApplyCharacterStyleToWildcardBatch", "document is required"
+    storyScope = LCase$(Trim$(storyScope))
+    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "headers" And storyScope <> "footers" And storyScope <> "all" Then Err.Raise 5, "WU_ApplyCharacterStyleToWildcardBatch", "story scope must be main, notes, headers, footers, or all"
+    activeRows = WU_ValidateCharacterStyleBatch(document, matches, styleCache, True, "WU_ApplyCharacterStyleToWildcardBatch")
+    If activeRows = 0 Then Exit Function
+    firstRow = LBound(matches, 1): lastRow = UBound(matches, 1): firstColumn = LBound(matches, 2)
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Style wildcard matches batch": opened = True
+    If storyScope = "main" Then
+        Set story = document.StoryRanges(wdMainTextStory)
+        If Not story Is Nothing Then If story.End > story.Start Then changed = WU_ApplyCharacterStyleBatchInStory(story, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord, True)
+    ElseIf storyScope = "notes" Then
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdFootnotesStory)
+        Err.Clear
+        On Error GoTo Failed
+        If Not firstStory Is Nothing Then changed = WU_ApplyCharacterStyleBatchInStoryChain(firstStory, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord, True)
+        Set firstStory = Nothing
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdEndnotesStory)
+        Err.Clear
+        On Error GoTo Failed
+        If Not firstStory Is Nothing Then changed = changed + WU_ApplyCharacterStyleBatchInStoryChain(firstStory, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord, True)
+    ElseIf storyScope = "headers" Then
+        changed = changed + WU_ApplyCharacterStyleBatchInStoryType(document, wdPrimaryHeaderStory, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord, True)
+        changed = changed + WU_ApplyCharacterStyleBatchInStoryType(document, wdFirstPageHeaderStory, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord, True)
+        changed = changed + WU_ApplyCharacterStyleBatchInStoryType(document, wdEvenPagesHeaderStory, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord, True)
+    ElseIf storyScope = "footers" Then
+        changed = changed + WU_ApplyCharacterStyleBatchInStoryType(document, wdPrimaryFooterStory, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord, True)
+        changed = changed + WU_ApplyCharacterStyleBatchInStoryType(document, wdFirstPageFooterStory, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord, True)
+        changed = changed + WU_ApplyCharacterStyleBatchInStoryType(document, wdEvenPagesFooterStory, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord, True)
+    Else
+        For Each firstStory In document.StoryRanges
+            changed = changed + WU_ApplyCharacterStyleBatchInStoryChain(firstStory, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord, True)
+        Next firstStory
+    End If
+    WU_ApplyCharacterStyleToWildcardBatch = changed
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
+' Apply the wildcard/style table only inside the exact caller-supplied Range.
+Public Function WU_ApplyCharacterStyleToWildcardBatchInRange(ByVal target As Range, ByVal matches As Variant, Optional ByVal matchCase As Boolean = False, Optional ByVal wholeWord As Boolean = True) As Long
+    Dim document As Document, updating As Boolean, opened As Boolean, captured As Boolean, activeRows As Long
+    Dim failure As Long, failureSource As String, failureText As String
+    Dim firstRow As Long, lastRow As Long, firstColumn As Long, changed As Long
+    Dim styleCache() As Style
+    On Error GoTo Failed
+    If target Is Nothing Then Err.Raise 91, "WU_ApplyCharacterStyleToWildcardBatchInRange", "target range is required"
+    Set document = target.Document
+    activeRows = WU_ValidateCharacterStyleBatch(document, matches, styleCache, True, "WU_ApplyCharacterStyleToWildcardBatchInRange")
+    If activeRows = 0 Or target.End <= target.Start Then Exit Function
+    firstRow = LBound(matches, 1): lastRow = UBound(matches, 1): firstColumn = LBound(matches, 2)
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Style wildcard matches batch": opened = True
+    WU_ApplyCharacterStyleToWildcardBatchInRange = WU_ApplyCharacterStyleBatchInStory(target, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord, True)
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
 Private Function WU_ReplaceWildcardInScope(ByVal document As Document, ByVal pattern As String, ByVal replacement As String, ByVal storyScope As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Boolean
     Dim firstStory As Range, story As Range, changed As Boolean
     If storyScope = "main" Then
@@ -1809,40 +1911,44 @@ Failed:
     If failure <> 0 Then Err.Raise failure, failureSource, failureText
 End Function
 
-Private Function WU_ValidateCharacterStyleBatch(ByVal document As Document, ByVal matches As Variant, ByRef styleCache() As Style) As Long
+Private Function WU_ValidateCharacterStyleBatch(ByVal document As Document, ByVal matches As Variant, ByRef styleCache() As Style, Optional ByVal useWildcards As Boolean = False, Optional ByVal sourceName As String = "WU_ApplyCharacterStyleBatch") As Long
     Dim firstRow As Long, lastRow As Long, firstColumn As Long, lastColumn As Long, row As Long, dimensionError As Long
     Dim findText As String, styleName As String, style As Style, activeRows As Long
     Dim failure As Long, failureSource As String, failureText As String
     On Error GoTo Failed
-    If Not IsArray(matches) Then Err.Raise 5, "WU_ApplyCharacterStyleBatch", "matches must be a two-dimensional array"
+    If Not IsArray(matches) Then Err.Raise 5, sourceName, "matches must be a two-dimensional array"
     On Error Resume Next
     firstRow = LBound(matches, 1): lastRow = UBound(matches, 1)
     firstColumn = LBound(matches, 2): lastColumn = UBound(matches, 2)
     dimensionError = Err.Number
     Err.Clear
     On Error GoTo Failed
-    If dimensionError <> 0 Then Err.Raise 5, "WU_ApplyCharacterStyleBatch", "matches must be a two-dimensional array"
-    If lastColumn - firstColumn + 1 <> 2 Then Err.Raise 5, "WU_ApplyCharacterStyleBatch", "matches must have exactly two columns"
-    If lastRow - firstRow + 1 > WU_MAX_BATCH_RULES Then Err.Raise 5, "WU_ApplyCharacterStyleBatch", "style rule count exceeds 1024"
+    If dimensionError <> 0 Then Err.Raise 5, sourceName, "matches must be a two-dimensional array"
+    If lastColumn - firstColumn + 1 <> 2 Then Err.Raise 5, sourceName, "matches must have exactly two columns"
+    If lastRow - firstRow + 1 > WU_MAX_BATCH_RULES Then Err.Raise 5, sourceName, "style rule count exceeds 1024"
     ReDim styleCache(firstRow To lastRow)
     For row = firstRow To lastRow
-        If IsError(matches(row, firstColumn)) Or IsNull(matches(row, firstColumn)) Or IsObject(matches(row, firstColumn)) Or IsArray(matches(row, firstColumn)) Then Err.Raise 5, "WU_ApplyCharacterStyleBatch", "style rule " & CStr(row) & " find text must be scalar"
-        If IsError(matches(row, firstColumn + 1)) Or IsNull(matches(row, firstColumn + 1)) Or IsObject(matches(row, firstColumn + 1)) Or IsArray(matches(row, firstColumn + 1)) Then Err.Raise 5, "WU_ApplyCharacterStyleBatch", "style rule " & CStr(row) & " style name must be scalar"
+        If IsError(matches(row, firstColumn)) Or IsNull(matches(row, firstColumn)) Or IsObject(matches(row, firstColumn)) Or IsArray(matches(row, firstColumn)) Then Err.Raise 5, sourceName, "style rule " & CStr(row) & " pattern must be scalar"
+        If IsError(matches(row, firstColumn + 1)) Or IsNull(matches(row, firstColumn + 1)) Or IsObject(matches(row, firstColumn + 1)) Or IsArray(matches(row, firstColumn + 1)) Then Err.Raise 5, sourceName, "style rule " & CStr(row) & " style name must be scalar"
         findText = CStr(matches(row, firstColumn))
         styleName = CStr(matches(row, firstColumn + 1))
-        WU_ValidateLiteral findText, "", "WU_ApplyCharacterStyleBatch"
-        If Len(Trim$(styleName)) = 0 Then Err.Raise 5, "WU_ApplyCharacterStyleBatch", "style rule " & CStr(row) & " style name is required"
+        If useWildcards Then
+            WU_ValidateWildcard findText, "", sourceName
+        Else
+            WU_ValidateLiteral findText, "", sourceName
+        End If
+        If Len(Trim$(styleName)) = 0 Then Err.Raise 5, sourceName, "style rule " & CStr(row) & " style name is required"
         Set style = Nothing
         On Error Resume Next
         Set style = document.Styles(styleName)
         If Err.Number <> 0 Or style Is Nothing Then
             Err.Clear
             On Error GoTo Failed
-            Err.Raise 5, "WU_ApplyCharacterStyleBatch", "style rule " & CStr(row) & " names a missing style"
+            Err.Raise 5, sourceName, "style rule " & CStr(row) & " names a missing style"
         End If
         Err.Clear
         On Error GoTo Failed
-        If style.Type <> wdStyleTypeCharacter And Not style.Linked Then Err.Raise 5, "WU_ApplyCharacterStyleBatch", "style rule " & CStr(row) & " style is not a character style"
+        If style.Type <> wdStyleTypeCharacter And Not style.Linked Then Err.Raise 5, sourceName, "style rule " & CStr(row) & " style is not a character style"
         Set styleCache(row) = style
         activeRows = activeRows + 1
     Next row
@@ -1934,31 +2040,31 @@ Private Function WU_CharacterStyleMatches(ByVal target As Range, ByVal expectedN
     If readError = 0 Then WU_CharacterStyleMatches = (StrComp(currentStyle, expectedName, vbTextCompare) = 0)
 End Function
 
-Private Function WU_ApplyCharacterStyleBatchInStoryChain(ByVal firstStory As Range, ByVal matches As Variant, ByRef styleCache() As Style, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
+Private Function WU_ApplyCharacterStyleBatchInStoryChain(ByVal firstStory As Range, ByVal matches As Variant, ByRef styleCache() As Style, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, Optional ByVal useWildcards As Boolean = False) As Long
     Dim story As Range, changed As Long
     Set story = firstStory
     Do While Not story Is Nothing
-        If story.End > story.Start Then changed = changed + WU_ApplyCharacterStyleBatchInStory(story, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+        If story.End > story.Start Then changed = changed + WU_ApplyCharacterStyleBatchInStory(story, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord, useWildcards)
         Set story = story.NextStoryRange
     Loop
     WU_ApplyCharacterStyleBatchInStoryChain = changed
 End Function
 
-Private Function WU_ApplyCharacterStyleBatchInStoryType(ByVal document As Document, ByVal storyType As Long, ByVal matches As Variant, ByRef styleCache() As Style, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
+Private Function WU_ApplyCharacterStyleBatchInStoryType(ByVal document As Document, ByVal storyType As Long, ByVal matches As Variant, ByRef styleCache() As Style, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, Optional ByVal useWildcards As Boolean = False) As Long
     Dim firstStory As Range
     On Error Resume Next
     Set firstStory = document.StoryRanges(storyType)
     Err.Clear
     On Error GoTo 0
-    If Not firstStory Is Nothing Then WU_ApplyCharacterStyleBatchInStoryType = WU_ApplyCharacterStyleBatchInStoryChain(firstStory, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+    If Not firstStory Is Nothing Then WU_ApplyCharacterStyleBatchInStoryType = WU_ApplyCharacterStyleBatchInStoryChain(firstStory, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord, useWildcards)
 End Function
 
-Private Function WU_ApplyCharacterStyleBatchInStory(ByVal story As Range, ByVal matches As Variant, ByRef styleCache() As Style, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
+Private Function WU_ApplyCharacterStyleBatchInStory(ByVal story As Range, ByVal matches As Variant, ByRef styleCache() As Style, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, Optional ByVal useWildcards As Boolean = False) As Long
     Dim row As Long, findText As String, style As Style, changed As Long
     For row = firstRow To lastRow
         findText = CStr(matches(row, firstColumn))
         Set style = styleCache(row)
-        changed = changed + WU_ApplyCharacterStyleInStory(story, findText, style, matchCase, wholeWord)
+        changed = changed + WU_ApplyCharacterStyleInStory(story, findText, style, matchCase, wholeWord, useWildcards)
     Next row
     WU_ApplyCharacterStyleBatchInStory = changed
 End Function
