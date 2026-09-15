@@ -133,7 +133,7 @@ func builtin() []Manifest {
 			items[i].Version = "1.0.3"
 		}
 		if items[i].ID == "document.text-operations" {
-			items[i].Version = "1.0.2"
+			items[i].Version = "1.0.3"
 		}
 		items[i].Schema = 1
 		items[i].License = "MIT"

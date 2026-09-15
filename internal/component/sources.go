@@ -366,15 +366,25 @@ Public Function WU_ReplaceLiteral(ByVal document As Document, ByVal findText As 
     captured = True
     Application.ScreenUpdating = False
     Application.UndoRecord.StartCustomRecord "Replace literal text": opened = True
-    For Each firstStory In document.StoryRanges
-        Set story = firstStory
-        Do While Not story Is Nothing
-            If story.End > story.Start And WU_StoryMatchesScope(story, storyScope) Then
-                If WU_ReplaceLiteralInStory(story, findText, replaceText, matchCase, wholeWord) Then changed = True
-            End If
-            Set story = story.NextStoryRange
-        Loop
-    Next firstStory
+    If storyScope = "main" Then
+        ' The main story is a single range. Avoid enumerating every empty
+        ' header, footer, text frame and note when the caller requested the
+        ' overwhelmingly common body-only operation.
+        Set story = document.StoryRanges(wdMainTextStory)
+        If Not story Is Nothing Then
+            If story.End > story.Start Then changed = WU_ReplaceLiteralInStory(story, findText, replaceText, matchCase, wholeWord)
+        End If
+    Else
+        For Each firstStory In document.StoryRanges
+            Set story = firstStory
+            Do While Not story Is Nothing
+                If story.End > story.Start And WU_StoryMatchesScope(story, storyScope) Then
+                    If WU_ReplaceLiteralInStory(story, findText, replaceText, matchCase, wholeWord) Then changed = True
+                End If
+                Set story = story.NextStoryRange
+            Loop
+        Next firstStory
+    End If
     WU_ReplaceLiteral = changed
 CleanUp:
     On Error Resume Next
