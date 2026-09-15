@@ -132,6 +132,7 @@ func builtin() []Manifest {
 		if items[i].ID == "document.style-converter" {
 			items[i].Version = "1.0.4"
 			items[i].Capabilities = []string{"paragraph-style conversion", "range-bounded conversion", "story-wide conversion"}
+			items[i].Acceptance = "WU_ConvertStyle and WU_ConvertStyleInRange are public, bounded, state-safe, and compile without non-Office references."
 		}
 		if items[i].ID == "document.text-operations" {
 			items[i].Version = "1.0.6"
