@@ -32,7 +32,10 @@ claims that every Word build or manuscript has identical latency.
 Style-map and offset-run validators cache each unique Word style handle once
 per operation, including non-adjacent repeated rules. Generated journal citation
 audits count note objects directly and use the shared bounded note-story search
-instead of materializing each note's text.
+instead of materializing each note's text. Every shared Find path pins Word's
+sticky fuzzy/phrase, width, Unicode, control-character, prefix, and suffix
+flags where the host exposes them, for deterministic results after interactive
+searches.
 Long field/contents refresh and revision-review scans now reset the shared
 cooperative cancellation state, checkpoint bounded story intervals, and restore
 the caller's status bar when cancelled or failed.

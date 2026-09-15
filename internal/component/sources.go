@@ -660,7 +660,13 @@ Private Function WU_ConvertStyleInStory(ByVal story As Range, ByVal sourceStyle 
         .Forward = True
         .Wrap = wdFindStop
         .Format = True
-End With
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchWildcards = False
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
+    End With
+    WU_PinFindOptions scope.Find
 WU_ConvertStyleInStory = scope.Find.Execute(Replace:=wdReplaceAll)
 End Function
 
@@ -850,6 +856,24 @@ Private Function WU_ParagraphStyleMatches(ByVal target As Range, ByVal style As 
     If Len(expectedName) = 0 Then expectedName = style.NameLocal
     If readError = 0 Then WU_ParagraphStyleMatches = (StrComp(currentStyle, expectedName, vbTextCompare) = 0)
 End Function
+
+Private Sub WU_PinFindOptions(ByVal criteria As Find)
+    ' These options exist in current Word object libraries but are optional
+    ' for some language packs/older hosts. Ignore only an unavailable option;
+    ' the required style and replacement settings remain fail-fast.
+    On Error Resume Next
+    criteria.MatchFuzzy = False
+    criteria.MatchPhrase = False
+    criteria.MatchByte = False
+    criteria.MatchKashida = False
+    criteria.MatchDiacritics = False
+    criteria.MatchAlefHamza = False
+    criteria.MatchControl = False
+    criteria.MatchPrefix = False
+    criteria.MatchSuffix = False
+    Err.Clear
+    On Error GoTo 0
+End Sub
 `
 
 const textOperationsSource = `Attribute VB_Name = "WordUpTextOperations"
@@ -2157,6 +2181,7 @@ Private Function WU_CountLiteralInStory(ByVal story As Range, ByVal findText As 
         .MatchSoundsLike = False
         .MatchAllWordForms = False
     End With
+    WU_PinFindOptions search.Find
     Do While search.Find.Execute
         count = count + 1
         nextStart = search.End
@@ -2235,6 +2260,7 @@ Private Function WU_ApplyCharacterStyleInStory(ByVal story As Range, ByVal findT
         .MatchSoundsLike = False
         .MatchAllWordForms = False
     End With
+    WU_PinFindOptions search.Find
     Do While search.Find.Execute
         currentStyle = vbNullString
         On Error Resume Next
@@ -2295,8 +2321,27 @@ Private Function WU_ReplaceLiteralInStory(ByVal story As Range, ByVal findText A
         .MatchSoundsLike = False
         .MatchAllWordForms = False
     End With
+    WU_PinFindOptions search.Find
     WU_ReplaceLiteralInStory = search.Find.Execute(Replace:=wdReplaceAll)
 End Function
+
+Private Sub WU_PinFindOptions(ByVal criteria As Find)
+    ' These options exist in current Word object libraries but are optional
+    ' for some language packs/older hosts. Ignore only an unavailable option;
+    ' the required text, scope, and replacement settings remain fail-fast.
+    On Error Resume Next
+    criteria.MatchFuzzy = False
+    criteria.MatchPhrase = False
+    criteria.MatchByte = False
+    criteria.MatchKashida = False
+    criteria.MatchDiacritics = False
+    criteria.MatchAlefHamza = False
+    criteria.MatchControl = False
+    criteria.MatchPrefix = False
+    criteria.MatchSuffix = False
+    Err.Clear
+    On Error GoTo 0
+End Sub
 
 Private Function WU_EscapeFindLiteral(ByVal value As String) As String
     WU_EscapeFindLiteral = Replace(value, "^", "^^")

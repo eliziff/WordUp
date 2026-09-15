@@ -359,7 +359,7 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.9" {
+	if item.Version != "1.0.12" {
 		t.Fatalf("style converter version did not advance: %q", item.Version)
 	}
 	for _, capability := range []string{"paragraph-style conversion", "paragraph-style application", "range-bounded conversion", "offset style runs", "story-wide conversion", "header/footer scopes", "batch style mapping"} {
@@ -432,6 +432,17 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 		"If enabled(row) Then If WU_ConvertStyleInStory",
 		"WU_ConvertStyleInStoryChain",
 		"WU_ConvertStyleInStoryType",
+		"Private Sub WU_PinFindOptions(ByVal criteria As Find)",
+		"WU_PinFindOptions scope.Find",
+		".MatchFuzzy = False",
+		".MatchPhrase = False",
+		".MatchByte = False",
+		".MatchKashida = False",
+		".MatchDiacritics = False",
+		".MatchAlefHamza = False",
+		".MatchControl = False",
+		".MatchPrefix = False",
+		".MatchSuffix = False",
 		"wdPrimaryHeaderStory",
 		"wdFirstPageHeaderStory",
 		"wdEvenPagesHeaderStory",
@@ -451,7 +462,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.16" {
+	if item.Version != "1.0.19" {
 		t.Fatalf("text operations version=%q", item.Version)
 	}
 	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
@@ -531,6 +542,12 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		".MatchWholeWord = wholeWord",
 		".MatchSoundsLike = False",
 		".MatchAllWordForms = False",
+		".MatchKashida = False",
+		".MatchDiacritics = False",
+		".MatchAlefHamza = False",
+		".MatchControl = False",
+		".MatchPrefix = False",
+		".MatchSuffix = False",
 		"WU_EscapeFindLiteral = Replace(value, \"^\", \"^^\")",
 		"WU_FindPattern",
 		"WU_ReplacementPattern",
@@ -569,6 +586,11 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"ReDim cachedNames(1 To cacheCapacity): ReDim cachedStyles(1 To cacheCapacity)",
 		"If StrComp(styleName, cachedNames(cacheRow), vbTextCompare) = 0 Then cacheIndex = cacheRow: Exit For",
 		"cachedNames(cacheIndex) = styleName: Set cachedStyles(cacheIndex) = style",
+		"Private Sub WU_PinFindOptions(ByVal criteria As Find)",
+		"WU_PinFindOptions search.Find",
+		".MatchFuzzy = False",
+		".MatchPhrase = False",
+		".MatchByte = False",
 		"targetStyleName = style.NameLocal",
 		"If StrComp(currentStyle, targetStyleName, vbTextCompare) <> 0 Then",
 		"search.SetRange Start:=nextStart, End:=story.End",
