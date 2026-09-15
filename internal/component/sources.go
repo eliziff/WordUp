@@ -525,7 +525,7 @@ Public Function WU_ReplaceLiteralBatch(ByVal document As Document, ByVal replace
     If document Is Nothing Then Err.Raise 91, "WU_ReplaceLiteralBatch", "document is required"
     storyScope = LCase$(Trim$(storyScope))
     If storyScope <> "main" And storyScope <> "notes" And storyScope <> "all" Then Err.Raise 5, "WU_ReplaceLiteralBatch", "story scope must be main, notes, or all"
-    activeRows = WU_ValidateLiteralBatch(replacements, matchCase)
+    activeRows = WU_ValidateLiteralBatch(replacements, matchCase, "WU_ReplaceLiteralBatch")
     If activeRows = 0 Then Exit Function
     firstRow = LBound(replacements, 1): lastRow = UBound(replacements, 1): firstColumn = LBound(replacements, 2)
     ReDim matched(firstRow To lastRow)
@@ -586,7 +586,7 @@ Public Function WU_ReplaceLiteralBatchInRange(ByVal target As Range, ByVal repla
     On Error GoTo Failed
     If target Is Nothing Then Err.Raise 91, "WU_ReplaceLiteralBatchInRange", "target range is required"
     Set document = target.Document
-    activeRows = WU_ValidateLiteralBatch(replacements, matchCase)
+    activeRows = WU_ValidateLiteralBatch(replacements, matchCase, "WU_ReplaceLiteralBatchInRange")
     If activeRows = 0 Then Exit Function
     targetStart = target.Start: targetEnd = target.End
     If targetEnd <= targetStart Then Exit Function
@@ -713,6 +713,65 @@ Failed:
     Resume CleanUp
 End Function
 
+' Apply a two-column Variant array of literal/style pairs in one safe edit.
+' The first column is the literal to find and the second is an existing
+' character or linked style name. The return value is the number of matching
+' ranges whose style actually changed; repeated rules are therefore safe and
+' do not inflate the result after the first application.
+Public Function WU_ApplyCharacterStyleBatch(ByVal document As Document, ByVal matches As Variant, Optional ByVal storyScope As String = "main", Optional ByVal matchCase As Boolean = False, Optional ByVal wholeWord As Boolean = True) As Long
+    Dim firstStory As Range, story As Range, updating As Boolean, opened As Boolean, captured As Boolean
+    Dim failure As Long, failureSource As String, failureText As String
+    Dim firstRow As Long, lastRow As Long, firstColumn As Long, activeRows As Long, changed As Long
+    On Error GoTo Failed
+    If document Is Nothing Then Err.Raise 91, "WU_ApplyCharacterStyleBatch", "document is required"
+    storyScope = LCase$(Trim$(storyScope))
+    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "all" Then Err.Raise 5, "WU_ApplyCharacterStyleBatch", "story scope must be main, notes, or all"
+    activeRows = WU_ValidateCharacterStyleBatch(document, matches)
+    If activeRows = 0 Then Exit Function
+    firstRow = LBound(matches, 1): lastRow = UBound(matches, 1): firstColumn = LBound(matches, 2)
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Style literal matches batch": opened = True
+    If storyScope = "main" Then
+        Set story = document.StoryRanges(wdMainTextStory)
+        If Not story Is Nothing Then If story.End > story.Start Then changed = WU_ApplyCharacterStyleBatchInStory(story, document, matches, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+    ElseIf storyScope = "notes" Then
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdFootnotesStory)
+        Err.Clear
+        On Error GoTo Failed
+        If Not firstStory Is Nothing Then changed = WU_ApplyCharacterStyleBatchInStoryChain(firstStory, document, matches, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+        Set firstStory = Nothing
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdEndnotesStory)
+        Err.Clear
+        On Error GoTo Failed
+        If Not firstStory Is Nothing Then changed = changed + WU_ApplyCharacterStyleBatchInStoryChain(firstStory, document, matches, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+    Else
+        For Each firstStory In document.StoryRanges
+            changed = changed + WU_ApplyCharacterStyleBatchInStoryChain(firstStory, document, matches, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+        Next firstStory
+    End If
+    WU_ApplyCharacterStyleBatch = changed
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
 ' Replace only inside an already-bounded Range. This is the fast path for
 ' callers that have an exact paragraph, content control, table cell, or other
 ' Word range and must not touch any other story. The range's direct formatting
@@ -757,25 +816,25 @@ Private Sub WU_ValidateLiteral(ByVal findText As String, ByVal replaceText As St
     If Len(WU_EscapeFindLiteral(replaceText)) > 255 Then Err.Raise 5, sourceName, "replacement text exceeds Word's escaped 255-character limit"
 End Sub
 
-Private Function WU_ValidateLiteralBatch(ByVal replacements As Variant, ByVal matchCase As Boolean) As Long
+Private Function WU_ValidateLiteralBatch(ByVal replacements As Variant, ByVal matchCase As Boolean, ByVal sourceName As String) As Long
     Dim firstRow As Long, lastRow As Long, firstColumn As Long, lastColumn As Long, row As Long
     Dim findText As String, replaceText As String, activeRows As Long, dimensionError As Long
     Dim failure As Long, failureSource As String, failureText As String
     On Error GoTo Failed
-    If Not IsArray(replacements) Then Err.Raise 5, "WU_ReplaceLiteralBatch", "replacements must be a two-dimensional array"
+    If Not IsArray(replacements) Then Err.Raise 5, sourceName, "replacements must be a two-dimensional array"
     On Error Resume Next
     firstRow = LBound(replacements, 1): lastRow = UBound(replacements, 1)
     firstColumn = LBound(replacements, 2): lastColumn = UBound(replacements, 2)
     dimensionError = Err.Number
     Err.Clear
     On Error GoTo Failed
-    If dimensionError <> 0 Then Err.Raise 5, "WU_ReplaceLiteralBatch", "replacements must be a two-dimensional array"
-    If lastColumn - firstColumn + 1 <> 2 Then Err.Raise 5, "WU_ReplaceLiteralBatch", "replacements must have exactly two columns"
-    If lastRow - firstRow + 1 > WU_MAX_BATCH_RULES Then Err.Raise 5, "WU_ReplaceLiteralBatch", "replacement rule count exceeds 1024"
+    If dimensionError <> 0 Then Err.Raise 5, sourceName, "replacements must be a two-dimensional array"
+    If lastColumn - firstColumn + 1 <> 2 Then Err.Raise 5, sourceName, "replacements must have exactly two columns"
+    If lastRow - firstRow + 1 > WU_MAX_BATCH_RULES Then Err.Raise 5, sourceName, "replacement rule count exceeds 1024"
     For row = firstRow To lastRow
         findText = CStr(replacements(row, firstColumn))
         replaceText = CStr(replacements(row, firstColumn + 1))
-        WU_ValidateLiteral findText, replaceText, "WU_ReplaceLiteralBatch"
+        WU_ValidateLiteral findText, replaceText, sourceName
         If Not (matchCase And StrComp(findText, replaceText, vbBinaryCompare) = 0) Then activeRows = activeRows + 1
     Next row
     WU_ValidateLiteralBatch = activeRows
@@ -784,6 +843,70 @@ Failed:
     failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
     On Error GoTo 0
     If failure <> 0 Then Err.Raise failure, failureSource, failureText
+End Function
+
+Private Function WU_ValidateCharacterStyleBatch(ByVal document As Document, ByVal matches As Variant) As Long
+    Dim firstRow As Long, lastRow As Long, firstColumn As Long, lastColumn As Long, row As Long, dimensionError As Long
+    Dim findText As String, styleName As String, style As Style, activeRows As Long
+    Dim failure As Long, failureSource As String, failureText As String
+    On Error GoTo Failed
+    If Not IsArray(matches) Then Err.Raise 5, "WU_ApplyCharacterStyleBatch", "matches must be a two-dimensional array"
+    On Error Resume Next
+    firstRow = LBound(matches, 1): lastRow = UBound(matches, 1)
+    firstColumn = LBound(matches, 2): lastColumn = UBound(matches, 2)
+    dimensionError = Err.Number
+    Err.Clear
+    On Error GoTo Failed
+    If dimensionError <> 0 Then Err.Raise 5, "WU_ApplyCharacterStyleBatch", "matches must be a two-dimensional array"
+    If lastColumn - firstColumn + 1 <> 2 Then Err.Raise 5, "WU_ApplyCharacterStyleBatch", "matches must have exactly two columns"
+    If lastRow - firstRow + 1 > WU_MAX_BATCH_RULES Then Err.Raise 5, "WU_ApplyCharacterStyleBatch", "style rule count exceeds 1024"
+    For row = firstRow To lastRow
+        If IsError(matches(row, firstColumn)) Or IsNull(matches(row, firstColumn)) Then Err.Raise 5, "WU_ApplyCharacterStyleBatch", "style rule " & CStr(row) & " find text must be scalar"
+        If IsError(matches(row, firstColumn + 1)) Or IsNull(matches(row, firstColumn + 1)) Then Err.Raise 5, "WU_ApplyCharacterStyleBatch", "style rule " & CStr(row) & " style name must be scalar"
+        findText = CStr(matches(row, firstColumn))
+        styleName = CStr(matches(row, firstColumn + 1))
+        WU_ValidateLiteral findText, "", "WU_ApplyCharacterStyleBatch"
+        If Len(Trim$(styleName)) = 0 Then Err.Raise 5, "WU_ApplyCharacterStyleBatch", "style rule " & CStr(row) & " style name is required"
+        Set style = Nothing
+        On Error Resume Next
+        Set style = document.Styles(styleName)
+        If Err.Number <> 0 Or style Is Nothing Then
+            Err.Clear
+            On Error GoTo Failed
+            Err.Raise 5, "WU_ApplyCharacterStyleBatch", "style rule " & CStr(row) & " names a missing style"
+        End If
+        Err.Clear
+        On Error GoTo Failed
+        If style.Type <> wdStyleTypeCharacter And Not style.Linked Then Err.Raise 5, "WU_ApplyCharacterStyleBatch", "style rule " & CStr(row) & " style is not a character style"
+        activeRows = activeRows + 1
+    Next row
+    WU_ValidateCharacterStyleBatch = activeRows
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+End Function
+
+Private Function WU_ApplyCharacterStyleBatchInStoryChain(ByVal firstStory As Range, ByVal document As Document, ByVal matches As Variant, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
+    Dim story As Range, changed As Long
+    Set story = firstStory
+    Do While Not story Is Nothing
+        If story.End > story.Start Then changed = changed + WU_ApplyCharacterStyleBatchInStory(story, document, matches, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+        Set story = story.NextStoryRange
+    Loop
+    WU_ApplyCharacterStyleBatchInStoryChain = changed
+End Function
+
+Private Function WU_ApplyCharacterStyleBatchInStory(ByVal story As Range, ByVal document As Document, ByVal matches As Variant, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
+    Dim row As Long, findText As String, styleName As String, style As Style, changed As Long
+    For row = firstRow To lastRow
+        findText = CStr(matches(row, firstColumn))
+        styleName = CStr(matches(row, firstColumn + 1))
+        Set style = document.Styles(styleName)
+        changed = changed + WU_ApplyCharacterStyleInStory(story, findText, style, matchCase, wholeWord)
+    Next row
+    WU_ApplyCharacterStyleBatchInStory = changed
 End Function
 
 Private Function WU_CountLiteralInStoryChain(ByVal firstStory As Range, ByVal findText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long

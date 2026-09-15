@@ -11,7 +11,7 @@ The full harness goal is **not complete**. This index distinguishes current evid
 
 The current neutral journal slice adds read-only literal counting, bounded
 batch replacement (including an exact Range path), and direct character-style
-match/range operations beside the document/story replacement path. All paths use bounded Word Find operations, preserve text and unrelated
+match/range/batch operations beside the document/story replacement path. All paths use bounded Word Find operations, preserve text and unrelated
 direct formatting, create one undo record, restore `ScreenUpdating`, and reject
 Word's raw and escaped 255-character limits. The native fixture also covers a
 partial-range boundary, literal caret text, whole-word matching, notes-only

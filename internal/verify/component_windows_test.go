@@ -180,7 +180,7 @@ Public Function CheckRibbonAndProgress() As String
 End Function
 Public Function CheckTextOperations() As String
     Dim d As Document, result As Boolean, before As String, bodyAfterNote As String, formatted As Range, scoped As Range, rejected As Boolean, note As Footnote, priorUpdating As Boolean
-    Dim replacements(0 To 2, 0 To 1) As Variant, batchChanged As Long, rangeBatchChanged As Long, literalCount As Long, citationStyle As Style, styled As Long
+    Dim replacements(0 To 2, 0 To 1) As Variant, styleMatches(0 To 2, 0 To 1) As Variant, batchChanged As Long, rangeBatchChanged As Long, literalCount As Long, citationStyle As Style, styled As Long, styleBatchChanged As Long
     Dim i As Long, lines(1 To 400) As String, started As Single, elapsed As Single
     Set d = Documents.Add
     d.Content.Text = "Alpha alpha alphabet" & vbCr
@@ -239,6 +239,16 @@ Public Function CheckTextOperations() As String
     If Not d.Paragraphs(1).Range.Characters(1).Italic Or Not d.Paragraphs(1).Range.Characters(7).Italic Then Err.Raise 5, , "character style matcher did not apply the requested style"
     If Not d.Undo Then Err.Raise 5, , "character style matcher did not create one undo record"
     If d.Paragraphs(1).Range.Characters(1).Italic Or d.Paragraphs(1).Range.Characters(7).Italic Then Err.Raise 5, , "character style matcher undo did not restore formatting"
+    d.Content.Text = "Alpha Alpha Gamma" & vbCr
+    styleMatches(0, 0) = "Alpha": styleMatches(0, 1) = citationStyle.NameLocal
+    styleMatches(1, 0) = "Gamma": styleMatches(1, 1) = citationStyle.NameLocal
+    styleMatches(2, 0) = "Unused": styleMatches(2, 1) = citationStyle.NameLocal
+    styleBatchChanged = WU_ApplyCharacterStyleBatch(d, styleMatches, "main", True, True)
+    If styleBatchChanged <> 3 Then Err.Raise 5, , "character style batch did not style each matching range"
+    If d.Content.Text <> "Alpha Alpha Gamma" & vbCr Then Err.Raise 5, , "character style batch changed text"
+    If Not d.Paragraphs(1).Range.Characters(1).Italic Or Not d.Paragraphs(1).Range.Characters(7).Italic Or Not d.Paragraphs(1).Range.Characters(13).Italic Then Err.Raise 5, , "character style batch missed a match"
+    If Not d.Undo Then Err.Raise 5, , "character style batch did not create one undo record"
+    If d.Paragraphs(1).Range.Characters(1).Italic Or d.Paragraphs(1).Range.Characters(7).Italic Or d.Paragraphs(1).Range.Characters(13).Italic Then Err.Raise 5, , "character style batch undo did not restore formatting"
     d.Content.Text = before
     Set scoped = d.Paragraphs(1).Range.Duplicate
     scoped.Collapse wdCollapseStart

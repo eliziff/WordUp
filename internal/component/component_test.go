@@ -404,13 +404,13 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.7" {
+	if item.Version != "1.0.8" {
 		t.Fatalf("text operations version=%q", item.Version)
 	}
 	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
 		t.Fatalf("unexpected text operations files: %#v", item.Files)
 	}
-	for _, capability := range []string{"literal replacement", "literal counting", "batch replacement", "range-bounded edits", "character-style matching"} {
+	for _, capability := range []string{"literal replacement", "literal counting", "batch replacement", "range-bounded edits", "character-style matching", "batch character-style matching"} {
 		found := false
 		for _, got := range item.Capabilities {
 			if got == capability {
@@ -432,6 +432,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"Public Function WU_ReplaceLiteralInRange",
 		"Public Function WU_ApplyCharacterStyleToMatches",
 		"Public Function WU_ApplyCharacterStyleToRange",
+		"Public Function WU_ApplyCharacterStyleBatch",
 		"target range is required",
 		"never opens an undo record or toggles ScreenUpdating",
 		"story scope must be main, notes, or all",
@@ -439,11 +440,13 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"replacements must have exactly two columns",
 		"Private Const WU_MAX_BATCH_RULES As Long = 1024",
 		"replacement rule count exceeds 1024",
+		"style rule count exceeds 1024",
 		"style is not a character style",
 		"find text exceeds Word's 255-character limit",
 		"Application.UndoRecord.StartCustomRecord \"Replace literal text\"",
 		"Application.UndoRecord.StartCustomRecord \"Replace literal text batch\"",
 		"Application.UndoRecord.StartCustomRecord \"Style literal matches\"",
+		"Application.UndoRecord.StartCustomRecord \"Style literal matches batch\"",
 		"If captured Then Application.ScreenUpdating = updating",
 		".Replacement.Text = WU_EscapeFindLiteral(replaceText)",
 		"find text exceeds Word's escaped 255-character limit",
@@ -461,11 +464,12 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"If matchCase And StrComp(findText, replaceText, vbBinaryCompare) = 0 Then Exit Function",
 		"targetStart = target.Start: targetEnd = target.End",
 		"If targetEnd <= targetStart Then Exit Function",
-		"WU_ValidateLiteralBatch(replacements, matchCase)",
+		"WU_ValidateLiteralBatch(replacements, matchCase, \"WU_ReplaceLiteralBatch\")",
 		"ReDim matched(firstRow To lastRow)",
 		"If matched(row) Then changed = changed + 1",
 		"ByRef matched() As Boolean",
 		"WU_ApplyCharacterStyleInStoryChain",
+		"WU_ApplyCharacterStyleBatchInStoryChain",
 		"If StrComp(currentStyle, style.NameLocal, vbTextCompare) <> 0 Then",
 		"search.SetRange Start:=nextStart, End:=story.End",
 	} {
