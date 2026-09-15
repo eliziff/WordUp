@@ -77,7 +77,8 @@ func Resolve(rows []map[string]any) map[string]any {
 			score += 30
 			evidence = append(evidence, "heading-style-name")
 		}
-		if _, ok := row["marker_interpretations"]; ok {
+		alternatives := markerAlternatives(row)
+		if len(alternatives) > 0 {
 			score += 25
 			evidence = append(evidence, "marker-grammar")
 		}
@@ -103,7 +104,7 @@ func Resolve(rows []map[string]any) map[string]any {
 				evidence = append(evidence, "native-numbering")
 			}
 		}
-		if sequence, ok := row["sequence_evidence"].(Assignment); ok && sequence.Action != "violation" {
+		if sequence, ok := sequenceAssignment(row["sequence_evidence"]); ok && sequence.Action != "violation" {
 			if !validHierarchyLevel(sequence.Level) {
 				addContradiction(row, fmt.Sprintf("sequence level %d is outside Word's 1-9 hierarchy", sequence.Level))
 			} else {
@@ -149,7 +150,7 @@ func Resolve(rows []map[string]any) map[string]any {
 			score += 8
 			evidence = append(evidence, "uppercase-text")
 		}
-		if level >= 5 && !headingStyle(style) && row["marker_interpretations"] == nil {
+		if level >= 5 && !headingStyle(style) && len(alternatives) == 0 {
 			// Deep outline levels on an ordinary body style are commonly stale
 			// residue from an editor's outline view. Keep the evidence, but do
 			// not let the native-outline bonus promote the paragraph by itself.
@@ -160,7 +161,6 @@ func Resolve(rows []map[string]any) map[string]any {
 			score -= 18
 			evidence = append(evidence, "sentence-ending")
 		}
-		alternatives := markerAlternatives(row)
 		contradictions := structureContradictions(row)
 		ambiguous := len(alternatives) > 1 || len(contradictions) > 0
 		if len(alternatives) > 1 {
@@ -224,11 +224,64 @@ func addContradiction(row map[string]any, message string) {
 }
 
 func markerAlternatives(row map[string]any) []Interpretation {
-	choices, ok := row["marker_interpretations"].([]Interpretation)
-	if !ok || len(choices) == 0 {
-		return nil
+	switch choices := row["marker_interpretations"].(type) {
+	case []Interpretation:
+		if len(choices) == 0 {
+			return nil
+		}
+		return append([]Interpretation(nil), choices...)
+	case []any:
+		out := make([]Interpretation, 0, len(choices))
+		for _, choice := range choices {
+			if interpretation, ok := interpretationValue(choice); ok {
+				out = append(out, interpretation)
+			}
+		}
+		if len(out) > 0 {
+			return out
+		}
 	}
-	return append([]Interpretation(nil), choices...)
+	return nil
+}
+
+func interpretationValue(value any) (Interpretation, bool) {
+	switch interpretation := value.(type) {
+	case Interpretation:
+		return interpretation, interpretation.Family != "" && interpretation.Value > 0
+	case map[string]any:
+		family, _ := interpretation["family"].(string)
+		marker, ok := intValue(interpretation["value"])
+		if !ok || family == "" || marker < 1 {
+			return Interpretation{}, false
+		}
+		return Interpretation{Family: family, Value: marker}, true
+	default:
+		return Interpretation{}, false
+	}
+}
+
+func sequenceAssignment(value any) (Assignment, bool) {
+	switch assignment := value.(type) {
+	case Assignment:
+		return assignment, true
+	case map[string]any:
+		family, _ := assignment["family"].(string)
+		marker, markerOK := intValue(assignment["value"])
+		level, levelOK := intValue(assignment["level"])
+		action, _ := assignment["action"].(string)
+		if !markerOK {
+			marker = 0
+		}
+		if !levelOK {
+			level = 0
+		}
+		if family == "" && marker == 0 && level == 0 && action == "" {
+			return Assignment{}, false
+		}
+		return Assignment{Family: family, Value: marker, Level: level, Action: action}, true
+	default:
+		return Assignment{}, false
+	}
 }
 
 func structureContradictions(row map[string]any) []string {
@@ -303,10 +356,25 @@ func frontMatterRoles(rows []map[string]any) map[int]string {
 
 func styleText(row map[string]any) string {
 	parts := []string{stringValue(row["style_id"])}
-	if names, ok := row["style_names"].([]string); ok {
-		parts = append(parts, names...)
-	}
+	parts = append(parts, stringSlice(row["style_names"])...)
 	return strings.Join(parts, " ")
+}
+
+func stringSlice(value any) []string {
+	switch values := value.(type) {
+	case []string:
+		return append([]string(nil), values...)
+	case []any:
+		out := make([]string, 0, len(values))
+		for _, item := range values {
+			if text, ok := item.(string); ok {
+				out = append(out, text)
+			}
+		}
+		return out
+	default:
+		return nil
+	}
 }
 
 func stringValue(value any) string {
@@ -525,7 +593,7 @@ func headingLevelFromStyle(row map[string]any) int {
 	if id, _ := row["style_id"].(string); id != "" {
 		parts = append(parts, id)
 	}
-	if names, ok := row["style_names"].([]string); ok && len(names) > 0 {
+	if names := stringSlice(row["style_names"]); len(names) > 0 {
 		parts = append(parts, names[0])
 	}
 	name := strings.Join(parts, " ")

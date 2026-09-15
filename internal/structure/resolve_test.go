@@ -128,6 +128,30 @@ func TestResolveRetainsAlternativesScoreAndContradictions(t *testing.T) {
 	}
 }
 
+func TestResolveAcceptsDecodedEvidenceShapes(t *testing.T) {
+	row := map[string]any{
+		"context":     "body",
+		"text":        "I. Introduction",
+		"style_id":    "Normal",
+		"style_names": []any{"Outline 2"},
+		"marker_interpretations": []any{
+			map[string]any{"family": "roman_.", "value": float64(1)},
+			map[string]any{"family": "upper_alpha_.", "value": float64(9)},
+		},
+		"sequence_evidence": map[string]any{
+			"family": "roman_.", "value": float64(1), "level": float64(2), "action": "open_level",
+		},
+	}
+	Resolve([]map[string]any{row})
+	resolved := row["resolved_structure"].(map[string]any)
+	if resolved["role"] != "heading" || resolved["level"] != 2 {
+		t.Fatalf("decoded style/sequence evidence was ignored: %#v", resolved)
+	}
+	if alternatives, ok := resolved["alternatives"].([]Interpretation); !ok || len(alternatives) != 2 {
+		t.Fatalf("decoded marker alternatives were dropped: %#v", resolved["alternatives"])
+	}
+}
+
 func TestResolveRejectsOutOfRangeHierarchyEvidence(t *testing.T) {
 	cases := []map[string]any{
 		{"context": "body", "text": "Body prose", "outline_evidence": map[string]any{"level": 99}},
