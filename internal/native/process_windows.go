@@ -52,7 +52,11 @@ const (
 )
 
 func processCreationFlags(job uintptr) uint32 {
-	flags := uint32(createNewProcessGroup | createSuspended | createNoWindow)
+	// Process groups are not needed for containment (the owned job supplies
+	// that boundary) and some restricted logon sessions reject the extra flag.
+	// Keep only the flags required for suspended handoff, hidden startup and
+	// STARTUPINFOEX handle attributes.
+	flags := uint32(createSuspended | createNoWindow | extendedStartupInfo)
 	// The host is created from the caller and must break out of any enclosing
 	// job before it is assigned to WordUp's owned job. Word itself is launched
 	// by that host and must inherit the owned job; asking it to break away can
