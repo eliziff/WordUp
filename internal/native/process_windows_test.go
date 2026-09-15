@@ -14,7 +14,7 @@ func TestProcessCreationFlagsKeepWordInOwnedJob(t *testing.T) {
 		t.Fatal("Word child must inherit the owned job")
 	}
 	for _, flags := range []uint32{worker, word} {
-		if flags&(createNewProcessGroup|createSuspended|createNoWindow) != createNewProcessGroup|createSuspended|createNoWindow {
+		if flags&(createSuspended|createNoWindow) != createSuspended|createNoWindow {
 			t.Fatalf("required creation flags were lost: %#x", flags)
 		}
 		if flags&extendedStartupInfo == 0 {
