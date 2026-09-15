@@ -437,6 +437,8 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"story scope must be main, notes, or all",
 		"replacements must be a two-dimensional array",
 		"replacements must have exactly two columns",
+		"Private Const WU_MAX_BATCH_RULES As Long = 1024",
+		"replacement rule count exceeds 1024",
 		"style is not a character style",
 		"find text exceeds Word's 255-character limit",
 		"Application.UndoRecord.StartCustomRecord \"Replace literal text\"",

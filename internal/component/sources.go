@@ -390,6 +390,7 @@ End Function
 
 const textOperationsSource = `Attribute VB_Name = "WordUpTextOperations"
 Option Explicit
+Private Const WU_MAX_BATCH_RULES As Long = 1024
 
 ' Replace visible literal text with one bounded Word Find pass per story.
 ' The operation never uses Selection and keeps Word's existing formatting on
@@ -770,6 +771,7 @@ Private Function WU_ValidateLiteralBatch(ByVal replacements As Variant, ByVal ma
     On Error GoTo Failed
     If dimensionError <> 0 Then Err.Raise 5, "WU_ReplaceLiteralBatch", "replacements must be a two-dimensional array"
     If lastColumn - firstColumn + 1 <> 2 Then Err.Raise 5, "WU_ReplaceLiteralBatch", "replacements must have exactly two columns"
+    If lastRow - firstRow + 1 > WU_MAX_BATCH_RULES Then Err.Raise 5, "WU_ReplaceLiteralBatch", "replacement rule count exceeds 1024"
     For row = firstRow To lastRow
         findText = CStr(replacements(row, firstColumn))
         replaceText = CStr(replacements(row, firstColumn + 1))
