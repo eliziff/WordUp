@@ -179,7 +179,7 @@ Public Function CheckRibbonAndProgress() As String
     CheckRibbonAndProgress = "PASS"
 End Function
 Public Function CheckTextOperations() As String
-    Dim d As Document, result As Boolean, before As String, bodyAfterNote As String, formatted As Range, rejected As Boolean, note As Footnote
+    Dim d As Document, result As Boolean, before As String, bodyAfterNote As String, formatted As Range, rejected As Boolean, note As Footnote, priorUpdating As Boolean
     Dim i As Long, lines(1 To 400) As String, started As Single, elapsed As Single
     Set d = Documents.Add
     d.Content.Text = "Alpha alpha alphabet" & vbCr
@@ -187,8 +187,10 @@ Public Function CheckTextOperations() As String
     formatted.End = formatted.Start + 5
     formatted.Italic = True
     before = d.Content.Text
+    priorUpdating = Application.ScreenUpdating
     result = WU_ReplaceLiteral(d, "alpha", "omega", "main", False, True)
     If Not result Then Err.Raise 5, , "literal replacement did not report a change"
+    If Application.ScreenUpdating <> priorUpdating Then Err.Raise 5, , "replacement did not restore ScreenUpdating"
     If d.Content.Text <> "Omega omega alphabet" & vbCr Then Err.Raise 5, , "whole-word replacement changed the wrong text"
     If Not d.Paragraphs(1).Range.Characters(1).Italic Then Err.Raise 5, , "replacement lost direct italic formatting"
     If Not d.Undo Then Err.Raise 5, , "replacement did not create one undo record"
