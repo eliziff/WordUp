@@ -199,6 +199,13 @@ Public Function CheckTextOperations() As String
     If Not d.Paragraphs(1).Range.Characters(1).Italic Then Err.Raise 5, , "replacement lost direct italic formatting"
     If Not d.Undo Then Err.Raise 5, , "replacement did not create one undo record"
     If d.Content.Text <> before Then Err.Raise 5, , "replacement undo did not restore text"
+    d.Content.Text = "a*b aab" & vbCr
+    d.Saved = True
+    result = WU_ReplaceLiteral(d, "a*b", "literal-hit", "main", True, False)
+    If Not result Or d.Content.Text <> "literal-hit aab" & vbCr Then Err.Raise 5, , "literal replacement interpreted wildcard syntax"
+    If Not d.Undo Then Err.Raise 5, , "literal wildcard-safety replacement did not create one undo record"
+    If d.Content.Text <> "a*b aab" & vbCr Then Err.Raise 5, , "literal wildcard-safety undo did not restore text"
+    d.Content.Text = before
     Set scoped = d.Paragraphs(1).Range.Duplicate
     scoped.Start = scoped.Start + 6
     scoped.End = scoped.Start + 5
