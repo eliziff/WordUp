@@ -288,7 +288,7 @@ Option Explicit
 Private Const WU_MAX_STYLE_BATCH_RULES As Long = 256
 Public Function WU_ConvertStyle(ByVal document As Document, ByVal fromStyle As String, ByVal toStyle As String, Optional ByVal storyScope As String = "all") As Boolean
     Dim firstStory As Range, story As Range, updating As Boolean, opened As Boolean, captured As Boolean
-    Dim failure As Long, failureSource As String, failureText As String
+    Dim failure As Long, failureSource As String, failureText As String, sourceError As Long, targetError As Long
     Dim sourceStyle As Style, targetStyle As Style
     On Error GoTo Failed
     If document Is Nothing Then Err.Raise 91, "WU_ConvertStyle", "document is required"
@@ -298,8 +298,16 @@ Public Function WU_ConvertStyle(ByVal document As Document, ByVal fromStyle As S
     If storyScope <> "main" And storyScope <> "notes" And storyScope <> "headers" And storyScope <> "footers" And storyScope <> "all" Then Err.Raise 5, "WU_ConvertStyle", "story scope must be main, notes, headers, footers, or all"
     updating = Application.ScreenUpdating
     captured = True
+    On Error Resume Next
     Set sourceStyle = document.Styles(fromStyle)
+    sourceError = Err.Number
+    Err.Clear
     Set targetStyle = document.Styles(toStyle)
+    targetError = Err.Number
+    Err.Clear
+    On Error GoTo Failed
+    If sourceError <> 0 Or sourceStyle Is Nothing Then Err.Raise 5, "WU_ConvertStyle", "source style " & fromStyle & " was not found"
+    If targetError <> 0 Or targetStyle Is Nothing Then Err.Raise 5, "WU_ConvertStyle", "target style " & toStyle & " was not found"
     If sourceStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ConvertStyle", "source style is not a paragraph style"
     If targetStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ConvertStyle", "target style is not a paragraph style"
     If StrComp(sourceStyle.NameLocal, targetStyle.NameLocal, vbTextCompare) = 0 Then Exit Function
@@ -426,15 +434,23 @@ End Function
 ' generated opening without re-enumerating every Word story.
 Public Function WU_ConvertStyleInRange(ByVal target As Range, ByVal fromStyle As String, ByVal toStyle As String) As Boolean
     Dim updating As Boolean, opened As Boolean, captured As Boolean, targetStart As Long, targetEnd As Long
-    Dim failure As Long, failureSource As String, failureText As String
+    Dim failure As Long, failureSource As String, failureText As String, sourceError As Long, targetError As Long
     Dim document As Document, sourceStyle As Style, targetStyle As Style
     On Error GoTo Failed
     If target Is Nothing Then Err.Raise 91, "WU_ConvertStyleInRange", "target range is required"
     If Len(Trim$(fromStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyleInRange", "source style is required"
     If Len(Trim$(toStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyleInRange", "target style is required"
     Set document = target.Document
+    On Error Resume Next
     Set sourceStyle = document.Styles(fromStyle)
+    sourceError = Err.Number
+    Err.Clear
     Set targetStyle = document.Styles(toStyle)
+    targetError = Err.Number
+    Err.Clear
+    On Error GoTo Failed
+    If sourceError <> 0 Or sourceStyle Is Nothing Then Err.Raise 5, "WU_ConvertStyleInRange", "source style " & fromStyle & " was not found"
+    If targetError <> 0 Or targetStyle Is Nothing Then Err.Raise 5, "WU_ConvertStyleInRange", "target style " & toStyle & " was not found"
     If sourceStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ConvertStyleInRange", "source style is not a paragraph style"
     If targetStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ConvertStyleInRange", "target style is not a paragraph style"
     targetStart = target.Start: targetEnd = target.End
@@ -621,6 +637,185 @@ Private Function WU_ConvertStyleInStory(ByVal story As Range, ByVal sourceStyle 
         .Format = True
 End With
 WU_ConvertStyleInStory = scope.Find.Execute(Replace:=wdReplaceAll)
+End Function
+
+' Apply a paragraph style to one exact Range. Word applies a paragraph style
+' to every paragraph touched by the range; the range itself is never widened
+' and direct character formatting remains in place.
+Public Function WU_ApplyParagraphStyleInRange(ByVal target As Range, ByVal styleName As String) As Boolean
+    Dim document As Document, style As Style, scope As Range, expectedName As String
+    Dim updating As Boolean, opened As Boolean, captured As Boolean
+    Dim failure As Long, failureSource As String, failureText As String, styleError As Long
+    On Error GoTo Failed
+    If target Is Nothing Then Err.Raise 91, "WU_ApplyParagraphStyleInRange", "target range is required"
+    If Len(Trim$(styleName)) = 0 Then Err.Raise 5, "WU_ApplyParagraphStyleInRange", "style name is required"
+    Set document = target.Document
+    On Error Resume Next
+    Set style = document.Styles(styleName)
+    styleError = Err.Number
+    Err.Clear
+    On Error GoTo Failed
+    If styleError <> 0 Or style Is Nothing Then Err.Raise 5, "WU_ApplyParagraphStyleInRange", "style " & styleName & " was not found"
+    If style.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ApplyParagraphStyleInRange", "style is not a paragraph style"
+    If target.End <= target.Start Then Exit Function
+    expectedName = style.NameLocal
+    If WU_ParagraphStyleMatches(target, style, expectedName) Then Exit Function
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Apply paragraph style": opened = True
+    Set scope = target.Duplicate
+    scope.Style = style
+    WU_ApplyParagraphStyleInRange = True
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
+' Apply paragraph styles to bounded, ordered source ranges in one edit. Each
+' row is [absoluteStart, absoluteEnd, styleName] and must fall inside target;
+' offsets are Word story positions, so detector output can be passed without
+' copying paragraph text through a second representation.
+Public Function WU_ApplyParagraphStyleRuns(ByVal target As Range, ByVal runs As Variant) As Long
+    Dim document As Document, scope As Range, style As Style
+    Dim firstRow As Long, lastRow As Long, firstColumn As Long, row As Long, activeRows As Long, changed As Long
+    Dim startPosition As Long, endPosition As Long, updating As Boolean, opened As Boolean, captured As Boolean
+    Dim failure As Long, failureSource As String, failureText As String
+    Dim styleCache() As Style, styleNames() As String
+    On Error GoTo Failed
+    If target Is Nothing Then Err.Raise 91, "WU_ApplyParagraphStyleRuns", "target range is required"
+    Set document = target.Document
+    activeRows = WU_ValidateParagraphStyleRuns(document, target, runs, styleCache, styleNames)
+    If activeRows = 0 Then Exit Function
+    firstRow = LBound(runs, 1): lastRow = UBound(runs, 1): firstColumn = LBound(runs, 2)
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Apply paragraph style runs": opened = True
+    Set scope = target.Duplicate
+    For row = firstRow To lastRow
+        startPosition = CLng(runs(row, firstColumn))
+        endPosition = CLng(runs(row, firstColumn + 1))
+        ' Extend first, then move the start; assigning a later start to a
+        ' reused Range before its end can make Word reject the transient span.
+        scope.End = endPosition: scope.Start = startPosition
+        Set style = styleCache(row)
+        If Not WU_ParagraphStyleMatches(scope, style, styleNames(row)) Then
+            scope.Style = style
+            changed = changed + 1
+        End If
+    Next row
+    WU_ApplyParagraphStyleRuns = changed
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
+Private Function WU_ValidateParagraphStyleRuns(ByVal document As Document, ByVal target As Range, ByVal runs As Variant, ByRef styleCache() As Style, ByRef styleNames() As String) As Long
+    Const WU_MAX_STYLE_RUNS As Long = 4096
+    Dim firstRow As Long, lastRow As Long, firstColumn As Long, lastColumn As Long, row As Long, dimensionError As Long
+    Dim targetStart As Long, targetEnd As Long, startPosition As Long, endPosition As Long, previousEnd As Long
+    Dim styleName As String, style As Style, cachedName As String, cachedStyle As Style, styleError As Long
+    Dim failure As Long, failureSource As String, failureText As String
+    On Error GoTo Failed
+    If Not IsArray(runs) Then Err.Raise 5, "WU_ApplyParagraphStyleRuns", "runs must be a two-dimensional array"
+    On Error Resume Next
+    firstRow = LBound(runs, 1): lastRow = UBound(runs, 1)
+    firstColumn = LBound(runs, 2): lastColumn = UBound(runs, 2)
+    dimensionError = Err.Number
+    Err.Clear
+    On Error GoTo Failed
+    If dimensionError <> 0 Then Err.Raise 5, "WU_ApplyParagraphStyleRuns", "runs must be a two-dimensional array"
+    If lastColumn - firstColumn + 1 <> 3 Then Err.Raise 5, "WU_ApplyParagraphStyleRuns", "runs must have exactly three columns"
+    If lastRow - firstRow + 1 > WU_MAX_STYLE_RUNS Then Err.Raise 5, "WU_ApplyParagraphStyleRuns", "style run count exceeds 4096"
+    targetStart = target.Start: targetEnd = target.End: previousEnd = targetStart
+    ReDim styleCache(firstRow To lastRow): ReDim styleNames(firstRow To lastRow)
+    For row = firstRow To lastRow
+        If IsError(runs(row, firstColumn)) Or IsNull(runs(row, firstColumn)) Or IsEmpty(runs(row, firstColumn)) Or IsObject(runs(row, firstColumn)) Or IsArray(runs(row, firstColumn)) Then Err.Raise 5, "WU_ApplyParagraphStyleRuns", "style run " & CStr(row) & " start must be scalar"
+        If IsError(runs(row, firstColumn + 1)) Or IsNull(runs(row, firstColumn + 1)) Or IsEmpty(runs(row, firstColumn + 1)) Or IsObject(runs(row, firstColumn + 1)) Or IsArray(runs(row, firstColumn + 1)) Then Err.Raise 5, "WU_ApplyParagraphStyleRuns", "style run " & CStr(row) & " end must be scalar"
+        If IsError(runs(row, firstColumn + 2)) Or IsNull(runs(row, firstColumn + 2)) Or IsEmpty(runs(row, firstColumn + 2)) Or IsObject(runs(row, firstColumn + 2)) Or IsArray(runs(row, firstColumn + 2)) Then Err.Raise 5, "WU_ApplyParagraphStyleRuns", "style run " & CStr(row) & " style name must be scalar"
+        If Not WU_ReadStylePosition(runs(row, firstColumn), startPosition) Then Err.Raise 5, "WU_ApplyParagraphStyleRuns", "style run " & CStr(row) & " start must be an integer position"
+        If Not WU_ReadStylePosition(runs(row, firstColumn + 1), endPosition) Then Err.Raise 5, "WU_ApplyParagraphStyleRuns", "style run " & CStr(row) & " end must be an integer position"
+        If startPosition < targetStart Or endPosition > targetEnd Or endPosition <= startPosition Then Err.Raise 5, "WU_ApplyParagraphStyleRuns", "style run " & CStr(row) & " is outside the target range"
+        If startPosition < previousEnd Then Err.Raise 5, "WU_ApplyParagraphStyleRuns", "style runs must be ordered and non-overlapping"
+        styleName = CStr(runs(row, firstColumn + 2))
+        If Len(Trim$(styleName)) = 0 Then Err.Raise 5, "WU_ApplyParagraphStyleRuns", "style run " & CStr(row) & " style name is required"
+        Set style = Nothing
+        If StrComp(styleName, cachedName, vbTextCompare) = 0 And Not cachedStyle Is Nothing Then
+            Set style = cachedStyle
+        Else
+            styleError = 0
+            On Error Resume Next
+            Set style = document.Styles(styleName)
+            styleError = Err.Number
+            Err.Clear
+            On Error GoTo Failed
+            If styleError <> 0 Or style Is Nothing Then Err.Raise 5, "WU_ApplyParagraphStyleRuns", "style run " & CStr(row) & " names a missing style"
+            Set cachedStyle = style: cachedName = styleName
+        End If
+        If style.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ApplyParagraphStyleRuns", "style run " & CStr(row) & " style is not a paragraph style"
+        Set styleCache(row) = style: styleNames(row) = cachedName
+        previousEnd = endPosition
+    Next row
+    WU_ValidateParagraphStyleRuns = lastRow - firstRow + 1
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+End Function
+
+Private Function WU_ReadStylePosition(ByVal value As Variant, ByRef position As Long) As Boolean
+    Dim numericValue As Double, conversionError As Long
+    If IsEmpty(value) Or IsObject(value) Or IsArray(value) Then Exit Function
+    If VarType(value) = vbBoolean Or VarType(value) = vbDate Then Exit Function
+    If Not IsNumeric(value) Then Exit Function
+    On Error Resume Next
+    numericValue = CDbl(value)
+    conversionError = Err.Number
+    Err.Clear
+    On Error GoTo 0
+    If conversionError <> 0 Or numericValue <> Fix(numericValue) Then Exit Function
+    If numericValue < -2147483647# - 1# Or numericValue > 2147483647# Then Exit Function
+    position = CLng(numericValue)
+    WU_ReadStylePosition = True
+End Function
+
+Private Function WU_ParagraphStyleMatches(ByVal target As Range, ByVal style As Style, Optional ByVal expectedName As String = "") As Boolean
+    Dim currentStyle As String, readError As Long
+    On Error Resume Next
+    currentStyle = CStr(target.Style)
+    readError = Err.Number
+    Err.Clear
+    On Error GoTo 0
+    If Len(expectedName) = 0 Then expectedName = style.NameLocal
+    If readError = 0 Then WU_ParagraphStyleMatches = (StrComp(currentStyle, expectedName, vbTextCompare) = 0)
 End Function
 `
 
@@ -884,14 +1079,19 @@ End Function
 ' short-form emphasis rules; callers decide which terms are eligible.
 Public Function WU_ApplyCharacterStyleToMatches(ByVal document As Document, ByVal findText As String, ByVal styleName As String, Optional ByVal storyScope As String = "main", Optional ByVal matchCase As Boolean = False, Optional ByVal wholeWord As Boolean = True) As Long
     Dim firstStory As Range, story As Range, updating As Boolean, opened As Boolean, captured As Boolean
-    Dim failure As Long, failureSource As String, failureText As String, style As Style, changed As Long
+    Dim failure As Long, failureSource As String, failureText As String, style As Style, changed As Long, styleError As Long
     On Error GoTo Failed
     If document Is Nothing Then Err.Raise 91, "WU_ApplyCharacterStyleToMatches", "document is required"
     WU_ValidateLiteral findText, "", "WU_ApplyCharacterStyleToMatches"
     If Len(Trim$(styleName)) = 0 Then Err.Raise 5, "WU_ApplyCharacterStyleToMatches", "style name is required"
     storyScope = LCase$(Trim$(storyScope))
     If storyScope <> "main" And storyScope <> "notes" And storyScope <> "headers" And storyScope <> "footers" And storyScope <> "all" Then Err.Raise 5, "WU_ApplyCharacterStyleToMatches", "story scope must be main, notes, headers, footers, or all"
+    On Error Resume Next
     Set style = document.Styles(styleName)
+    styleError = Err.Number
+    Err.Clear
+    On Error GoTo Failed
+    If styleError <> 0 Or style Is Nothing Then Err.Raise 5, "WU_ApplyCharacterStyleToMatches", "style " & styleName & " was not found"
     If style.Type <> wdStyleTypeCharacter And Not style.Linked Then Err.Raise 5, "WU_ApplyCharacterStyleToMatches", "style is not a character style"
     updating = Application.ScreenUpdating
     captured = True
@@ -947,14 +1147,19 @@ End Function
 ' Apply a character style inside the exact caller-supplied Range. The public
 ' range boundary is never widened to a story or Selection.
 Public Function WU_ApplyCharacterStyleToRange(ByVal target As Range, ByVal findText As String, ByVal styleName As String, Optional ByVal matchCase As Boolean = False, Optional ByVal wholeWord As Boolean = True) As Long
-    Dim updating As Boolean, opened As Boolean, captured As Boolean, failure As Long, failureSource As String, failureText As String
+    Dim updating As Boolean, opened As Boolean, captured As Boolean, failure As Long, failureSource As String, failureText As String, styleError As Long
     Dim style As Style, document As Document, targetStart As Long, targetEnd As Long
     On Error GoTo Failed
     If target Is Nothing Then Err.Raise 91, "WU_ApplyCharacterStyleToRange", "target range is required"
     WU_ValidateLiteral findText, "", "WU_ApplyCharacterStyleToRange"
     If Len(Trim$(styleName)) = 0 Then Err.Raise 5, "WU_ApplyCharacterStyleToRange", "style name is required"
     Set document = target.Document
+    On Error Resume Next
     Set style = document.Styles(styleName)
+    styleError = Err.Number
+    Err.Clear
+    On Error GoTo Failed
+    If styleError <> 0 Or style Is Nothing Then Err.Raise 5, "WU_ApplyCharacterStyleToRange", "style " & styleName & " was not found"
     If style.Type <> wdStyleTypeCharacter And Not style.Linked Then Err.Raise 5, "WU_ApplyCharacterStyleToRange", "style is not a character style"
     targetStart = target.Start: targetEnd = target.End
     If targetEnd <= targetStart Then Exit Function

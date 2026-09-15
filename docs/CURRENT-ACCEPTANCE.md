@@ -11,8 +11,9 @@ The full harness goal is **not complete**. This index distinguishes current evid
 
 The current neutral journal slice adds read-only literal counting, bounded
 batch replacement (including an exact Range path), explicitly scoped
-paragraph-style map conversion, and direct character-style match/range/batch operations beside
-the document/story replacement path. Document operations can target `main`,
+paragraph-style conversion and ordered offset-run application, and direct
+character-style match/range/batch operations beside the document/story
+replacement path. Document operations can target `main`,
 `notes`, `headers`, `footers`, or `all`, with header/footer chains probed only
 when requested. All paths use bounded Word Find operations, preserve text and unrelated
 direct formatting, create one undo record, restore `ScreenUpdating`, and reject

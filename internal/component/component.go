@@ -130,9 +130,9 @@ func builtin() []Manifest {
 			items[i].Version = "1.0.3"
 		}
 		if items[i].ID == "document.style-converter" {
-			items[i].Version = "1.0.7"
-			items[i].Capabilities = []string{"paragraph-style conversion", "range-bounded conversion", "story-wide conversion", "header/footer scopes", "batch style mapping"}
-			items[i].Acceptance = "WU_ConvertStyle, WU_ConvertStyleInRange, and their bounded batch equivalents support main, notes, headers, footers, and all scopes, are state-safe, and compile without non-Office references."
+			items[i].Version = "1.0.8"
+			items[i].Capabilities = []string{"paragraph-style conversion", "paragraph-style application", "range-bounded conversion", "offset style runs", "story-wide conversion", "header/footer scopes", "batch style mapping"}
+			items[i].Acceptance = "WU_ConvertStyle, WU_ConvertStyleInRange, WU_ApplyParagraphStyleInRange, WU_ApplyParagraphStyleRuns, and their bounded batch equivalents support main, notes, headers, footers, and all scopes, are state-safe, and compile without non-Office references."
 		}
 		if items[i].ID == "document.text-operations" {
 			items[i].Version = "1.0.12"

@@ -359,10 +359,10 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.7" {
+	if item.Version != "1.0.8" {
 		t.Fatalf("style converter version did not advance: %q", item.Version)
 	}
-	for _, capability := range []string{"paragraph-style conversion", "range-bounded conversion", "story-wide conversion", "header/footer scopes", "batch style mapping"} {
+	for _, capability := range []string{"paragraph-style conversion", "paragraph-style application", "range-bounded conversion", "offset style runs", "story-wide conversion", "header/footer scopes", "batch style mapping"} {
 		found := false
 		for _, got := range item.Capabilities {
 			if got == capability {
@@ -382,10 +382,16 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 	}
 	for _, want := range []string{
 		"Public Function WU_ConvertStyleInRange",
+		"Public Function WU_ApplyParagraphStyleInRange",
+		"Public Function WU_ApplyParagraphStyleRuns",
 		"Public Function WU_ConvertStyleBatch",
 		"Public Function WU_ConvertStyleBatchInRange",
 		"Private Function WU_ConvertStyleInStory",
 		"Private Function WU_ValidateStyleBatch",
+		"Private Function WU_ValidateParagraphStyleRuns",
+		"Private Function WU_ReadStylePosition",
+		"Private Function WU_ParagraphStyleMatches",
+		"ByRef styleNames() As String",
 		"Private Const WU_MAX_STYLE_BATCH_RULES As Long = 256",
 		`If document Is Nothing Then Err.Raise 91, "WU_ConvertStyle", "document is required"`,
 		`If Len(Trim$(fromStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyle", "source style is required"`,
@@ -402,6 +408,21 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 		"style mapping count exceeds 256",
 		"style mapping ",
 		"source must be scalar",
+		"runs must have exactly three columns",
+		"style run count exceeds 4096",
+		"style runs must be ordered and non-overlapping",
+		"style run ",
+		"start must be an integer position",
+		"end must be an integer position",
+		"is outside the target range",
+		"Application.UndoRecord.StartCustomRecord \"Apply paragraph style runs\"",
+		"Application.UndoRecord.StartCustomRecord \"Apply paragraph style\"",
+		"scope.Style = style",
+		"Set scope = target.Duplicate",
+		"scope.End = endPosition: scope.Start = startPosition",
+		"styleNames(row) = cachedName",
+		`"source style " & fromStyle & " was not found"`,
+		`"style " & styleName & " was not found"`,
 		"Application.UndoRecord.StartCustomRecord \"Convert style batch\"",
 		"ReDim sourceCache(firstRow To lastRow): ReDim targetCache(firstRow To lastRow): ReDim enabled(firstRow To lastRow)",
 		"Set sourceCache(row) = sourceStyle: Set targetCache(row) = targetStyle",

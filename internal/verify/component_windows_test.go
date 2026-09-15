@@ -426,7 +426,7 @@ Failed:
 End Sub
 Public Function Check() As String
     Dim number As Long, source As String, description As String, changed As Boolean, i As Long, bounded As Range, headerRange As Range
-    Dim styleMap(0 To 1, 0 To 1) As Variant, styleBatchChanged As Long
+    Dim styleMap(0 To 1, 0 To 1) As Variant, styleRuns(0 To 1, 0 To 2) As Variant, styleBatchChanged As Long, runChanged As Long
     Dim lines(1 To 400) As String, started As Single, elapsed As Single
     ActiveDocument.Content.Text = "original"
     Application.ScreenUpdating = False
@@ -479,6 +479,34 @@ Public Function Check() As String
     If styleBatchChanged <> 2 Or ActiveDocument.Paragraphs(1).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Or ActiveDocument.Paragraphs(2).Style.NameLocal <> "ProofSecond" Or ActiveDocument.Paragraphs(3).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Then Err.Raise 5, , "bounded style batch escaped its requested range"
     If Not ActiveDocument.Undo Then Err.Raise 5, , "missing bounded style batch undo"
     If ActiveDocument.Paragraphs(2).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Then Err.Raise 5, , "bounded style batch undo did not restore the source style"
+    ActiveDocument.Content.Text = "first" & vbCr & "second" & vbCr & "third" & vbCr
+    ActiveDocument.Content.Style = ActiveDocument.Styles(wdStyleNormal)
+    ActiveDocument.Paragraphs(2).Range.Italic = True
+    styleRuns(0, 0) = ActiveDocument.Paragraphs(1).Range.Start
+    styleRuns(0, 1) = ActiveDocument.Paragraphs(2).Range.End
+    styleRuns(0, 2) = "ProofTarget"
+    styleRuns(1, 0) = ActiveDocument.Paragraphs(3).Range.Start
+    styleRuns(1, 1) = ActiveDocument.Paragraphs(3).Range.End
+    styleRuns(1, 2) = "ProofSecond"
+    runChanged = WU_ApplyParagraphStyleRuns(ActiveDocument.Content, styleRuns)
+    If runChanged <> 2 Or ActiveDocument.Paragraphs(1).Style.NameLocal <> "ProofTarget" Or ActiveDocument.Paragraphs(2).Style.NameLocal <> "ProofTarget" Or ActiveDocument.Paragraphs(3).Style.NameLocal <> "ProofSecond" Then Err.Raise 5, , "offset style runs did not apply exact ordered ranges"
+    If Not ActiveDocument.Paragraphs(2).Range.Italic Then Err.Raise 5, , "offset style runs lost direct italic formatting"
+    If Not ActiveDocument.Undo Then Err.Raise 5, , "missing offset style runs undo"
+    If ActiveDocument.Paragraphs(1).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Or ActiveDocument.Paragraphs(2).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Or ActiveDocument.Paragraphs(3).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Then Err.Raise 5, , "offset style runs undo did not restore source styles"
+    ActiveDocument.Saved = True
+    styleRuns(1, 2) = "MissingProofStyle"
+    On Error Resume Next
+    runChanged = WU_ApplyParagraphStyleRuns(ActiveDocument.Content, styleRuns)
+    number = Err.Number
+    Err.Clear
+    On Error GoTo 0
+    If number = 0 Or Not ActiveDocument.Saved Then Err.Raise 5, , "invalid offset style run was not rejected before mutation"
+    styleRuns(1, 2) = "ProofSecond"
+    Set bounded = ActiveDocument.Paragraphs(2).Range.Duplicate
+    changed = WU_ApplyParagraphStyleInRange(bounded, "ProofSecond")
+    If Not changed Or ActiveDocument.Paragraphs(1).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Or ActiveDocument.Paragraphs(2).Style.NameLocal <> "ProofSecond" Then Err.Raise 5, , "bounded paragraph style application widened its range"
+    If Not ActiveDocument.Undo Then Err.Raise 5, , "missing bounded paragraph style undo"
+    If ActiveDocument.Paragraphs(2).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Then Err.Raise 5, , "bounded paragraph style undo did not restore the source style"
     ActiveDocument.Content.Text = "first" & vbCr & "second" & vbCr
     ActiveDocument.Content.Style = ActiveDocument.Styles(wdStyleNormal)
     ActiveDocument.Saved = True
