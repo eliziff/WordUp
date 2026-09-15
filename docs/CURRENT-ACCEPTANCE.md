@@ -22,7 +22,9 @@ claims that every Word build or manuscript has identical latency.
 The neutral style pass also honors a resolved non-heading role over a
 tentative marker level, so ordinary numbered lists are not promoted to
 headings; native behavior for that guard remains queued behind the same host
-boundary.
+boundary. The optimized style path validates contiguous detector offsets and
+falls back to Word's paragraph enumeration when an adapted detector's shape
+or spans do not match the main story.
 
 Timings are individual observations, not latency guarantees or controlled speedup measurements. Report assertions and source suites define the actual coverage; assertion counts alone do not establish completeness.
 
