@@ -361,7 +361,7 @@ func semanticRole(row map[string]any) string {
 		return "abstract"
 	case styleTokenPresent(style, "author") || styleTokenPresent(style, "byline"):
 		return "author"
-	case !styleTokenPresent(style, "heading") && ((styleTokenPresent(style, "document") && styleTokenPresent(style, "title")) || strings.EqualFold(strings.TrimSpace(style), "title normal")):
+	case !styleTokenPresent(style, "heading") && ((styleTokenPresent(style, "document") && styleTokenPresent(style, "title")) || strings.EqualFold(strings.TrimSpace(style), "title") || strings.EqualFold(strings.TrimSpace(style), "title normal")):
 		return "title"
 	}
 	return ""

@@ -121,12 +121,13 @@ func TestResolveDetectsLayoutFrontMatter(t *testing.T) {
 func TestResolveRecognizesCamelCaseSemanticStyles(t *testing.T) {
 	rows := []map[string]any{
 		{"context": "body", "text": "Document name", "style_id": "DocumentTitle"},
+		{"context": "body", "text": "Plain title", "style_id": "Title"},
 		{"context": "body", "text": "Contents", "style_id": "TOCHeading"},
 		{"context": "body", "text": "Quoted material", "style_id": "BlockQuote"},
 		{"context": "body", "text": "Header text", "style_id": "Header"},
 	}
 	Resolve(rows)
-	want := []string{"title", "toc", "quotation", "body"}
+	want := []string{"title", "title", "toc", "quotation", "body"}
 	for i, role := range want {
 		if got := rows[i]["resolved_structure"].(map[string]any)["role"]; got != role {
 			t.Fatalf("row %d role=%v want %s", i, got, role)
