@@ -339,7 +339,7 @@ func TestAddRejectsInvalidOrUndeclaredParametersBeforeWriting(t *testing.T) {
 }
 
 func TestBundledCatalogIsComplete(t *testing.T) {
-	want := []string{"structure.detect", "operation.safe-edit", "ui.form-shell", "ui.progress-cancel", "ui.ribbon-command", "command.hotkey", "command.context-menu", "document.style-converter", "document.text-operations"}
+	want := []string{"structure.detect", "operation.safe-edit", "ui.form-shell", "ui.progress-cancel", "ui.ribbon-command", "command.hotkey", "command.context-menu", "document.style-converter", "document.field-refresh", "document.text-operations"}
 	items := List()
 	if len(items) != len(want) {
 		t.Fatalf("components=%d, want %d", len(items), len(want))
@@ -350,6 +350,49 @@ func TestBundledCatalogIsComplete(t *testing.T) {
 		}
 		if items[i].Provenance == "" || items[i].Acceptance == "" || len(items[i].SupportedPlatforms) == 0 {
 			t.Fatalf("incomplete manifest: %#v", items[i])
+		}
+	}
+}
+
+func TestFieldRefreshChecksWordReturnCodesAndBounds(t *testing.T) {
+	item, err := Get("document.field-refresh")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if item.Version != "1.0.1" {
+		t.Fatalf("field refresh version=%q", item.Version)
+	}
+	for _, capability := range []string{"field refresh", "table-of-contents refresh", "range-bounded refresh", "story scopes", "header/footer scopes", "return-code diagnostics"} {
+		found := false
+		for _, got := range item.Capabilities {
+			if got == capability {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Fatalf("field refresh manifest omitted capability %q: %#v", capability, item.Capabilities)
+		}
+	}
+	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpFieldRefresh.bas" {
+		t.Fatalf("unexpected field refresh files: %#v", item.Files)
+	}
+	source := item.Files[0].Text
+	for _, want := range []string{
+		"Public Function WU_RefreshFields",
+		"Public Function WU_RefreshFieldsInRange",
+		"Private Function WU_NormalizeFieldScope",
+		"Private Sub WU_RefreshFieldStoryChain",
+		"Private Sub WU_RefreshFieldContents",
+		"fieldResult = story.Fields.Update",
+		"If readError <> 0 Or fieldResult <> 0 Then failures = failures + 1",
+		"fieldResult = target.Fields.Update",
+		"If updateContents And (storyScope = \"main\" Or storyScope = \"all\") Then",
+		"Application.UndoRecord.StartCustomRecord \"Refresh fields\"",
+		"If captured Then Application.ScreenUpdating = updating",
+	} {
+		if !strings.Contains(source, want) {
+			t.Fatalf("field refresh source omitted %q", want)
 		}
 	}
 }

@@ -191,21 +191,21 @@ func TestCreateBuildsIndependentJournalWorkspace(t *testing.T) {
 	if report.Build.Artifact != report.Artifact {
 		t.Fatalf("build report retained staging artifact path: build=%q report=%q", report.Build.Artifact, report.Artifact)
 	}
-	if report.Build.Modules != 12 || report.Build.Forms != 1 {
+	if report.Build.Modules != 13 || report.Build.Forms != 1 {
 		t.Fatalf("generated workspace did not vendor the expected source surface: modules=%d forms=%d", report.Build.Modules, report.Build.Forms)
 	}
 	if _, err := os.Stat(report.Artifact); err != nil {
 		t.Fatal(err)
 	}
 	lock, err := os.ReadFile(filepath.Join(root, ".wordwright", "components.json"))
-	if err != nil || !strings.Contains(string(lock), "operation.safe-edit") || !strings.Contains(string(lock), "command.hotkey") || !strings.Contains(string(lock), "structure.detect") || !strings.Contains(string(lock), "document.text-operations") {
+	if err != nil || !strings.Contains(string(lock), "operation.safe-edit") || !strings.Contains(string(lock), "command.hotkey") || !strings.Contains(string(lock), "structure.detect") || !strings.Contains(string(lock), "document.field-refresh") || !strings.Contains(string(lock), "document.text-operations") {
 		t.Fatalf("generated workspace did not record reusable components: err=%v lock=%s", err, lock)
 	}
 	core, err := os.ReadFile(filepath.Join(root, "vba", "WUJournalCore.bas"))
 	if err != nil {
 		t.Fatal(err)
 	}
-    for _, marker := range []string{"WU_JournalOpenSetupFromRibbon", "WU_JournalApplyStyles", "WU_JournalPermaAssistant", "WU_DetectStructure", "WU_BeginSafeEdit", "Style definitions are shared document state", "If StrComp(CStr(.Font.Name), fontName, vbTextCompare) <> 0 Then .Font.Name = fontName", "Set value = doc.Styles(styleName)\n    Err.Clear\n    On Error GoTo 0", "Outline levels are shared style state too", "If heading1.ParagraphFormat.OutlineLevel <> wdOutlineLevel1 Then heading1.ParagraphFormat.OutlineLevel = wdOutlineLevel1", "StoryRanges already contains every header/footer story", "structureColumns < WU_COLUMNS", "startPosition <> priorEnd", "priorEnd <> storyEnd", "WU_ApplyResolvedParagraphStyles", "headingNames(1) = heading1.NameLocal", "role = vbNullString", "StrComp(role, \"body\", vbTextCompare)", "StrComp(styleName, desiredName", "paragraphRange.Style", "WU_JOURNAL_STYLE_H9", "wdOutlineLevel9", "paragraphRange As Range", "WU_FlushParagraphStyleBatch", "WU_ApplyNoteStoryStyle", "Set story = doc.StoryRanges(wdFootnotesStory)\n    Err.Clear\n    On Error GoTo 0", "wdFootnotesStory", "WU_CountStoryItems", "Unavailable story scans", "WU_ResetProgress", "field refresh cancelled", "revision review cancelled", "Application.StatusBar = priorStatus", "fieldResult = story.Fields.Update", "If Err.Number <> 0 Or fieldResult <> 0 Then failures = failures + 1", "is not a paragraph style", "WU_EndSafeEdit updating, undoStarted, captured", "Toggle tracked changes", "supraCount = WU_CountLiteral(doc, \"supra\", \"notes\", False, False)", "preserve every note's rich runs"} {
+	for _, marker := range []string{"WU_JournalOpenSetupFromRibbon", "WU_JournalApplyStyles", "WU_JournalPermaAssistant", "WU_DetectStructure", "WU_BeginSafeEdit", "Style definitions are shared document state", "If StrComp(CStr(.Font.Name), fontName, vbTextCompare) <> 0 Then .Font.Name = fontName", "Set value = doc.Styles(styleName)\n    Err.Clear\n    On Error GoTo 0", "Outline levels are shared style state too", "If heading1.ParagraphFormat.OutlineLevel <> wdOutlineLevel1 Then heading1.ParagraphFormat.OutlineLevel = wdOutlineLevel1", "StoryRanges already contains every header/footer story", "structureColumns < WU_COLUMNS", "startPosition <> priorEnd", "endPosition <= startPosition", "priorEnd <> storyEnd", "WU_ApplyResolvedParagraphStyles", "headingNames(1) = heading1.NameLocal", "role = vbNullString", "StrComp(role, \"body\", vbTextCompare)", "StrComp(styleName, desiredName", "paragraphRange.Style", "WU_JOURNAL_STYLE_H9", "wdOutlineLevel9", "paragraphRange As Range", "WU_FlushParagraphStyleBatch", "WU_ApplyNoteStoryStyle", "WU_RefreshFields(ActiveDocument, \"all\", True)", "could not refresh fields in \" & CStr(failures) & \" story/table(s)", "WU_CountStoryItems", "Unavailable story scans", "revision review cancelled", "Application.StatusBar = priorStatus", "is not a paragraph style", "WU_EndSafeEdit updating, undoStarted, captured", "Toggle tracked changes", "supraCount = WU_CountLiteral(doc, \"supra\", \"notes\", False, False)", "preserve every note's rich runs"} {
 		if !strings.Contains(string(core), marker) {
 			t.Fatalf("generated source lacks %s", marker)
 		}
@@ -257,7 +257,7 @@ func TestCreateRejectsUnsafeProfileValuesBeforeWriting(t *testing.T) {
 		t.Fatalf("non-finite profile size was accepted: %v", err)
 	}
 	for name, profile := range map[string]Profile{
-		"zero size": {ID: "BAD-ZERO", Name: "Unsafe", BodyFont: "Times New Roman", NoteFont: "Times New Roman", BodySizePT: 0, NoteSizePT: 9},
+		"zero size":    {ID: "BAD-ZERO", Name: "Unsafe", BodyFont: "Times New Roman", NoteFont: "Times New Roman", BodySizePT: 0, NoteSizePT: 9},
 		"missing font": {ID: "BAD-FONT", Name: "Unsafe", BodyFont: "", NoteFont: "Times New Roman", BodySizePT: 11, NoteSizePT: 9},
 	} {
 		t.Run(name, func(t *testing.T) {

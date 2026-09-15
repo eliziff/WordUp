@@ -109,6 +109,7 @@ func builtin() []Manifest {
 		vbaComponent("command.hotkey", "WordUpHotkey", "WU_RegisterHotkey", "Registers and removes a template-owned key binding.", "hotkeys", hotkeySource),
 		vbaComponent("command.context-menu", "WordUpContextMenu", "WU_RegisterContextMenu", "Registers and removes a tagged context-menu command.", "context menus", contextMenuSource),
 		vbaComponent("document.style-converter", "WordUpStyleConverter", "WU_ConvertStyle", "Converts one or a bounded map of paragraph styles across explicitly selected stories or inside an exact Range in a single safe edit.", "style conversion", styleConverterSource),
+		vbaComponent("document.field-refresh", "WordUpFieldRefresh", "WU_RefreshFields", "Refreshes fields and optionally tables of contents across explicitly selected Word stories without using Selection.", "field refresh", fieldRefreshSource),
 		vbaComponent("document.text-operations", "WordUpTextOperations", "WU_ReplaceLiteral", "Counts and performs bounded literal and explicit wildcard replacement, batch replacement, and exact character-style matching (including offset runs and batches) across explicitly selected Word stories or an exact Range without using Selection.", "text operations", textOperationsSource)}
 	for i := range items {
 		if items[i].ID == "command.hotkey" {
@@ -138,6 +139,11 @@ func builtin() []Manifest {
 			items[i].Version = "1.0.22"
 			items[i].Capabilities = []string{"literal replacement", "literal counting", "wildcard replacement", "wildcard counting", "wildcard batch replacement", "batch replacement", "range-bounded edits", "character-style matching", "exact character-style application", "wildcard character styling", "wildcard character-style batches", "offset character-style runs", "batch character-style matching", "header/footer scopes"}
 			items[i].Acceptance = "Literal and explicit wildcard count/replacement, wildcard batch replacement, exact character-style application, character-style match/range/batch, and exact offset-run operations support main, notes, headers, footers, and all scopes; wildcard replacement tokens are opt-in, literal searches remain escaped, Find's sticky fuzzy/phrase/width/Unicode/control/prefix flags are pinned where exposed, one-record style batches resolve each unique style once, cache target names and story boundaries, all paths remain bounded and state-safe, and the module compiles without non-Office references."
+		}
+		if items[i].ID == "document.field-refresh" {
+			items[i].Version = "1.0.1"
+			items[i].Capabilities = []string{"field refresh", "table-of-contents refresh", "range-bounded refresh", "story scopes", "header/footer scopes", "return-code diagnostics"}
+			items[i].Acceptance = "WU_RefreshFields and WU_RefreshFieldsInRange support explicit story selection, optional table-of-contents updates, nonzero Fields.Update return-code detection, one-record state-safe cleanup, and compilation without non-Office references."
 		}
 		items[i].Schema = 1
 		items[i].License = "MIT"

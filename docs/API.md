@@ -153,6 +153,8 @@ an event; use native `compile` and acceptance steps for that.
 
 Generated journal setup forms use the same shared text component for their citation/supra audit: note objects are counted directly and note text is scanned through the bounded `WU_CountLiteral(..., "notes", ...)` path, preserving rich runs and avoiding per-note text materialization. Field refresh checks both VBA errors and the nonzero first-failing-field return from `Fields.Update`, so a broken field cannot be reported as a successful refresh. The generated style pass resolves each localized style name once before its paragraph run loop, then batches contiguous ranges. All shared Find paths pin Word's sticky fuzzy/phrase, width, Unicode/control/prefix/suffix flags when the host exposes them.
 
+The bundled `document.field-refresh` component exposes `WU_RefreshFields(document, storyScope, updateContents)` and `WU_RefreshFieldsInRange(target)`. It walks only the requested main, note, header, footer, or all-story scope, optionally updates tables of contents for main/all, checks both `Fields.Update` return codes and VBA errors, and restores the caller's screen state under one undo record. The range form never widens its input or updates a table of contents.
+
 ## Mac native prototype
 
 Use `dictionary` to inspect the installed Word SDEF and the implemented operation surface. Native `get`, `put`, `invoke`, `run` and `ae.send` use actual Apple Events. Event/property codes are discovered from the installed dictionary, not guessed from Windows names. Mac UI/render/full-compile operations are unsupported and must not be silently rerouted to Windows or emulated. `compat` is advisory source review; only actual Mac Word evidence can verify Mac behavior.

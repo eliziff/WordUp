@@ -96,6 +96,7 @@ func Create(root string, profile Profile) (CreateReport, error) {
 		"command.hotkey",
 		"command.context-menu",
 		"document.style-converter",
+		"document.field-refresh",
 		"document.text-operations",
 	} {
 		if _, err := component.AddWith(stageRoot, id, nil); err != nil {
@@ -853,45 +854,17 @@ Private Sub WU_ApplyNoteStoryStyle(ByVal story As Range, ByVal noteStyle As Styl
 End Sub
 
 Public Sub WU_JournalRefreshFields()
-    Dim updating As Boolean, undoStarted As Boolean, captured As Boolean
-    Dim failure As Long, failureSource As String, failureText As String
-    Dim doc As Document, story As Range, linked As Range, contents As TableOfContents
-    Dim fieldFailures As Long, contentsFailures As Long, storyIndex As Long, contentsIndex As Long
-    Dim priorStatus As Variant
+    Dim failures As Long, failure As Long, failureSource As String, failureText As String, priorStatus As Variant
     On Error GoTo Failed
-    Set doc = ActiveDocument
     priorStatus = Application.StatusBar
-    WU_BeginSafeEdit updating, undoStarted, captured, "Refresh %s fields"
-    WU_ResetProgress
-    For Each story In doc.StoryRanges
-        Set linked = story
-        Do While Not linked Is Nothing
-            storyIndex = storyIndex + 1
-            If storyIndex Mod 8 = 0 Then
-                Application.StatusBar = "Refreshing " & WU_JOURNAL_NAME & " fields (story " & CStr(storyIndex) & ")"
-                If WU_CancelRequested() Then Err.Raise 18, "Refresh fields", "field refresh cancelled"
-            End If
-            WU_UpdateFieldsInStory linked, fieldFailures
-            Set linked = linked.NextStoryRange
-        Loop
-    Next story
-    ' StoryRanges already contains every header/footer story and its linked
-    ' sections. Walking Sections as well updates those fields twice and can
-    ' make a large manuscript needlessly repaginate.
-    For Each contents In doc.TablesOfContents
-        contentsIndex = contentsIndex + 1
-        If contentsIndex Mod 4 = 0 Then
-            Application.StatusBar = "Refreshing " & WU_JOURNAL_NAME & " contents (table " & CStr(contentsIndex) & ")"
-            If WU_CancelRequested() Then Err.Raise 18, "Refresh fields", "contents refresh cancelled"
-        End If
-        WU_UpdateContents contents, contentsFailures
-    Next contents
-    If fieldFailures + contentsFailures > 0 Then Err.Raise 5, "WU_JournalRefreshFields", "could not refresh fields in " & CStr(fieldFailures) & " story(s) and " & CStr(contentsFailures) & " table(s)"
+    ' StoryRanges already contains every header/footer story; the shared
+    ' component walks that collection once and reports any failed update.
+    failures = WU_RefreshFields(ActiveDocument, "all", True)
+    If failures > 0 Then Err.Raise 5, "WU_JournalRefreshFields", "could not refresh fields in " & CStr(failures) & " story/table(s)"
 Cleanup:
     On Error Resume Next
-    WU_EndSafeEdit updating, undoStarted, captured
-    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
     Application.StatusBar = priorStatus
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
     Err.Clear
     On Error GoTo 0
     If failure <> 0 Then Err.Raise failure, failureSource, failureText
@@ -899,27 +872,6 @@ Cleanup:
 Failed:
     failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
     Resume Cleanup
-End Sub
-
-Private Sub WU_UpdateFieldsInStory(ByVal story As Range, ByRef failures As Long)
-    Dim fieldResult As Long
-    On Error Resume Next
-    ' Fields.Update reports the first failing field by return value; it does
-    ' not necessarily raise a VBA error. Treat either signal as a failed
-    ' story so a quality action cannot claim success over a broken field.
-    Err.Clear
-    fieldResult = story.Fields.Update
-    If Err.Number <> 0 Or fieldResult <> 0 Then failures = failures + 1
-    Err.Clear
-    On Error GoTo 0
-End Sub
-
-Private Sub WU_UpdateContents(ByVal contents As TableOfContents, ByRef failures As Long)
-    On Error Resume Next
-    contents.Update
-    If Err.Number <> 0 Then failures = failures + 1
-    Err.Clear
-    On Error GoTo 0
 End Sub
 
 Public Sub WU_JournalReviewNext()
@@ -1168,5 +1120,5 @@ Private Sub WU_TrimAnchorParagraphMark(ByVal target As Range)
     tail = target.Characters.Last.Text
     If tail = Chr$(13) Or tail = Chr$(7) Then target.End = target.End - 1
 End Sub
-`, vbaString(profile.ID), vbaString(profile.Name), vbaString(profile.BodyFont), vbaString(profile.NoteFont), profile.BodySizePT, profile.NoteSizePT, vbaString(profile.PermalinkPolicy), vbaString(styleBase+" Body"), vbaString(styleBase+" Note"), vbaString(styleBase+" Heading 1"), vbaString(styleBase+" Heading 2"), vbaString(styleBase+" Heading 3"), vbaString(styleBase+" Heading 4"), vbaString(styleBase+" Heading 5"), vbaString(styleBase+" Heading 6"), vbaString(styleBase+" Heading 7"), vbaString(styleBase+" Heading 8"), vbaString(styleBase+" Heading 9"), profile.Name, profile.Name)
+`, vbaString(profile.ID), vbaString(profile.Name), vbaString(profile.BodyFont), vbaString(profile.NoteFont), profile.BodySizePT, profile.NoteSizePT, vbaString(profile.PermalinkPolicy), vbaString(styleBase+" Body"), vbaString(styleBase+" Note"), vbaString(styleBase+" Heading 1"), vbaString(styleBase+" Heading 2"), vbaString(styleBase+" Heading 3"), vbaString(styleBase+" Heading 4"), vbaString(styleBase+" Heading 5"), vbaString(styleBase+" Heading 6"), vbaString(styleBase+" Heading 7"), vbaString(styleBase+" Heading 8"), vbaString(styleBase+" Heading 9"), profile.Name)
 }

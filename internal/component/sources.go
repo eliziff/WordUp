@@ -407,6 +407,10 @@ Public Function WU_ConvertStyleBatch(ByVal document As Document, ByVal mappings 
             WU_ConvertStyleBatchInStoryChain firstStory, sourceCache, targetCache, enabled, firstRow, lastRow, matched
         Next firstStory
     End If
+    ' Re-derive each row scope from the saved span: a row that replaces the
+    ' paragraph mark at the range end makes Word adjust the caller Range to
+    ' exclude the replacement mark, so reusing the Range object would hide
+    ' it from later rows.
     For row = firstRow To lastRow
         If matched(row) Then changed = changed + 1
     Next row
@@ -726,6 +730,7 @@ Public Function WU_ConvertStyleBatchInRange(ByVal target As Range, ByVal mapping
     Dim document As Document, updating As Boolean, opened As Boolean, captured As Boolean
     Dim failure As Long, failureSource As String, failureText As String
     Dim targetStart As Long, targetEnd As Long, firstRow As Long, lastRow As Long, firstColumn As Long, activeRows As Long, row As Long, changed As Long
+    Dim rowScope As Range
     Dim sourceCache() As Style, targetCache() As Style, enabled() As Boolean, matched() As Boolean
     On Error GoTo Failed
     If target Is Nothing Then Err.Raise 91, "WU_ConvertStyleBatchInRange", "target range is required"
@@ -740,7 +745,12 @@ Public Function WU_ConvertStyleBatchInRange(ByVal target As Range, ByVal mapping
     captured = True
     Application.ScreenUpdating = False
     Application.UndoRecord.StartCustomRecord "Convert style batch": opened = True
-    WU_ConvertStyleBatchInStory target, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+    For row = firstRow To lastRow
+        If enabled(row) Then
+            Set rowScope = document.Range(targetStart, targetEnd)
+            If WU_ConvertStyleInStory(rowScope, sourceCache(row), targetCache(row)) Then matched(row) = True
+        End If
+    Next row
     For row = firstRow To lastRow
         If matched(row) Then changed = changed + 1
     Next row
@@ -1199,6 +1209,155 @@ Private Sub WU_PinFindOptions(ByVal criteria As Find)
     criteria.MatchSuffix = False
     Err.Clear
     On Error GoTo 0
+End Sub
+`
+
+const fieldRefreshSource = `Attribute VB_Name = "WordUpFieldRefresh"
+Option Explicit
+
+' Refresh fields in explicitly selected Word stories. The return value is the
+' number of stories/tables that reported an update failure; Word's Fields.Update
+' return value is checked because it can report a failing field without raising.
+Public Function WU_RefreshFields(ByVal document As Document, Optional ByVal storyScope As String = "all", Optional ByVal updateContents As Boolean = True) As Long
+    Dim firstStory As Range, story As Range, updating As Boolean, opened As Boolean, captured As Boolean
+    Dim failure As Long, failureSource As String, failureText As String, failures As Long
+    On Error GoTo Failed
+    If document Is Nothing Then Err.Raise 91, "WU_RefreshFields", "document is required"
+    storyScope = WU_NormalizeFieldScope(storyScope, "WU_RefreshFields")
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Refresh fields": opened = True
+    If storyScope = "main" Then
+        Set story = document.StoryRanges(wdMainTextStory)
+        If Not story Is Nothing Then WU_RefreshFieldStory story, failures
+    ElseIf storyScope = "notes" Then
+        Set firstStory = WU_FieldStory(document, wdFootnotesStory)
+        If Not firstStory Is Nothing Then WU_RefreshFieldStoryChain firstStory, failures
+        Set firstStory = Nothing
+        Set firstStory = WU_FieldStory(document, wdEndnotesStory)
+        If Not firstStory Is Nothing Then WU_RefreshFieldStoryChain firstStory, failures
+    ElseIf storyScope = "headers" Then
+        WU_RefreshFieldStoryType document, wdPrimaryHeaderStory, failures
+        WU_RefreshFieldStoryType document, wdFirstPageHeaderStory, failures
+        WU_RefreshFieldStoryType document, wdEvenPagesHeaderStory, failures
+    ElseIf storyScope = "footers" Then
+        WU_RefreshFieldStoryType document, wdPrimaryFooterStory, failures
+        WU_RefreshFieldStoryType document, wdFirstPageFooterStory, failures
+        WU_RefreshFieldStoryType document, wdEvenPagesFooterStory, failures
+    Else
+        For Each firstStory In document.StoryRanges
+            WU_RefreshFieldStoryChain firstStory, failures
+        Next firstStory
+    End If
+    If updateContents And (storyScope = "main" Or storyScope = "all") Then WU_RefreshFieldContents document, failures
+    WU_RefreshFields = failures
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
+' Refresh only fields inside the exact caller-supplied Range. The range is
+' never widened and no table of contents is implicitly updated.
+Public Function WU_RefreshFieldsInRange(ByVal target As Range) As Long
+    Dim updating As Boolean, opened As Boolean, captured As Boolean, fieldResult As Long
+    Dim failure As Long, failureSource As String, failureText As String
+    On Error GoTo Failed
+    If target Is Nothing Then Err.Raise 91, "WU_RefreshFieldsInRange", "target range is required"
+    If target.End <= target.Start Then Exit Function
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Refresh fields": opened = True
+    Err.Clear
+    fieldResult = target.Fields.Update
+    If Err.Number <> 0 Then
+        WU_RefreshFieldsInRange = 1
+    ElseIf fieldResult <> 0 Then
+        WU_RefreshFieldsInRange = 1
+    End If
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
+Private Function WU_NormalizeFieldScope(ByVal value As String, ByVal sourceName As String) As String
+    value = LCase$(Trim$(value))
+    If value <> "main" And value <> "notes" And value <> "headers" And value <> "footers" And value <> "all" Then Err.Raise 5, sourceName, "story scope must be main, notes, headers, footers, or all"
+    WU_NormalizeFieldScope = value
+End Function
+
+Private Function WU_FieldStory(ByVal document As Document, ByVal storyType As Long) As Range
+    On Error Resume Next
+    Set WU_FieldStory = document.StoryRanges(storyType)
+    Err.Clear
+    On Error GoTo 0
+End Function
+
+Private Sub WU_RefreshFieldStoryType(ByVal document As Document, ByVal storyType As Long, ByRef failures As Long)
+    Dim firstStory As Range
+    Set firstStory = WU_FieldStory(document, storyType)
+    If Not firstStory Is Nothing Then WU_RefreshFieldStoryChain firstStory, failures
+End Sub
+
+Private Sub WU_RefreshFieldStoryChain(ByVal firstStory As Range, ByRef failures As Long)
+    Dim story As Range
+    Set story = firstStory
+    Do While Not story Is Nothing
+        WU_RefreshFieldStory story, failures
+        Set story = story.NextStoryRange
+    Loop
+End Sub
+
+Private Sub WU_RefreshFieldStory(ByVal story As Range, ByRef failures As Long)
+    Dim fieldResult As Long, readError As Long
+    If story Is Nothing Then Exit Sub
+    If story.End <= story.Start Then Exit Sub
+    On Error Resume Next
+    Err.Clear
+    fieldResult = story.Fields.Update
+    readError = Err.Number
+    Err.Clear
+    On Error GoTo 0
+    If readError <> 0 Or fieldResult <> 0 Then failures = failures + 1
+End Sub
+
+Private Sub WU_RefreshFieldContents(ByVal document As Document, ByRef failures As Long)
+    Dim contents As TableOfContents
+    For Each contents In document.TablesOfContents
+        On Error Resume Next
+        Err.Clear
+        contents.Update
+        If Err.Number <> 0 Then failures = failures + 1
+        Err.Clear
+        On Error GoTo 0
+    Next contents
 End Sub
 `
 
