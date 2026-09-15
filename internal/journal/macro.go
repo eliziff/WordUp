@@ -586,17 +586,30 @@ Public Sub WU_JournalApplyStyles()
     priorStatus = Application.StatusBar
     WU_BeginSafeEdit updating, undoStarted, captured, "Apply %s styles"
     WU_ResetProgress
-    Set bodyStyle = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_BODY, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, False)
-    Set noteStyle = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_NOTE, WU_JOURNAL_NOTE_FONT, WU_JOURNAL_NOTE_SIZE, False)
-    Set heading1 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H1, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE + 1, True)
-    Set heading2 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H2, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True)
-    Set heading3 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H3, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True)
-    Set heading4 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H4, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True)
-    Set heading5 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H5, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True)
-    Set heading6 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H6, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True)
-    Set heading7 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H7, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True)
-    Set heading8 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H8, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True)
-    Set heading9 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H9, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True)
+    Set bodyStyle = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_BODY, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, False, False)
+    Set noteStyle = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_NOTE, WU_JOURNAL_NOTE_FONT, WU_JOURNAL_NOTE_SIZE, False, False)
+    Set heading1 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H1, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE + 1, True, True)
+    Set heading2 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H2, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True, True)
+    Set heading3 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H3, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True, True)
+    Set heading4 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H4, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True, True)
+    Set heading5 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H5, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True, True)
+    Set heading6 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H6, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True, True)
+    Set heading7 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H7, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True, True)
+    Set heading8 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H8, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True, True)
+    Set heading9 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H9, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True, True)
+    ' Keep the neutral core useful as a real authoring base: a newly typed
+    ' paragraph after a heading should start in the body style. Existing
+    ' direct formatting on document text is unaffected by changing these
+    ' shared style definitions.
+    WU_SetNextParagraphStyle heading1, bodyStyle
+    WU_SetNextParagraphStyle heading2, bodyStyle
+    WU_SetNextParagraphStyle heading3, bodyStyle
+    WU_SetNextParagraphStyle heading4, bodyStyle
+    WU_SetNextParagraphStyle heading5, bodyStyle
+    WU_SetNextParagraphStyle heading6, bodyStyle
+    WU_SetNextParagraphStyle heading7, bodyStyle
+    WU_SetNextParagraphStyle heading8, bodyStyle
+    WU_SetNextParagraphStyle heading9, bodyStyle
     ' Outline levels are shared style state too; avoid dirtying each heading
     ' definition on every repeat of an otherwise idempotent operation.
     If heading1.ParagraphFormat.OutlineLevel <> wdOutlineLevel1 Then heading1.ParagraphFormat.OutlineLevel = wdOutlineLevel1
@@ -624,7 +637,7 @@ Failed:
     Resume Cleanup
 End Sub
 
-Private Function WU_EnsureStyle(ByVal doc As Document, ByVal styleName As String, ByVal fontName As String, ByVal fontSize As Single, ByVal keepNext As Boolean) As Style
+Private Function WU_EnsureStyle(ByVal doc As Document, ByVal styleName As String, ByVal fontName As String, ByVal fontSize As Single, ByVal keepNext As Boolean, ByVal bold As Boolean) As Style
     Dim value As Style
     On Error Resume Next
     Set value = doc.Styles(styleName)
@@ -642,12 +655,24 @@ Private Function WU_EnsureStyle(ByVal doc As Document, ByVal styleName As String
         If StrComp(CStr(.Font.NameFarEast), fontName, vbTextCompare) <> 0 Then .Font.NameFarEast = fontName
         If StrComp(CStr(.Font.NameBi), fontName, vbTextCompare) <> 0 Then .Font.NameBi = fontName
         If Abs(CSng(.Font.Size) - fontSize) > 0.01 Then .Font.Size = fontSize
+        If Abs(CSng(.Font.SizeBi) - fontSize) > 0.01 Then .Font.SizeBi = fontSize
+        If .Font.Bold <> bold Then .Font.Bold = bold
         If Abs(CSng(.ParagraphFormat.SpaceAfter) - 6) > 0.01 Then .ParagraphFormat.SpaceAfter = 6
         If .ParagraphFormat.LineSpacingRule <> wdLineSpaceSingle Then .ParagraphFormat.LineSpacingRule = wdLineSpaceSingle
         If .ParagraphFormat.KeepWithNext <> keepNext Then .ParagraphFormat.KeepWithNext = keepNext
     End With
     Set WU_EnsureStyle = value
 End Function
+
+Private Sub WU_SetNextParagraphStyle(ByVal style As Style, ByVal nextStyle As Style)
+    Dim currentName As String
+    If style Is Nothing Or nextStyle Is Nothing Then Exit Sub
+    On Error Resume Next
+    currentName = CStr(style.NextParagraphStyle.NameLocal)
+    Err.Clear
+    On Error GoTo 0
+    If StrComp(currentName, nextStyle.NameLocal, vbTextCompare) <> 0 Then style.NextParagraphStyle = nextStyle
+End Sub
 
 Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As Style, ByVal heading1 As Style, ByVal heading2 As Style, ByVal heading3 As Style, ByVal heading4 As Style, ByVal heading5 As Style, ByVal heading6 As Style, ByVal heading7 As Style, ByVal heading8 As Style, ByVal heading9 As Style)
     Dim story As Range, paragraphCount As Long, structureRows As Long, structureColumns As Long, storyStart As Long, storyEnd As Long, readError As Long
@@ -1114,6 +1139,9 @@ End Function
 
 Public Sub WU_JournalPreflight()
     Dim doc As Document, missing As String, issues As String, report As String
+    Dim structure As Variant, structureRows As Long, structureColumns As Long
+    Dim ambiguous As Long, candidates As Long, contradictions As Long, row As Long
+    Dim structureFailure As String, role As String, contradiction As String
     On Error GoTo Failed
     Set doc = ActiveDocument
     If doc.ProtectionType <> wdNoProtection Then issues = issues & "Document protection is enabled." & vbCrLf
@@ -1129,8 +1157,43 @@ Public Sub WU_JournalPreflight()
     If Not WU_HasStyle(doc, WU_JOURNAL_STYLE_H8) Then missing = missing & WU_JOURNAL_STYLE_H8 & ", "
     If Not WU_HasStyle(doc, WU_JOURNAL_STYLE_H9) Then missing = missing & WU_JOURNAL_STYLE_H9 & ", "
     If Len(missing) > 0 Then issues = issues & "Missing generated styles: " & Left$(missing, Len(missing) - 2) & vbCrLf
+    ' Detection is evidence only. Preflight surfaces uncertainty for an
+    ' editor/agent to resolve instead of silently treating every candidate as
+    ' a heading. A malformed or unsupported document remains usable; its
+    ' detector failure is reported as a precise preflight issue.
+    On Error Resume Next
+    Err.Clear
+    structure = WU_DetectStructure(doc)
+    If Err.Number <> 0 Then
+        structureFailure = Err.Description
+        If Len(structureFailure) = 0 Then structureFailure = "Word could not inspect the main story."
+        Err.Clear
+    ElseIf IsArray(structure) Then
+        structureRows = UBound(structure, 1) - LBound(structure, 1) + 1
+        structureColumns = UBound(structure, 2) - LBound(structure, 2) + 1
+        If Err.Number <> 0 Or structureColumns < WU_COLUMNS Then
+            structureFailure = "detector returned an incomplete evidence table"
+            Err.Clear
+        Else
+            For row = LBound(structure, 1) To UBound(structure, 1)
+                If CBool(structure(row, WU_AMBIGUOUS)) Then ambiguous = ambiguous + 1
+                role = CStr(structure(row, WU_ROLE))
+                If StrComp(role, "candidate", vbTextCompare) = 0 Then candidates = candidates + 1
+                contradiction = CStr(structure(row, WU_CONTRADICTION))
+                If Len(contradiction) > 0 Then contradictions = contradictions + 1
+            Next row
+        End If
+    End If
+    On Error GoTo Failed
+    If Len(structureFailure) > 0 Then
+        issues = issues & "Structure detection unavailable: " & structureFailure & vbCrLf
+    Else
+        If ambiguous > 0 Or candidates > 0 Then issues = issues & "Structure candidates needing review: " & CStr(candidates) & "; ambiguous: " & CStr(ambiguous) & vbCrLf
+        If contradictions > 0 Then issues = issues & "Structure contradictions: " & CStr(contradictions) & vbCrLf
+    End If
     report = "Main-story paragraphs: " & CStr(doc.Paragraphs.Count) & vbCrLf
     report = report & "Sections: " & CStr(doc.Sections.Count)
+    If Len(structureFailure) = 0 Then report = report & vbCrLf & "Structure evidence rows: " & CStr(structureRows)
     If Len(issues) = 0 Then
         MsgBox report & vbCrLf & "No preflight issues were found.", vbInformation, "Journal preflight"
     Else

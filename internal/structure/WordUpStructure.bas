@@ -1,7 +1,7 @@
 Attribute VB_Name = "WordUpStructure"
 Option Explicit
 
-' WordUp structure contract 1.2.12. MIT licensed; editable and dependency-free.
+' WordUp structure contract 1.2.14. MIT licensed; editable and dependency-free.
 ' Detection is separate from publication-specific style mapping.
 Public Const WU_ROLE As Long = 0
 Public Const WU_LEVEL As Long = 1
@@ -34,10 +34,34 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
     Dim hasLists As Boolean, hasTables As Boolean, plausible As Boolean
     Dim headingStyle As Boolean, keepNext As Boolean, upperText As Boolean
     Dim story As Range, pieces As Variant, position As Long, startPosition As Long, endPosition As Long
+    Dim storyText As String, storyStart As Long, storyEnd As Long, relativeStart As Long, relativeLength As Long
+    Dim readError As Long, readDescription As String
     Dim storyTextAligned As Boolean, trailingParagraphMark As Boolean, pieceCount As Long, markLength As Long
     Dim starts() As Long, ends() As Long, texts() As String
     Dim centered() As Boolean, frontEmphasis() As Boolean, frontRoles() As String
-    Set story = document.StoryRanges(wdMainTextStory): Set paragraphs = story.Paragraphs
+    If document Is Nothing Then Err.Raise 91, "WU_DetectStructure", "document is required"
+    On Error Resume Next
+    Err.Clear
+    Set story = document.StoryRanges(wdMainTextStory)
+    readError = Err.Number: readDescription = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If readError <> 0 Or story Is Nothing Then
+        If Len(readDescription) = 0 Then readDescription = "Word could not retrieve the main story."
+        If readError = 0 Then readError = 5
+        Err.Raise readError, "WU_DetectStructure", "main story is unavailable: " & readDescription
+    End If
+    On Error Resume Next
+    Err.Clear
+    Set paragraphs = story.Paragraphs
+    readError = Err.Number: readDescription = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If readError <> 0 Or paragraphs Is Nothing Then
+        If Len(readDescription) = 0 Then readDescription = "Word could not enumerate main-story paragraphs."
+        If readError = 0 Then readError = 5
+        Err.Raise readError, "WU_DetectStructure", "main-story paragraphs are unavailable: " & readDescription
+    End If
     count = paragraphs.count
     If count > 20000 Then Err.Raise 5, "WU_DetectStructure", "paragraph limit exceeds 20000"
     If count = 0 Then WU_DetectStructure = Array(): Exit Function
@@ -45,18 +69,22 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
     ReDim centered(0 To count - 1): ReDim frontEmphasis(0 To count - 1): ReDim frontRoles(0 To count - 1)
     hasLists = (document.Lists.count > 0): hasTables = (document.Tables.count > 0)
     storyTextAligned = False
-    If Not hasTables Then
-        pieces = Split(story.text, vbCr)
-        pieceCount = UBound(pieces) + 1
-        ' Word's main-story text normally ends with the final paragraph mark,
-        ' so Split returns one trailing empty piece. The old count-only check
-        ' rejected every ordinary story and forced one Range read per
-        ' paragraph. Accept both Word forms while keeping the offset table
-        ' exact for a story whose final mark is absent.
-        trailingParagraphMark = (pieceCount = count + 1 And Len(CStr(pieces(pieceCount - 1))) = 0)
-        storyTextAligned = (pieceCount = count Or trailingParagraphMark)
-        If Not storyTextAligned Then GoTo SkipStoryTextCache
-        position = story.Start
+    ' Read the main story once. For table-containing stories, paragraph.Range
+    ' still supplies the authoritative offsets while Mid$ slices this cached
+    ' text; that avoids a second text COM read without guessing around cell
+    ' end markers. For ordinary stories, the split form also supplies the
+    ' paragraph offsets and text in one pass.
+    storyText = story.text
+    storyStart = story.Start: storyEnd = story.End
+    pieces = Split(storyText, vbCr)
+    pieceCount = UBound(pieces) + 1
+    ' Word's main-story text normally ends with the final paragraph mark,
+    ' so Split returns one trailing empty piece. Accept both Word forms while
+    ' keeping the offset table exact for a story whose final mark is absent.
+    trailingParagraphMark = (pieceCount = count + 1 And Len(CStr(pieces(pieceCount - 1))) = 0)
+    storyTextAligned = (Not hasTables And (pieceCount = count Or trailingParagraphMark))
+    If storyTextAligned Then
+        position = storyStart
         ReDim starts(0 To count - 1): ReDim ends(0 To count - 1)
         ReDim texts(0 To count - 1)
         For i = 0 To count - 1
@@ -66,13 +94,29 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
             ends(i) = position + Len(rawText) + markLength: position = ends(i)
             texts(i) = WU_CleanText(rawText)
         Next i
+        ' Do not trust a text-derived table unless its final offset agrees
+        ' with Word's story boundary. A malformed story then takes the safe
+        ' per-paragraph path instead of producing an unsafe edit span.
+        If position <> storyEnd Then storyTextAligned = False
     End If
-SkipStoryTextCache:
     i = 0
     For Each paragraph In paragraphs
         i = i + 1
         Set scope = Nothing
-        If hasTables Or Not storyTextAligned Then
+        If hasTables Then
+            Set scope = paragraph.Range
+            startPosition = scope.Start: endPosition = scope.End
+            relativeStart = startPosition - storyStart + 1: relativeLength = endPosition - startPosition
+            If relativeStart >= 1 And relativeLength >= 0 And relativeStart + relativeLength - 1 <= Len(storyText) Then
+                rawText = Mid$(storyText, relativeStart, relativeLength)
+            Else
+                ' A malformed story boundary is unusual, but the direct
+                ' Range.Text value is safer than slicing outside the cached
+                ' story text.
+                rawText = scope.text
+            End If
+            text = WU_CleanText(rawText): style = CStr(paragraph.Style)
+        ElseIf Not storyTextAligned Then
             Set scope = paragraph.Range: rawText = scope.text
             startPosition = scope.Start: endPosition = scope.End
             text = WU_CleanText(rawText): style = CStr(paragraph.Style)
@@ -80,6 +124,7 @@ SkipStoryTextCache:
             text = texts(i - 1): style = CStr(paragraph.Style)
             startPosition = starts(i - 1): endPosition = ends(i - 1)
         End If
+        If hasTables And scope Is Nothing Then Set scope = paragraph.Range
         context = "body": If hasTables Then If scope.Information(wdWithInTable) Then context = "table"
         marker = WU_ParseMarker(text): alternatives = WU_MarkerAlternatives(marker): label = vbNullString
         If i <= 64 And context = "body" And Len(Trim$(text)) > 0 Then
