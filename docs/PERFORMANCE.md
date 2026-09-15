@@ -52,8 +52,10 @@ The direct Go package lane measured 4.52 ms for a module edit and 5.12 ms for a
 class add. These are writer measurements, not Word compilation or rendering.
 The resident cache retains parsed state only inside the existing idle-expiring
 agent session; external source, evidence, or artifact changes invalidate it and
-force a real build. Independent verification still hashes source, package parts,
-and CFB streams outside the timed operation.
+force a real build. On Windows it uses the filesystem change stamp for an
+unchanged artifact and falls back to the recorded SHA-256 when that stamp is
+unavailable; full source, package-part, and CFB verification still happens on
+the rebuild path.
 
 A 2026-09-14 run on the supplied complex macro fixture measured 27.72 ms for
 unchanged forced rebuilds, 54.04 ms for a module edit, 58.90 ms for a class add,
