@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -49,6 +50,30 @@ func TestXMLPatchUsesQueryRangeAndHashGuard(t *testing.T) {
 		ExpectedSHA256: query["source_sha256"].(string),
 	}); err == nil {
 		t.Fatal("stale XML patch accepted")
+	}
+}
+
+func TestXMLPatchRejectsAbsolutePath(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "work")
+	if _, err := project.New("Test", root); err != nil {
+		t.Fatal(err)
+	}
+	outside := filepath.Join(t.TempDir(), "outside.xml")
+	if err := project.AtomicWrite(outside, []byte(`<root/>`)); err != nil {
+		t.Fatal(err)
+	}
+	e := &Engine{Root: root}
+	if _, err := e.Call(context.Background(), "xml.patch", Parameters{
+		Path:           outside,
+		Offset:         0,
+		Length:         0,
+		Text:           `<root/>`,
+		ExpectedSHA256: office.Hash([]byte(`<root/>`)),
+	}); err == nil || !strings.Contains(err.Error(), "workspace-relative") {
+		t.Fatalf("absolute XML patch path was accepted: %v", err)
+	}
+	if got, err := os.ReadFile(outside); err != nil || string(got) != `<root/>` {
+		t.Fatalf("absolute XML patch changed outside file: %v %q", err, got)
 	}
 }
 

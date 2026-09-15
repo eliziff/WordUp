@@ -560,6 +560,9 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		if p.Part != "" {
 			return nil, fmt.Errorf("xml.patch edits an XML source path; materialize the workspace package part instead of rewriting a ZIP")
 		}
+		if filepath.IsAbs(p.Path) {
+			return nil, fmt.Errorf("xml.patch path must be workspace-relative")
+		}
 		if p.ExpectedSHA256 == "" {
 			return nil, fmt.Errorf("xml.patch requires expected_sha256")
 		}
