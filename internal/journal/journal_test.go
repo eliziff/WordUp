@@ -188,6 +188,9 @@ func TestCreateBuildsIndependentJournalWorkspace(t *testing.T) {
 	if report.Build == nil || !report.Build.PackageValidated || report.Artifact == "" {
 		t.Fatalf("build report is incomplete: %#v", report)
 	}
+	if report.Build.Artifact != report.Artifact {
+		t.Fatalf("build report retained staging artifact path: build=%q report=%q", report.Build.Artifact, report.Artifact)
+	}
 	if report.Build.Modules != 11 || report.Build.Forms != 1 {
 		t.Fatalf("generated workspace did not vendor the expected source surface: modules=%d forms=%d", report.Build.Modules, report.Build.Forms)
 	}
@@ -217,6 +220,20 @@ func TestCreateBuildsIndependentJournalWorkspace(t *testing.T) {
 	}
 	if diagnostics, ok := check["diagnostics"].([]map[string]any); !ok || len(diagnostics) != 0 {
 		t.Fatalf("generated workspace diagnostics: %#v", check)
+	}
+}
+
+func TestCreateAllRejectsSanitizedDestinationCollisions(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "all")
+	profiles := []Profile{
+		{ID: "A-B", Name: "First"},
+		{ID: "A_B", Name: "Second"},
+	}
+	if _, err := createAll(root, profiles); err == nil || !strings.Contains(err.Error(), "collides") {
+		t.Fatalf("sanitized destination collision was accepted: %v", err)
+	}
+	if _, err := os.Stat(root); !os.IsNotExist(err) {
+		t.Fatalf("collision preflight created output: %v", err)
 	}
 }
 

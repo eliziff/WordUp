@@ -47,13 +47,21 @@ func projectName(profile Profile) string {
 }
 
 // Create builds an ordinary source workspace and an uncompiled DOTM. Native
-// compilation/signing remains an explicit outer-loop operation.
+// compilation/signing remains an explicit outer-loop operation. The workspace
+// is assembled out of sight and published only after the complete offline
+// build succeeds, so callers never observe a half-created journal tree.
 func Create(root string, profile Profile) (CreateReport, error) {
 	if root == "" {
 		return CreateReport{}, fmt.Errorf("journal workspace path required")
 	}
 	if err := validateProfile(profile); err != nil {
 		return CreateReport{}, err
+	}
+	finalRoot := filepath.Clean(root)
+	if _, err := os.Lstat(finalRoot); err == nil {
+		return CreateReport{}, fmt.Errorf("journal workspace destination already exists")
+	} else if !os.IsNotExist(err) {
+		return CreateReport{}, fmt.Errorf("inspect journal workspace destination: %w", err)
 	}
 	if profile.BodyFont == "" {
 		profile.BodyFont = "Times New Roman"
@@ -71,7 +79,20 @@ func Create(root string, profile Profile) (CreateReport, error) {
 		profile.Features = defaultFeatures(profile.PermalinkPolicy)
 	}
 	name := projectName(profile)
-	if _, err := project.New(name, root); err != nil {
+	parent, err := filepath.Abs(filepath.Dir(finalRoot))
+	if err != nil {
+		return CreateReport{}, err
+	}
+	if err := os.MkdirAll(parent, 0700); err != nil {
+		return CreateReport{}, err
+	}
+	stageParent, err := os.MkdirTemp(parent, ".wordwright-journal-*")
+	if err != nil {
+		return CreateReport{}, err
+	}
+	defer os.RemoveAll(stageParent)
+	stageRoot := filepath.Join(stageParent, "workspace")
+	if _, err := project.New(name, stageRoot); err != nil {
 		return CreateReport{}, err
 	}
 	// Keep the generated workspace useful as a real agent starting point:
@@ -88,7 +109,7 @@ func Create(root string, profile Profile) (CreateReport, error) {
 		"command.context-menu",
 		"document.style-converter",
 	} {
-		if _, err := component.AddWith(root, id, nil); err != nil {
+		if _, err := component.AddWith(stageRoot, id, nil); err != nil {
 			return CreateReport{}, fmt.Errorf("install %s: %w", id, err)
 		}
 	}
@@ -101,12 +122,12 @@ func Create(root string, profile Profile) (CreateReport, error) {
 		"package/customUI/customUI14.xml": []byte(ribbonSource(profile, module)),
 	}
 	for path, data := range writes {
-		if err := project.Write(root, path, data, ""); err != nil {
+		if err := project.Write(stageRoot, path, data, ""); err != nil {
 			return CreateReport{}, err
 		}
 	}
-	artifact := filepath.Join(root, "dist", name+".dotm")
-	w, err := project.Open(root)
+	artifact := filepath.Join(stageRoot, "dist", name+".dotm")
+	w, err := project.Open(stageRoot)
 	if err != nil {
 		return CreateReport{}, err
 	}
@@ -114,7 +135,22 @@ func Create(root string, profile Profile) (CreateReport, error) {
 	if err != nil {
 		return CreateReport{}, err
 	}
-	return CreateReport{Journal: profile, Workspace: root, Artifact: artifact, Build: build}, nil
+	finalArtifact := filepath.Join(finalRoot, "dist", name+".dotm")
+	build.Artifact = finalArtifact
+	if err := project.Write(stageRoot, "reports/build.json", project.JSON(build), ""); err != nil {
+		return CreateReport{}, err
+	}
+	// The destination was checked before work began, but check again just
+	// before publication so a concurrent creator is never overwritten.
+	if _, err := os.Lstat(finalRoot); err == nil {
+		return CreateReport{}, fmt.Errorf("journal workspace destination appeared during build")
+	} else if !os.IsNotExist(err) {
+		return CreateReport{}, fmt.Errorf("inspect journal workspace destination: %w", err)
+	}
+	if err := os.Rename(stageRoot, finalRoot); err != nil {
+		return CreateReport{}, fmt.Errorf("publish journal workspace: %w", err)
+	}
+	return CreateReport{Journal: profile, Workspace: root, Artifact: finalArtifact, Build: build}, nil
 }
 
 func validateProfile(profile Profile) error {
@@ -209,8 +245,17 @@ func createAll(root string, profiles []Profile) ([]CreateReport, error) {
 	// Preflight every destination before starting workers. A batch must not
 	// leave half a release generated merely because a later profile already
 	// exists.
+	destinations := map[string]string{}
 	for _, profile := range profiles {
+		if err := validateProfile(profile); err != nil {
+			return nil, fmt.Errorf("%s: %w", profile.ID, err)
+		}
 		dir := filepath.Join(root, safeIdentifier(profile.ID))
+		key := strings.ToLower(filepath.ToSlash(filepath.Clean(dir)))
+		if prior, exists := destinations[key]; exists {
+			return nil, fmt.Errorf("%s: destination collides with %s", profile.ID, prior)
+		}
+		destinations[key] = profile.ID
 		if _, err := os.Lstat(dir); err == nil {
 			return nil, fmt.Errorf("%s: destination already exists", profile.ID)
 		} else if !os.IsNotExist(err) {
