@@ -479,13 +479,13 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.21" {
+	if item.Version != "1.0.22" {
 		t.Fatalf("text operations version=%q", item.Version)
 	}
 	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
 		t.Fatalf("unexpected text operations files: %#v", item.Files)
 	}
-	for _, capability := range []string{"literal replacement", "literal counting", "wildcard replacement", "wildcard counting", "wildcard batch replacement", "batch replacement", "range-bounded edits", "character-style matching", "wildcard character styling", "wildcard character-style batches", "offset character-style runs", "batch character-style matching", "header/footer scopes"} {
+	for _, capability := range []string{"literal replacement", "literal counting", "wildcard replacement", "wildcard counting", "wildcard batch replacement", "batch replacement", "range-bounded edits", "character-style matching", "exact character-style application", "wildcard character styling", "wildcard character-style batches", "offset character-style runs", "batch character-style matching", "header/footer scopes"} {
 		found := false
 		for _, got := range item.Capabilities {
 			if got == capability {
@@ -513,6 +513,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"Public Function WU_CountWildcardInRange",
 		"Public Function WU_ApplyCharacterStyleToMatches",
 		"Public Function WU_ApplyCharacterStyleToRange",
+		"Public Function WU_ApplyCharacterStyleInRange",
 		"Public Function WU_ApplyCharacterStyleToWildcardMatches",
 		"Public Function WU_ApplyCharacterStyleToWildcardRange",
 		"Public Function WU_ApplyCharacterStyleToWildcardBatch",
@@ -547,6 +548,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"Application.UndoRecord.StartCustomRecord \"Replace literal text batch\"",
 		"Application.UndoRecord.StartCustomRecord \"Replace wildcard text batch\"",
 		"Application.UndoRecord.StartCustomRecord \"Style literal matches\"",
+		"Application.UndoRecord.StartCustomRecord \"Apply character style\"",
 		"Application.UndoRecord.StartCustomRecord \"Style literal matches batch\"",
 		"WU_ValidateCharacterStyleBatch(document, matches, styleCache, True, \"WU_ApplyCharacterStyleToWildcardBatch\")",
 		"WU_ValidateCharacterStyleBatch(document, matches, styleCache, True, \"WU_ApplyCharacterStyleToWildcardBatchInRange\")",

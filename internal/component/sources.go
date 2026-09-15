@@ -1569,6 +1569,53 @@ Failed:
     Resume CleanUp
 End Function
 
+' Apply a character or linked style to the exact caller-supplied Range. This is
+' the zero-search path for an inspector or detector that already owns the
+' source span; text, fields, hyperlinks, and direct run formatting stay in
+' Word's Range while one style assignment changes only that span.
+Public Function WU_ApplyCharacterStyleInRange(ByVal target As Range, ByVal styleName As String) As Boolean
+    Dim document As Document, style As Style, scope As Range, expectedName As String
+    Dim updating As Boolean, opened As Boolean, captured As Boolean, styleError As Long
+    Dim failure As Long, failureSource As String, failureText As String
+    On Error GoTo Failed
+    If target Is Nothing Then Err.Raise 91, "WU_ApplyCharacterStyleInRange", "target range is required"
+    If Len(Trim$(styleName)) = 0 Then Err.Raise 5, "WU_ApplyCharacterStyleInRange", "style name is required"
+    Set document = target.Document
+    On Error Resume Next
+    Set style = document.Styles(styleName)
+    styleError = Err.Number
+    Err.Clear
+    On Error GoTo Failed
+    If styleError <> 0 Or style Is Nothing Then Err.Raise 5, "WU_ApplyCharacterStyleInRange", "style " & styleName & " was not found"
+    If style.Type <> wdStyleTypeCharacter And Not style.Linked Then Err.Raise 5, "WU_ApplyCharacterStyleInRange", "style is not a character style"
+    If target.End <= target.Start Then Exit Function
+    expectedName = style.NameLocal
+    If WU_CharacterStyleMatches(target, expectedName) Then Exit Function
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Apply character style": opened = True
+    Set scope = target.Duplicate
+    scope.Style = style
+    WU_ApplyCharacterStyleInRange = True
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
 ' Apply a character or linked style to exact Word story offsets in one edit.
 ' Each row is [absoluteStart, absoluteEnd, styleName]. This is the fast,
 ' deterministic path when an inspector or detector already located citation,

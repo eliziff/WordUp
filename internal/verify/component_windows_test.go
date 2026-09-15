@@ -555,6 +555,18 @@ Public Function Check() As String
     If ActiveDocument.Content.Text <> "first cite second" & vbCr Then Err.Raise 5, , "character style conversion changed text"
     If Not ActiveDocument.Undo Then Err.Raise 5, , "missing character style conversion undo"
     If bounded.Style.NameLocal <> "Proof Citation Source" Or Not bounded.Italic Or bounded.Bold Then Err.Raise 5, , "character style conversion undo did not restore inline formatting"
+    ActiveDocument.Content.Text = "direct cite untouched" & vbCr & "outside" & vbCr
+    ActiveDocument.Content.Style = ActiveDocument.Styles(wdStyleNormal)
+    Set bounded = ActiveDocument.Paragraphs(1).Range.Duplicate
+    bounded.Start = bounded.Start + 7: bounded.End = bounded.Start + 4
+    bounded.Style = sourceCharacterStyle
+    bounded.Italic = True
+    changed = WU_ApplyCharacterStyleInRange(bounded, "Proof Citation Target")
+    If Not changed Or bounded.Style.NameLocal <> "Proof Citation Target" Or Not bounded.Bold Or Not bounded.Italic Then Err.Raise 5, , "exact character style application did not preserve inline formatting"
+    If ActiveDocument.Content.Text <> "direct cite untouched" & vbCr & "outside" & vbCr Then Err.Raise 5, , "exact character style application changed text"
+    If ActiveDocument.Paragraphs(2).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Then Err.Raise 5, , "exact character style application escaped its range"
+    If Not ActiveDocument.Undo Then Err.Raise 5, , "missing exact character style undo"
+    If bounded.Style.NameLocal <> "Proof Citation Source" Or Not bounded.Italic Or bounded.Bold Then Err.Raise 5, , "exact character style undo did not restore source formatting"
     ActiveDocument.Content.Text = "first cite second" & vbCr & "third cite fourth" & vbCr
     Set bounded = ActiveDocument.Paragraphs(1).Range.Duplicate
     bounded.Start = bounded.Start + 6: bounded.End = bounded.Start + 4
