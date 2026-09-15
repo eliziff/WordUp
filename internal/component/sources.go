@@ -1178,6 +1178,7 @@ End Function
 Private Function WU_StyleStory(ByVal document As Document, ByVal storyType As Long) As Range
     Dim readError As Long, readDescription As String
     On Error Resume Next
+    Err.Clear
     Set WU_StyleStory = document.StoryRanges(storyType)
     readError = Err.Number
     readDescription = Err.Description
@@ -1357,6 +1358,7 @@ End Function
 Private Function WU_FieldStory(ByVal document As Document, ByVal storyType As Long) As Range
     Dim readError As Long, readDescription As String
     On Error Resume Next
+    Err.Clear
     Set WU_FieldStory = document.StoryRanges(storyType)
     readError = Err.Number
     readDescription = Err.Description
@@ -2903,6 +2905,7 @@ End Function
 Private Function WU_TextStory(ByVal document As Document, ByVal storyType As Long) As Range
     Dim readError As Long, readDescription As String
     On Error Resume Next
+    Err.Clear
     Set WU_TextStory = document.StoryRanges(storyType)
     readError = Err.Number
     readDescription = Err.Description

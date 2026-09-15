@@ -840,6 +840,7 @@ End Sub
 Private Function WU_JournalStory(ByVal doc As Document, ByVal storyType As Long) As Range
     Dim readError As Long, readDescription As String
     On Error Resume Next
+    Err.Clear
     Set WU_JournalStory = doc.StoryRanges(storyType)
     readError = Err.Number
     readDescription = Err.Description
