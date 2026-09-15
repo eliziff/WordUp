@@ -189,7 +189,7 @@ Public Function CheckTextOperations() As String
     before = d.Content.Text
     result = WU_ReplaceLiteral(d, "alpha", "omega", "main", False, True)
     If Not result Then Err.Raise 5, , "literal replacement did not report a change"
-    If d.Content.Text <> "omega omega alphabet" & vbCr Then Err.Raise 5, , "whole-word replacement changed the wrong text"
+    If d.Content.Text <> "Omega omega alphabet" & vbCr Then Err.Raise 5, , "whole-word replacement changed the wrong text"
     If Not d.Paragraphs(1).Range.Characters(1).Italic Then Err.Raise 5, , "replacement lost direct italic formatting"
     If Not d.Undo Then Err.Raise 5, , "replacement did not create one undo record"
     If d.Content.Text <> before Then Err.Raise 5, , "replacement undo did not restore text"
