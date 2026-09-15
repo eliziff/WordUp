@@ -1229,7 +1229,7 @@ Public Function WU_RefreshFields(ByVal document As Document, Optional ByVal stor
     Application.ScreenUpdating = False
     Application.UndoRecord.StartCustomRecord "Refresh fields": opened = True
     If storyScope = "main" Then
-        Set story = document.StoryRanges(wdMainTextStory)
+        Set story = WU_FieldStory(document, wdMainTextStory)
         If Not story Is Nothing Then WU_RefreshFieldStory story, failures
     ElseIf storyScope = "notes" Then
         Set firstStory = WU_FieldStory(document, wdFootnotesStory)
@@ -1327,18 +1327,31 @@ Private Sub WU_RefreshFieldStoryType(ByVal document As Document, ByVal storyType
 End Sub
 
 Private Sub WU_RefreshFieldStoryChain(ByVal firstStory As Range, ByRef failures As Long)
-    Dim story As Range
+    Dim story As Range, nextError As Long
     Set story = firstStory
     Do While Not story Is Nothing
         WU_RefreshFieldStory story, failures
+        On Error Resume Next
         Set story = story.NextStoryRange
+        nextError = Err.Number
+        Err.Clear
+        On Error GoTo 0
+        If nextError <> 0 Then failures = failures + 1: Exit Do
     Loop
 End Sub
 
 Private Sub WU_RefreshFieldStory(ByVal story As Range, ByRef failures As Long)
-    Dim fieldResult As Long, readError As Long
+    Dim fieldResult As Long, readError As Long, storyStart As Long, storyEnd As Long
     If story Is Nothing Then Exit Sub
-    If story.End <= story.Start Then Exit Sub
+    On Error Resume Next
+    Err.Clear
+    storyStart = story.Start
+    storyEnd = story.End
+    readError = Err.Number
+    Err.Clear
+    On Error GoTo 0
+    If readError <> 0 Then failures = failures + 1: Exit Sub
+    If storyEnd <= storyStart Then Exit Sub
     On Error Resume Next
     Err.Clear
     fieldResult = story.Fields.Update
