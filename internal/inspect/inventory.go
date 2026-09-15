@@ -199,6 +199,14 @@ func formEventRow(file string, symbol Symbol, controls map[string]bool, designKn
 	}
 }
 
+func formEventSymbol(name string) bool {
+	i := strings.LastIndexByte(name, '_')
+	if i <= 0 || i+1 >= len(name) {
+		return false
+	}
+	return formEventSuffixes[strings.ToLower(name[i+1:])]
+}
+
 func lineRegistrations(files map[string][]byte, pattern *regexp.Regexp, kind string) []map[string]any {
 	paths := make([]string, 0)
 	for path := range files {
@@ -528,8 +536,7 @@ func CheckInventory(root string, files map[string][]byte, diagnostics *[]map[str
 					publicMacros = append(publicMacros, map[string]any{"file": path, "module": symbol.Module, "name": symbol.Name, "kind": symbol.Kind, "line": symbol.Line, "declaration": symbol.Declaration})
 				}
 			}
-			lower := strings.ToLower(symbol.Name)
-			if strings.EqualFold(pathpkg.Ext(path), ".vba") && (strings.HasPrefix(lower, "userform_") || (strings.Contains(symbol.Name, "_") && formEventSuffixes[strings.ToLower(symbol.Name[strings.LastIndexByte(symbol.Name, '_')+1:])])) {
+			if strings.EqualFold(pathpkg.Ext(path), ".vba") && formEventSymbol(symbol.Name) {
 				formName := strings.TrimSuffix(pathpkg.Base(path), pathpkg.Ext(path))
 				designPath := strings.ToLower("forms/" + formName + ".json")
 				cached, ok := formDesigns[designPath]
