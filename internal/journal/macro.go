@@ -855,14 +855,18 @@ Private Function WU_JournalStory(ByVal doc As Document, ByVal storyType As Long)
 End Function
 
 Private Sub WU_ApplyNoteStoryChain(ByVal firstStory As Range, ByVal noteStyle As Style)
-    Dim story As Range, storyFailed As Boolean, chainLength As Long
+    Dim story As Range, storyFailed As Boolean, chainLength As Long, storyFailure As String
     Set story = firstStory
     Do While Not story Is Nothing
         chainLength = chainLength + 1
         If chainLength > WU_JOURNAL_MAX_STORY_CHAIN Then Err.Raise 5, "WU_ApplyNoteStoryChain", "story chain exceeds 32768 linked stories"
         WU_ApplyNoteStoryStyle story, noteStyle
-        Set story = WU_JournalNextStory(story, storyFailed)
-        If storyFailed Then Err.Raise 5, "WU_ApplyNoteStoryChain", "linked story traversal failed"
+        storyFailure = vbNullString
+        Set story = WU_JournalNextStory(story, storyFailed, storyFailure)
+        If storyFailed Then
+            If Len(storyFailure) = 0 Then storyFailure = "Word could not traverse the linked story."
+            Err.Raise 5, "WU_ApplyNoteStoryChain", "linked story traversal failed: " & storyFailure
+        End If
     Loop
 End Sub
 
@@ -908,7 +912,7 @@ Failed:
 End Sub
 
 Public Sub WU_JournalReviewNext()
-    Dim firstStory As Range, story As Range, revision As Revision, storyIndex As Long, chainLength As Long, storyFailed As Boolean
+    Dim firstStory As Range, story As Range, revision As Revision, storyIndex As Long, chainLength As Long, storyFailed As Boolean, storyFailure As String
     On Error GoTo Failed
     WU_ResetProgress
     For Each firstStory In ActiveDocument.StoryRanges
@@ -933,8 +937,12 @@ Public Sub WU_JournalReviewNext()
                 Application.StatusBar = "Selected the next revision for review."
                 Exit Sub
             End If
-            Set story = WU_JournalNextStory(story, storyFailed)
-            If storyFailed Then Err.Raise 5, "Journal review", "linked story traversal failed"
+            storyFailure = vbNullString
+            Set story = WU_JournalNextStory(story, storyFailed, storyFailure)
+            If storyFailed Then
+                If Len(storyFailure) = 0 Then storyFailure = "Word could not traverse the linked story."
+                Err.Raise 5, "Journal review", "linked story traversal failed: " & storyFailure
+            End If
         Loop
     Next firstStory
     MsgBox "No tracked changes were found in the document stories.", vbInformation, "Journal review"
@@ -1081,18 +1089,26 @@ Private Sub WU_CountStoryItems(ByVal doc As Document, ByRef fieldCount As Long, 
     Next firstStory
 End Sub
 
-Private Function WU_JournalNextStory(ByVal story As Range, ByRef failed As Boolean) As Range
-    Dim nextStory As Range, readError As Long
+Private Function WU_JournalNextStory(ByVal story As Range, ByRef failed As Boolean, Optional ByRef failureText As String) As Range
+    Dim nextStory As Range, readError As Long, readDescription As String
     failed = False
+    failureText = vbNullString
     If story Is Nothing Then Exit Function
     On Error Resume Next
+    Err.Clear
     Set nextStory = story.NextStoryRange
     readError = Err.Number
+    readDescription = Err.Description
     Err.Clear
     On Error GoTo 0
-    If readError <> 0 Then failed = True: Exit Function
+    If readError <> 0 Then
+        failed = True
+        failureText = readDescription
+        If Len(failureText) = 0 Then failureText = "Word could not traverse the linked story."
+        Exit Function
+    End If
     If nextStory Is Nothing Then Exit Function
-    If nextStory Is story Then failed = True: Exit Function
+    If nextStory Is story Then failed = True: failureText = "self-referential story chain": Exit Function
     Set WU_JournalNextStory = nextStory
 End Function
 
