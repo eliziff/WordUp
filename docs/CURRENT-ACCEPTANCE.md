@@ -18,14 +18,16 @@ notes-only isolation, bulk replacement and undo; exact no-ops and empty ranges
 return before touching Word state; native execution remains
 unclaimed while this logon session refuses hidden Word. The fresh offline
 109-document structure gate resolved 109/109 documents and 22,789 paragraphs
-in 5.44 s; the slowest document was 237.9 ms. These are observed gates, not
+in 3.40 s; the slowest document was 149.9 ms. These are observed gates, not
 claims that every Word build or manuscript has identical latency.
 The neutral style pass also honors a resolved non-heading role over a
 tentative marker level, so ordinary numbered lists are not promoted to
 headings; native behavior for that guard remains queued behind the same host
 boundary. The optimized style path validates contiguous detector offsets and
 falls back to Word's paragraph enumeration when an adapted detector's shape
-or spans do not match the main story.
+or spans do not match the main story. Ignored style/story lookups clear VBA's
+`Err` state before returning, so a missing optional notes story cannot force a
+false cleanup failure or disable the detector fast path.
 
 Timings are individual observations, not latency guarantees or controlled speedup measurements. Report assertions and source suites define the actual coverage; assertion counts alone do not establish completeness.
 
