@@ -201,6 +201,12 @@ Public Function CheckTextOperations() As String
     Err.Clear
     On Error GoTo 0
     If Not rejected Then Err.Raise 5, , "invalid story scope was accepted"
+    On Error Resume Next
+    result = WU_ReplaceLiteral(d, String$(200, "^"), "omega", "main", True, False)
+    rejected = (Err.Number <> 0)
+    Err.Clear
+    On Error GoTo 0
+    If Not rejected Then Err.Raise 5, , "escaped find input limit was not enforced"
     For i = 1 To 400: lines(i) = "Alpha text.": Next i
     d.Content.Text = Join(lines, vbCr)
     started = Timer
