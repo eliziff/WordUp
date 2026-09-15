@@ -1,0 +1,167 @@
+package journal
+
+import (
+	"encoding/json"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"github.com/eliziff/WordUp/internal/inspect"
+	"github.com/eliziff/WordUp/internal/project"
+)
+
+func TestProfilesAreStableAndComplete(t *testing.T) {
+	profiles := Profiles()
+	if len(profiles) != 34 {
+		t.Fatalf("profile count = %d, want 34", len(profiles))
+	}
+	seen := map[string]bool{}
+	for _, profile := range profiles {
+		if profile.ID == "" || seen[strings.ToLower(profile.ID)] {
+			t.Fatalf("duplicate or empty profile id: %#v", profile)
+		}
+		seen[strings.ToLower(profile.ID)] = true
+		if len(profile.Features) < 8 || profile.BodyFont == "" || profile.BodySizePT <= 0 {
+			t.Fatalf("incomplete profile: %#v", profile)
+		}
+	}
+}
+
+func TestCatalogEvidenceOverlayPreservesBundledSurface(t *testing.T) {
+	base, err := Get("UBC-L-REV")
+	if err != nil {
+		t.Fatal(err)
+	}
+	overlay := Profile{ID: base.ID, BodyFont: "Cambria", BodySizePT: 10.5, EvidenceStatus: "corpus-observed", Observed: ObservedEvidence{Articles: 2}}
+	got := WithCatalogEvidence(base, Catalog{Journals: []Profile{overlay}})
+	if got.Name != base.Name || len(got.Features) != len(base.Features) || got.BodySizePT != 10.5 || got.Observed.Articles != 2 || got.EvidenceStatus != "corpus-observed" {
+		t.Fatalf("catalog overlay lost profile surface: got=%#v base=%#v", got, base)
+	}
+}
+
+func TestCreateAllPreflightsDestinations(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "all")
+	if err := os.MkdirAll(filepath.Join(root, "ALTA_L_REV"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := CreateAll(root); err == nil || !strings.Contains(err.Error(), "ALTA-L-REV") {
+		t.Fatalf("existing destination was not rejected before batch creation: %v", err)
+	}
+	entries, err := os.ReadDir(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 1 || entries[0].Name() != "ALTA_L_REV" {
+		t.Fatalf("batch created partial output after preflight failure: %#v", entries)
+	}
+}
+
+func TestScanUsesCurrentEvidenceAndKeepsOutputCompact(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "final_contracts")
+	oldArticle := filepath.Join(root, "UBC-L-REV", "58", "4", "article-old")
+	if err := os.MkdirAll(oldArticle, 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(oldArticle, "provenance.json"), []byte(`{"band_year":2000}`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	// The date prefix is sufficient to exclude an old record; malformed
+	// telemetry after it must not make a current-year catalog fail.
+	if err := os.WriteFile(filepath.Join(oldArticle, "digitalborn_native_summary.json"), []byte(`{"document_date_en":"2000",`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	article := filepath.Join(root, "UBC-L-REV", "59", "1", "article-1")
+	if err := os.MkdirAll(article, 0700); err != nil {
+		t.Fatal(err)
+	}
+	provenance := []byte(`{"schema_version":"test","heading_grammar_demotions":{"profile":{"band_year":2026}}}`)
+	if err := os.WriteFile(filepath.Join(article, "provenance.json"), provenance, 0600); err != nil {
+		t.Fatal(err)
+	}
+	summary := map[string]any{
+		"document_date_en":         "2026-01-01",
+		"font_role_body":           map[string]any{"active": true, "font": "Cambria", "size": 11},
+		"font_role_note":           map[string]any{"active": true, "font": "Cambria", "size": 9},
+		"font_role_counts":         map[string]any{"note": 3},
+		"block_quote_line_count":   2,
+		"list_item_line_count":     1,
+		"running_furniture_counts": map[string]any{"header": 1},
+		"drop_cap_merged_count":    1,
+		"two_column_ladder_fired":  1,
+		"toc_outline":              map[string]any{"entries": 2},
+	}
+	b, err := json.Marshal(summary)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(article, "digitalborn_native_summary.json"), b, 0600); err != nil {
+		t.Fatal(err)
+	}
+	catalog, err := Scan(root, []int{2026})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if catalog.JournalCount != 1 || catalog.ArticleCount != 1 {
+		t.Fatalf("unexpected catalog counts: %#v", catalog)
+	}
+	profile := catalog.Journals[0]
+	if profile.ID != "UBC-L-REV" || profile.CurrentYears[0] != 2026 || profile.StyleEvidence.BodyFont != "Cambria" {
+		t.Fatalf("unexpected profile: %#v", profile)
+	}
+	if !profile.Observed.HasFootnotes || !profile.Observed.HasContents || !profile.Observed.HasTwoColumnPages {
+		t.Fatalf("feature evidence was not retained: %#v", profile.Observed)
+	}
+	encoded, err := json.Marshal(catalog)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(encoded), "article-1") {
+		t.Fatalf("catalog leaked an article path: %s", encoded)
+	}
+}
+
+func TestCreateBuildsIndependentJournalWorkspace(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "workspace")
+	profile, err := Get("UBC-L-REV")
+	if err != nil {
+		t.Fatal(err)
+	}
+	report, err := Create(root, profile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.Build == nil || !report.Build.PackageValidated || report.Artifact == "" {
+		t.Fatalf("build report is incomplete: %#v", report)
+	}
+	if report.Build.Modules != 11 || report.Build.Forms != 1 {
+		t.Fatalf("generated workspace did not vendor the expected source surface: modules=%d forms=%d", report.Build.Modules, report.Build.Forms)
+	}
+	if _, err := os.Stat(report.Artifact); err != nil {
+		t.Fatal(err)
+	}
+	lock, err := os.ReadFile(filepath.Join(root, ".wordwright", "components.json"))
+	if err != nil || !strings.Contains(string(lock), "operation.safe-edit") || !strings.Contains(string(lock), "command.hotkey") || !strings.Contains(string(lock), "structure.detect") {
+		t.Fatalf("generated workspace did not record reusable components: err=%v lock=%s", err, lock)
+	}
+	core, err := os.ReadFile(filepath.Join(root, "vba", "WUJournalCore.bas"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, marker := range []string{"WU_JournalOpenSetupFromRibbon", "WU_JournalApplyStyles", "WU_JournalPermaAssistant", "WU_DetectStructure", "WU_BeginSafeEdit"} {
+		if !strings.Contains(string(core), marker) {
+			t.Fatalf("generated source lacks %s", marker)
+		}
+	}
+	w, err := project.Open(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	check, err := inspect.CheckWithConstants(w, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if diagnostics, ok := check["diagnostics"].([]map[string]any); !ok || len(diagnostics) != 0 {
+		t.Fatalf("generated workspace diagnostics: %#v", check)
+	}
+}

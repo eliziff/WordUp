@@ -22,6 +22,8 @@ desktop.ini
 !.env.example
 /private/
 /workspaces/
+# Private journal-template experiment notes and generated profiles.
+/notes/journal-templates/
 **/.wordwright/deploy/
 ALR Macro*
 ALR-*/

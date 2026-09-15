@@ -42,6 +42,12 @@ func Tools() []Tool {
 		[2]string{"component.status", "Report installed and bundled versions, source hashes, modification state and host-platform compatibility for an installed component: component."},
 		[2]string{"component.diff", "Compare installed source with the same parameterized bundled or local starting version using hashes, sizes and first differing byte; never overwrites edits or returns source text."},
 	)
+	ds = append(ds,
+		[2]string{"journal.catalog", "Scan a final-contracts directory for requested current years and return one compact profile per journal: volume/issue evidence, observed fonts/sizes, and feature signals. Reads bounded provenance/summary records only; does not copy article text."},
+		[2]string{"journal.profile", "Return the editable default profile for one supported Canadian law journal. The profile controls generated style names, fonts, sizes, ordered tools and permalink policy."},
+		[2]string{"journal.create", "Create and offline-build one journal workspace and DOTM from its profile. Optional path names a final-contracts catalog whose observed values are overlaid. The output contains ordinary VBA, a clickable setup form, Ribbon callbacks and no WordUp runtime dependency; native compile/sign/acceptance remain explicit."},
+		[2]string{"journal.create-all", "Create and offline-build every bundled Canadian law-journal profile beneath output. Optional path supplies one final-contracts catalog scan for all profiles. Existing destinations are never overwritten."},
+	)
 	props := map[string]any{}
 	ds = append(ds, [2]string{"test.freeze", "Freeze passing native report reference into a new local output directory, including the retained artifact, declared inputs and run evidence. Returns a portable bundle.json reference accepted by test.replay and test.compare; verifies hashes on load. Existing destinations are never overwritten. XML is copied unchanged. Uncaptured external inputs are not made hermetic."})
 	ds = append(ds, [2]string{"xml.verify", "Verify actual XML or a named OPC package part against an expected XML reference directly. comparison defaults to exact; semantic is explicit namespace-aware equality. No ignored content. Mismatch returns an error plus hashes and difference locations. Does not run Word."})
@@ -75,6 +81,8 @@ func Tools() []Tool {
 		props[key] = map[string]any{"type": "string"}
 	}
 	props["component"] = map[string]any{"type": "string", "description": "Stable bundled component ID such as structure.detect."}
+	props["journal"] = map[string]any{"type": "string", "description": "Stable journal profile ID such as ALTA-L-REV or UBC-L-REV."}
+	props["years"] = map[string]any{"type": "array", "items": map[string]any{"type": "integer"}, "description": "Current years for journal.catalog; defaults to 2025 and 2026."}
 	props["parameters"] = map[string]any{"type": "object", "additionalProperties": map[string]any{"type": "string"}, "description": "Declared component adaptation values. Currently module_prefix is a validated VBA identifier; undeclared values are rejected."}
 	for _, key := range []string{"timeout_ms", "tolerance", "offset", "limit", "length"} {
 		props[key] = map[string]any{"type": "integer"}

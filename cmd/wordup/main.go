@@ -172,6 +172,36 @@ func run(ctx context.Context, args []string) int {
 		} else {
 			p.Path, p.Output = rest[0], rest[1]
 		}
+	case "journal.catalog":
+		if len(rest) != 1 {
+			err = fmt.Errorf("journal.catalog FINAL_CONTRACTS_DIRECTORY required")
+		} else {
+			p.Path = rest[0]
+		}
+	case "journal.profile":
+		if len(rest) != 1 {
+			err = fmt.Errorf("journal.profile JOURNAL_ID required")
+		} else {
+			p.Journal = rest[0]
+		}
+	case "journal.create":
+		if len(rest) < 2 || len(rest) > 3 {
+			err = fmt.Errorf("journal.create JOURNAL_ID OUTPUT_DIRECTORY [FINAL_CONTRACTS_DIRECTORY] expected")
+		} else {
+			p.Journal, p.Output = rest[0], rest[1]
+			if len(rest) == 3 {
+				p.Path = rest[2]
+			}
+		}
+	case "journal.create-all":
+		if len(rest) < 1 || len(rest) > 2 {
+			err = fmt.Errorf("journal.create-all OUTPUT_DIRECTORY [FINAL_CONTRACTS_DIRECTORY] expected")
+		} else {
+			p.Output = rest[0]
+			if len(rest) == 2 {
+				p.Path = rest[1]
+			}
+		}
 	case "inspect", "reference.document", "reference.image", "read":
 		if len(rest) != 1 {
 			err = fmt.Errorf("%s PATH required", method)
@@ -287,6 +317,10 @@ const usage = `WordUp ` + project.Version + ` — native local Word development 
   wordup --workspace WORKSPACE rpc METHOD @parameters.json
   wordup --workspace WORKSPACE session stop
   wordup doctor
+  wordup journal.catalog FINAL_CONTRACTS_DIRECTORY
+  wordup journal.profile JOURNAL_ID
+  wordup journal.create JOURNAL_ID OUTPUT_DIRECTORY [FINAL_CONTRACTS_DIRECTORY]
+  wordup journal.create-all OUTPUT_DIRECTORY [FINAL_CONTRACTS_DIRECTORY]
   wordup --execute selftest [EVIDENCE_DIRECTORY]
   wordup example OUTPUT_DIRECTORY
 

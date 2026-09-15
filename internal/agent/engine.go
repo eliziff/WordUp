@@ -12,6 +12,7 @@ import (
 	"github.com/eliziff/WordUp/internal/deploy"
 	"github.com/eliziff/WordUp/internal/example"
 	"github.com/eliziff/WordUp/internal/inspect"
+	"github.com/eliziff/WordUp/internal/journal"
 	"github.com/eliziff/WordUp/internal/native"
 	"github.com/eliziff/WordUp/internal/office"
 	"github.com/eliziff/WordUp/internal/project"
@@ -34,6 +35,8 @@ type Parameters struct {
 	Part                 string                  `json:"part,omitempty"`
 	Namespaces           map[string]string       `json:"namespaces,omitempty"`
 	Component            string                  `json:"component,omitempty"`
+	Journal              string                  `json:"journal,omitempty"`
+	Years                []int                   `json:"years,omitempty"`
 	Parameters           map[string]string       `json:"parameters,omitempty"`
 	Document             string                  `json:"document,omitempty"`
 	CompilationConstants map[string]any          `json:"compilation_constants,omitempty"`
@@ -125,6 +128,52 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		defer e.fsMu.Unlock()
 	}
 	switch method {
+	case "journal.catalog":
+		path, err := e.path(p.Path)
+		if err != nil {
+			return nil, err
+		}
+		return journal.Scan(path, p.Years)
+	case "journal.profile":
+		return journal.Get(p.Journal)
+	case "journal.create":
+		profile, err := journal.Get(p.Journal)
+		if err != nil {
+			return nil, err
+		}
+		if p.Path != "" {
+			catalogPath, pathErr := e.path(p.Path)
+			if pathErr != nil {
+				return nil, pathErr
+			}
+			catalog, scanErr := journal.Scan(catalogPath, p.Years)
+			if scanErr != nil {
+				return nil, scanErr
+			}
+			profile = journal.WithCatalogEvidence(profile, catalog)
+		}
+		output, err := e.path(p.Output)
+		if err != nil {
+			return nil, err
+		}
+		return journal.Create(output, profile)
+	case "journal.create-all":
+		output, err := e.path(p.Output)
+		if err != nil {
+			return nil, err
+		}
+		if p.Path != "" {
+			catalogPath, pathErr := e.path(p.Path)
+			if pathErr != nil {
+				return nil, pathErr
+			}
+			catalog, scanErr := journal.Scan(catalogPath, p.Years)
+			if scanErr != nil {
+				return nil, scanErr
+			}
+			return journal.CreateAllWithCatalog(output, catalog)
+		}
+		return journal.CreateAll(output)
 	case "component.list":
 		return component.List(), nil
 	case "component.get":

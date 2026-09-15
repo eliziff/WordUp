@@ -146,7 +146,7 @@ Failed:
     Resume CleanUp
 End Function
 Private Sub WU_ChangeHotkey(ByVal keyCode As Long, ByVal macroName As String, ByVal remove As Boolean)
-    Dim prior As Object, binding As KeyBinding
+    Dim prior As Object, binding As KeyBinding, owner As Object
     Dim failure As Long, failureSource As String, failureText As String
     On Error GoTo Failed
     Set prior = Application.CustomizationContext
@@ -155,11 +155,16 @@ Private Sub WU_ChangeHotkey(ByVal keyCode As Long, ByVal macroName As String, By
         Set binding = WU_OwnedHotkey(keyCode)
         If Not binding Is Nothing Then binding.Clear
     Else
-        ' Replace only a binding owned by this template.  Re-registering a
-        ' shortcut must not accumulate duplicate entries or disturb another
-        ' template's customization context.
-        Set binding = WU_OwnedHotkey(keyCode)
-        If Not binding Is Nothing Then binding.Clear
+        ' Replace only a binding owned by this template. Re-registering a
+        ' shortcut must not accumulate duplicate entries or disturb Word's
+        ' Normal template or another add-in.
+        Set binding = FindKey(keyCode)
+        If Not binding Is Nothing Then
+            Set owner = binding.Context
+            If owner Is Nothing Then Err.Raise 5, "WU_RegisterHotkey", "refusing to replace an unowned key binding"
+            If Not owner Is ThisDocument Then Err.Raise 5, "WU_RegisterHotkey", "key binding belongs to another template"
+            binding.Clear
+        End If
         KeyBindings.Add wdKeyCategoryMacro, WU_QualifiedMacro(macroName), keyCode
     End If
 CleanUp:
