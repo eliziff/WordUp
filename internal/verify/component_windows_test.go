@@ -221,8 +221,9 @@ Public Function CheckTextOperations() As String
     Set scoped = d.Paragraphs(1).Range.Duplicate
     rangeBatchChanged = WU_ReplaceLiteralBatchInRange(scoped, replacements, True, True)
     If rangeBatchChanged <> 1 Or d.Content.Text <> "First Omega" & vbCr & "Second Gamma" & vbCr Then Err.Raise 5, , "range batch replacement escaped its requested boundary"
+    d.Saved = True
     literalCount = WU_CountLiteral(d, "Gamma", "main", True, True)
-    If literalCount <> 1 Then Err.Raise 5, , "literal counter returned the wrong main-story count"
+    If literalCount <> 1 Or Not d.Saved Then Err.Raise 5, , "literal counter returned the wrong main-story count or changed document state"
     literalCount = WU_CountLiteralInRange(scoped, "Omega", True, True)
     If literalCount <> 1 Then Err.Raise 5, , "range literal counter missed the bounded match"
     If Application.ScreenUpdating <> priorUpdating Then Err.Raise 5, , "range batch replacement did not restore ScreenUpdating"
