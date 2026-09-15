@@ -698,14 +698,19 @@ End Sub
 Private Sub WU_ApplyResolvedParagraphStyles(ByVal story As Range, ByRef structure As Variant, ByVal bodyStyle As Style, ByVal heading1 As Style, ByVal heading2 As Style, ByVal heading3 As Style, ByVal heading4 As Style, ByVal heading5 As Style, ByVal heading6 As Style, ByVal heading7 As Style, ByVal heading8 As Style, ByVal heading9 As Style)
     Dim batch As Range, batchStyle As Style, desiredStyle As Style
     Dim row As Long, firstRow As Long, lastRow As Long, startPosition As Long, endPosition As Long, level As Long
-    Dim role As String, context As String, styleName As String, valid As Boolean
+    Dim role As String, context As String, styleName As String, desiredName As String, valid As Boolean
+    Dim bodyName As String, headingNames(1 To 9) As String
+    bodyName = bodyStyle.NameLocal
+    headingNames(1) = heading1.NameLocal: headingNames(2) = heading2.NameLocal: headingNames(3) = heading3.NameLocal
+    headingNames(4) = heading4.NameLocal: headingNames(5) = heading5.NameLocal: headingNames(6) = heading6.NameLocal
+    headingNames(7) = heading7.NameLocal: headingNames(8) = heading8.NameLocal: headingNames(9) = heading9.NameLocal
     firstRow = LBound(structure, 1): lastRow = UBound(structure, 1)
     For row = firstRow To lastRow
         If (row - firstRow) Mod 256 = 0 Then
             Application.StatusBar = "Applying " & WU_JOURNAL_NAME & " styles (paragraph " & CStr(row - firstRow + 1) & ")"
             If WU_CancelRequested() Then Err.Raise 18, "Apply styles", "style application cancelled"
         End If
-        Set desiredStyle = Nothing: valid = False: role = vbNullString: context = vbNullString: styleName = vbNullString
+        Set desiredStyle = Nothing: valid = False: role = vbNullString: context = vbNullString: styleName = vbNullString: desiredName = vbNullString
         startPosition = 0: endPosition = 0: level = 0
         On Error Resume Next
         role = CStr(structure(row, WU_ROLE))
@@ -720,14 +725,15 @@ Private Sub WU_ApplyResolvedParagraphStyles(ByVal story As Range, ByRef structur
         If valid And StrComp(context, "table", vbTextCompare) <> 0 Then
             If StrComp(role, "heading", vbTextCompare) = 0 Then
                 Set desiredStyle = WU_HeadingStyleForLevel(level, heading1, heading2, heading3, heading4, heading5, heading6, heading7, heading8, heading9)
+                If level >= 1 And level <= 9 Then desiredName = headingNames(level)
             ElseIf StrComp(role, "body", vbTextCompare) = 0 Then
-                Set desiredStyle = bodyStyle
+                Set desiredStyle = bodyStyle: desiredName = bodyName
             ElseIf Len(role) = 0 Then
-                If StrComp(styleName, "Normal", vbTextCompare) = 0 Or StrComp(styleName, "Body Text", vbTextCompare) = 0 Then Set desiredStyle = bodyStyle
+                If StrComp(styleName, "Normal", vbTextCompare) = 0 Or StrComp(styleName, "Body Text", vbTextCompare) = 0 Then Set desiredStyle = bodyStyle: desiredName = bodyName
             End If
         End If
         If Not desiredStyle Is Nothing Then
-            If StrComp(styleName, desiredStyle.NameLocal, vbTextCompare) = 0 Then Set desiredStyle = Nothing
+            If StrComp(styleName, desiredName, vbTextCompare) = 0 Then Set desiredStyle = Nothing
         End If
         If desiredStyle Is Nothing Then
             WU_FlushParagraphStyleBatch batch, batchStyle
@@ -747,29 +753,36 @@ End Sub
 
 Private Sub WU_ApplyNativeParagraphStyles(ByVal story As Range, ByVal bodyStyle As Style, ByVal heading1 As Style, ByVal heading2 As Style, ByVal heading3 As Style, ByVal heading4 As Style, ByVal heading5 As Style, ByVal heading6 As Style, ByVal heading7 As Style, ByVal heading8 As Style, ByVal heading9 As Style)
     Dim paragraph As Paragraph, paragraphRange As Range, batch As Range
-    Dim batchStyle As Style, desiredStyle As Style, currentStyle As String, paragraphIndex As Long
+    Dim batchStyle As Style, desiredStyle As Style, currentStyle As String, desiredName As String, paragraphIndex As Long, paragraphLevel As Long
+    Dim bodyName As String, headingNames(1 To 9) As String
+    bodyName = bodyStyle.NameLocal
+    headingNames(1) = heading1.NameLocal: headingNames(2) = heading2.NameLocal: headingNames(3) = heading3.NameLocal
+    headingNames(4) = heading4.NameLocal: headingNames(5) = heading5.NameLocal: headingNames(6) = heading6.NameLocal
+    headingNames(7) = heading7.NameLocal: headingNames(8) = heading8.NameLocal: headingNames(9) = heading9.NameLocal
     For Each paragraph In story.Paragraphs
         paragraphIndex = paragraphIndex + 1
         If paragraphIndex Mod 256 = 0 Then
             Application.StatusBar = "Applying " & WU_JOURNAL_NAME & " styles (paragraph " & CStr(paragraphIndex) & ")"
             If WU_CancelRequested() Then Err.Raise 18, "Apply styles", "style application cancelled"
         End If
-        Set paragraphRange = paragraph.Range: Set desiredStyle = Nothing
+        Set paragraphRange = paragraph.Range: Set desiredStyle = Nothing: desiredName = vbNullString
         If Not paragraphRange.Information(wdWithInTable) Then
             currentStyle = vbNullString
             On Error Resume Next
             currentStyle = CStr(paragraphRange.Style)
             Err.Clear
             On Error GoTo 0
-            Set desiredStyle = WU_HeadingStyleForLevel(paragraph.OutlineLevel, heading1, heading2, heading3, heading4, heading5, heading6, heading7, heading8, heading9)
+            paragraphLevel = paragraph.OutlineLevel
+            Set desiredStyle = WU_HeadingStyleForLevel(paragraphLevel, heading1, heading2, heading3, heading4, heading5, heading6, heading7, heading8, heading9)
+            If paragraphLevel >= 1 And paragraphLevel <= 9 Then desiredName = headingNames(paragraphLevel)
             If Not desiredStyle Is Nothing Then
-                If StrComp(currentStyle, desiredStyle.NameLocal, vbTextCompare) = 0 Then Set desiredStyle = Nothing
+                If StrComp(currentStyle, desiredName, vbTextCompare) = 0 Then Set desiredStyle = Nothing
             End If
             If desiredStyle Is Nothing Then
-                If StrComp(currentStyle, "Normal", vbTextCompare) = 0 Or StrComp(currentStyle, "Body Text", vbTextCompare) = 0 Then Set desiredStyle = bodyStyle
+                If StrComp(currentStyle, "Normal", vbTextCompare) = 0 Or StrComp(currentStyle, "Body Text", vbTextCompare) = 0 Then Set desiredStyle = bodyStyle: desiredName = bodyName
             End If
             If Not desiredStyle Is Nothing Then
-                If StrComp(currentStyle, desiredStyle.NameLocal, vbTextCompare) = 0 Then Set desiredStyle = Nothing
+                If StrComp(currentStyle, desiredName, vbTextCompare) = 0 Then Set desiredStyle = Nothing
             End If
         End If
         If desiredStyle Is Nothing Then
