@@ -359,10 +359,10 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.13" {
+	if item.Version != "1.0.15" {
 		t.Fatalf("style converter version did not advance: %q", item.Version)
 	}
-	for _, capability := range []string{"paragraph-style conversion", "paragraph-style application", "range-bounded conversion", "offset style runs", "story-wide conversion", "header/footer scopes", "batch style mapping"} {
+	for _, capability := range []string{"paragraph-style conversion", "character-style conversion", "paragraph-style application", "range-bounded conversion", "offset style runs", "story-wide conversion", "header/footer scopes", "batch style mapping", "character-style batch mapping"} {
 		found := false
 		for _, got := range item.Capabilities {
 			if got == capability {
@@ -382,11 +382,22 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 	}
 	for _, want := range []string{
 		"Public Function WU_ConvertStyleInRange",
+		"Public Function WU_ConvertCharacterStyle",
+		"Public Function WU_ConvertCharacterStyleInRange",
+		"Public Function WU_ConvertCharacterStyleBatch",
+		"Public Function WU_ConvertCharacterStyleBatchInRange",
 		"Public Function WU_ApplyParagraphStyleInRange",
 		"Public Function WU_ApplyParagraphStyleRuns",
 		"Public Function WU_ConvertStyleBatch",
 		"Public Function WU_ConvertStyleBatchInRange",
 		"Private Function WU_ConvertStyleInStory",
+		"Private Function WU_ConvertCharacterStyleInStory",
+		"Private Function WU_ConvertCharacterStyleInStoryChain",
+		"Private Function WU_ConvertCharacterStyleInStoryType",
+		"Private Function WU_IsCharacterStyle",
+		"Private Sub WU_ConvertCharacterStyleBatchInStory",
+		"Private Sub WU_ConvertCharacterStyleBatchInStoryChain",
+		"Private Sub WU_ConvertCharacterStyleBatchInStoryType",
 		"Private Function WU_ValidateStyleBatch",
 		"Private Function WU_ValidateParagraphStyleRuns",
 		"Private Function WU_ReadStylePosition",
@@ -399,6 +410,8 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 		`If storyScope <> "main" And storyScope <> "notes" And storyScope <> "headers" And storyScope <> "footers" And storyScope <> "all" Then Err.Raise 5, "WU_ConvertStyle", "story scope must be main, notes, headers, footers, or all"`,
 		`If sourceStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ConvertStyle", "source style is not a paragraph style"`,
 		`If targetStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ConvertStyle", "target style is not a paragraph style"`,
+		`If Not WU_IsCharacterStyle(sourceStyle) Then Err.Raise 5, "WU_ConvertCharacterStyle", "source style is not a character style"`,
+		`If Not WU_IsCharacterStyle(targetStyle) Then Err.Raise 5, "WU_ConvertCharacterStyle", "target style is not a character style"`,
 		"captured = True",
 		"If captured Then Application.ScreenUpdating = updating",
 		"If targetEnd <= targetStart Then Exit Function",
@@ -424,6 +437,8 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 		`"source style " & fromStyle & " was not found"`,
 		`"style " & styleName & " was not found"`,
 		"Application.UndoRecord.StartCustomRecord \"Convert style batch\"",
+		"Application.UndoRecord.StartCustomRecord \"Convert character style\"",
+		"Application.UndoRecord.StartCustomRecord \"Convert character style batch\"",
 		"ReDim sourceCache(firstRow To lastRow): ReDim targetCache(firstRow To lastRow): ReDim enabled(firstRow To lastRow)",
 		"ReDim cachedSourceNames(1 To cacheCapacity): ReDim cachedTargetNames(1 To cacheCapacity)",
 		"If StrComp(fromStyle, cachedSourceNames(cacheRow), vbTextCompare) = 0 Then sourceCacheIndex = cacheRow: Exit For",
@@ -434,6 +449,8 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 		"WU_ConvertStyleInStoryType",
 		"Private Sub WU_PinFindOptions(ByVal criteria As Find)",
 		"Call WU_PinFindOptions(scope.Find)",
+		".Replacement.Style = targetStyle",
+		".Text = vbNullString",
 		".MatchFuzzy = False",
 		".MatchPhrase = False",
 		".MatchByte = False",

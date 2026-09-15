@@ -130,9 +130,9 @@ func builtin() []Manifest {
 			items[i].Version = "1.0.3"
 		}
 		if items[i].ID == "document.style-converter" {
-			items[i].Version = "1.0.13"
-			items[i].Capabilities = []string{"paragraph-style conversion", "paragraph-style application", "range-bounded conversion", "offset style runs", "story-wide conversion", "header/footer scopes", "batch style mapping"}
-			items[i].Acceptance = "WU_ConvertStyle, WU_ConvertStyleInRange, WU_ApplyParagraphStyleInRange, WU_ApplyParagraphStyleRuns, and their bounded batch equivalents support main, notes, headers, footers, and all scopes, cache each unique style handle before editing, pin Word's sticky Find flags where the host exposes them, are state-safe, and compile without non-Office references."
+			items[i].Version = "1.0.15"
+			items[i].Capabilities = []string{"paragraph-style conversion", "character-style conversion", "paragraph-style application", "range-bounded conversion", "offset style runs", "story-wide conversion", "header/footer scopes", "batch style mapping", "character-style batch mapping"}
+			items[i].Acceptance = "WU_ConvertStyle and WU_ConvertCharacterStyle (including exact-range and bounded batch forms), WU_ApplyParagraphStyleInRange, WU_ApplyParagraphStyleRuns, and their bounded paragraph batch equivalents support main, notes, headers, footers, and all scopes, cache each unique style handle before editing, pin Word's sticky Find flags where the host exposes them, preserve text and inline structure on formatting-only conversion, are state-safe, and compile without non-Office references."
 		}
 		if items[i].ID == "document.text-operations" {
 			items[i].Version = "1.0.20"

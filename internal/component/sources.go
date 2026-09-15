@@ -479,6 +479,247 @@ Failed:
     Resume CleanUp
 End Function
 
+' Convert a character or linked style across explicitly selected stories.
+' Word's formatting Find engine applies the destination style without
+' rewriting the matched text, so existing italic, language, hyperlinks,
+' fields, and other inline structure remain owned by Word.
+Public Function WU_ConvertCharacterStyle(ByVal document As Document, ByVal fromStyle As String, ByVal toStyle As String, Optional ByVal storyScope As String = "all") As Boolean
+    Dim firstStory As Range, story As Range, updating As Boolean, opened As Boolean, captured As Boolean
+    Dim failure As Long, failureSource As String, failureText As String, sourceError As Long, targetError As Long
+    Dim sourceStyle As Style, targetStyle As Style
+    On Error GoTo Failed
+    If document Is Nothing Then Err.Raise 91, "WU_ConvertCharacterStyle", "document is required"
+    If Len(Trim$(fromStyle)) = 0 Then Err.Raise 5, "WU_ConvertCharacterStyle", "source style is required"
+    If Len(Trim$(toStyle)) = 0 Then Err.Raise 5, "WU_ConvertCharacterStyle", "target style is required"
+    storyScope = LCase$(Trim$(storyScope))
+    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "headers" And storyScope <> "footers" And storyScope <> "all" Then Err.Raise 5, "WU_ConvertCharacterStyle", "story scope must be main, notes, headers, footers, or all"
+    updating = Application.ScreenUpdating
+    captured = True
+    On Error Resume Next
+    Set sourceStyle = document.Styles(fromStyle)
+    sourceError = Err.Number
+    Err.Clear
+    Set targetStyle = document.Styles(toStyle)
+    targetError = Err.Number
+    Err.Clear
+    On Error GoTo Failed
+    If sourceError <> 0 Or sourceStyle Is Nothing Then Err.Raise 5, "WU_ConvertCharacterStyle", "source style " & fromStyle & " was not found"
+    If targetError <> 0 Or targetStyle Is Nothing Then Err.Raise 5, "WU_ConvertCharacterStyle", "target style " & toStyle & " was not found"
+    If Not WU_IsCharacterStyle(sourceStyle) Then Err.Raise 5, "WU_ConvertCharacterStyle", "source style is not a character style"
+    If Not WU_IsCharacterStyle(targetStyle) Then Err.Raise 5, "WU_ConvertCharacterStyle", "target style is not a character style"
+    If StrComp(sourceStyle.NameLocal, targetStyle.NameLocal, vbTextCompare) = 0 Then Exit Function
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Convert character style": opened = True
+    If storyScope = "main" Then
+        Set story = document.StoryRanges(wdMainTextStory)
+        If Not story Is Nothing Then If story.End > story.Start Then WU_ConvertCharacterStyle = WU_ConvertCharacterStyleInStory(story, sourceStyle, targetStyle)
+    ElseIf storyScope = "notes" Then
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdFootnotesStory)
+        Err.Clear
+        On Error GoTo Failed
+        If Not firstStory Is Nothing Then WU_ConvertCharacterStyle = WU_ConvertCharacterStyleInStoryChain(firstStory, sourceStyle, targetStyle)
+        Set firstStory = Nothing
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdEndnotesStory)
+        Err.Clear
+        On Error GoTo Failed
+        If Not firstStory Is Nothing Then If WU_ConvertCharacterStyleInStoryChain(firstStory, sourceStyle, targetStyle) Then WU_ConvertCharacterStyle = True
+    ElseIf storyScope = "headers" Then
+        If WU_ConvertCharacterStyleInStoryType(document, wdPrimaryHeaderStory, sourceStyle, targetStyle) Then WU_ConvertCharacterStyle = True
+        If WU_ConvertCharacterStyleInStoryType(document, wdFirstPageHeaderStory, sourceStyle, targetStyle) Then WU_ConvertCharacterStyle = True
+        If WU_ConvertCharacterStyleInStoryType(document, wdEvenPagesHeaderStory, sourceStyle, targetStyle) Then WU_ConvertCharacterStyle = True
+    ElseIf storyScope = "footers" Then
+        If WU_ConvertCharacterStyleInStoryType(document, wdPrimaryFooterStory, sourceStyle, targetStyle) Then WU_ConvertCharacterStyle = True
+        If WU_ConvertCharacterStyleInStoryType(document, wdFirstPageFooterStory, sourceStyle, targetStyle) Then WU_ConvertCharacterStyle = True
+        If WU_ConvertCharacterStyleInStoryType(document, wdEvenPagesFooterStory, sourceStyle, targetStyle) Then WU_ConvertCharacterStyle = True
+    Else
+        For Each firstStory In document.StoryRanges
+            If WU_ConvertCharacterStyleInStoryChain(firstStory, sourceStyle, targetStyle) Then WU_ConvertCharacterStyle = True
+        Next firstStory
+    End If
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
+' Convert a character or linked style only inside the exact caller-supplied
+' Range. Empty ranges and same-style requests are true no-ops: they do not
+' open an undo record or dirty the document.
+Public Function WU_ConvertCharacterStyleInRange(ByVal target As Range, ByVal fromStyle As String, ByVal toStyle As String) As Boolean
+    Dim updating As Boolean, opened As Boolean, captured As Boolean, targetStart As Long, targetEnd As Long
+    Dim failure As Long, failureSource As String, failureText As String, sourceError As Long, targetError As Long
+    Dim document As Document, sourceStyle As Style, targetStyle As Style
+    On Error GoTo Failed
+    If target Is Nothing Then Err.Raise 91, "WU_ConvertCharacterStyleInRange", "target range is required"
+    If Len(Trim$(fromStyle)) = 0 Then Err.Raise 5, "WU_ConvertCharacterStyleInRange", "source style is required"
+    If Len(Trim$(toStyle)) = 0 Then Err.Raise 5, "WU_ConvertCharacterStyleInRange", "target style is required"
+    Set document = target.Document
+    On Error Resume Next
+    Set sourceStyle = document.Styles(fromStyle)
+    sourceError = Err.Number
+    Err.Clear
+    Set targetStyle = document.Styles(toStyle)
+    targetError = Err.Number
+    Err.Clear
+    On Error GoTo Failed
+    If sourceError <> 0 Or sourceStyle Is Nothing Then Err.Raise 5, "WU_ConvertCharacterStyleInRange", "source style " & fromStyle & " was not found"
+    If targetError <> 0 Or targetStyle Is Nothing Then Err.Raise 5, "WU_ConvertCharacterStyleInRange", "target style " & toStyle & " was not found"
+    If Not WU_IsCharacterStyle(sourceStyle) Then Err.Raise 5, "WU_ConvertCharacterStyleInRange", "source style is not a character style"
+    If Not WU_IsCharacterStyle(targetStyle) Then Err.Raise 5, "WU_ConvertCharacterStyleInRange", "target style is not a character style"
+    targetStart = target.Start: targetEnd = target.End
+    If targetEnd <= targetStart Then Exit Function
+    If StrComp(sourceStyle.NameLocal, targetStyle.NameLocal, vbTextCompare) = 0 Then Exit Function
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Convert character style": opened = True
+    WU_ConvertCharacterStyleInRange = WU_ConvertCharacterStyleInStory(target, sourceStyle, targetStyle)
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
+' Convert a bounded map of character or linked styles in row order. The
+' validated Style handles are reused across stories, and every mapping shares
+' one undo record. Row order is intentional when a source style is itself a
+' destination of an earlier mapping.
+Public Function WU_ConvertCharacterStyleBatch(ByVal document As Document, ByVal mappings As Variant, Optional ByVal storyScope As String = "all") As Long
+    Dim firstStory As Range, story As Range, updating As Boolean, opened As Boolean, captured As Boolean
+    Dim failure As Long, failureSource As String, failureText As String
+    Dim firstRow As Long, lastRow As Long, firstColumn As Long, activeRows As Long, changed As Long, row As Long
+    Dim sourceCache() As Style, targetCache() As Style, enabled() As Boolean, matched() As Boolean
+    On Error GoTo Failed
+    If document Is Nothing Then Err.Raise 91, "WU_ConvertCharacterStyleBatch", "document is required"
+    storyScope = LCase$(Trim$(storyScope))
+    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "headers" And storyScope <> "footers" And storyScope <> "all" Then Err.Raise 5, "WU_ConvertCharacterStyleBatch", "story scope must be main, notes, headers, footers, or all"
+    activeRows = WU_ValidateStyleBatch(document, mappings, sourceCache, targetCache, enabled, True, "WU_ConvertCharacterStyleBatch")
+    If activeRows = 0 Then Exit Function
+    firstRow = LBound(mappings, 1): lastRow = UBound(mappings, 1): firstColumn = LBound(mappings, 2)
+    ReDim matched(firstRow To lastRow)
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Convert character style batch": opened = True
+    If storyScope = "main" Then
+        Set story = document.StoryRanges(wdMainTextStory)
+        If Not story Is Nothing Then If story.End > story.Start Then WU_ConvertCharacterStyleBatchInStory story, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+    ElseIf storyScope = "notes" Then
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdFootnotesStory)
+        Err.Clear
+        On Error GoTo Failed
+        If Not firstStory Is Nothing Then WU_ConvertCharacterStyleBatchInStoryChain firstStory, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+        Set firstStory = Nothing
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdEndnotesStory)
+        Err.Clear
+        On Error GoTo Failed
+        If Not firstStory Is Nothing Then WU_ConvertCharacterStyleBatchInStoryChain firstStory, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+    ElseIf storyScope = "headers" Then
+        WU_ConvertCharacterStyleBatchInStoryType document, wdPrimaryHeaderStory, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+        WU_ConvertCharacterStyleBatchInStoryType document, wdFirstPageHeaderStory, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+        WU_ConvertCharacterStyleBatchInStoryType document, wdEvenPagesHeaderStory, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+    ElseIf storyScope = "footers" Then
+        WU_ConvertCharacterStyleBatchInStoryType document, wdPrimaryFooterStory, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+        WU_ConvertCharacterStyleBatchInStoryType document, wdFirstPageFooterStory, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+        WU_ConvertCharacterStyleBatchInStoryType document, wdEvenPagesFooterStory, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+    Else
+        For Each firstStory In document.StoryRanges
+            WU_ConvertCharacterStyleBatchInStoryChain firstStory, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+        Next firstStory
+    End If
+    For row = firstRow To lastRow
+        If matched(row) Then changed = changed + 1
+    Next row
+    WU_ConvertCharacterStyleBatch = changed
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
+' Convert the same character-style map only inside an exact Range. Validation
+' completes before state changes or the undo record are opened.
+Public Function WU_ConvertCharacterStyleBatchInRange(ByVal target As Range, ByVal mappings As Variant) As Long
+    Dim document As Document, updating As Boolean, opened As Boolean, captured As Boolean
+    Dim failure As Long, failureSource As String, failureText As String
+    Dim targetStart As Long, targetEnd As Long, firstRow As Long, lastRow As Long, firstColumn As Long, activeRows As Long, row As Long, changed As Long
+    Dim sourceCache() As Style, targetCache() As Style, enabled() As Boolean, matched() As Boolean
+    On Error GoTo Failed
+    If target Is Nothing Then Err.Raise 91, "WU_ConvertCharacterStyleBatchInRange", "target range is required"
+    Set document = target.Document
+    activeRows = WU_ValidateStyleBatch(document, mappings, sourceCache, targetCache, enabled, True, "WU_ConvertCharacterStyleBatchInRange")
+    If activeRows = 0 Then Exit Function
+    targetStart = target.Start: targetEnd = target.End
+    If targetEnd <= targetStart Then Exit Function
+    firstRow = LBound(mappings, 1): lastRow = UBound(mappings, 1): firstColumn = LBound(mappings, 2)
+    ReDim matched(firstRow To lastRow)
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Convert character style batch": opened = True
+    WU_ConvertCharacterStyleBatchInStory target, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+    For row = firstRow To lastRow
+        If matched(row) Then changed = changed + 1
+    Next row
+    WU_ConvertCharacterStyleBatchInRange = changed
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
 ' Convert the same bounded style map only inside the exact caller-supplied
 ' Range. The range is never widened to a story or Selection.
 Public Function WU_ConvertStyleBatchInRange(ByVal target As Range, ByVal mappings As Variant) As Long
@@ -522,34 +763,34 @@ Failed:
     Resume CleanUp
 End Function
 
-Private Function WU_ValidateStyleBatch(ByVal document As Document, ByVal mappings As Variant, ByRef sourceCache() As Style, ByRef targetCache() As Style, ByRef enabled() As Boolean) As Long
+Private Function WU_ValidateStyleBatch(ByVal document As Document, ByVal mappings As Variant, ByRef sourceCache() As Style, ByRef targetCache() As Style, ByRef enabled() As Boolean, Optional ByVal characterStyles As Boolean = False, Optional ByVal sourceName As String = "WU_ConvertStyleBatch") As Long
     Dim firstRow As Long, lastRow As Long, firstColumn As Long, lastColumn As Long, row As Long, dimensionError As Long
     Dim fromStyle As String, toStyle As String, sourceStyle As Style, targetStyle As Style, sourceError As Long, targetError As Long, activeRows As Long
     Dim cachedSourceNames() As String, cachedTargetNames() As String, cachedSourceStyles() As Style, cachedTargetStyles() As Style
     Dim sourceCacheCount As Long, targetCacheCount As Long, sourceCacheIndex As Long, targetCacheIndex As Long, cacheRow As Long, cacheCapacity As Long
     Dim failure As Long, failureSource As String, failureText As String
     On Error GoTo Failed
-    If Not IsArray(mappings) Then Err.Raise 5, "WU_ConvertStyleBatch", "mappings must be a two-dimensional array"
+    If Not IsArray(mappings) Then Err.Raise 5, sourceName, "mappings must be a two-dimensional array"
     On Error Resume Next
     firstRow = LBound(mappings, 1): lastRow = UBound(mappings, 1)
     firstColumn = LBound(mappings, 2): lastColumn = UBound(mappings, 2)
     dimensionError = Err.Number
     Err.Clear
     On Error GoTo Failed
-    If dimensionError <> 0 Then Err.Raise 5, "WU_ConvertStyleBatch", "mappings must be a two-dimensional array"
-    If lastColumn - firstColumn + 1 <> 2 Then Err.Raise 5, "WU_ConvertStyleBatch", "mappings must have exactly two columns"
-    If lastRow - firstRow + 1 > WU_MAX_STYLE_BATCH_RULES Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping count exceeds 256"
+    If dimensionError <> 0 Then Err.Raise 5, sourceName, "mappings must be a two-dimensional array"
+    If lastColumn - firstColumn + 1 <> 2 Then Err.Raise 5, sourceName, "mappings must have exactly two columns"
+    If lastRow - firstRow + 1 > WU_MAX_STYLE_BATCH_RULES Then Err.Raise 5, sourceName, "style mapping count exceeds 256"
     cacheCapacity = lastRow - firstRow + 1
     ReDim sourceCache(firstRow To lastRow): ReDim targetCache(firstRow To lastRow): ReDim enabled(firstRow To lastRow)
     ReDim cachedSourceNames(1 To cacheCapacity): ReDim cachedTargetNames(1 To cacheCapacity)
     ReDim cachedSourceStyles(1 To cacheCapacity): ReDim cachedTargetStyles(1 To cacheCapacity)
     For row = firstRow To lastRow
-        If IsError(mappings(row, firstColumn)) Or IsNull(mappings(row, firstColumn)) Or IsObject(mappings(row, firstColumn)) Or IsArray(mappings(row, firstColumn)) Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " source must be scalar"
-        If IsError(mappings(row, firstColumn + 1)) Or IsNull(mappings(row, firstColumn + 1)) Or IsObject(mappings(row, firstColumn + 1)) Or IsArray(mappings(row, firstColumn + 1)) Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " target must be scalar"
+        If IsError(mappings(row, firstColumn)) Or IsNull(mappings(row, firstColumn)) Or IsObject(mappings(row, firstColumn)) Or IsArray(mappings(row, firstColumn)) Then Err.Raise 5, sourceName, "style mapping " & CStr(row) & " source must be scalar"
+        If IsError(mappings(row, firstColumn + 1)) Or IsNull(mappings(row, firstColumn + 1)) Or IsObject(mappings(row, firstColumn + 1)) Or IsArray(mappings(row, firstColumn + 1)) Then Err.Raise 5, sourceName, "style mapping " & CStr(row) & " target must be scalar"
         fromStyle = CStr(mappings(row, firstColumn))
         toStyle = CStr(mappings(row, firstColumn + 1))
-        If Len(Trim$(fromStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " source is required"
-        If Len(Trim$(toStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " target is required"
+        If Len(Trim$(fromStyle)) = 0 Then Err.Raise 5, sourceName, "style mapping " & CStr(row) & " source is required"
+        If Len(Trim$(toStyle)) = 0 Then Err.Raise 5, sourceName, "style mapping " & CStr(row) & " target is required"
         sourceCacheIndex = 0
         For cacheRow = 1 To sourceCacheCount
             If StrComp(fromStyle, cachedSourceNames(cacheRow), vbTextCompare) = 0 Then sourceCacheIndex = cacheRow: Exit For
@@ -561,13 +802,17 @@ Private Function WU_ValidateStyleBatch(ByVal document As Document, ByVal mapping
             sourceError = Err.Number
             Err.Clear
             On Error GoTo Failed
-            If sourceError <> 0 Or sourceStyle Is Nothing Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " names a missing source style"
+            If sourceError <> 0 Or sourceStyle Is Nothing Then Err.Raise 5, sourceName, "style mapping " & CStr(row) & " names a missing source style"
             sourceCacheCount = sourceCacheCount + 1: sourceCacheIndex = sourceCacheCount
             cachedSourceNames(sourceCacheIndex) = fromStyle: Set cachedSourceStyles(sourceCacheIndex) = sourceStyle
         Else
             Set sourceStyle = cachedSourceStyles(sourceCacheIndex)
         End If
-        If sourceStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " source is not a paragraph style"
+        If characterStyles Then
+            If Not WU_IsCharacterStyle(sourceStyle) Then Err.Raise 5, sourceName, "style mapping " & CStr(row) & " source is not a character style"
+        Else
+            If sourceStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, sourceName, "style mapping " & CStr(row) & " source is not a paragraph style"
+        End If
         targetCacheIndex = 0
         For cacheRow = 1 To targetCacheCount
             If StrComp(toStyle, cachedTargetNames(cacheRow), vbTextCompare) = 0 Then targetCacheIndex = cacheRow: Exit For
@@ -579,13 +824,17 @@ Private Function WU_ValidateStyleBatch(ByVal document As Document, ByVal mapping
             targetError = Err.Number
             Err.Clear
             On Error GoTo Failed
-            If targetError <> 0 Or targetStyle Is Nothing Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " names a missing target style"
+            If targetError <> 0 Or targetStyle Is Nothing Then Err.Raise 5, sourceName, "style mapping " & CStr(row) & " names a missing target style"
             targetCacheCount = targetCacheCount + 1: targetCacheIndex = targetCacheCount
             cachedTargetNames(targetCacheIndex) = toStyle: Set cachedTargetStyles(targetCacheIndex) = targetStyle
         Else
             Set targetStyle = cachedTargetStyles(targetCacheIndex)
         End If
-        If targetStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ConvertStyleBatch", "style mapping " & CStr(row) & " target is not a paragraph style"
+        If characterStyles Then
+            If Not WU_IsCharacterStyle(targetStyle) Then Err.Raise 5, sourceName, "style mapping " & CStr(row) & " target is not a character style"
+        Else
+            If targetStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, sourceName, "style mapping " & CStr(row) & " target is not a paragraph style"
+        End If
         Set sourceCache(row) = sourceStyle: Set targetCache(row) = targetStyle
         enabled(row) = (StrComp(sourceStyle.NameLocal, targetStyle.NameLocal, vbTextCompare) <> 0)
         If enabled(row) Then activeRows = activeRows + 1
@@ -645,6 +894,31 @@ Private Sub WU_ConvertStyleBatchInStoryChain(ByVal firstStory As Range, ByRef so
     Loop
 End Sub
 
+Private Sub WU_ConvertCharacterStyleBatchInStory(ByVal story As Range, ByRef sourceCache() As Style, ByRef targetCache() As Style, ByRef enabled() As Boolean, ByVal firstRow As Long, ByVal lastRow As Long, ByRef matched() As Boolean)
+    Dim row As Long
+    For row = firstRow To lastRow
+        If enabled(row) Then If WU_ConvertCharacterStyleInStory(story, sourceCache(row), targetCache(row)) Then matched(row) = True
+    Next row
+End Sub
+
+Private Sub WU_ConvertCharacterStyleBatchInStoryChain(ByVal firstStory As Range, ByRef sourceCache() As Style, ByRef targetCache() As Style, ByRef enabled() As Boolean, ByVal firstRow As Long, ByVal lastRow As Long, ByRef matched() As Boolean)
+    Dim story As Range
+    Set story = firstStory
+    Do While Not story Is Nothing
+        If story.End > story.Start Then WU_ConvertCharacterStyleBatchInStory story, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+        Set story = story.NextStoryRange
+    Loop
+End Sub
+
+Private Sub WU_ConvertCharacterStyleBatchInStoryType(ByVal document As Document, ByVal storyType As Long, ByRef sourceCache() As Style, ByRef targetCache() As Style, ByRef enabled() As Boolean, ByVal firstRow As Long, ByVal lastRow As Long, ByRef matched() As Boolean)
+    Dim firstStory As Range
+    On Error Resume Next
+    Set firstStory = document.StoryRanges(storyType)
+    Err.Clear
+    On Error GoTo 0
+    If Not firstStory Is Nothing Then WU_ConvertCharacterStyleBatchInStoryChain firstStory, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+End Sub
+
 Private Function WU_ConvertStyleInStory(ByVal story As Range, ByVal sourceStyle As Style, ByVal targetStyle As Style) As Boolean
     Dim scope As Range
     If story Is Nothing Then Exit Function
@@ -668,6 +942,58 @@ Private Function WU_ConvertStyleInStory(ByVal story As Range, ByVal sourceStyle 
     End With
     Call WU_PinFindOptions(scope.Find)
 WU_ConvertStyleInStory = scope.Find.Execute(Replace:=wdReplaceAll)
+End Function
+
+' Find's formatting-only mode is the native fast path for character styles:
+' an empty text criterion plus Style selects the existing styled spans, while
+' Replacement.Style changes only that formatting and leaves text/runs intact.
+Private Function WU_ConvertCharacterStyleInStory(ByVal story As Range, ByVal sourceStyle As Style, ByVal targetStyle As Style) As Boolean
+    Dim scope As Range
+    If story Is Nothing Then Exit Function
+    If story.End <= story.Start Then Exit Function
+    Set scope = story.Duplicate
+    With scope.Find
+        .ClearFormatting
+        .Replacement.ClearFormatting
+        .Text = vbNullString
+        .Replacement.Text = vbNullString
+        .Style = sourceStyle
+        .Replacement.Style = targetStyle
+        .Forward = True
+        .Wrap = wdFindStop
+        .Format = True
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchWildcards = False
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
+    End With
+    Call WU_PinFindOptions(scope.Find)
+    WU_ConvertCharacterStyleInStory = scope.Find.Execute(Replace:=wdReplaceAll)
+End Function
+
+Private Function WU_ConvertCharacterStyleInStoryChain(ByVal firstStory As Range, ByVal sourceStyle As Style, ByVal targetStyle As Style) As Boolean
+    Dim story As Range, changed As Boolean
+    Set story = firstStory
+    Do While Not story Is Nothing
+        If story.End > story.Start Then If WU_ConvertCharacterStyleInStory(story, sourceStyle, targetStyle) Then changed = True
+        Set story = story.NextStoryRange
+    Loop
+    WU_ConvertCharacterStyleInStoryChain = changed
+End Function
+
+Private Function WU_ConvertCharacterStyleInStoryType(ByVal document As Document, ByVal storyType As Long, ByVal sourceStyle As Style, ByVal targetStyle As Style) As Boolean
+    Dim firstStory As Range
+    On Error Resume Next
+    Set firstStory = document.StoryRanges(storyType)
+    Err.Clear
+    On Error GoTo 0
+    If Not firstStory Is Nothing Then WU_ConvertCharacterStyleInStoryType = WU_ConvertCharacterStyleInStoryChain(firstStory, sourceStyle, targetStyle)
+End Function
+
+Private Function WU_IsCharacterStyle(ByVal style As Style) As Boolean
+    If style Is Nothing Then Exit Function
+    WU_IsCharacterStyle = (style.Type = wdStyleTypeCharacter Or style.Linked)
 End Function
 
 ' Apply a paragraph style to one exact Range. Word applies a paragraph style

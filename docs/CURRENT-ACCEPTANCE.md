@@ -13,7 +13,7 @@ The current neutral journal slice adds read-only literal counting, bounded
 batch replacement (including an exact Range path), explicit wildcard
 replacement/counting and wildcard character-style batches, explicitly scoped
 paragraph-style conversion and ordered offset-run application, and direct
-character-style match/range/batch operations beside the document/story
+character-style conversion and match/range/batch operations beside the document/story
 replacement path. Document operations can target `main`,
 `notes`, `headers`, `footers`, or `all`, with header/footer chains probed only
 when requested. All paths use bounded Word Find operations, preserve text and unrelated

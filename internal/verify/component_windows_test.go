@@ -506,6 +506,7 @@ Failed:
 End Sub
 Public Function Check() As String
     Dim number As Long, source As String, description As String, changed As Boolean, i As Long, bounded As Range, headerRange As Range
+    Dim sourceCharacterStyle As Style, targetCharacterStyle As Style
     Dim styleMap(0 To 1, 0 To 1) As Variant, styleRuns(0 To 1, 0 To 2) As Variant, styleBatchChanged As Long, runChanged As Long
     Dim lines(1 To 400) As String, started As Single, elapsed As Single
     ActiveDocument.Content.Text = "original"
@@ -538,6 +539,41 @@ Public Function Check() As String
     If Not changed Or ActiveDocument.Paragraphs(1).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Or ActiveDocument.Paragraphs(2).Style.NameLocal <> "ProofTarget" Then Err.Raise 5, , "bounded conversion widened its range"
     If Not ActiveDocument.Undo Then Err.Raise 5, , "missing bounded conversion undo"
     If ActiveDocument.Paragraphs(2).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Then Err.Raise 5, , "bounded conversion not undone"
+    ActiveDocument.Content.Text = "first cite second" & vbCr
+    Set sourceCharacterStyle = ActiveDocument.Styles.Add("Proof Citation Source", wdStyleTypeCharacter)
+    sourceCharacterStyle.Font.Italic = True
+    Set targetCharacterStyle = ActiveDocument.Styles.Add("Proof Citation Target", wdStyleTypeCharacter)
+    targetCharacterStyle.Font.Bold = True
+    Set bounded = ActiveDocument.Paragraphs(1).Range.Duplicate
+    bounded.Start = bounded.Start + 6: bounded.End = bounded.Start + 4
+    bounded.Style = sourceCharacterStyle
+    bounded.Italic = True
+    changed = WU_ConvertCharacterStyle(ActiveDocument, "Proof Citation Source", "Proof Citation Target", "main")
+    If Not changed Then Err.Raise 5, , "character style conversion did not report a change"
+    Set bounded = ActiveDocument.Range(Start:=ActiveDocument.Paragraphs(1).Range.Start + 6, End:=ActiveDocument.Paragraphs(1).Range.Start + 10)
+    If bounded.Style.NameLocal <> "Proof Citation Target" Or Not bounded.Bold Or Not bounded.Italic Then Err.Raise 5, , "character style conversion lost the target style or direct emphasis"
+    If ActiveDocument.Content.Text <> "first cite second" & vbCr Then Err.Raise 5, , "character style conversion changed text"
+    If Not ActiveDocument.Undo Then Err.Raise 5, , "missing character style conversion undo"
+    If bounded.Style.NameLocal <> "Proof Citation Source" Or Not bounded.Italic Or bounded.Bold Then Err.Raise 5, , "character style conversion undo did not restore inline formatting"
+    ActiveDocument.Content.Text = "first cite second" & vbCr & "third cite fourth" & vbCr
+    Set bounded = ActiveDocument.Paragraphs(1).Range.Duplicate
+    bounded.Start = bounded.Start + 6: bounded.End = bounded.Start + 4
+    bounded.Style = sourceCharacterStyle
+    Set bounded = ActiveDocument.Paragraphs(2).Range.Duplicate
+    bounded.Start = bounded.Start + 6: bounded.End = bounded.Start + 4
+    bounded.Style = sourceCharacterStyle
+    Set bounded = ActiveDocument.Paragraphs(1).Range.Duplicate
+    changed = WU_ConvertCharacterStyleInRange(bounded, "Proof Citation Source", "Proof Citation Target")
+    If Not changed Then Err.Raise 5, , "bounded character style conversion did not report a change"
+    If ActiveDocument.Paragraphs(1).Range.Characters(7).Style.NameLocal <> "Proof Citation Target" Or ActiveDocument.Paragraphs(2).Range.Characters(7).Style.NameLocal <> "Proof Citation Source" Then Err.Raise 5, , "bounded character style conversion escaped its requested range"
+    If Not ActiveDocument.Undo Then Err.Raise 5, , "missing bounded character style conversion undo"
+    If ActiveDocument.Paragraphs(1).Range.Characters(7).Style.NameLocal <> "Proof Citation Source" Then Err.Raise 5, , "bounded character style conversion undo did not restore source style"
+    styleMap(0, 0) = "Proof Citation Source": styleMap(0, 1) = "Proof Citation Target"
+    styleMap(1, 0) = "Proof Citation Target": styleMap(1, 1) = "Proof Citation Target"
+    styleBatchChanged = WU_ConvertCharacterStyleBatch(ActiveDocument, styleMap, "main")
+    If styleBatchChanged <> 1 Or ActiveDocument.Paragraphs(1).Range.Characters(7).Style.NameLocal <> "Proof Citation Target" Or ActiveDocument.Paragraphs(2).Range.Characters(7).Style.NameLocal <> "Proof Citation Target" Then Err.Raise 5, , "character style batch did not reuse the native formatting pass"
+    If Not ActiveDocument.Undo Then Err.Raise 5, , "missing character style batch undo"
+    If ActiveDocument.Paragraphs(1).Range.Characters(7).Style.NameLocal <> "Proof Citation Source" Or ActiveDocument.Paragraphs(2).Range.Characters(7).Style.NameLocal <> "Proof Citation Source" Then Err.Raise 5, , "character style batch undo did not restore source styles"
     ActiveDocument.Content.Text = "first" & vbCr & "second" & vbCr & "third" & vbCr
     ActiveDocument.Content.Style = ActiveDocument.Styles(wdStyleNormal)
     ActiveDocument.Paragraphs(2).Range.Italic = True
