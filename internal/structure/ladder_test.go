@@ -35,6 +35,9 @@ func TestMarkerChoicesPreserveAmbiguity(t *testing.T) {
 	if len(MarkerChoices("1.5 percent")) != 0 {
 		t.Fatal("decimal treated as marker")
 	}
+	if len(MarkerChoices("IIIIIIII. Long prose")) != 0 {
+		t.Fatal("overlong Roman-looking prose was treated as a marker")
+	}
 	if len(MarkerChoices("Part IV - Contractual Rights")) != 1 {
 		t.Fatal("named part not recognized")
 	}

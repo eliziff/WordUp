@@ -1,7 +1,7 @@
 Attribute VB_Name = "WordUpStructure"
 Option Explicit
 
-' WordUp structure contract 1.2.11. MIT licensed; editable and dependency-free.
+' WordUp structure contract 1.2.12. MIT licensed; editable and dependency-free.
 ' Detection is separate from publication-specific style mapping.
 Public Const WU_ROLE As Long = 0
 Public Const WU_LEVEL As Long = 1
@@ -525,7 +525,7 @@ End Function
 
 Private Function WU_IsRoman(ByVal value As String) As Boolean
     Dim i As Long
-    value = UCase$(Trim$(value)): If Len(value) = 0 Then Exit Function
+    value = UCase$(Trim$(value)): If Len(value) = 0 Or Len(value) > 7 Then Exit Function
     For i = 1 To Len(value): If InStr(1, "IVXLCDM", Mid$(value, i, 1), vbBinaryCompare) = 0 Then Exit Function
     Next i
     WU_IsRoman = True
