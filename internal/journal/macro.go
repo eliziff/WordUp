@@ -907,6 +907,7 @@ Private Sub WU_UpdateFieldsInStory(ByVal story As Range, ByRef failures As Long)
     ' Fields.Update reports the first failing field by return value; it does
     ' not necessarily raise a VBA error. Treat either signal as a failed
     ' story so a quality action cannot claim success over a broken field.
+    Err.Clear
     fieldResult = story.Fields.Update
     If Err.Number <> 0 Or fieldResult <> 0 Then failures = failures + 1
     Err.Clear
