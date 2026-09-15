@@ -640,7 +640,8 @@ Private Function WU_EnsureStyle(ByVal doc As Document, ByVal styleName As String
 End Function
 
 Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As Style, ByVal heading1 As Style, ByVal heading2 As Style, ByVal heading3 As Style, ByVal heading4 As Style, ByVal heading5 As Style, ByVal heading6 As Style, ByVal heading7 As Style, ByVal heading8 As Style, ByVal heading9 As Style)
-    Dim story As Range, paragraph As Paragraph, paragraphRange As Range, currentStyle As String, detectedRole As String
+    Dim story As Range, paragraph As Paragraph, paragraphRange As Range, batch As Range
+    Dim batchStyle As Style, desiredStyle As Style, currentStyle As String, detectedRole As String
     Dim structure As Variant, haveStructure As Boolean, paragraphIndex As Long, level As Long
     On Error Resume Next
     Set story = doc.StoryRanges(wdMainTextStory)
@@ -663,6 +664,7 @@ Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As St
             If WU_CancelRequested() Then Err.Raise 18, "Apply styles", "style application cancelled"
         End If
         Set paragraphRange = paragraph.Range
+        Set desiredStyle = Nothing
         If Not paragraphRange.Information(wdWithInTable) Then
             level = paragraph.OutlineLevel
             ' Reset before the guarded array read. A malformed or stale
@@ -677,41 +679,59 @@ Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As St
                 On Error GoTo 0
             End If
             If level = wdOutlineLevel1 Then
-                paragraphRange.Style = heading1
+                Set desiredStyle = heading1
             ElseIf level = wdOutlineLevel2 Then
-                paragraphRange.Style = heading2
+                Set desiredStyle = heading2
             ElseIf level = wdOutlineLevel3 Then
-                paragraphRange.Style = heading3
+                Set desiredStyle = heading3
             ElseIf level = wdOutlineLevel4 Then
-                paragraphRange.Style = heading4
+                Set desiredStyle = heading4
             ElseIf level = wdOutlineLevel5 Then
-                paragraphRange.Style = heading5
+                Set desiredStyle = heading5
             ElseIf level = wdOutlineLevel6 Then
-                paragraphRange.Style = heading6
+                Set desiredStyle = heading6
             ElseIf level = wdOutlineLevel7 Then
-                paragraphRange.Style = heading7
+                Set desiredStyle = heading7
             ElseIf level = wdOutlineLevel8 Then
-                paragraphRange.Style = heading8
+                Set desiredStyle = heading8
             ElseIf level = wdOutlineLevel9 Then
-                paragraphRange.Style = heading9
+                Set desiredStyle = heading9
             ElseIf StrComp(detectedRole, "body", vbTextCompare) = 0 Then
                 ' The neutral detector has enough evidence to distinguish an
                 ' ordinary body paragraph from a candidate, quotation, or
                 ' front-matter role. Apply the house body style even when the
                 ' source used a custom paragraph style; direct run formatting
                 ' remains direct formatting on the existing range.
-                paragraphRange.Style = bodyStyle
+                Set desiredStyle = bodyStyle
             Else
                 currentStyle = ""
                 On Error Resume Next
                 currentStyle = CStr(paragraphRange.Style)
                 On Error GoTo 0
-                If StrComp(currentStyle, "Normal", vbTextCompare) = 0 Or StrComp(currentStyle, "Body Text", vbTextCompare) = 0 Then
-                    paragraphRange.Style = bodyStyle
-                End If
+                If StrComp(currentStyle, "Normal", vbTextCompare) = 0 Or StrComp(currentStyle, "Body Text", vbTextCompare) = 0 Then Set desiredStyle = bodyStyle
             End If
         End If
+        If desiredStyle Is Nothing Then
+            WU_FlushParagraphStyleBatch batch, batchStyle
+        ElseIf batch Is Nothing Then
+            Set batch = paragraphRange.Duplicate
+            Set batchStyle = desiredStyle
+        ElseIf desiredStyle Is batchStyle And paragraphRange.Start <= batch.End Then
+            batch.End = paragraphRange.End
+        Else
+            WU_FlushParagraphStyleBatch batch, batchStyle
+            Set batch = paragraphRange.Duplicate
+            Set batchStyle = desiredStyle
+        End If
     Next paragraph
+    WU_FlushParagraphStyleBatch batch, batchStyle
+End Sub
+
+Private Sub WU_FlushParagraphStyleBatch(ByRef batch As Range, ByRef style As Style)
+    If batch Is Nothing Then Exit Sub
+    batch.Style = style
+    Set batch = Nothing
+    Set style = Nothing
 End Sub
 
 Private Sub WU_ApplyFootnoteStyle(ByVal doc As Document, ByVal noteStyle As Style)
@@ -962,6 +982,7 @@ Public Sub WU_JournalPermaAssistant()
     Dim target As Range, address As String
     Dim updating As Boolean, undoStarted As Boolean, captured As Boolean
     Dim failure As Long, failureSource As String, failureText As String
+    On Error GoTo FailedPerma
     If StrComp(WU_JOURNAL_PERMALINK_POLICY, "none", vbTextCompare) = 0 Then
         MsgBox "This journal profile does not use permalinks.", vbInformation, "Perma assistant"
         Exit Sub
@@ -975,7 +996,6 @@ Public Sub WU_JournalPermaAssistant()
     If Len(Trim$(address)) = 0 Then Exit Sub
     If LCase$(Left$(Trim$(address), 8)) <> "https://" Then Err.Raise 5, "Perma assistant", "Use an HTTPS permalink."
     WU_TrimAnchorParagraphMark target
-    On Error GoTo FailedPerma
     WU_BeginSafeEdit updating, undoStarted, captured, "Add permalink"
     ' Adding a hyperlink to the existing range preserves its text and direct
     ' character formatting; TextToDisplay would replace rich inline content.
