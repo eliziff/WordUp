@@ -361,7 +361,10 @@ func formDesign(profile Profile) office.Design {
 	if preflight {
 		controls = append(controls, office.ControlDesign{Name: "cmdPreflight", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 276.0, "Width": 344.0, "Height": 28.0, "Caption": "Run preflight"}})
 	}
-	controls = append(controls, office.ControlDesign{Name: "cmdClose", Type: "CommandButton", Properties: map[string]any{"Left": 274.0, "Top": 314.0, "Width": 84.0, "Height": 28.0, "Caption": "Close"}})
+	controls = append(controls,
+		office.ControlDesign{Name: "cmdCancel", Type: "CommandButton", Properties: map[string]any{"Left": 184.0, "Top": 314.0, "Width": 84.0, "Height": 28.0, "Caption": "Cancel current work"}},
+		office.ControlDesign{Name: "cmdClose", Type: "CommandButton", Properties: map[string]any{"Left": 274.0, "Top": 314.0, "Width": 84.0, "Height": 28.0, "Caption": "Close"}},
+	)
 	return office.Design{
 		Name: "WUJournalSetup",
 		Mode: "replace",
@@ -426,6 +429,10 @@ Option Explicit`}
 	}
 	parts = append(parts, `Private Sub cmdClose_Click()
     Unload Me
+End Sub`)
+	parts = append(parts, `Private Sub cmdCancel_Click()
+    WU_RequestCancel
+    Application.StatusBar = "Cancellation requested."
 End Sub`)
 	return strings.Join(parts, "\n\n") + "\n"
 }

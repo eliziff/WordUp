@@ -76,7 +76,7 @@ func TestProfileFeaturesControlGeneratedSurface(t *testing.T) {
 			t.Fatalf("feature-disabled form still contains %s wiring", omitted)
 		}
 	}
-	for _, retained := range []string{"cmdReview", "cmdCommands", "cmdRemoveCommands", "cmdPreflight"} {
+	for _, retained := range []string{"cmdReview", "cmdCommands", "cmdRemoveCommands", "cmdPreflight", "cmdCancel"} {
 		if !strings.Contains(form, retained) {
 			t.Fatalf("feature-enabled form lost %s wiring", retained)
 		}
