@@ -826,20 +826,32 @@ End Sub
 
 Private Sub WU_ApplyFootnoteStyle(ByVal doc As Document, ByVal noteStyle As Style)
     Dim story As Range
-    ' A note story is already a contiguous Range. Applying its paragraph
-    ' style once avoids one COM round-trip per note while leaving direct run
-    ' formatting (italic case names, emphasis, and fields) untouched.
+    ' Apply one style assignment per linked note story rather than one COM
+    ' round-trip per note. Direct run formatting (italic case names,
+    ' emphasis, and fields) remains untouched.
     On Error Resume Next
     Set story = doc.StoryRanges(wdFootnotesStory)
     Err.Clear
     On Error GoTo 0
-    If Not story Is Nothing Then WU_ApplyNoteStoryStyle story, noteStyle
+    If Not story Is Nothing Then WU_ApplyNoteStoryChain story, noteStyle
     Set story = Nothing
     On Error Resume Next
     Set story = doc.StoryRanges(wdEndnotesStory)
     Err.Clear
     On Error GoTo 0
-    If Not story Is Nothing Then WU_ApplyNoteStoryStyle story, noteStyle
+    If Not story Is Nothing Then WU_ApplyNoteStoryChain story, noteStyle
+End Sub
+
+Private Sub WU_ApplyNoteStoryChain(ByVal firstStory As Range, ByVal noteStyle As Style)
+    Dim story As Range, storyFailed As Boolean, chainLength As Long
+    Set story = firstStory
+    Do While Not story Is Nothing
+        chainLength = chainLength + 1
+        If chainLength > WU_JOURNAL_MAX_STORY_CHAIN Then Err.Raise 5, "WU_ApplyNoteStoryChain", "story chain exceeds 32768 linked stories"
+        WU_ApplyNoteStoryStyle story, noteStyle
+        Set story = WU_JournalNextStory(story, storyFailed)
+        If storyFailed Then Err.Raise 5, "WU_ApplyNoteStoryChain", "linked story traversal failed"
+    Loop
 End Sub
 
 Private Sub WU_ApplyNoteStoryStyle(ByVal story As Range, ByVal noteStyle As Style)
