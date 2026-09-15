@@ -731,6 +731,8 @@ Private Function WU_ApplyCharacterStyleInStory(ByVal story As Range, ByVal findT
         .MatchCase = matchCase
         .MatchWholeWord = wholeWord
         .MatchWildcards = False
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
     End With
     Do While search.Find.Execute
         currentStyle = vbNullString
@@ -777,6 +779,8 @@ Private Function WU_ReplaceLiteralInStory(ByVal story As Range, ByVal findText A
         .MatchCase = matchCase
         .MatchWholeWord = wholeWord
         .MatchWildcards = False
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
     End With
     WU_ReplaceLiteralInStory = search.Find.Execute(Replace:=wdReplaceAll)
 End Function

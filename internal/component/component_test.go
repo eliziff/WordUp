@@ -445,6 +445,8 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"story.End > story.Start",
 		"Set story = document.StoryRanges(wdMainTextStory)",
 		".MatchWholeWord = wholeWord",
+		".MatchSoundsLike = False",
+		".MatchAllWordForms = False",
 		"WU_EscapeFindLiteral = Replace(value, \"^\", \"^^\")",
 		"Set firstStory = document.StoryRanges(wdFootnotesStory)",
 		"Set firstStory = document.StoryRanges(wdEndnotesStory)",
