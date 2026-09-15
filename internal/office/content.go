@@ -42,6 +42,10 @@ func numeric(v any) (float64, error) {
 	return 0, fmt.Errorf("finite numeric measurement required")
 }
 
+func finiteFloat(v float64) bool {
+	return !math.IsNaN(v) && !math.IsInf(v, 0)
+}
+
 // integer is for OOXML fields whose schema is an integer, not a measurement.
 // Do not round a caller's value here: a fractional outline or numbering level
 // would otherwise produce a different document than the recipe requested.
@@ -847,7 +851,7 @@ func (c *composer) image(in Inline) (string, error) {
 	if ct == "" {
 		return "", fmt.Errorf("unsupported image content type")
 	}
-	if in.WidthPT <= 0 || in.HeightPT <= 0 || in.WidthPT > 10000 || in.HeightPT > 10000 {
+	if !finiteFloat(in.WidthPT) || !finiteFloat(in.HeightPT) || in.WidthPT <= 0 || in.HeightPT <= 0 || in.WidthPT > 10000 || in.HeightPT > 10000 {
 		return "", fmt.Errorf("explicit positive image dimensions required")
 	}
 	c.next++
@@ -956,7 +960,7 @@ func (c *composer) blocks(blocks []Block) (string, error) {
 				}
 			}
 			for _, w := range widths {
-				if w <= 0 {
+				if !finiteFloat(w) || w <= 0 {
 					return "", fmt.Errorf("positive column width required")
 				}
 				out.WriteString(fmt.Sprintf(`<w:gridCol w:w="%.0f"/>`, w*20))
@@ -972,6 +976,9 @@ func (c *composer) blocks(blocks []Block) (string, error) {
 					span := max(1, cell.Span)
 					occupied += span
 					out.WriteString(`<w:tc><w:tcPr>`)
+					if !finiteFloat(cell.WidthPT) {
+						return "", fmt.Errorf("finite cell width required")
+					}
 					if cell.WidthPT > 0 {
 						out.WriteString(fmt.Sprintf(`<w:tcW w:w="%.0f" w:type="dxa"/>`, cell.WidthPT*20))
 					}
@@ -1079,7 +1086,7 @@ func compose(p *Package, r ContentRecipe, asset func(string) ([]byte, error)) er
 		if h == 0 {
 			h = 792
 		}
-		if w <= 0 || h <= 0 || w > 1584 || h > 1584 {
+		if !finiteFloat(w) || !finiteFloat(h) || w <= 0 || h <= 0 || w > 1584 || h > 1584 {
 			return fmt.Errorf("page dimensions outside Word's supported 22-inch range")
 		}
 		orient := ""
@@ -1092,7 +1099,7 @@ func compose(p *Package, r ContentRecipe, asset func(string) ([]byte, error)) er
 			if _, ok := m[k]; !ok {
 				return fmt.Errorf("unknown page margin %s", k)
 			}
-			if v < 0 || v > 1584 {
+			if !finiteFloat(v) || v < 0 || v > 1584 {
 				return fmt.Errorf("invalid margin")
 			}
 			m[k] = v

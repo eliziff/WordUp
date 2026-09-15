@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"strings"
 	"testing"
@@ -586,6 +587,40 @@ func TestRecipeRejectsFractionalAndInvalidNumberingFields(t *testing.T) {
 	raw, err := props(nil, "paragraph", map[string]any{"outline_level": 1.0, "list_id": 7.0, "list_level": 8.0})
 	if err != nil || !strings.Contains(string(raw), `w:outlineLvl w:val="1"`) || !strings.Contains(string(raw), `w:numId w:val="7"`) || !strings.Contains(string(raw), `w:ilvl w:val="8"`) {
 		t.Fatalf("valid integer fields were not emitted: %s (%v)", raw, err)
+	}
+}
+
+func TestComposeRejectsNonFiniteLayoutMeasurements(t *testing.T) {
+	cases := []struct {
+		name   string
+		recipe ContentRecipe
+	}{
+		{name: "page width", recipe: ContentRecipe{Page: &PageSpec{WidthPT: math.NaN()}}},
+		{name: "page height", recipe: ContentRecipe{Page: &PageSpec{HeightPT: math.Inf(1)}}},
+		{name: "page margin", recipe: ContentRecipe{Page: &PageSpec{MarginsPT: map[string]float64{"left": math.NaN()}}}},
+		{name: "table column", recipe: ContentRecipe{Blocks: []Block{{Type: "table", ColumnsPT: []float64{math.Inf(1)}, Rows: [][]Cell{{{Text: "cell"}}}}}}},
+		{name: "table cell", recipe: ContentRecipe{Blocks: []Block{{Type: "table", ColumnsPT: []float64{72}, Rows: [][]Cell{{{Text: "cell", WidthPT: math.NaN()}}}}}}},
+		{name: "image size", recipe: ContentRecipe{Blocks: []Block{{Inlines: []Inline{{Image: "figure.png", WidthPT: math.NaN(), HeightPT: 12}}}}}},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			p := BlankPackage()
+			before, err := p.Bytes()
+			if err != nil {
+				t.Fatal(err)
+			}
+			asset := func(string) ([]byte, error) { return []byte("image"), nil }
+			if err := Compose(p, tc.recipe, asset); err == nil {
+				t.Fatal("non-finite layout measurement was accepted")
+			}
+			after, err := p.Bytes()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !bytes.Equal(before, after) {
+				t.Fatal("failed composition mutated the package")
+			}
+		})
 	}
 }
 
