@@ -1176,15 +1176,19 @@ Private Function WU_ParagraphStyleMatches(ByVal target As Range, ByVal style As 
 End Function
 
 Private Function WU_StyleStory(ByVal document As Document, ByVal storyType As Long) As Range
-    Dim readError As Long
+    Dim readError As Long, readDescription As String
     On Error Resume Next
     Set WU_StyleStory = document.StoryRanges(storyType)
     readError = Err.Number
+    readDescription = Err.Description
     Err.Clear
     On Error GoTo 0
     ' 5941 is the normal missing-member result for an optional Word story.
     ' Do not hide any other retrieval failure from the caller.
-    If readError <> 0 And readError <> WU_WORD_STORY_MISSING Then Err.Raise readError, "WU_StyleStory", "story " & CStr(storyType) & " is unavailable"
+    If readError <> 0 And readError <> WU_WORD_STORY_MISSING Then
+        If Len(readDescription) = 0 Then readDescription = "Word could not retrieve the requested story."
+        Err.Raise readError, "WU_StyleStory", "story " & CStr(storyType) & " is unavailable: " & readDescription
+    End If
 End Function
 
 Private Function WU_StyleStoryHasContent(ByVal story As Range) As Boolean
@@ -1351,17 +1355,21 @@ Private Function WU_NormalizeFieldScope(ByVal value As String, ByVal sourceName 
 End Function
 
 Private Function WU_FieldStory(ByVal document As Document, ByVal storyType As Long) As Range
-    Dim readError As Long
+    Dim readError As Long, readDescription As String
     On Error Resume Next
     Set WU_FieldStory = document.StoryRanges(storyType)
     readError = Err.Number
+    readDescription = Err.Description
     Err.Clear
     On Error GoTo 0
     ' 5941 is Word's normal response when an optional story (for example a
     ' first-page header or a footnote story) does not exist. Every other
     ' retrieval failure is real evidence that the requested scope is broken;
     ' do not silently turn it into a successful partial refresh.
-    If readError <> 0 And readError <> WU_WORD_STORY_MISSING Then Err.Raise readError, "WU_FieldStory", "story " & CStr(storyType) & " is unavailable"
+    If readError <> 0 And readError <> WU_WORD_STORY_MISSING Then
+        If Len(readDescription) = 0 Then readDescription = "Word could not retrieve the requested story."
+        Err.Raise readError, "WU_FieldStory", "story " & CStr(storyType) & " is unavailable: " & readDescription
+    End If
 End Function
 
 Private Sub WU_RefreshFieldStoryType(ByVal document As Document, ByVal storyType As Long, ByRef failures As Long)
@@ -2893,15 +2901,19 @@ End Function
 ' silently dropping part of the requested scope. The public operation remains
 ' scoped and never falls through to Selection or a full-story widening.
 Private Function WU_TextStory(ByVal document As Document, ByVal storyType As Long) As Range
-    Dim readError As Long
+    Dim readError As Long, readDescription As String
     On Error Resume Next
     Set WU_TextStory = document.StoryRanges(storyType)
     readError = Err.Number
+    readDescription = Err.Description
     Err.Clear
     On Error GoTo 0
     ' 5941 is Word's normal missing-member result for an optional story.
     ' Surface every other retrieval failure instead of silently omitting it.
-    If readError <> 0 And readError <> WU_WORD_STORY_MISSING Then Err.Raise readError, "WU_TextStory", "story " & CStr(storyType) & " is unavailable"
+    If readError <> 0 And readError <> WU_WORD_STORY_MISSING Then
+        If Len(readDescription) = 0 Then readDescription = "Word could not retrieve the requested story."
+        Err.Raise readError, "WU_TextStory", "story " & CStr(storyType) & " is unavailable: " & readDescription
+    End If
 End Function
 
 Private Function WU_TextStoryHasContent(ByVal story As Range) As Boolean

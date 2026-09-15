@@ -838,15 +838,19 @@ Private Sub WU_ApplyFootnoteStyle(ByVal doc As Document, ByVal noteStyle As Styl
 End Sub
 
 Private Function WU_JournalStory(ByVal doc As Document, ByVal storyType As Long) As Range
-    Dim readError As Long
+    Dim readError As Long, readDescription As String
     On Error Resume Next
     Set WU_JournalStory = doc.StoryRanges(storyType)
     readError = Err.Number
+    readDescription = Err.Description
     Err.Clear
     On Error GoTo 0
     ' 5941 is Word's normal missing-member result for a document without
     ' footnotes or endnotes. Surface every other root retrieval failure.
-    If readError <> 0 And readError <> WU_WORD_STORY_MISSING Then Err.Raise readError, "WU_JournalStory", "story " & CStr(storyType) & " is unavailable"
+    If readError <> 0 And readError <> WU_WORD_STORY_MISSING Then
+        If Len(readDescription) = 0 Then readDescription = "Word could not retrieve the requested story."
+        Err.Raise readError, "WU_JournalStory", "story " & CStr(storyType) & " is unavailable: " & readDescription
+    End If
 End Function
 
 Private Sub WU_ApplyNoteStoryChain(ByVal firstStory As Range, ByVal noteStyle As Style)
