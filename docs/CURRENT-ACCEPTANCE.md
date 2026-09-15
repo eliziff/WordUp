@@ -9,6 +9,17 @@ The full harness goal is **not complete**. This index distinguishes current evid
 | ALR refactor | `fbe98b6dda2034983e4f903f7cff84c72923e3137a64c4c9c1c751da4192c0fe` | `workspaces/alr-refactor/reports/final-full-setup-state-undo.json`, `dyson-final-parity.json`, `full-rizzuto-explicit-view.json`, `rizzuto-selected-options-parity.json`, `final-niche-ui.json`, `final-perma-csv-state.json`, `final-supra-crossreference.json` | Full Setup/compile/state/undo: Dyson 7 assertions, 26.352 s; Rizzuto 8 assertions, 45.808 s. Full XML matches the original under explicit metadata policies; Rizzuto baseline additionally executes the original justification routine skipped by its checkbox typo. No footnote-formatting exclusion. Separate form workflows pass 33 assertions. Not byte-identical; complete callback/input coverage remains open. |
 | UBC template | `b901717545fd83de79005ad17ea712ee28250e9ef40e7cb4f73713812d317ad8` | `workspaces/ubc-template/reports/footer-preservation-core.json`, `publication-footer-ui.json`, `publication-footer-visual.json` | Native core 10.627 s; actual Ribbon/form suite 7.690 s. Real manuscript preserves 146 notes, body text, fields/bookmarks and table formatting under the explicit layout policy. TOC closing paragraph stays unchanged. Publication headers continue section numbering and remove duplicate footer PAGE fields; one-step undo restores the original restart. Linked footer text and NUMPAGES fields are preserved; undo restores the removed PAGE field after a paginated baseline. Native pages 2-3 inspected: blank page and duplicate page numbers resolved. Title/author editorial roles and complete house-style fidelity remain open. |
 
+The current neutral journal slice adds `WU_ReplaceLiteralInRange` beside the
+document/story replacement path. Both paths use bounded Word Find operations,
+preserve direct formatting, create one undo record, restore `ScreenUpdating`,
+and reject Word's raw and escaped 255-character limits. The native fixture also
+covers a partial-range boundary, literal caret text, whole-word matching,
+notes-only isolation, bulk replacement and undo; native execution remains
+unclaimed while this logon session refuses hidden Word. The fresh offline
+109-document structure gate resolved 109/109 documents and 22,789 paragraphs
+in 5.61 s; the slowest document was 241.6 ms. These are observed gates, not
+claims that every Word build or manuscript has identical latency.
+
 Timings are individual observations, not latency guarantees or controlled speedup measurements. Report assertions and source suites define the actual coverage; assertion counts alone do not establish completeness.
 
 The ALR original and candidate also pass the same 200-paragraph short-form workload. `workspaces/alr-refactor/reports/workload-parity.json` records built-in asserted-field parity and separate asynchronous task timings (1998.083 ms original, 1420.943 ms candidate). These include completion-dialog handling. The shared comparison command separates `task_timings` from polling-call `timings`; no manual extraction of macro timing is required.
