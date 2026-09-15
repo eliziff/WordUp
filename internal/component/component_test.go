@@ -359,7 +359,7 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.12" {
+	if item.Version != "1.0.13" {
 		t.Fatalf("style converter version did not advance: %q", item.Version)
 	}
 	for _, capability := range []string{"paragraph-style conversion", "paragraph-style application", "range-bounded conversion", "offset style runs", "story-wide conversion", "header/footer scopes", "batch style mapping"} {
@@ -433,7 +433,7 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 		"WU_ConvertStyleInStoryChain",
 		"WU_ConvertStyleInStoryType",
 		"Private Sub WU_PinFindOptions(ByVal criteria As Find)",
-		"WU_PinFindOptions scope.Find",
+		"Call WU_PinFindOptions(scope.Find)",
 		".MatchFuzzy = False",
 		".MatchPhrase = False",
 		".MatchByte = False",
@@ -462,7 +462,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.19" {
+	if item.Version != "1.0.20" {
 		t.Fatalf("text operations version=%q", item.Version)
 	}
 	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
@@ -587,7 +587,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"If StrComp(styleName, cachedNames(cacheRow), vbTextCompare) = 0 Then cacheIndex = cacheRow: Exit For",
 		"cachedNames(cacheIndex) = styleName: Set cachedStyles(cacheIndex) = style",
 		"Private Sub WU_PinFindOptions(ByVal criteria As Find)",
-		"WU_PinFindOptions search.Find",
+		"Call WU_PinFindOptions(search.Find)",
 		".MatchFuzzy = False",
 		".MatchPhrase = False",
 		".MatchByte = False",

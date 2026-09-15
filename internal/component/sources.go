@@ -666,7 +666,7 @@ Private Function WU_ConvertStyleInStory(ByVal story As Range, ByVal sourceStyle 
         .MatchSoundsLike = False
         .MatchAllWordForms = False
     End With
-    WU_PinFindOptions scope.Find
+    Call WU_PinFindOptions(scope.Find)
 WU_ConvertStyleInStory = scope.Find.Execute(Replace:=wdReplaceAll)
 End Function
 
@@ -2181,7 +2181,7 @@ Private Function WU_CountLiteralInStory(ByVal story As Range, ByVal findText As 
         .MatchSoundsLike = False
         .MatchAllWordForms = False
     End With
-    WU_PinFindOptions search.Find
+    Call WU_PinFindOptions(search.Find)
     Do While search.Find.Execute
         count = count + 1
         nextStart = search.End
@@ -2260,7 +2260,7 @@ Private Function WU_ApplyCharacterStyleInStory(ByVal story As Range, ByVal findT
         .MatchSoundsLike = False
         .MatchAllWordForms = False
     End With
-    WU_PinFindOptions search.Find
+    Call WU_PinFindOptions(search.Find)
     Do While search.Find.Execute
         currentStyle = vbNullString
         On Error Resume Next
@@ -2321,7 +2321,7 @@ Private Function WU_ReplaceLiteralInStory(ByVal story As Range, ByVal findText A
         .MatchSoundsLike = False
         .MatchAllWordForms = False
     End With
-    WU_PinFindOptions search.Find
+    Call WU_PinFindOptions(search.Find)
     WU_ReplaceLiteralInStory = search.Find.Execute(Replace:=wdReplaceAll)
 End Function
 
