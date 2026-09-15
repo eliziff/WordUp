@@ -43,6 +43,25 @@ var closeHandle = kernel.NewProc("CloseHandle")
 var duplicateHandle = kernel.NewProc("DuplicateHandle")
 var currentProcess = kernel.NewProc("GetCurrentProcess")
 
+const (
+	createNewProcessGroup = 0x00080000
+	createSuspended       = 0x00000004
+	createNoWindow        = 0x08000000
+	createBreakaway       = 0x00004000
+)
+
+func processCreationFlags(job uintptr) uint32 {
+	flags := uint32(createNewProcessGroup | createSuspended | createNoWindow)
+	// The host is created from the caller and must break out of any enclosing
+	// job before it is assigned to WordUp's owned job. Word itself is launched
+	// by that host and must inherit the owned job; asking it to break away can
+	// fail with ERROR_NO_SUCH_LOGON_SESSION in restricted interactive sessions.
+	if job != 0 {
+		flags |= createBreakaway
+	}
+	return flags
+}
+
 // The job is lifetime containment, not a security sandbox. Windows kills only
 // the processes that this application explicitly owns, including on a crash.
 type jobLimits struct {
@@ -205,7 +224,7 @@ func spawnOnDesktop(exe string, args []string, desktop string, hidden bool, stdi
 	var pi syscall.ProcessInformation
 	// A process is put in the job before its first instruction, eliminating the
 	// launch/timeout race that can leave a stray Word process behind.
-	r, _, e = createProcess.Call(uintptr(unsafe.Pointer(ep)), uintptr(unsafe.Pointer(command)), 0, 0, 1, 0x00080000|0x00000004|0x08000000|0x4000, 0, 0, uintptr(unsafe.Pointer(&si)), uintptr(unsafe.Pointer(&pi)))
+	r, _, e = createProcess.Call(uintptr(unsafe.Pointer(ep)), uintptr(unsafe.Pointer(command)), 0, 0, 1, uintptr(processCreationFlags(job)), 0, 0, uintptr(unsafe.Pointer(&si)), uintptr(unsafe.Pointer(&pi)))
 	runtime.KeepAlive(storage)
 	runtime.KeepAlive(handles)
 	runtime.KeepAlive(command)
