@@ -404,7 +404,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.8" {
+	if item.Version != "1.0.7" {
 		t.Fatalf("text operations version=%q", item.Version)
 	}
 	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
