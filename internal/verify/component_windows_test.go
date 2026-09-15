@@ -251,13 +251,13 @@ End Function
 Public Sub HotkeyTarget()
 End Sub
 Public Sub FailAfterEdit()
-    Dim updating As Boolean, opened As Boolean, number As Long, source As String, description As String
+    Dim updating As Boolean, opened As Boolean, captured As Boolean, number As Long, source As String, description As String
     On Error GoTo Failed
-    WU_BeginSafeEdit updating, opened
+    WU_BeginSafeEdit updating, opened, captured
     ActiveDocument.Content.InsertBefore "partial"
     Err.Raise 713, "ComponentProof", "deliberate"
 CleanUp:
-    WU_EndSafeEdit updating, opened
+    WU_EndSafeEdit updating, opened, captured
     On Error GoTo 0
     If number <> 0 Then Err.Raise number, source, description
     Exit Sub

@@ -114,7 +114,7 @@ func builtin() []Manifest {
 			items[i].Version = "1.0.5"
 		}
 		if items[i].ID == "operation.safe-edit" {
-			items[i].Version = "1.0.1"
+			items[i].Version = "1.0.2"
 		}
 		if items[i].ID == "command.context-menu" {
 			items[i].Version = "1.0.4"

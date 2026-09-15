@@ -381,6 +381,31 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 	}
 }
 
+func TestSafeEditRequiresExplicitCaptureState(t *testing.T) {
+	item, err := Get("operation.safe-edit")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if item.Version != "1.0.2" {
+		t.Fatalf("safe-edit version did not advance: %q", item.Version)
+	}
+	var source string
+	for _, file := range item.Files {
+		if file.Path == "vba/WordUpSafeEdit.bas" {
+			source = file.Text
+		}
+	}
+	for _, want := range []string{
+		"ByRef captured As Boolean",
+		"captured = False",
+		"If captured Then Application.ScreenUpdating = updating",
+	} {
+		if !strings.Contains(source, want) {
+			t.Fatalf("safe-edit source omitted %q", want)
+		}
+	}
+}
+
 func TestFormShellPreservesUnloadFailure(t *testing.T) {
 	item, err := Get("ui.form-shell")
 	if err != nil {
