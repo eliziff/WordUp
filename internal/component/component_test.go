@@ -398,8 +398,9 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"story scope must be main, notes, or all",
 		"Application.UndoRecord.StartCustomRecord \"Replace literal text\"",
 		"If captured Then Application.ScreenUpdating = updating",
-		".Replacement.Text = replaceText",
+		".Replacement.Text = WU_EscapeFindLiteral(replaceText)",
 		".MatchWholeWord = wholeWord",
+		"WU_EscapeFindLiteral = Replace(value, \"^\", \"^^\")",
 		"wdFootnoteContinuationNoticeStory",
 	} {
 		if !strings.Contains(source, want) {

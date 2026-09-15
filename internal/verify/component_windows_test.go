@@ -207,6 +207,9 @@ Public Function CheckTextOperations() As String
     If elapsed < 0 Then elapsed = elapsed + 86400
     If Not result Then Err.Raise 5, , "bulk literal replacement did not report a change"
     If elapsed * 1000 > 250 Then Err.Raise 5, , "400 literal replacements exceeded 250 ms: " & CStr(elapsed * 1000)
+    d.Content.Text = "literal ^p marker" & vbCr
+    result = WU_ReplaceLiteral(d, "^p", "^t", "main", True, True)
+    If Not result Or d.Content.Text <> "literal ^t marker" & vbCr Then Err.Raise 5, , "literal caret text was interpreted as a Word control token"
     d.Close SaveChanges:=wdDoNotSaveChanges
     CheckTextOperations = "PASS"
 End Function

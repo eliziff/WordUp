@@ -408,8 +408,10 @@ Private Function WU_ReplaceLiteralInStory(ByVal story As Range, ByVal findText A
     With search.Find
         .ClearFormatting
         .Replacement.ClearFormatting
-        .Text = findText
-        .Replacement.Text = replaceText
+        ' Find/Replace treats ^p, ^t, and similar sequences as structural
+        ' tokens. Doubling the marker keeps this helper literal by default.
+        .Text = WU_EscapeFindLiteral(findText)
+        .Replacement.Text = WU_EscapeFindLiteral(replaceText)
         .Forward = True
         .Wrap = wdFindStop
         .Format = False
@@ -418,5 +420,9 @@ Private Function WU_ReplaceLiteralInStory(ByVal story As Range, ByVal findText A
         .MatchWildcards = False
     End With
     WU_ReplaceLiteralInStory = search.Find.Execute(Replace:=wdReplaceAll)
+End Function
+
+Private Function WU_EscapeFindLiteral(ByVal value As String) As String
+    WU_EscapeFindLiteral = Replace(value, "^", "^^")
 End Function
 `
