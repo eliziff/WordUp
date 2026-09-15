@@ -205,7 +205,7 @@ func TestCreateBuildsIndependentJournalWorkspace(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, marker := range []string{"WU_JournalOpenSetupFromRibbon", "WU_JournalApplyStyles", "WU_JournalPermaAssistant", "WU_DetectStructure", "WU_BeginSafeEdit", "StoryRanges already contains every header/footer story", "detectedRole = vbNullString", "WU_JOURNAL_STYLE_H9", "wdOutlineLevel9"} {
+	for _, marker := range []string{"WU_JournalOpenSetupFromRibbon", "WU_JournalApplyStyles", "WU_JournalPermaAssistant", "WU_DetectStructure", "WU_BeginSafeEdit", "StoryRanges already contains every header/footer story", "detectedRole = vbNullString", "WU_JOURNAL_STYLE_H9", "wdOutlineLevel9", "paragraphRange As Range", "wdFootnotesStory", "WU_CountStoryItems", "is not a paragraph style"} {
 		if !strings.Contains(string(core), marker) {
 			t.Fatalf("generated source lacks %s", marker)
 		}

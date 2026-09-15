@@ -623,6 +623,7 @@ Private Function WU_EnsureStyle(ByVal doc As Document, ByVal styleName As String
     Set value = doc.Styles(styleName)
     On Error GoTo 0
     If value Is Nothing Then Set value = doc.Styles.Add(Name:=styleName, Type:=wdStyleTypeParagraph)
+    If value.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_EnsureStyle", "style " & styleName & " is not a paragraph style"
     With value
         .Font.Name = fontName
         .Font.NameAscii = fontName
@@ -638,7 +639,7 @@ Private Function WU_EnsureStyle(ByVal doc As Document, ByVal styleName As String
 End Function
 
 Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As Style, ByVal heading1 As Style, ByVal heading2 As Style, ByVal heading3 As Style, ByVal heading4 As Style, ByVal heading5 As Style, ByVal heading6 As Style, ByVal heading7 As Style, ByVal heading8 As Style, ByVal heading9 As Style)
-    Dim story As Range, paragraph As Paragraph, currentStyle As String, detectedRole As String
+    Dim story As Range, paragraph As Paragraph, paragraphRange As Range, currentStyle As String, detectedRole As String
     Dim structure As Variant, haveStructure As Boolean, paragraphIndex As Long, level As Long
     On Error Resume Next
     Set story = doc.StoryRanges(wdMainTextStory)
@@ -660,7 +661,8 @@ Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As St
             Application.StatusBar = "Applying " & WU_JOURNAL_NAME & " styles (paragraph " & CStr(paragraphIndex) & ")"
             If WU_CancelRequested() Then Err.Raise 18, "Apply styles", "style application cancelled"
         End If
-        If Not paragraph.Range.Information(wdWithInTable) Then
+        Set paragraphRange = paragraph.Range
+        If Not paragraphRange.Information(wdWithInTable) Then
             level = paragraph.OutlineLevel
             ' Reset before the guarded array read. A malformed or stale
             ' detector result must fall back to Word's native outline level,
@@ -674,30 +676,30 @@ Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As St
                 On Error GoTo 0
             End If
             If level = wdOutlineLevel1 Then
-                paragraph.Range.Style = heading1
+                paragraphRange.Style = heading1
             ElseIf level = wdOutlineLevel2 Then
-                paragraph.Range.Style = heading2
+                paragraphRange.Style = heading2
             ElseIf level = wdOutlineLevel3 Then
-                paragraph.Range.Style = heading3
+                paragraphRange.Style = heading3
             ElseIf level = wdOutlineLevel4 Then
-                paragraph.Range.Style = heading4
+                paragraphRange.Style = heading4
             ElseIf level = wdOutlineLevel5 Then
-                paragraph.Range.Style = heading5
+                paragraphRange.Style = heading5
             ElseIf level = wdOutlineLevel6 Then
-                paragraph.Range.Style = heading6
+                paragraphRange.Style = heading6
             ElseIf level = wdOutlineLevel7 Then
-                paragraph.Range.Style = heading7
+                paragraphRange.Style = heading7
             ElseIf level = wdOutlineLevel8 Then
-                paragraph.Range.Style = heading8
+                paragraphRange.Style = heading8
             ElseIf level = wdOutlineLevel9 Then
-                paragraph.Range.Style = heading9
+                paragraphRange.Style = heading9
             Else
                 currentStyle = ""
                 On Error Resume Next
-                currentStyle = CStr(paragraph.Style)
+                currentStyle = CStr(paragraphRange.Style)
                 On Error GoTo 0
                 If StrComp(currentStyle, "Normal", vbTextCompare) = 0 Or StrComp(currentStyle, "Body Text", vbTextCompare) = 0 Then
-                    paragraph.Range.Style = bodyStyle
+                    paragraphRange.Style = bodyStyle
                 End If
             End If
         End If
@@ -705,13 +707,19 @@ Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As St
 End Sub
 
 Private Sub WU_ApplyFootnoteStyle(ByVal doc As Document, ByVal noteStyle As Style)
-    Dim note As Footnote, endnote As Endnote
-    For Each note In doc.Footnotes
-        note.Range.Style = noteStyle
-    Next note
-    For Each endnote In doc.Endnotes
-        endnote.Range.Style = noteStyle
-    Next endnote
+    Dim story As Range
+    ' A note story is already a contiguous Range. Applying its paragraph
+    ' style once avoids one COM round-trip per note while leaving direct run
+    ' formatting (italic case names, emphasis, and fields) untouched.
+    On Error Resume Next
+    Set story = doc.StoryRanges(wdFootnotesStory)
+    On Error GoTo 0
+    If Not story Is Nothing Then story.Style = noteStyle
+    Set story = Nothing
+    On Error Resume Next
+    Set story = doc.StoryRanges(wdEndnotesStory)
+    On Error GoTo 0
+    If Not story Is Nothing Then story.Style = noteStyle
 End Sub
 
 Public Sub WU_JournalRefreshFields()
@@ -789,29 +797,37 @@ Failed:
 End Sub
 
 Public Sub WU_JournalCitationAudit()
-    Dim note As Footnote, endnote As Endnote, noteText As String, supraCount As Long, noteCount As Long
-    For Each note In ActiveDocument.Footnotes
+    Dim noteCount As Long, supraCount As Long
+    On Error GoTo Failed
+    WU_ScanNotes ActiveDocument, noteCount, supraCount
+    MsgBox "Footnotes and endnotes: " & CStr(noteCount) & vbCrLf & "Notes containing 'supra': " & CStr(supraCount), vbInformation, "Citation audit"
+    Exit Sub
+Failed:
+    MsgBox Err.Description, vbExclamation, "Citation audit"
+End Sub
+
+Public Sub WU_JournalSupraAudit()
+    Dim noteCount As Long, supraCount As Long
+    On Error GoTo Failed
+    WU_ScanNotes ActiveDocument, noteCount, supraCount
+    MsgBox "Notes containing 'supra': " & CStr(supraCount), vbInformation, "Supra audit"
+    Exit Sub
+Failed:
+    MsgBox Err.Description, vbExclamation, "Supra audit"
+End Sub
+
+Private Sub WU_ScanNotes(ByVal doc As Document, ByRef noteCount As Long, ByRef supraCount As Long)
+    Dim note As Footnote, endnote As Endnote, noteText As String
+    For Each note In doc.Footnotes
         noteCount = noteCount + 1
         noteText = note.Range.Text
         If InStr(1, noteText, "supra", vbTextCompare) > 0 Then supraCount = supraCount + 1
     Next note
-    For Each endnote In ActiveDocument.Endnotes
+    For Each endnote In doc.Endnotes
         noteCount = noteCount + 1
         noteText = endnote.Range.Text
         If InStr(1, noteText, "supra", vbTextCompare) > 0 Then supraCount = supraCount + 1
     Next endnote
-    MsgBox "Footnotes and endnotes: " & CStr(noteCount) & vbCrLf & "Notes containing 'supra': " & CStr(supraCount), vbInformation, "Citation audit"
-End Sub
-
-Public Sub WU_JournalSupraAudit()
-    Dim note As Footnote, endnote As Endnote, count As Long
-    For Each note In ActiveDocument.Footnotes
-        If InStr(1, note.Range.Text, "supra", vbTextCompare) > 0 Then count = count + 1
-    Next note
-    For Each endnote In ActiveDocument.Endnotes
-        If InStr(1, endnote.Range.Text, "supra", vbTextCompare) > 0 Then count = count + 1
-    Next endnote
-    MsgBox "Notes containing 'supra': " & CStr(count), vbInformation, "Supra audit"
 End Sub
 
 Public Sub WU_JournalInstallCommands()
@@ -856,77 +872,40 @@ End Sub
 
 Public Sub WU_JournalQualityReport()
     Dim doc As Document, report As String
+    Dim fieldCount As Long, tableCount As Long, revisionCount As Long, hyperlinkCount As Long
     On Error GoTo Failed
     Set doc = ActiveDocument
+    WU_CountStoryItems doc, fieldCount, tableCount, revisionCount, hyperlinkCount
     report = "Paragraphs: " & CStr(doc.Paragraphs.Count) & vbCrLf
     report = report & "Sections: " & CStr(doc.Sections.Count) & vbCrLf
     report = report & "Footnotes: " & CStr(doc.Footnotes.Count) & vbCrLf
     report = report & "Endnotes: " & CStr(doc.Endnotes.Count) & vbCrLf
-    report = report & "Fields (all stories): " & CStr(WU_CountFields(doc)) & vbCrLf
-    report = report & "Tables (all stories): " & CStr(WU_CountTables(doc)) & vbCrLf
-    report = report & "Revisions (all stories): " & CStr(WU_CountRevisions(doc)) & vbCrLf
-    report = report & "Hyperlinks (all stories): " & CStr(WU_CountHyperlinks(doc))
+    report = report & "Fields (all stories): " & CStr(fieldCount) & vbCrLf
+    report = report & "Tables (all stories): " & CStr(tableCount) & vbCrLf
+    report = report & "Revisions (all stories): " & CStr(revisionCount) & vbCrLf
+    report = report & "Hyperlinks (all stories): " & CStr(hyperlinkCount)
     MsgBox report, vbInformation, "Quality report"
     Exit Sub
 Failed:
     MsgBox Err.Description, vbExclamation, "Quality report"
 End Sub
 
-Private Function WU_CountFields(ByVal doc As Document) As Long
+Private Sub WU_CountStoryItems(ByVal doc As Document, ByRef fieldCount As Long, ByRef tableCount As Long, ByRef revisionCount As Long, ByRef hyperlinkCount As Long)
     Dim firstStory As Range, story As Range
     For Each firstStory In doc.StoryRanges
         Set story = firstStory
         Do While Not story Is Nothing
             On Error Resume Next
-            WU_CountFields = WU_CountFields + story.Fields.Count
+            fieldCount = fieldCount + story.Fields.Count
+            tableCount = tableCount + story.Tables.Count
+            revisionCount = revisionCount + story.Revisions.Count
+            hyperlinkCount = hyperlinkCount + story.Hyperlinks.Count
             Err.Clear
             On Error GoTo 0
             Set story = story.NextStoryRange
         Loop
     Next firstStory
-End Function
-
-Private Function WU_CountTables(ByVal doc As Document) As Long
-    Dim firstStory As Range, story As Range
-    For Each firstStory In doc.StoryRanges
-        Set story = firstStory
-        Do While Not story Is Nothing
-            On Error Resume Next
-            WU_CountTables = WU_CountTables + story.Tables.Count
-            Err.Clear
-            On Error GoTo 0
-            Set story = story.NextStoryRange
-        Loop
-    Next firstStory
-End Function
-
-Private Function WU_CountRevisions(ByVal doc As Document) As Long
-    Dim firstStory As Range, story As Range
-    For Each firstStory In doc.StoryRanges
-        Set story = firstStory
-        Do While Not story Is Nothing
-            On Error Resume Next
-            WU_CountRevisions = WU_CountRevisions + story.Revisions.Count
-            Err.Clear
-            On Error GoTo 0
-            Set story = story.NextStoryRange
-        Loop
-    Next firstStory
-End Function
-
-Private Function WU_CountHyperlinks(ByVal doc As Document) As Long
-    Dim firstStory As Range, story As Range
-    For Each firstStory In doc.StoryRanges
-        Set story = firstStory
-        Do While Not story Is Nothing
-            On Error Resume Next
-            WU_CountHyperlinks = WU_CountHyperlinks + story.Hyperlinks.Count
-            Err.Clear
-            On Error GoTo 0
-            Set story = story.NextStoryRange
-        Loop
-    Next firstStory
-End Function
+End Sub
 
 Public Sub WU_JournalPreflight()
     Dim doc As Document, missing As String, issues As String, report As String
