@@ -459,6 +459,8 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"Private Const WU_MAX_BATCH_RULES As Long = 1024",
 		"replacement rule count exceeds 1024",
 		"replacement text must be scalar",
+		"IsObject(replacements(row, firstColumn))",
+		"IsArray(replacements(row, firstColumn + 1))",
 		"style rule count exceeds 1024",
 		"style is not a character style",
 		"find text exceeds Word's 255-character limit",

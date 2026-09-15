@@ -179,7 +179,7 @@ Public Function CheckRibbonAndProgress() As String
     CheckRibbonAndProgress = "PASS"
 End Function
 Public Function CheckTextOperations() As String
-    Dim d As Document, result As Boolean, before As String, bodyAfterNote As String, formatted As Range, scoped As Range, header As Range, footer As Range, rejected As Boolean, note As Footnote, priorUpdating As Boolean
+    Dim d As Document, result As Boolean, before As String, bodyAfterNote As String, unicodeText As String, formatted As Range, scoped As Range, header As Range, footer As Range, rejected As Boolean, note As Footnote, priorUpdating As Boolean, table As Table
     Dim replacements(0 To 2, 0 To 1) As Variant, styleMatches(0 To 2, 0 To 1) As Variant, batchChanged As Long, rangeBatchChanged As Long, literalCount As Long, citationStyle As Style, styled As Long, styleBatchChanged As Long
     Dim i As Long, lines(1 To 400) As String, started As Single, elapsed As Single
     Set d = Documents.Add
@@ -295,6 +295,26 @@ Public Function CheckTextOperations() As String
     d.Content.Text = "literal ^p marker" & vbCr
     result = WU_ReplaceLiteral(d, "^p", "^t", "main", True, False)
     If Not result Or d.Content.Text <> "literal ^t marker" & vbCr Then Err.Raise 5, , "literal caret text was interpreted as a Word control token"
+    unicodeText = "R" & ChrW(&HE9) & "sum" & ChrW(&HE9)
+    d.Content.Text = unicodeText & " " & unicodeText & vbCr
+    Set formatted = d.Paragraphs(1).Range.Duplicate
+    formatted.End = formatted.Start + Len(unicodeText)
+    formatted.Italic = True
+    result = WU_ReplaceLiteral(d, unicodeText, "Case" & ChrW(&H2013) & "Name", "main", True, True)
+    If Not result Or d.Content.Text <> "Case" & ChrW(&H2013) & "Name " & "Case" & ChrW(&H2013) & "Name" & vbCr Then Err.Raise 5, , "Unicode literal replacement changed the wrong text"
+    If Not d.Paragraphs(1).Range.Characters(1).Italic Then Err.Raise 5, , "Unicode replacement lost direct formatting"
+    If Not d.Undo Then Err.Raise 5, , "Unicode replacement did not create one undo record"
+    d.Content.Text = "table host" & vbCr
+    Set table = d.Tables.Add(Range:=d.Paragraphs(1).Range, NumRows:=1, NumColumns:=2)
+    table.Cell(1, 1).Range.Text = "Alpha"
+    table.Cell(1, 2).Range.Text = "Alpha"
+    Set scoped = table.Cell(1, 1).Range.Duplicate
+    scoped.End = scoped.End - 1
+    result = WU_ReplaceLiteralInRange(scoped, "Alpha", "Beta", True, True)
+    If Not result Or InStr(1, table.Cell(1, 1).Range.Text, "Beta", vbBinaryCompare) = 0 Or InStr(1, table.Cell(1, 2).Range.Text, "Alpha", vbBinaryCompare) = 0 Then Err.Raise 5, , "table-cell range replacement escaped its requested cell"
+    If Not d.Undo Then Err.Raise 5, , "table-cell range replacement did not create one undo record"
+    If InStr(1, table.Cell(1, 1).Range.Text, "Alpha", vbBinaryCompare) = 0 Then Err.Raise 5, , "table-cell range replacement undo did not restore text"
+    d.Content.Text = "Alpha body" & vbCr
     Set note = d.Footnotes.Add(Range:=d.Paragraphs(1).Range, Text:="Alpha note")
     bodyAfterNote = d.Content.Text
     result = WU_ReplaceLiteral(d, "Alpha", "Omega", "notes", True, True)
