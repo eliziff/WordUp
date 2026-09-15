@@ -388,7 +388,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.4" {
+	if item.Version != "1.0.5" {
 		t.Fatalf("text operations version=%q", item.Version)
 	}
 	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
@@ -410,8 +410,13 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"Set story = document.StoryRanges(wdMainTextStory)",
 		".MatchWholeWord = wholeWord",
 		"WU_EscapeFindLiteral = Replace(value, \"^\", \"^^\")",
-		"Case wdFootnotesStory, wdEndnotesStory",
-		"If target.End > target.Start Then WU_ReplaceLiteralInRange",
+		"Set firstStory = document.StoryRanges(wdFootnotesStory)",
+		"Set firstStory = document.StoryRanges(wdEndnotesStory)",
+		"WU_ReplaceLiteralInStoryChain",
+		"Do not create an undo record or touch Word state for an exact no-op.",
+		"If StrComp(findText, replaceText, vbBinaryCompare) = 0 Then Exit Function",
+		"targetStart = target.Start: targetEnd = target.End",
+		"If targetEnd <= targetStart Then Exit Function",
 	} {
 		if !strings.Contains(source, want) {
 			t.Fatalf("text operations source omitted %q", want)

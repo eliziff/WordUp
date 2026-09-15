@@ -188,6 +188,9 @@ Public Function CheckTextOperations() As String
     formatted.Italic = True
     before = d.Content.Text
     priorUpdating = Application.ScreenUpdating
+    d.Saved = True
+    result = WU_ReplaceLiteral(d, "Alpha", "Alpha", "main", False, False)
+    If result Or Not d.Saved Then Err.Raise 5, , "exact no-op opened an edit or changed the document"
     result = WU_ReplaceLiteral(d, "alpha", "omega", "main", False, True)
     If Not result Then Err.Raise 5, , "literal replacement did not report a change"
     If Application.ScreenUpdating <> priorUpdating Then Err.Raise 5, , "replacement did not restore ScreenUpdating"
@@ -203,6 +206,11 @@ Public Function CheckTextOperations() As String
     If Application.ScreenUpdating <> priorUpdating Then Err.Raise 5, , "range replacement did not restore ScreenUpdating"
     If Not d.Undo Then Err.Raise 5, , "range replacement did not create one undo record"
     If d.Content.Text <> before Then Err.Raise 5, , "range replacement undo did not restore text"
+    Set scoped = d.Paragraphs(1).Range.Duplicate
+    scoped.Collapse wdCollapseStart
+    d.Saved = True
+    result = WU_ReplaceLiteralInRange(scoped, "Alpha", "Omega", True, True)
+    If result Or Not d.Saved Then Err.Raise 5, , "empty range opened an edit or changed the document"
     On Error Resume Next
     result = WU_ReplaceLiteral(d, "alpha", "omega", "invalid", False, False)
     rejected = (Err.Number <> 0)

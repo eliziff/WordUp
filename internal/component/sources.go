@@ -358,6 +358,8 @@ Public Function WU_ReplaceLiteral(ByVal document As Document, ByVal findText As 
     WU_ValidateLiteral findText, replaceText, "WU_ReplaceLiteral"
     storyScope = LCase$(Trim$(storyScope))
     If storyScope <> "main" And storyScope <> "notes" And storyScope <> "all" Then Err.Raise 5, "WU_ReplaceLiteral", "story scope must be main, notes, or all"
+    ' Do not create an undo record or touch Word state for an exact no-op.
+    If StrComp(findText, replaceText, vbBinaryCompare) = 0 Then Exit Function
     updating = Application.ScreenUpdating
     captured = True
     Application.ScreenUpdating = False
@@ -370,15 +372,24 @@ Public Function WU_ReplaceLiteral(ByVal document As Document, ByVal findText As 
         If Not story Is Nothing Then
             If story.End > story.Start Then changed = WU_ReplaceLiteralInStory(story, findText, replaceText, matchCase, wholeWord)
         End If
+    ElseIf storyScope = "notes" Then
+        ' Notes are the only non-main stories most journal operations need.
+        ' Address their two roots directly instead of enumerating unrelated
+        ' headers, footers, text boxes, comments, and text frames.
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdFootnotesStory)
+        Err.Clear
+        On Error GoTo Failed
+        If Not firstStory Is Nothing Then changed = WU_ReplaceLiteralInStoryChain(firstStory, findText, replaceText, matchCase, wholeWord)
+        Set firstStory = Nothing
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdEndnotesStory)
+        Err.Clear
+        On Error GoTo Failed
+        If Not firstStory Is Nothing Then If WU_ReplaceLiteralInStoryChain(firstStory, findText, replaceText, matchCase, wholeWord) Then changed = True
     Else
         For Each firstStory In document.StoryRanges
-            Set story = firstStory
-            Do While Not story Is Nothing
-                If story.End > story.Start And WU_StoryMatchesScope(story, storyScope) Then
-                    If WU_ReplaceLiteralInStory(story, findText, replaceText, matchCase, wholeWord) Then changed = True
-                End If
-                Set story = story.NextStoryRange
-            Loop
+            If WU_ReplaceLiteralInStoryChain(firstStory, findText, replaceText, matchCase, wholeWord) Then changed = True
         Next firstStory
     End If
     WU_ReplaceLiteral = changed
@@ -405,16 +416,19 @@ End Function
 ' Word range and must not touch any other story. The range's direct formatting
 ' is retained by Word's formatting-neutral replacement.
 Public Function WU_ReplaceLiteralInRange(ByVal target As Range, ByVal findText As String, ByVal replaceText As String, Optional ByVal matchCase As Boolean = False, Optional ByVal wholeWord As Boolean = False) As Boolean
-    Dim updating As Boolean, opened As Boolean, captured As Boolean
+    Dim updating As Boolean, opened As Boolean, captured As Boolean, targetStart As Long, targetEnd As Long
     Dim failure As Long, failureSource As String, failureText As String
     On Error GoTo Failed
     If target Is Nothing Then Err.Raise 91, "WU_ReplaceLiteralInRange", "target range is required"
     WU_ValidateLiteral findText, replaceText, "WU_ReplaceLiteralInRange"
+    targetStart = target.Start: targetEnd = target.End
+    If targetEnd <= targetStart Then Exit Function
+    If StrComp(findText, replaceText, vbBinaryCompare) = 0 Then Exit Function
     updating = Application.ScreenUpdating
     captured = True
     Application.ScreenUpdating = False
     Application.UndoRecord.StartCustomRecord "Replace literal text": opened = True
-    If target.End > target.Start Then WU_ReplaceLiteralInRange = WU_ReplaceLiteralInStory(target, findText, replaceText, matchCase, wholeWord)
+    WU_ReplaceLiteralInRange = WU_ReplaceLiteralInStory(target, findText, replaceText, matchCase, wholeWord)
 CleanUp:
     On Error Resume Next
     If opened Then
@@ -441,18 +455,16 @@ Private Sub WU_ValidateLiteral(ByVal findText As String, ByVal replaceText As St
     If Len(WU_EscapeFindLiteral(replaceText)) > 255 Then Err.Raise 5, sourceName, "replacement text exceeds Word's escaped 255-character limit"
 End Sub
 
-Private Function WU_StoryMatchesScope(ByVal story As Range, ByVal storyScope As String) As Boolean
-    Select Case storyScope
-        Case "all"
-            WU_StoryMatchesScope = True
-        Case "main"
-            WU_StoryMatchesScope = (story.StoryType = wdMainTextStory)
-        Case "notes"
-            Select Case story.StoryType
-                Case wdFootnotesStory, wdEndnotesStory
-                    WU_StoryMatchesScope = True
-            End Select
-    End Select
+Private Function WU_ReplaceLiteralInStoryChain(ByVal firstStory As Range, ByVal findText As String, ByVal replaceText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Boolean
+    Dim story As Range, changed As Boolean
+    Set story = firstStory
+    Do While Not story Is Nothing
+        If story.End > story.Start Then
+            If WU_ReplaceLiteralInStory(story, findText, replaceText, matchCase, wholeWord) Then changed = True
+        End If
+        Set story = story.NextStoryRange
+    Loop
+    WU_ReplaceLiteralInStoryChain = changed
 End Function
 
 Private Function WU_ReplaceLiteralInStory(ByVal story As Range, ByVal findText As String, ByVal replaceText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Boolean

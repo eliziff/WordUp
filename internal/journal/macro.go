@@ -629,19 +629,23 @@ Private Function WU_EnsureStyle(ByVal doc As Document, ByVal styleName As String
     Dim value As Style
     On Error Resume Next
     Set value = doc.Styles(styleName)
+    Err.Clear
     On Error GoTo 0
     If value Is Nothing Then Set value = doc.Styles.Add(Name:=styleName, Type:=wdStyleTypeParagraph)
     If value.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_EnsureStyle", "style " & styleName & " is not a paragraph style"
     With value
-        .Font.Name = fontName
-        .Font.NameAscii = fontName
-        .Font.NameOther = fontName
-        .Font.NameFarEast = fontName
-        .Font.NameBi = fontName
-        .Font.Size = fontSize
-        .ParagraphFormat.SpaceAfter = 6
-        .ParagraphFormat.LineSpacingRule = wdLineSpaceSingle
-        .ParagraphFormat.KeepWithNext = keepNext
+        ' Style definitions are shared document state. Read before writing so
+        ' an idempotent pass does not dirty the document or spend a COM call on
+        ' every font slot. A changed profile still updates the complete set.
+        If StrComp(CStr(.Font.Name), fontName, vbTextCompare) <> 0 Then .Font.Name = fontName
+        If StrComp(CStr(.Font.NameAscii), fontName, vbTextCompare) <> 0 Then .Font.NameAscii = fontName
+        If StrComp(CStr(.Font.NameOther), fontName, vbTextCompare) <> 0 Then .Font.NameOther = fontName
+        If StrComp(CStr(.Font.NameFarEast), fontName, vbTextCompare) <> 0 Then .Font.NameFarEast = fontName
+        If StrComp(CStr(.Font.NameBi), fontName, vbTextCompare) <> 0 Then .Font.NameBi = fontName
+        If Abs(CSng(.Font.Size) - fontSize) > 0.01 Then .Font.Size = fontSize
+        If Abs(CSng(.ParagraphFormat.SpaceAfter) - 6) > 0.01 Then .ParagraphFormat.SpaceAfter = 6
+        If .ParagraphFormat.LineSpacingRule <> wdLineSpaceSingle Then .ParagraphFormat.LineSpacingRule = wdLineSpaceSingle
+        If .ParagraphFormat.KeepWithNext <> keepNext Then .ParagraphFormat.KeepWithNext = keepNext
     End With
     Set WU_EnsureStyle = value
 End Function
@@ -656,6 +660,7 @@ Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As St
         paragraphCount = story.Paragraphs.Count
         storyStart = story.Start: storyEnd = story.End
     End If
+    Err.Clear
     On Error GoTo 0
     If story Is Nothing Or paragraphCount = 0 Then Exit Sub
     ' Run the detector once. Its offsets and roles let the normal path create
@@ -758,6 +763,7 @@ Private Sub WU_ApplyNativeParagraphStyles(ByVal story As Range, ByVal bodyStyle 
             currentStyle = vbNullString
             On Error Resume Next
             currentStyle = CStr(paragraphRange.Style)
+            Err.Clear
             On Error GoTo 0
             Set desiredStyle = WU_HeadingStyleForLevel(paragraph.OutlineLevel, heading1, heading2, heading3, heading4, heading5, heading6, heading7, heading8, heading9)
             If Not desiredStyle Is Nothing Then
@@ -812,13 +818,29 @@ Private Sub WU_ApplyFootnoteStyle(ByVal doc As Document, ByVal noteStyle As Styl
     ' formatting (italic case names, emphasis, and fields) untouched.
     On Error Resume Next
     Set story = doc.StoryRanges(wdFootnotesStory)
+    Err.Clear
     On Error GoTo 0
-    If Not story Is Nothing Then story.Style = noteStyle
+    If Not story Is Nothing Then WU_ApplyNoteStoryStyle story, noteStyle
     Set story = Nothing
     On Error Resume Next
     Set story = doc.StoryRanges(wdEndnotesStory)
+    Err.Clear
     On Error GoTo 0
-    If Not story Is Nothing Then story.Style = noteStyle
+    If Not story Is Nothing Then WU_ApplyNoteStoryStyle story, noteStyle
+End Sub
+
+Private Sub WU_ApplyNoteStoryStyle(ByVal story As Range, ByVal noteStyle As Style)
+    Dim currentStyle As String
+    If story Is Nothing Then Exit Sub
+    If story.End <= story.Start Then Exit Sub
+    ' Story.Style can be mixed (or unavailable for a malformed story). Only
+    ' skip an assignment when Word positively reports the target style; a
+    ' mixed/failed read remains a deliberate full-story conversion.
+    On Error Resume Next
+    currentStyle = CStr(story.Style)
+    Err.Clear
+    On Error GoTo 0
+    If StrComp(currentStyle, noteStyle.NameLocal, vbTextCompare) <> 0 Then story.Style = noteStyle
 End Sub
 
 Public Sub WU_JournalRefreshFields()
@@ -1056,6 +1078,7 @@ Private Function WU_HasStyle(ByVal doc As Document, ByVal styleName As String) A
     On Error Resume Next
     Set value = doc.Styles(styleName)
     WU_HasStyle = Not value Is Nothing
+    Err.Clear
     On Error GoTo 0
 End Function
 

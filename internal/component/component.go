@@ -133,8 +133,8 @@ func builtin() []Manifest {
 			items[i].Version = "1.0.3"
 		}
 		if items[i].ID == "document.text-operations" {
-			items[i].Version = "1.0.4"
-			items[i].Acceptance = "WU_ReplaceLiteral and WU_ReplaceLiteralInRange are public, bounded, and compile without non-Office references."
+			items[i].Version = "1.0.5"
+			items[i].Acceptance = "WU_ReplaceLiteral and WU_ReplaceLiteralInRange are public, bounded, no-op aware, and compile without non-Office references."
 		}
 		items[i].Schema = 1
 		items[i].License = "MIT"
