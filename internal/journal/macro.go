@@ -875,7 +875,7 @@ Failed:
 End Sub
 
 Public Sub WU_JournalReviewNext()
-    Dim firstStory As Range, story As Range, revision As Revision, storyIndex As Long
+    Dim firstStory As Range, story As Range, revision As Revision, storyIndex As Long, storyFailed As Boolean
     On Error GoTo Failed
     WU_ResetProgress
     For Each firstStory In ActiveDocument.StoryRanges
@@ -897,7 +897,8 @@ Public Sub WU_JournalReviewNext()
                 Application.StatusBar = "Selected the next revision for review."
                 Exit Sub
             End If
-            Set story = story.NextStoryRange
+            Set story = WU_JournalNextStory(story, storyFailed)
+            If storyFailed Then Err.Raise 5, "Journal review", "linked story traversal failed"
         Loop
     Next firstStory
     MsgBox "No tracked changes were found in the document stories.", vbInformation, "Journal review"
@@ -1035,10 +1036,26 @@ Private Sub WU_CountStoryItems(ByVal doc As Document, ByRef fieldCount As Long, 
             Err.Clear
             On Error GoTo 0
             If storyFailed Then failures = failures + 1
-            Set story = story.NextStoryRange
+            Set story = WU_JournalNextStory(story, storyFailed)
+            If storyFailed Then failures = failures + 1: Exit Do
         Loop
     Next firstStory
 End Sub
+
+Private Function WU_JournalNextStory(ByVal story As Range, ByRef failed As Boolean) As Range
+    Dim nextStory As Range, readError As Long
+    failed = False
+    If story Is Nothing Then Exit Function
+    On Error Resume Next
+    Set nextStory = story.NextStoryRange
+    readError = Err.Number
+    Err.Clear
+    On Error GoTo 0
+    If readError <> 0 Then failed = True: Exit Function
+    If nextStory Is Nothing Then Exit Function
+    If nextStory Is story Then failed = True: Exit Function
+    Set WU_JournalNextStory = nextStory
+End Function
 
 Public Sub WU_JournalPreflight()
     Dim doc As Document, missing As String, issues As String, report As String

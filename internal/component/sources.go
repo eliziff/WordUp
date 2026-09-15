@@ -315,7 +315,7 @@ Public Function WU_ConvertStyle(ByVal document As Document, ByVal fromStyle As S
     Application.UndoRecord.StartCustomRecord "Convert style": opened = True
     If storyScope = "main" Then
         Set story = document.StoryRanges(wdMainTextStory)
-        If Not story Is Nothing Then If story.End > story.Start Then WU_ConvertStyle = WU_ConvertStyleInStory(story, sourceStyle, targetStyle)
+        If Not story Is Nothing Then If WU_StyleStoryHasContent(story) Then WU_ConvertStyle = WU_ConvertStyleInStory(story, sourceStyle, targetStyle)
     ElseIf storyScope = "notes" Then
         On Error Resume Next
         Set firstStory = document.StoryRanges(wdFootnotesStory)
@@ -381,7 +381,7 @@ Public Function WU_ConvertStyleBatch(ByVal document As Document, ByVal mappings 
     Application.UndoRecord.StartCustomRecord "Convert style batch": opened = True
     If storyScope = "main" Then
         Set story = document.StoryRanges(wdMainTextStory)
-        If Not story Is Nothing Then If story.End > story.Start Then WU_ConvertStyleBatchInStory story, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+        If Not story Is Nothing Then If WU_StyleStoryHasContent(story) Then WU_ConvertStyleBatchInStory story, sourceCache, targetCache, enabled, firstRow, lastRow, matched
     ElseIf storyScope = "notes" Then
         On Error Resume Next
         Set firstStory = document.StoryRanges(wdFootnotesStory)
@@ -516,7 +516,7 @@ Public Function WU_ConvertCharacterStyle(ByVal document As Document, ByVal fromS
     Application.UndoRecord.StartCustomRecord "Convert character style": opened = True
     If storyScope = "main" Then
         Set story = document.StoryRanges(wdMainTextStory)
-        If Not story Is Nothing Then If story.End > story.Start Then WU_ConvertCharacterStyle = WU_ConvertCharacterStyleInStory(story, sourceStyle, targetStyle)
+        If Not story Is Nothing Then If WU_StyleStoryHasContent(story) Then WU_ConvertCharacterStyle = WU_ConvertCharacterStyleInStory(story, sourceStyle, targetStyle)
     ElseIf storyScope = "notes" Then
         On Error Resume Next
         Set firstStory = document.StoryRanges(wdFootnotesStory)
@@ -633,7 +633,7 @@ Public Function WU_ConvertCharacterStyleBatch(ByVal document As Document, ByVal 
     Application.UndoRecord.StartCustomRecord "Convert character style batch": opened = True
     If storyScope = "main" Then
         Set story = document.StoryRanges(wdMainTextStory)
-        If Not story Is Nothing Then If story.End > story.Start Then WU_ConvertCharacterStyleBatchInStory story, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+        If Not story Is Nothing Then If WU_StyleStoryHasContent(story) Then WU_ConvertCharacterStyleBatchInStory story, sourceCache, targetCache, enabled, firstRow, lastRow, matched
     ElseIf storyScope = "notes" Then
         On Error Resume Next
         Set firstStory = document.StoryRanges(wdFootnotesStory)
@@ -868,8 +868,8 @@ Private Function WU_ConvertStyleInStoryChain(ByVal firstStory As Range, ByVal so
     Dim story As Range, changed As Boolean
     Set story = firstStory
     Do While Not story Is Nothing
-        If story.End > story.Start Then If WU_ConvertStyleInStory(story, sourceStyle, targetStyle) Then changed = True
-        Set story = story.NextStoryRange
+        If WU_StyleStoryHasContent(story) Then If WU_ConvertStyleInStory(story, sourceStyle, targetStyle) Then changed = True
+        Set story = WU_StyleNextStory(story)
     Loop
     WU_ConvertStyleInStoryChain = changed
 End Function
@@ -899,8 +899,8 @@ Private Sub WU_ConvertStyleBatchInStoryChain(ByVal firstStory As Range, ByRef so
     Dim story As Range
     Set story = firstStory
     Do While Not story Is Nothing
-        If story.End > story.Start Then WU_ConvertStyleBatchInStory story, sourceCache, targetCache, enabled, firstRow, lastRow, matched
-        Set story = story.NextStoryRange
+        If WU_StyleStoryHasContent(story) Then WU_ConvertStyleBatchInStory story, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+        Set story = WU_StyleNextStory(story)
     Loop
 End Sub
 
@@ -915,8 +915,8 @@ Private Sub WU_ConvertCharacterStyleBatchInStoryChain(ByVal firstStory As Range,
     Dim story As Range
     Set story = firstStory
     Do While Not story Is Nothing
-        If story.End > story.Start Then WU_ConvertCharacterStyleBatchInStory story, sourceCache, targetCache, enabled, firstRow, lastRow, matched
-        Set story = story.NextStoryRange
+        If WU_StyleStoryHasContent(story) Then WU_ConvertCharacterStyleBatchInStory story, sourceCache, targetCache, enabled, firstRow, lastRow, matched
+        Set story = WU_StyleNextStory(story)
     Loop
 End Sub
 
@@ -986,8 +986,8 @@ Private Function WU_ConvertCharacterStyleInStoryChain(ByVal firstStory As Range,
     Dim story As Range, changed As Boolean
     Set story = firstStory
     Do While Not story Is Nothing
-        If story.End > story.Start Then If WU_ConvertCharacterStyleInStory(story, sourceStyle, targetStyle) Then changed = True
-        Set story = story.NextStoryRange
+        If WU_StyleStoryHasContent(story) Then If WU_ConvertCharacterStyleInStory(story, sourceStyle, targetStyle) Then changed = True
+        Set story = WU_StyleNextStory(story)
     Loop
     WU_ConvertCharacterStyleInStoryChain = changed
 End Function
@@ -1201,6 +1201,36 @@ Private Function WU_ParagraphStyleMatches(ByVal target As Range, ByVal style As 
     If readError = 0 Then WU_ParagraphStyleMatches = (StrComp(currentStyle, expectedName, vbTextCompare) = 0)
 End Function
 
+Private Function WU_StyleStoryHasContent(ByVal story As Range) As Boolean
+    ' Empty stories are harmless; an unavailable boundary is not. Raise it
+    ' through the caller so a style conversion cannot report success after
+    ' silently omitting a linked story.
+    Dim storyStart As Long, storyEnd As Long, readError As Long
+    If story Is Nothing Then Exit Function
+    On Error Resume Next
+    storyStart = story.Start
+    storyEnd = story.End
+    readError = Err.Number
+    Err.Clear
+    On Error GoTo 0
+    If readError <> 0 Then Err.Raise readError, "WU_StyleStoryHasContent", "story boundary is unavailable"
+    WU_StyleStoryHasContent = (storyEnd > storyStart)
+End Function
+
+Private Function WU_StyleNextStory(ByVal story As Range) As Range
+    Dim nextStory As Range, readError As Long
+    If story Is Nothing Then Exit Function
+    On Error Resume Next
+    Set nextStory = story.NextStoryRange
+    readError = Err.Number
+    Err.Clear
+    On Error GoTo 0
+    If readError <> 0 Then Err.Raise readError, "WU_StyleNextStory", "linked story traversal is unavailable"
+    If nextStory Is Nothing Then Exit Function
+    If nextStory Is story Then Err.Raise 5, "WU_StyleNextStory", "self-referential story chain"
+    Set WU_StyleNextStory = nextStory
+End Function
+
 Private Sub WU_PinFindOptions(ByVal criteria As Find)
     ' These options exist in current Word object libraries but are optional
     ' for some language packs/older hosts. Ignore only an unavailable option;
@@ -1339,16 +1369,18 @@ Private Sub WU_RefreshFieldStoryType(ByVal document As Document, ByVal storyType
 End Sub
 
 Private Sub WU_RefreshFieldStoryChain(ByVal firstStory As Range, ByRef failures As Long)
-    Dim story As Range, nextError As Long
+    Dim story As Range, nextStory As Range, nextError As Long
     Set story = firstStory
     Do While Not story Is Nothing
         WU_RefreshFieldStory story, failures
         On Error Resume Next
-        Set story = story.NextStoryRange
+        Set nextStory = story.NextStoryRange
         nextError = Err.Number
         Err.Clear
         On Error GoTo 0
         If nextError <> 0 Then failures = failures + 1: Exit Do
+        If nextStory Is story Then failures = failures + 1: Exit Do
+        Set story = nextStory
     Loop
 End Sub
 
@@ -1416,7 +1448,7 @@ Public Function WU_ReplaceLiteral(ByVal document As Document, ByVal findText As 
         ' overwhelmingly common body-only operation.
         Set story = document.StoryRanges(wdMainTextStory)
         If Not story Is Nothing Then
-            If story.End > story.Start Then changed = WU_ReplaceLiteralInStory(story, findText, replaceText, matchCase, wholeWord)
+            If WU_TextStoryHasContent(story) Then changed = WU_ReplaceLiteralInStory(story, findText, replaceText, matchCase, wholeWord)
         End If
     ElseIf storyScope = "notes" Then
         ' Notes are the only non-main stories most journal operations need.
@@ -1479,7 +1511,7 @@ Public Function WU_CountLiteral(ByVal document As Document, ByVal findText As St
     If storyScope <> "main" And storyScope <> "notes" And storyScope <> "headers" And storyScope <> "footers" And storyScope <> "all" Then Err.Raise 5, "WU_CountLiteral", "story scope must be main, notes, headers, footers, or all"
     If storyScope = "main" Then
         Set story = document.StoryRanges(wdMainTextStory)
-        If Not story Is Nothing Then If story.End > story.Start Then count = WU_CountLiteralInStory(story, findText, matchCase, wholeWord)
+        If Not story Is Nothing Then If WU_TextStoryHasContent(story) Then count = WU_CountLiteralInStory(story, findText, matchCase, wholeWord)
     ElseIf storyScope = "notes" Then
         On Error Resume Next
         Set firstStory = document.StoryRanges(wdFootnotesStory)
@@ -1549,7 +1581,7 @@ Public Function WU_ReplaceLiteralBatch(ByVal document As Document, ByVal replace
     Application.UndoRecord.StartCustomRecord "Replace literal text batch": opened = True
     If storyScope = "main" Then
         Set story = document.StoryRanges(wdMainTextStory)
-        If Not story Is Nothing Then If story.End > story.Start Then WU_ReplaceLiteralBatchInStory story, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched
+        If Not story Is Nothing Then If WU_TextStoryHasContent(story) Then WU_ReplaceLiteralBatchInStory story, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched
     ElseIf storyScope = "notes" Then
         On Error Resume Next
         Set firstStory = document.StoryRanges(wdFootnotesStory)
@@ -1666,7 +1698,7 @@ Public Function WU_ApplyCharacterStyleToMatches(ByVal document As Document, ByVa
     Application.UndoRecord.StartCustomRecord "Style literal matches": opened = True
     If storyScope = "main" Then
         Set story = document.StoryRanges(wdMainTextStory)
-        If Not story Is Nothing Then If story.End > story.Start Then changed = WU_ApplyCharacterStyleInStory(story, findText, style, matchCase, wholeWord)
+        If Not story Is Nothing Then If WU_TextStoryHasContent(story) Then changed = WU_ApplyCharacterStyleInStory(story, findText, style, matchCase, wholeWord)
     ElseIf storyScope = "notes" Then
         On Error Resume Next
         Set firstStory = document.StoryRanges(wdFootnotesStory)
@@ -1876,7 +1908,7 @@ Public Function WU_ApplyCharacterStyleBatch(ByVal document As Document, ByVal ma
     Application.UndoRecord.StartCustomRecord "Style literal matches batch": opened = True
     If storyScope = "main" Then
         Set story = document.StoryRanges(wdMainTextStory)
-        If Not story Is Nothing Then If story.End > story.Start Then changed = WU_ApplyCharacterStyleBatchInStory(story, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+        If Not story Is Nothing Then If WU_TextStoryHasContent(story) Then changed = WU_ApplyCharacterStyleBatchInStory(story, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord)
     ElseIf storyScope = "notes" Then
         On Error Resume Next
         Set firstStory = document.StoryRanges(wdFootnotesStory)
@@ -2264,7 +2296,7 @@ Public Function WU_ApplyCharacterStyleToWildcardBatch(ByVal document As Document
     Application.UndoRecord.StartCustomRecord "Style wildcard matches batch": opened = True
     If storyScope = "main" Then
         Set story = document.StoryRanges(wdMainTextStory)
-        If Not story Is Nothing Then If story.End > story.Start Then changed = WU_ApplyCharacterStyleBatchInStory(story, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord, True)
+        If Not story Is Nothing Then If WU_TextStoryHasContent(story) Then changed = WU_ApplyCharacterStyleBatchInStory(story, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord, True)
     ElseIf storyScope = "notes" Then
         On Error Resume Next
         Set firstStory = document.StoryRanges(wdFootnotesStory)
@@ -2348,7 +2380,7 @@ Private Function WU_ReplaceWildcardInScope(ByVal document As Document, ByVal pat
     Dim firstStory As Range, story As Range, changed As Boolean
     If storyScope = "main" Then
         Set story = document.StoryRanges(wdMainTextStory)
-        If Not story Is Nothing Then If story.End > story.Start Then changed = WU_ReplaceLiteralInStory(story, pattern, replacement, matchCase, wholeWord, True)
+        If Not story Is Nothing Then If WU_TextStoryHasContent(story) Then changed = WU_ReplaceLiteralInStory(story, pattern, replacement, matchCase, wholeWord, True)
     ElseIf storyScope = "notes" Then
         On Error Resume Next
         Set firstStory = document.StoryRanges(wdFootnotesStory)
@@ -2381,7 +2413,7 @@ Private Sub WU_ReplaceWildcardBatchInScope(ByVal document As Document, ByVal rep
     Dim firstStory As Range, story As Range
     If storyScope = "main" Then
         Set story = document.StoryRanges(wdMainTextStory)
-        If Not story Is Nothing Then If story.End > story.Start Then WU_ReplaceLiteralBatchInStory story, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched, True
+        If Not story Is Nothing Then If WU_TextStoryHasContent(story) Then WU_ReplaceLiteralBatchInStory story, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched, True
     ElseIf storyScope = "notes" Then
         On Error Resume Next
         Set firstStory = document.StoryRanges(wdFootnotesStory)
@@ -2413,7 +2445,7 @@ Private Function WU_CountWildcardInScope(ByVal document As Document, ByVal patte
     Dim firstStory As Range, story As Range, count As Long
     If storyScope = "main" Then
         Set story = document.StoryRanges(wdMainTextStory)
-        If Not story Is Nothing Then If story.End > story.Start Then count = WU_CountLiteralInStory(story, pattern, matchCase, wholeWord, True)
+        If Not story Is Nothing Then If WU_TextStoryHasContent(story) Then count = WU_CountLiteralInStory(story, pattern, matchCase, wholeWord, True)
     ElseIf storyScope = "notes" Then
         On Error Resume Next
         Set firstStory = document.StoryRanges(wdFootnotesStory)
@@ -2446,7 +2478,7 @@ Private Function WU_ApplyWildcardStyleInScope(ByVal document As Document, ByVal 
     Dim firstStory As Range, story As Range, changed As Long
     If storyScope = "main" Then
         Set story = document.StoryRanges(wdMainTextStory)
-        If Not story Is Nothing Then If story.End > story.Start Then changed = WU_ApplyCharacterStyleInStory(story, pattern, style, matchCase, wholeWord, True)
+        If Not story Is Nothing Then If WU_TextStoryHasContent(story) Then changed = WU_ApplyCharacterStyleInStory(story, pattern, style, matchCase, wholeWord, True)
     ElseIf storyScope = "notes" Then
         On Error Resume Next
         Set firstStory = document.StoryRanges(wdFootnotesStory)
@@ -2691,8 +2723,8 @@ Private Function WU_ApplyCharacterStyleBatchInStoryChain(ByVal firstStory As Ran
     Dim story As Range, changed As Long
     Set story = firstStory
     Do While Not story Is Nothing
-        If story.End > story.Start Then changed = changed + WU_ApplyCharacterStyleBatchInStory(story, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord, useWildcards)
-        Set story = story.NextStoryRange
+        If WU_TextStoryHasContent(story) Then changed = changed + WU_ApplyCharacterStyleBatchInStory(story, matches, styleCache, firstRow, lastRow, firstColumn, matchCase, wholeWord, useWildcards)
+        Set story = WU_TextNextStory(story)
     Loop
     WU_ApplyCharacterStyleBatchInStoryChain = changed
 End Function
@@ -2720,8 +2752,8 @@ Private Function WU_CountLiteralInStoryChain(ByVal firstStory As Range, ByVal fi
     Dim story As Range, count As Long
     Set story = firstStory
     Do While Not story Is Nothing
-        If story.End > story.Start Then count = count + WU_CountLiteralInStory(story, findText, matchCase, wholeWord, useWildcards)
-        Set story = story.NextStoryRange
+        If WU_TextStoryHasContent(story) Then count = count + WU_CountLiteralInStory(story, findText, matchCase, wholeWord, useWildcards)
+        Set story = WU_TextNextStory(story)
     Loop
     WU_CountLiteralInStoryChain = count
 End Function
@@ -2770,8 +2802,8 @@ Private Sub WU_ReplaceLiteralBatchInStoryChain(ByVal firstStory As Range, ByVal 
     Dim story As Range
     Set story = firstStory
     Do While Not story Is Nothing
-        If story.End > story.Start Then WU_ReplaceLiteralBatchInStory story, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched, useWildcards
-        Set story = story.NextStoryRange
+        If WU_TextStoryHasContent(story) Then WU_ReplaceLiteralBatchInStory story, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord, matched, useWildcards
+        Set story = WU_TextNextStory(story)
     Loop
 End Sub
 
@@ -2799,8 +2831,8 @@ Private Function WU_ApplyCharacterStyleInStoryChain(ByVal firstStory As Range, B
     Dim story As Range, changed As Long
     Set story = firstStory
     Do While Not story Is Nothing
-        If story.End > story.Start Then changed = changed + WU_ApplyCharacterStyleInStory(story, findText, style, matchCase, wholeWord, useWildcards)
-        Set story = story.NextStoryRange
+        If WU_TextStoryHasContent(story) Then changed = changed + WU_ApplyCharacterStyleInStory(story, findText, style, matchCase, wholeWord, useWildcards)
+        Set story = WU_TextNextStory(story)
     Loop
     WU_ApplyCharacterStyleInStoryChain = changed
 End Function
@@ -2815,7 +2847,7 @@ Private Function WU_ApplyCharacterStyleInStoryType(ByVal document As Document, B
 End Function
 
 Private Function WU_ApplyCharacterStyleInStory(ByVal story As Range, ByVal findText As String, ByVal style As Style, ByVal matchCase As Boolean, ByVal wholeWord As Boolean, Optional ByVal useWildcards As Boolean = False) As Long
-    Dim search As Range, nextStart As Long, storyEnd As Long, changed As Long, currentStyle As String, targetStyleName As String
+    Dim search As Range, nextStart As Long, matchStart As Long, matchEnd As Long, storyEnd As Long, changed As Long, currentStyle As String, targetStyleName As String
     Set search = story.Duplicate
     ' Range.End is a COM property. Cache the fixed story boundary once rather
     ' than crossing the host boundary for every match in a long note story.
@@ -2837,19 +2869,25 @@ Private Function WU_ApplyCharacterStyleInStory(ByVal story As Range, ByVal findT
     End With
     Call WU_PinFindOptions(search.Find)
     Do While search.Find.Execute
-        currentStyle = vbNullString
-        On Error Resume Next
-        currentStyle = CStr(search.Style)
-        Err.Clear
-        On Error GoTo 0
-        If StrComp(currentStyle, targetStyleName, vbTextCompare) <> 0 Then
-            search.Style = style
-            changed = changed + 1
+        ' A wildcard may match an empty span. It is a valid count result but
+        ' cannot own a character style, so leave it untouched and still
+        ' advance the bounded search below.
+        matchStart = search.Start: matchEnd = search.End
+        If matchEnd > matchStart Then
+            currentStyle = vbNullString
+            On Error Resume Next
+            currentStyle = CStr(search.Style)
+            Err.Clear
+            On Error GoTo 0
+            If StrComp(currentStyle, targetStyleName, vbTextCompare) <> 0 Then
+                search.Style = style
+                changed = changed + 1
+            End If
         End If
-        nextStart = search.End
+        nextStart = matchEnd
         ' Keep wildcard patterns that match an empty span from re-finding the
         ' same position forever. Literal searches are unaffected by the guard.
-        If nextStart <= search.Start Then nextStart = search.Start + 1
+        If nextStart <= matchStart Then nextStart = matchStart + 1
         If nextStart >= storyEnd Then Exit Do
         search.SetRange Start:=nextStart, End:=storyEnd
     Loop
@@ -2860,10 +2898,10 @@ Private Function WU_ReplaceLiteralInStoryChain(ByVal firstStory As Range, ByVal 
     Dim story As Range, changed As Boolean
     Set story = firstStory
     Do While Not story Is Nothing
-        If story.End > story.Start Then
+        If WU_TextStoryHasContent(story) Then
             If WU_ReplaceLiteralInStory(story, findText, replaceText, matchCase, wholeWord, useWildcards) Then changed = True
         End If
-        Set story = story.NextStoryRange
+        Set story = WU_TextNextStory(story)
     Loop
     WU_ReplaceLiteralInStoryChain = changed
 End Function
@@ -2898,6 +2936,40 @@ Private Function WU_ReplaceLiteralInStory(ByVal story As Range, ByVal findText A
     End With
     Call WU_PinFindOptions(search.Find)
     WU_ReplaceLiteralInStory = search.Find.Execute(Replace:=wdReplaceAll)
+End Function
+
+' StoryRanges can contain empty, unavailable, or malformed linked stories in
+' real-world templates. Keep the hot loops bounded without repeatedly asking
+' Word for Start/End. Empty stories are skipped; an unavailable boundary or
+' traversal and a self-referential chain become a controlled error instead of
+' silently dropping part of the requested scope. The public operation remains
+' scoped and never falls through to Selection or a full-story widening.
+Private Function WU_TextStoryHasContent(ByVal story As Range) As Boolean
+    Dim storyStart As Long, storyEnd As Long, readError As Long
+    If story Is Nothing Then Exit Function
+    On Error Resume Next
+    storyStart = story.Start
+    storyEnd = story.End
+    readError = Err.Number
+    Err.Clear
+    On Error GoTo 0
+    If readError <> 0 Then Err.Raise readError, "WU_TextStoryHasContent", "story boundary is unavailable"
+    WU_TextStoryHasContent = (storyEnd > storyStart)
+End Function
+
+Private Function WU_TextNextStory(ByVal story As Range) As Range
+    Dim nextStory As Range, readError As Long
+    If story Is Nothing Then Exit Function
+    On Error Resume Next
+    Set nextStory = story.NextStoryRange
+    readError = Err.Number
+    Err.Clear
+    On Error GoTo 0
+    If readError <> 0 Then Err.Raise readError, "WU_TextNextStory", "linked story traversal is unavailable"
+    If nextStory Is Nothing Then Exit Function
+    ' A malformed package must not create a self-referential story chain.
+    If nextStory Is story Then Err.Raise 5, "WU_TextNextStory", "self-referential story chain"
+    Set WU_TextNextStory = nextStory
 End Function
 
 Private Sub WU_PinFindOptions(ByVal criteria As Find)

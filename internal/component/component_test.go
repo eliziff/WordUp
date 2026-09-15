@@ -359,10 +359,10 @@ func TestFieldRefreshChecksWordReturnCodesAndBounds(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.3" {
+	if item.Version != "1.0.4" {
 		t.Fatalf("field refresh version=%q", item.Version)
 	}
-	for _, capability := range []string{"field refresh", "table-of-contents refresh", "range-bounded refresh", "story scopes", "header/footer scopes", "return-code diagnostics"} {
+	for _, capability := range []string{"field refresh", "table-of-contents refresh", "range-bounded refresh", "story scopes", "header/footer scopes", "return-code diagnostics", "bounded story traversal"} {
 		found := false
 		for _, got := range item.Capabilities {
 			if got == capability {
@@ -392,7 +392,8 @@ func TestFieldRefreshChecksWordReturnCodesAndBounds(t *testing.T) {
 		"storyStart = story.Start",
 		"storyEnd = story.End",
 		"If readError <> 0 Then failures = failures + 1: Exit Sub",
-		"Set story = story.NextStoryRange",
+		"Set nextStory = story.NextStoryRange",
+		"If nextStory Is story Then failures = failures + 1: Exit Do",
 		"If nextError <> 0 Then failures = failures + 1: Exit Do",
 		"Application.UndoRecord.StartCustomRecord \"Refresh fields\"",
 		"If captured Then Application.ScreenUpdating = updating",
@@ -408,10 +409,10 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.16" {
+	if item.Version != "1.0.17" {
 		t.Fatalf("style converter version did not advance: %q", item.Version)
 	}
-	for _, capability := range []string{"paragraph-style conversion", "character-style conversion", "paragraph-style application", "range-bounded conversion", "offset style runs", "story-wide conversion", "header/footer scopes", "batch style mapping", "character-style batch mapping"} {
+	for _, capability := range []string{"paragraph-style conversion", "character-style conversion", "paragraph-style application", "range-bounded conversion", "offset style runs", "story-wide conversion", "header/footer scopes", "batch style mapping", "character-style batch mapping", "bounded story traversal"} {
 		found := false
 		for _, got := range item.Capabilities {
 			if got == capability {
@@ -452,6 +453,9 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 		"Private Function WU_ValidateParagraphStyleRuns",
 		"Private Function WU_ReadStylePosition",
 		"Private Function WU_ParagraphStyleMatches",
+		"Private Function WU_StyleStoryHasContent",
+		"Private Function WU_StyleNextStory",
+		`If nextStory Is story Then Err.Raise 5, "WU_StyleNextStory", "self-referential story chain"`,
 		"ByRef styleNames() As String",
 		"Private Const WU_MAX_STYLE_BATCH_RULES As Long = 256",
 		`If document Is Nothing Then Err.Raise 91, "WU_ConvertStyle", "document is required"`,
@@ -465,7 +469,7 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 		"captured = True",
 		"If captured Then Application.ScreenUpdating = updating",
 		"If targetEnd <= targetStart Then Exit Function",
-		"If story.End > story.Start Then If WU_ConvertStyleInStory",
+		"If WU_StyleStoryHasContent(story) Then If WU_ConvertStyleInStory",
 		"mappings must be a two-dimensional array",
 		"mappings must have exactly two columns",
 		"style mapping count exceeds 256",
@@ -532,13 +536,13 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.23" {
+	if item.Version != "1.0.24" {
 		t.Fatalf("text operations version=%q", item.Version)
 	}
 	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
 		t.Fatalf("unexpected text operations files: %#v", item.Files)
 	}
-	for _, capability := range []string{"literal replacement", "literal counting", "wildcard replacement", "wildcard counting", "wildcard batch replacement", "batch replacement", "range-bounded edits", "character-style matching", "exact character-style application", "wildcard character styling", "wildcard character-style batches", "offset character-style runs", "batch character-style matching", "header/footer scopes"} {
+	for _, capability := range []string{"literal replacement", "literal counting", "wildcard replacement", "wildcard counting", "wildcard batch replacement", "batch replacement", "range-bounded edits", "character-style matching", "exact character-style application", "wildcard character styling", "wildcard character-style batches", "offset character-style runs", "batch character-style matching", "header/footer scopes", "bounded story traversal"} {
 		found := false
 		for _, got := range item.Capabilities {
 			if got == capability {
@@ -589,6 +593,9 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"Private Function WU_ReadCharacterStylePosition",
 		"Private Function WU_CharacterStyleMatches",
 		"Private Function WU_TextIsCharacterStyle",
+		"Private Function WU_TextStoryHasContent",
+		"Private Function WU_TextNextStory",
+		"A malformed package must not create a self-referential story chain.",
 		"Plain character styles can raise when Linked is read on some Word",
 		"character style run count exceeds 4096",
 		"character style runs must be ordered and non-overlapping",
@@ -611,7 +618,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		".Replacement.Text = WU_ReplacementPattern(replaceText, useWildcards)",
 		"find text exceeds Word's escaped 255-character limit",
 		"replacement text exceeds Word's escaped 255-character limit",
-		"story.End > story.Start",
+		"storyEnd > storyStart",
 		"Set story = document.StoryRanges(wdMainTextStory)",
 		".MatchWholeWord = wholeWord",
 		".MatchSoundsLike = False",
@@ -666,7 +673,9 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		".MatchPhrase = False",
 		".MatchByte = False",
 		"targetStyleName = style.NameLocal",
-		"Dim search As Range, nextStart As Long, storyEnd As Long, changed As Long, currentStyle As String, targetStyleName As String",
+		"Dim search As Range, nextStart As Long, matchStart As Long, matchEnd As Long, storyEnd As Long, changed As Long, currentStyle As String, targetStyleName As String",
+		"A wildcard may match an empty span",
+		"If matchEnd > matchStart Then",
 		"Dim search As Range, nextStart As Long, storyEnd As Long, count As Long",
 		"storyEnd = story.End",
 		"search.SetRange Start:=nextStart, End:=storyEnd",
