@@ -358,6 +358,8 @@ Public Function WU_ReplaceLiteral(ByVal document As Document, ByVal findText As 
     If Len(findText) = 0 Then Err.Raise 5, "WU_ReplaceLiteral", "find text is required"
     If Len(findText) > 255 Then Err.Raise 5, "WU_ReplaceLiteral", "find text exceeds Word's 255-character limit"
     If Len(replaceText) > 255 Then Err.Raise 5, "WU_ReplaceLiteral", "replacement text exceeds Word's 255-character limit"
+    If Len(WU_EscapeFindLiteral(findText)) > 255 Then Err.Raise 5, "WU_ReplaceLiteral", "find text exceeds Word's escaped 255-character limit"
+    If Len(WU_EscapeFindLiteral(replaceText)) > 255 Then Err.Raise 5, "WU_ReplaceLiteral", "replacement text exceeds Word's escaped 255-character limit"
     storyScope = LCase$(Trim$(storyScope))
     If storyScope <> "main" And storyScope <> "notes" And storyScope <> "all" Then Err.Raise 5, "WU_ReplaceLiteral", "story scope must be main, notes, or all"
     updating = Application.ScreenUpdating
