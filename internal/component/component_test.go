@@ -404,7 +404,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		".Replacement.Text = WU_EscapeFindLiteral(replaceText)",
 		".MatchWholeWord = wholeWord",
 		"WU_EscapeFindLiteral = Replace(value, \"^\", \"^^\")",
-		"wdFootnoteContinuationNoticeStory",
+		"Case wdFootnotesStory, wdEndnotesStory",
 	} {
 		if !strings.Contains(source, want) {
 			t.Fatalf("text operations source omitted %q", want)

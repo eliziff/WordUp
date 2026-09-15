@@ -400,7 +400,7 @@ Private Function WU_StoryMatchesScope(ByVal story As Range, ByVal storyScope As 
             WU_StoryMatchesScope = (story.StoryType = wdMainTextStory)
         Case "notes"
             Select Case story.StoryType
-                Case wdFootnotesStory, wdEndnotesStory, wdFootnoteSeparatorStory, wdFootnoteContinuationSeparatorStory, wdFootnoteContinuationNoticeStory, wdEndnoteSeparatorStory, wdEndnoteContinuationSeparatorStory, wdEndnoteContinuationNoticeStory
+                Case wdFootnotesStory, wdEndnotesStory
                     WU_StoryMatchesScope = True
             End Select
     End Select

@@ -179,7 +179,7 @@ Public Function CheckRibbonAndProgress() As String
     CheckRibbonAndProgress = "PASS"
 End Function
 Public Function CheckTextOperations() As String
-    Dim d As Document, result As Boolean, before As String, formatted As Range, rejected As Boolean
+    Dim d As Document, result As Boolean, before As String, bodyAfterNote As String, formatted As Range, rejected As Boolean, note As Footnote
     Dim i As Long, lines(1 To 400) As String, started As Single, elapsed As Single
     Set d = Documents.Add
     d.Content.Text = "Alpha alpha alphabet" & vbCr
@@ -210,6 +210,11 @@ Public Function CheckTextOperations() As String
     d.Content.Text = "literal ^p marker" & vbCr
     result = WU_ReplaceLiteral(d, "^p", "^t", "main", True, False)
     If Not result Or d.Content.Text <> "literal ^t marker" & vbCr Then Err.Raise 5, , "literal caret text was interpreted as a Word control token"
+    Set note = d.Footnotes.Add(Range:=d.Paragraphs(1).Range, Text:="Alpha note")
+    bodyAfterNote = d.Content.Text
+    result = WU_ReplaceLiteral(d, "Alpha", "Omega", "notes", True, True)
+    If Not result Or d.Content.Text <> bodyAfterNote Then Err.Raise 5, , "notes-scoped replacement changed the main story"
+    If InStr(1, note.Range.Text, "Omega note", vbBinaryCompare) = 0 Then Err.Raise 5, , "notes-scoped replacement did not update the note story"
     d.Close SaveChanges:=wdDoNotSaveChanges
     CheckTextOperations = "PASS"
 End Function
