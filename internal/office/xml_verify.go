@@ -85,11 +85,10 @@ func VerifyXML(expected, actual []byte, mode string) (map[string]any, error) {
 			"policy": XMLComparePolicy{},
 		}, nil
 	}
-	for _, data := range [][]byte{expected, actual} {
-		if _, err := XMLSpans(data); err != nil {
-			return nil, err
-		}
-	}
+	// CompareXML performs the same strict XML validation while tokenizing the
+	// two inputs. Do not walk both documents once here and then immediately
+	// walk them again in the comparator: mismatch diagnostics are the common
+	// edit-loop failure path, and the duplicate parse was measurable there.
 	report, err := CompareXML(expected, actual, XMLComparePolicy{})
 	if err != nil {
 		return nil, err
