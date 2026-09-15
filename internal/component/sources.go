@@ -337,6 +337,86 @@ Private Function WU_ConvertStyleInRange(ByVal story As Range, ByVal sourceStyle 
         .Wrap = wdFindStop
         .Format = True
     End With
-    WU_ConvertStyleInRange = scope.Find.Execute(Replace:=wdReplaceAll)
+WU_ConvertStyleInRange = scope.Find.Execute(Replace:=wdReplaceAll)
+End Function
+`
+
+const textOperationsSource = `Attribute VB_Name = "WordUpTextOperations"
+Option Explicit
+
+' Replace visible literal text with one bounded Word Find pass per story.
+' The operation never uses Selection and keeps Word's existing formatting on
+' the found range. Use raw XML when the intended edit is a field instruction,
+' relationship, or other package markup rather than visible text.
+Public Function WU_ReplaceLiteral(ByVal document As Document, ByVal findText As String, ByVal replaceText As String, Optional ByVal storyScope As String = "main", Optional ByVal matchCase As Boolean = False, Optional ByVal wholeWord As Boolean = False) As Boolean
+    Dim firstStory As Range, story As Range, updating As Boolean, opened As Boolean, captured As Boolean
+    Dim failure As Long, failureSource As String, failureText As String, changed As Boolean
+    On Error GoTo Failed
+    If document Is Nothing Then Err.Raise 91, "WU_ReplaceLiteral", "document is required"
+    If Len(findText) = 0 Then Err.Raise 5, "WU_ReplaceLiteral", "find text is required"
+    storyScope = LCase$(Trim$(storyScope))
+    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "all" Then Err.Raise 5, "WU_ReplaceLiteral", "story scope must be main, notes, or all"
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Replace literal text": opened = True
+    For Each firstStory In document.StoryRanges
+        Set story = firstStory
+        Do While Not story Is Nothing
+            If WU_StoryMatchesScope(story, storyScope) Then
+                If WU_ReplaceLiteralInStory(story, findText, replaceText, matchCase, wholeWord) Then changed = True
+            End If
+            Set story = story.NextStoryRange
+        Loop
+    Next firstStory
+    WU_ReplaceLiteral = changed
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
+Private Function WU_StoryMatchesScope(ByVal story As Range, ByVal storyScope As String) As Boolean
+    Select Case storyScope
+        Case "all"
+            WU_StoryMatchesScope = True
+        Case "main"
+            WU_StoryMatchesScope = (story.StoryType = wdMainTextStory)
+        Case "notes"
+            Select Case story.StoryType
+                Case wdFootnotesStory, wdEndnotesStory, wdFootnoteSeparatorStory, wdFootnoteContinuationSeparatorStory, wdFootnoteContinuationNoticeStory, wdEndnoteSeparatorStory, wdEndnoteContinuationSeparatorStory, wdEndnoteContinuationNoticeStory
+                    WU_StoryMatchesScope = True
+            End Select
+    End Select
+End Function
+
+Private Function WU_ReplaceLiteralInStory(ByVal story As Range, ByVal findText As String, ByVal replaceText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Boolean
+    Dim search As Range
+    Set search = story.Duplicate
+    With search.Find
+        .ClearFormatting
+        .Replacement.ClearFormatting
+        .Text = findText
+        .Replacement.Text = replaceText
+        .Forward = True
+        .Wrap = wdFindStop
+        .Format = False
+        .MatchCase = matchCase
+        .MatchWholeWord = wholeWord
+        .MatchWildcards = False
+    End With
+    WU_ReplaceLiteralInStory = search.Find.Execute(Replace:=wdReplaceAll)
 End Function
 `

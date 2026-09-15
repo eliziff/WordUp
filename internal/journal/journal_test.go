@@ -191,14 +191,14 @@ func TestCreateBuildsIndependentJournalWorkspace(t *testing.T) {
 	if report.Build.Artifact != report.Artifact {
 		t.Fatalf("build report retained staging artifact path: build=%q report=%q", report.Build.Artifact, report.Artifact)
 	}
-	if report.Build.Modules != 11 || report.Build.Forms != 1 {
+	if report.Build.Modules != 12 || report.Build.Forms != 1 {
 		t.Fatalf("generated workspace did not vendor the expected source surface: modules=%d forms=%d", report.Build.Modules, report.Build.Forms)
 	}
 	if _, err := os.Stat(report.Artifact); err != nil {
 		t.Fatal(err)
 	}
 	lock, err := os.ReadFile(filepath.Join(root, ".wordwright", "components.json"))
-	if err != nil || !strings.Contains(string(lock), "operation.safe-edit") || !strings.Contains(string(lock), "command.hotkey") || !strings.Contains(string(lock), "structure.detect") {
+	if err != nil || !strings.Contains(string(lock), "operation.safe-edit") || !strings.Contains(string(lock), "command.hotkey") || !strings.Contains(string(lock), "structure.detect") || !strings.Contains(string(lock), "document.text-operations") {
 		t.Fatalf("generated workspace did not record reusable components: err=%v lock=%s", err, lock)
 	}
 	core, err := os.ReadFile(filepath.Join(root, "vba", "WUJournalCore.bas"))

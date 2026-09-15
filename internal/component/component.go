@@ -108,7 +108,8 @@ func builtin() []Manifest {
 		vbaComponent("ui.ribbon-command", "WordUpRibbon", "WU_RibbonCommand", "Provides a stable Ribbon callback dispatch seam.", "Ribbon callbacks", ribbonSource),
 		vbaComponent("command.hotkey", "WordUpHotkey", "WU_RegisterHotkey", "Registers and removes a template-owned key binding.", "hotkeys", hotkeySource),
 		vbaComponent("command.context-menu", "WordUpContextMenu", "WU_RegisterContextMenu", "Registers and removes a tagged context-menu command.", "context menus", contextMenuSource),
-		vbaComponent("document.style-converter", "WordUpStyleConverter", "WU_ConvertStyle", "Converts one paragraph style in a single safe edit.", "style conversion", styleConverterSource)}
+		vbaComponent("document.style-converter", "WordUpStyleConverter", "WU_ConvertStyle", "Converts one paragraph style in a single safe edit.", "style conversion", styleConverterSource),
+		vbaComponent("document.text-operations", "WordUpTextOperations", "WU_ReplaceLiteral", "Performs bounded literal text replacements across selected Word stories without using Selection.", "text operations", textOperationsSource)}
 	for i := range items {
 		if items[i].ID == "command.hotkey" {
 			items[i].Version = "1.0.5"
@@ -130,6 +131,9 @@ func builtin() []Manifest {
 		}
 		if items[i].ID == "document.style-converter" {
 			items[i].Version = "1.0.3"
+		}
+		if items[i].ID == "document.text-operations" {
+			items[i].Version = "1.0.0"
 		}
 		items[i].Schema = 1
 		items[i].License = "MIT"

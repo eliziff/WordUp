@@ -23,7 +23,7 @@ func TestNativeComponentCleanup(t *testing.T) {
 	if _, err := project.New("ComponentProof", root); err != nil {
 		t.Fatal(err)
 	}
-	for _, id := range []string{"operation.safe-edit", "document.style-converter", "structure.detect", "ui.form-shell", "ui.progress-cancel", "ui.ribbon-command", "command.hotkey", "command.context-menu"} {
+	for _, id := range []string{"operation.safe-edit", "document.style-converter", "document.text-operations", "structure.detect", "ui.form-shell", "ui.progress-cancel", "ui.ribbon-command", "command.hotkey", "command.context-menu"} {
 		var err error
 		if id == "ui.progress-cancel" {
 			_, err = component.AddWith(root, id, map[string]string{"module_prefix": "ProofProgress"})

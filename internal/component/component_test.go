@@ -339,7 +339,7 @@ func TestAddRejectsInvalidOrUndeclaredParametersBeforeWriting(t *testing.T) {
 }
 
 func TestBundledCatalogIsComplete(t *testing.T) {
-	want := []string{"structure.detect", "operation.safe-edit", "ui.form-shell", "ui.progress-cancel", "ui.ribbon-command", "command.hotkey", "command.context-menu", "document.style-converter"}
+	want := []string{"structure.detect", "operation.safe-edit", "ui.form-shell", "ui.progress-cancel", "ui.ribbon-command", "command.hotkey", "command.context-menu", "document.style-converter", "document.text-operations"}
 	items := List()
 	if len(items) != len(want) {
 		t.Fatalf("components=%d, want %d", len(items), len(want))
@@ -377,6 +377,33 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 	} {
 		if !strings.Contains(source, want) {
 			t.Fatalf("style converter source omitted %q", want)
+		}
+	}
+}
+
+func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
+	item, err := Get("document.text-operations")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if item.Version != "1.0.0" {
+		t.Fatalf("text operations version=%q", item.Version)
+	}
+	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
+		t.Fatalf("unexpected text operations files: %#v", item.Files)
+	}
+	source := item.Files[0].Text
+	for _, want := range []string{
+		"Public Function WU_ReplaceLiteral",
+		"story scope must be main, notes, or all",
+		"Application.UndoRecord.StartCustomRecord \"Replace literal text\"",
+		"If captured Then Application.ScreenUpdating = updating",
+		".Replacement.Text = replaceText",
+		".MatchWholeWord = wholeWord",
+		"wdFootnoteContinuationNoticeStory",
+	} {
+		if !strings.Contains(source, want) {
+			t.Fatalf("text operations source omitted %q", want)
 		}
 	}
 }

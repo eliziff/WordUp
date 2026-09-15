@@ -108,6 +108,7 @@ func Create(root string, profile Profile) (CreateReport, error) {
 		"command.hotkey",
 		"command.context-menu",
 		"document.style-converter",
+		"document.text-operations",
 	} {
 		if _, err := component.AddWith(stageRoot, id, nil); err != nil {
 			return CreateReport{}, fmt.Errorf("install %s: %w", id, err)
