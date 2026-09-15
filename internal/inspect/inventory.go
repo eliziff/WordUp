@@ -133,11 +133,13 @@ func publicSymbol(symbol Symbol) bool {
 	return !strings.HasPrefix(declaration, "private ") && !strings.HasPrefix(declaration, "friend ")
 }
 
-func vbaSourceFiles(files map[string][]byte) map[string]string {
+func formSourceFiles(files map[string][]byte) map[string]string {
 	out := map[string]string{}
 	for _, path := range vbaSourcePaths(files) {
-		ext := strings.ToLower(pathpkg.Ext(path))
-		name := strings.TrimSuffix(pathpkg.Base(path), ext)
+		if !strings.EqualFold(pathpkg.Ext(path), ".vba") {
+			continue
+		}
+		name := strings.TrimSuffix(pathpkg.Base(path), pathpkg.Ext(path))
 		out[strings.ToLower(name)] = path
 	}
 	return out
@@ -402,7 +404,7 @@ func installedComponentInventory(root string, diagnostics *[]map[string]any) []m
 }
 
 func validateFormDesigns(files map[string][]byte, diagnostics *[]map[string]any) {
-	sources := vbaSourceFiles(files)
+	sources := formSourceFiles(files)
 	paths := make([]string, 0)
 	designs := map[string]string{}
 	for path := range files {

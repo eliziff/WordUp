@@ -271,10 +271,12 @@ func TestCheckReportsInvalidAndMisnamedFormDesigns(t *testing.T) {
 		t.Fatal(err)
 	}
 	for path, data := range map[string][]byte{
-		"forms/Broken.json": []byte(`{"name":`),
-		"forms/Wrong.json":  []byte(`{"name":"Other"}`),
-		"vba/Wrong.vba":     []byte("Option Explicit\n"),
-		"vba/Missing.vba":   []byte("Option Explicit\n"),
+		"forms/Broken.json":   []byte(`{"name":`),
+		"forms/Wrong.json":    []byte(`{"name":"Other"}`),
+		"forms/Standard.json": []byte(`{"name":"Standard"}`),
+		"vba/Wrong.vba":       []byte("Option Explicit\n"),
+		"vba/Missing.vba":     []byte("Option Explicit\n"),
+		"vba/Standard.bas":    []byte("Option Explicit\n"),
 	} {
 		if err := project.Write(root, path, data, ""); err != nil {
 			t.Fatal(err)
@@ -288,7 +290,7 @@ func TestCheckReportsInvalidAndMisnamedFormDesigns(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	foundBroken, foundMismatch, foundMissing := false, false, false
+	foundBroken, foundMismatch, foundMissing, foundWrongSource := false, false, false, false
 	for _, diagnostic := range result["diagnostics"].([]map[string]any) {
 		if diagnostic["file"] == "forms/Broken.json" && diagnostic["message"] == "invalid form design: unexpected EOF" {
 			foundBroken = true
@@ -299,8 +301,11 @@ func TestCheckReportsInvalidAndMisnamedFormDesigns(t *testing.T) {
 		if diagnostic["file"] == "vba/Missing.vba" && diagnostic["message"] == "form source has no matching persistent design; new forms require forms/Missing.json" {
 			foundMissing = true
 		}
+		if diagnostic["file"] == "forms/Standard.json" && diagnostic["message"] == "form design has no matching VBA source module" {
+			foundWrongSource = true
+		}
 	}
-	if !foundBroken || !foundMismatch || !foundMissing {
+	if !foundBroken || !foundMismatch || !foundMissing || !foundWrongSource {
 		t.Fatalf("form design diagnostics missing: %#v", result["diagnostics"])
 	}
 }
