@@ -110,3 +110,50 @@ func TestCompareStructureSilverUsesXMLPathForDuplicateParagraphIDs(t *testing.T)
 		t.Fatalf("xml-path silver did not disambiguate duplicate IDs: %#v", report)
 	}
 }
+
+func TestCompareStructureSilverAcceptsXMLPathWithUniqueParagraphID(t *testing.T) {
+	p := office.BlankPackage()
+	p.Files["word/document.xml"] = []byte(`<w:document xmlns:w="` + office.W + `" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml"><w:body><w:p w14:paraId="ABCDEF01"><w:r><w:t>One</w:t></w:r></w:p></w:body></w:document>`)
+	b, err := p.Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := t.TempDir()
+	document := filepath.Join(root, "unique.docx")
+	if err := os.WriteFile(document, b, 0600); err != nil {
+		t.Fatal(err)
+	}
+	resolved, err := StructureResolved(document)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rows := resolved["paragraphs"].([]map[string]any)
+	if len(rows) != 1 {
+		t.Fatalf("paragraphs=%d", len(rows))
+	}
+	structure := rows[0]["resolved_structure"].(map[string]any)
+	silver := filepath.Join(root, "silver.xml")
+	content := fmt.Sprintf(`<?xml version="1.0"?><structure-silver schema="1"><documents><document source="unique.docx" source_sha256="%s"><p paraId="ABCDEF01" xml_path="(//w:p)[1]" role="%s" level="%d" parent="none"/></document></documents></structure-silver>`,
+		resolved["source_sha256"], structure["role"], structure["level"])
+	if err := os.WriteFile(silver, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	report, err := CompareStructureSilver(root, silver, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report["mismatch_count"] != 0 {
+		t.Fatalf("xml path with unique ID did not match: %#v", report)
+	}
+	content = strings.Replace(content, `paraId="ABCDEF01"`, `paraId="ABCDEF02"`, 1)
+	if err := os.WriteFile(silver, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	report, err = CompareStructureSilver(root, silver, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report["mismatch_count"] != 1 || report["mismatch_fields"].(map[string]int)["identity"] != 1 {
+		t.Fatalf("xml path did not validate accompanying paragraph ID: %#v", report)
+	}
+}

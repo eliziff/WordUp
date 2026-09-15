@@ -76,24 +76,44 @@ func CompareStructureSilver(root, reference string, limit int) (map[string]any, 
 		}
 		rows := actualDocument["paragraphs"].([]map[string]any)
 		actual := make(map[string]map[string]any, len(rows))
+		actualPaths := make(map[string]map[string]any, len(rows))
 		for _, row := range rows {
 			actual[row["source_id"].(string)] = row
+			if xmlPath, ok := row["xml_path"].(string); ok && xmlPath != "" {
+				part, _ := row["source_part"].(string)
+				if part == "" {
+					part = "word/document.xml"
+				}
+				actualPaths[part+"#"+xmlPath] = row
+			}
 		}
 		for _, expected := range expectedDocument.Paragraphs {
-			// An explicit XML path is the disambiguator for malformed documents
-			// whose paragraph IDs repeat. Preserve the compact paraId lookup for
-			// existing silver that omits xml_path.
+			// An explicit XML path is a stable locator in its own right. It is
+			// preferred even when a unique paraId is also present; this keeps
+			// hand-authored silver deterministic on malformed and well-formed
+			// documents alike. Preserve compact paraId lookup for rows that omit
+			// xml_path.
 			id := "word/document.xml#" + expected.XMLPath
-			if expected.XMLPath == "" && expected.ParagraphID != "" {
+			row, ok := actualPaths[id]
+			if expected.XMLPath == "" {
 				id = "word/document.xml#paraId=" + expected.ParagraphID
+				row, ok = actual[id]
 			}
-			row, ok := actual[id]
 			compared++
 			if !ok {
 				appendStructureMismatch(&mismatches, limit, expectedDocument.Source, id, "identity", "present", "missing")
 				mismatchCount++
 				mismatchFields["identity"]++
 				continue
+			}
+			if expected.XMLPath != "" && expected.ParagraphID != "" {
+				actualParagraphID, _ := row["paragraph_id"].(string)
+				if !strings.EqualFold(actualParagraphID, expected.ParagraphID) {
+					appendStructureMismatch(&mismatches, limit, expectedDocument.Source, id, "identity", expected.ParagraphID, actualParagraphID)
+					mismatchCount++
+					mismatchFields["identity"]++
+					continue
+				}
 			}
 			got := row["resolved_structure"].(map[string]any)
 			if compareStructureValue(&mismatches, limit, expectedDocument.Source, id, "role", expected.Role, got["role"]) {
