@@ -422,7 +422,7 @@ func validateFormDesigns(files map[string][]byte, diagnostics *[]map[string]any)
 			})
 			continue
 		}
-		if design.Name != expected {
+		if !strings.EqualFold(design.Name, expected) {
 			*diagnostics = append(*diagnostics, map[string]any{
 				"severity": "error", "file": path,
 				"message": fmt.Sprintf("form design name %q does not match filename %q", design.Name, expected),
@@ -470,6 +470,12 @@ func CheckInventory(root string, files map[string][]byte, diagnostics *[]map[str
 		control map[string]bool
 	}
 	formDesigns := map[string]formControls{}
+	designFiles := map[string][]byte{}
+	for path, data := range files {
+		if strings.HasPrefix(strings.ToLower(path), "forms/") && strings.EqualFold(pathpkg.Ext(path), ".json") {
+			designFiles[strings.ToLower(path)] = data
+		}
+	}
 	orderedPaths := make([]string, 0, len(paths))
 	for _, path := range paths {
 		orderedPaths = append(orderedPaths, path)
@@ -523,11 +529,11 @@ func CheckInventory(root string, files map[string][]byte, diagnostics *[]map[str
 			lower := strings.ToLower(symbol.Name)
 			if strings.EqualFold(pathpkg.Ext(path), ".vba") && (strings.HasPrefix(lower, "userform_") || (strings.Contains(symbol.Name, "_") && formEventSuffixes[strings.ToLower(symbol.Name[strings.LastIndexByte(symbol.Name, '_')+1:])])) {
 				formName := strings.TrimSuffix(pathpkg.Base(path), pathpkg.Ext(path))
-				designPath := "forms/" + formName + ".json"
+				designPath := strings.ToLower("forms/" + formName + ".json")
 				cached, ok := formDesigns[designPath]
 				if !ok {
 					cached = formControls{control: map[string]bool{}}
-					if raw, exists := files[designPath]; exists {
+					if raw, exists := designFiles[designPath]; exists {
 						var design office.Design
 						if err := project.ReadJSON(raw, &design); err == nil {
 							cached.known = true
