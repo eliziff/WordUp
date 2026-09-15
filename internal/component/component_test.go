@@ -404,7 +404,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.9" {
+	if item.Version != "1.0.11" {
 		t.Fatalf("text operations version=%q", item.Version)
 	}
 	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
@@ -472,12 +472,22 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"ByRef matched() As Boolean",
 		"WU_ApplyCharacterStyleInStoryChain",
 		"WU_ApplyCharacterStyleBatchInStoryChain",
-		"If StrComp(currentStyle, style.NameLocal, vbTextCompare) <> 0 Then",
+		"Dim styleCache() As Style",
+		"activeRows = WU_ValidateCharacterStyleBatch(document, matches, styleCache)",
+		"ByRef styleCache() As Style",
+		"Set styleCache(row) = style",
+		"Set style = styleCache(row)",
+		"targetStyleName = style.NameLocal",
+		"If StrComp(currentStyle, targetStyleName, vbTextCompare) <> 0 Then",
 		"search.SetRange Start:=nextStart, End:=story.End",
 	} {
 		if !strings.Contains(source, want) {
 			t.Fatalf("text operations source omitted %q", want)
 		}
+	}
+	batchHelper := source[strings.Index(source, "Private Function WU_ApplyCharacterStyleBatchInStory(ByVal"):]
+	if strings.Contains(batchHelper, "document.Styles(styleName)") {
+		t.Fatal("style batch looked up the same COM style once per story instead of reusing validated handles")
 	}
 }
 

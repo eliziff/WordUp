@@ -135,9 +135,9 @@ func builtin() []Manifest {
 			items[i].Acceptance = "WU_ConvertStyle and WU_ConvertStyleInRange are public, bounded, state-safe, and compile without non-Office references."
 		}
 		if items[i].ID == "document.text-operations" {
-			items[i].Version = "1.0.9"
+			items[i].Version = "1.0.11"
 			items[i].Capabilities = []string{"literal replacement", "literal counting", "batch replacement", "range-bounded edits", "character-style matching", "batch character-style matching"}
-			items[i].Acceptance = "Literal count, replacement, batch, and character-style match/range operations, including one-record style batches, are public, bounded, state-safe, and compile without non-Office references."
+			items[i].Acceptance = "Literal count, replacement, batch, and character-style match/range operations, including one-record style batches with prevalidated style handles and cached target names, are public, bounded, state-safe, and compile without non-Office references."
 		}
 		items[i].Schema = 1
 		items[i].License = "MIT"
