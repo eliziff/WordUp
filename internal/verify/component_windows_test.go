@@ -272,9 +272,9 @@ Public Function CheckTextOperations() As String
     d.Content.Text = "Case 12; Case 34" & vbCr
     styled = WU_ApplyCharacterStyleToWildcardMatches(d, "Case [0-9]{2}", citationStyle.NameLocal, "main", True, True)
     If styled <> 2 Or d.Content.Text <> "Case 12; Case 34" & vbCr Then Err.Raise 5, , "wildcard character style matcher changed text or missed a match"
-    If Not d.Paragraphs(1).Range.Characters(1).Italic Or Not d.Paragraphs(1).Range.Characters(9).Italic Then Err.Raise 5, , "wildcard character style matcher missed a citation span"
+    If Not d.Paragraphs(1).Range.Characters(1).Italic Or Not d.Paragraphs(1).Range.Characters(10).Italic Then Err.Raise 5, , "wildcard character style matcher missed a citation span"
     If Not d.Undo Then Err.Raise 5, , "wildcard character style matcher did not create one undo record"
-    If d.Paragraphs(1).Range.Characters(1).Italic Or d.Paragraphs(1).Range.Characters(9).Italic Then Err.Raise 5, , "wildcard character style matcher undo did not restore formatting"
+    If d.Paragraphs(1).Range.Characters(1).Italic Or d.Paragraphs(1).Range.Characters(10).Italic Then Err.Raise 5, , "wildcard character style matcher undo did not restore formatting"
     Set pinStyle = d.Styles.Add(Name:="Proof Pin", Type:=wdStyleTypeCharacter)
     pinStyle.Font.Bold = True
     d.Content.Text = "Case 12; Matter 34" & vbCr
@@ -282,10 +282,10 @@ Public Function CheckTextOperations() As String
     wildcardStyleMatches(1, 0) = "Matter [0-9]{2}": wildcardStyleMatches(1, 1) = pinStyle.NameLocal
     wildcardStyleBatchChanged = WU_ApplyCharacterStyleToWildcardBatch(d, wildcardStyleMatches, "main", True, True)
     If wildcardStyleBatchChanged <> 2 Or d.Content.Text <> "Case 12; Matter 34" & vbCr Then Err.Raise 5, , "wildcard character style batch changed text or missed a pattern"
-    If Not d.Paragraphs(1).Range.Characters(1).Italic Or Not d.Paragraphs(1).Range.Characters(9).Bold Then Err.Raise 5, , "wildcard character style batch missed its destination styles"
+    If Not d.Paragraphs(1).Range.Characters(1).Italic Or Not d.Paragraphs(1).Range.Characters(10).Bold Then Err.Raise 5, , "wildcard character style batch missed its destination styles"
     If Application.ScreenUpdating <> priorUpdating Then Err.Raise 5, , "wildcard character style batch did not restore ScreenUpdating"
     If Not d.Undo Then Err.Raise 5, , "wildcard character style batch did not create one undo record"
-    If d.Paragraphs(1).Range.Characters(1).Italic Or d.Paragraphs(1).Range.Characters(9).Bold Then Err.Raise 5, , "wildcard character style batch undo did not restore formatting"
+    If d.Paragraphs(1).Range.Characters(1).Italic Or d.Paragraphs(1).Range.Characters(10).Bold Then Err.Raise 5, , "wildcard character style batch undo did not restore formatting"
     d.Content.Text = "First Case 12" & vbCr & "Second Matter 34" & vbCr
     Set scoped = d.Paragraphs(1).Range.Duplicate
     wildcardStyleBatchChanged = WU_ApplyCharacterStyleToWildcardBatchInRange(scoped, wildcardStyleMatches, True, True)
