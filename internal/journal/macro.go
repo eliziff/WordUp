@@ -647,76 +647,95 @@ Private Function WU_EnsureStyle(ByVal doc As Document, ByVal styleName As String
 End Function
 
 Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As Style, ByVal heading1 As Style, ByVal heading2 As Style, ByVal heading3 As Style, ByVal heading4 As Style, ByVal heading5 As Style, ByVal heading6 As Style, ByVal heading7 As Style, ByVal heading8 As Style, ByVal heading9 As Style)
-    Dim story As Range, paragraph As Paragraph, paragraphRange As Range, batch As Range
-    Dim batchStyle As Style, desiredStyle As Style, currentStyle As String, detectedRole As String, useOutline As Boolean
-    Dim structure As Variant, haveStructure As Boolean, paragraphIndex As Long, level As Long
+    Dim story As Range, paragraphCount As Long, structureRows As Long, structureColumns As Long
+    Dim structure As Variant, haveStructure As Boolean
     On Error Resume Next
     Set story = doc.StoryRanges(wdMainTextStory)
+    If Not story Is Nothing Then paragraphCount = story.Paragraphs.Count
     On Error GoTo 0
-    If story Is Nothing Then Exit Sub
-    ' Run the detector once. It retains native outline, style-family and
-    ' marker evidence while keeping the formatting pass linear. If an input
-    ' is too large or cannot expose its main story, native outline evidence
-    ' remains a safe fallback rather than making style application fail.
+    If story Is Nothing Or paragraphCount = 0 Then Exit Sub
+    ' Run the detector once. Its offsets and roles let the normal path create
+    ' only one Range per contiguous style run instead of re-reading every
+    ' paragraph through COM. Any shape/count mismatch falls back to Word's
+    ' native outline pass rather than risking an offset-based edit.
     On Error Resume Next
     structure = WU_DetectStructure(doc)
     haveStructure = (Err.Number = 0 And IsArray(structure))
+    If haveStructure Then
+        structureRows = UBound(structure, 1) - LBound(structure, 1) + 1
+        structureColumns = UBound(structure, 2) - LBound(structure, 2) + 1
+        If Err.Number <> 0 Or structureRows <> paragraphCount Or structureColumns < WU_COLUMNS Then haveStructure = False
+    End If
     Err.Clear
     On Error GoTo 0
-    paragraphIndex = 0
+    If haveStructure Then
+        WU_ApplyResolvedParagraphStyles story, structure, bodyStyle, heading1, heading2, heading3, heading4, heading5, heading6, heading7, heading8, heading9
+    Else
+        WU_ApplyNativeParagraphStyles story, bodyStyle, heading1, heading2, heading3, heading4, heading5, heading6, heading7, heading8, heading9
+    End If
+End Sub
+
+Private Sub WU_ApplyResolvedParagraphStyles(ByVal story As Range, ByRef structure As Variant, ByVal bodyStyle As Style, ByVal heading1 As Style, ByVal heading2 As Style, ByVal heading3 As Style, ByVal heading4 As Style, ByVal heading5 As Style, ByVal heading6 As Style, ByVal heading7 As Style, ByVal heading8 As Style, ByVal heading9 As Style)
+    Dim batch As Range, batchStyle As Style, desiredStyle As Style
+    Dim row As Long, firstRow As Long, lastRow As Long, startPosition As Long, endPosition As Long, level As Long
+    Dim role As String, context As String, styleName As String, valid As Boolean
+    firstRow = LBound(structure, 1): lastRow = UBound(structure, 1)
+    For row = firstRow To lastRow
+        If (row - firstRow) Mod 256 = 0 Then
+            Application.StatusBar = "Applying " & WU_JOURNAL_NAME & " styles (paragraph " & CStr(row - firstRow + 1) & ")"
+            If WU_CancelRequested() Then Err.Raise 18, "Apply styles", "style application cancelled"
+        End If
+        Set desiredStyle = Nothing: valid = False: role = vbNullString: context = vbNullString: styleName = vbNullString
+        startPosition = 0: endPosition = 0: level = 0
+        On Error Resume Next
+        role = CStr(structure(row, WU_ROLE))
+        context = CStr(structure(row, WU_CONTEXT))
+        styleName = CStr(structure(row, WU_STYLE))
+        startPosition = CLng(structure(row, WU_START))
+        endPosition = CLng(structure(row, WU_END))
+        level = CLng(structure(row, WU_LEVEL))
+        valid = (Err.Number = 0 And endPosition > startPosition)
+        Err.Clear
+        On Error GoTo 0
+        If valid And StrComp(context, "table", vbTextCompare) <> 0 Then
+            If StrComp(role, "heading", vbTextCompare) = 0 Then
+                Set desiredStyle = WU_HeadingStyleForLevel(level, heading1, heading2, heading3, heading4, heading5, heading6, heading7, heading8, heading9)
+            ElseIf StrComp(role, "body", vbTextCompare) = 0 Then
+                Set desiredStyle = bodyStyle
+            ElseIf Len(role) = 0 Then
+                If StrComp(styleName, "Normal", vbTextCompare) = 0 Or StrComp(styleName, "Body Text", vbTextCompare) = 0 Then Set desiredStyle = bodyStyle
+            End If
+        End If
+        If desiredStyle Is Nothing Then
+            WU_FlushParagraphStyleBatch batch, batchStyle
+        ElseIf batch Is Nothing Then
+            Set batch = story.Duplicate: batch.Start = startPosition: batch.End = endPosition
+            Set batchStyle = desiredStyle
+        ElseIf desiredStyle Is batchStyle And startPosition <= batch.End Then
+            batch.End = endPosition
+        Else
+            WU_FlushParagraphStyleBatch batch, batchStyle
+            Set batch = story.Duplicate: batch.Start = startPosition: batch.End = endPosition
+            Set batchStyle = desiredStyle
+        End If
+    Next row
+    WU_FlushParagraphStyleBatch batch, batchStyle
+End Sub
+
+Private Sub WU_ApplyNativeParagraphStyles(ByVal story As Range, ByVal bodyStyle As Style, ByVal heading1 As Style, ByVal heading2 As Style, ByVal heading3 As Style, ByVal heading4 As Style, ByVal heading5 As Style, ByVal heading6 As Style, ByVal heading7 As Style, ByVal heading8 As Style, ByVal heading9 As Style)
+    Dim paragraph As Paragraph, paragraphRange As Range, batch As Range
+    Dim batchStyle As Style, desiredStyle As Style, currentStyle As String, paragraphIndex As Long
     For Each paragraph In story.Paragraphs
         paragraphIndex = paragraphIndex + 1
         If paragraphIndex Mod 256 = 0 Then
             Application.StatusBar = "Applying " & WU_JOURNAL_NAME & " styles (paragraph " & CStr(paragraphIndex) & ")"
             If WU_CancelRequested() Then Err.Raise 18, "Apply styles", "style application cancelled"
         End If
-        Set paragraphRange = paragraph.Range
-        Set desiredStyle = Nothing
+        Set paragraphRange = paragraph.Range: Set desiredStyle = Nothing
         If Not paragraphRange.Information(wdWithInTable) Then
-            level = paragraph.OutlineLevel
-            ' Reset before the guarded array read. A malformed or stale
-            ' detector result must fall back to Word's native outline level,
-            ' never reuse the previous paragraph's role.
-            detectedRole = vbNullString
-            If haveStructure Then
-                On Error Resume Next
-                detectedRole = CStr(structure(paragraphIndex - 1, WU_ROLE))
-                If StrComp(detectedRole, "heading", vbTextCompare) = 0 Then level = CLng(structure(paragraphIndex - 1, WU_LEVEL))
-                Err.Clear
-                On Error GoTo 0
-            End If
-            ' A marker sequence may retain a tentative level for an ordinary
-            ' numbered list. When the detector returned a role, trust that
-            ' role over the tentative level; use Word's outline only when the
-            ' detector was unavailable or this row could not be read.
-            useOutline = (Not haveStructure Or Len(detectedRole) = 0 Or StrComp(detectedRole, "heading", vbTextCompare) = 0)
-            If useOutline And level = wdOutlineLevel1 Then
-                Set desiredStyle = heading1
-            ElseIf useOutline And level = wdOutlineLevel2 Then
-                Set desiredStyle = heading2
-            ElseIf useOutline And level = wdOutlineLevel3 Then
-                Set desiredStyle = heading3
-            ElseIf useOutline And level = wdOutlineLevel4 Then
-                Set desiredStyle = heading4
-            ElseIf useOutline And level = wdOutlineLevel5 Then
-                Set desiredStyle = heading5
-            ElseIf useOutline And level = wdOutlineLevel6 Then
-                Set desiredStyle = heading6
-            ElseIf useOutline And level = wdOutlineLevel7 Then
-                Set desiredStyle = heading7
-            ElseIf useOutline And level = wdOutlineLevel8 Then
-                Set desiredStyle = heading8
-            ElseIf useOutline And level = wdOutlineLevel9 Then
-                Set desiredStyle = heading9
-            ElseIf Not useOutline And StrComp(detectedRole, "body", vbTextCompare) = 0 Then
-                ' The neutral detector has enough evidence to distinguish an
-                ' ordinary body paragraph from a candidate, quotation, or
-                ' front-matter role. Apply the house body style even when the
-                ' source used a custom paragraph style; direct run formatting
-                ' remains direct formatting on the existing range.
-                Set desiredStyle = bodyStyle
-            Else
-                currentStyle = ""
+            Set desiredStyle = WU_HeadingStyleForLevel(paragraph.OutlineLevel, heading1, heading2, heading3, heading4, heading5, heading6, heading7, heading8, heading9)
+            If desiredStyle Is Nothing Then
+                currentStyle = vbNullString
                 On Error Resume Next
                 currentStyle = CStr(paragraphRange.Style)
                 On Error GoTo 0
@@ -726,21 +745,30 @@ Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As St
         If desiredStyle Is Nothing Then
             WU_FlushParagraphStyleBatch batch, batchStyle
         ElseIf batch Is Nothing Then
-            Set batch = paragraphRange.Duplicate
-            Set batchStyle = desiredStyle
+            Set batch = paragraphRange.Duplicate: Set batchStyle = desiredStyle
         ElseIf desiredStyle Is batchStyle And paragraphRange.Start <= batch.End Then
             batch.End = paragraphRange.End
         Else
             WU_FlushParagraphStyleBatch batch, batchStyle
-            Set batch = paragraphRange.Duplicate
-            Set batchStyle = desiredStyle
+            Set batch = paragraphRange.Duplicate: Set batchStyle = desiredStyle
         End If
     Next paragraph
-    ' Assign once per contiguous target-style run. Setting a paragraph style
-    ' does not flatten direct run formatting, while avoiding one COM setter per
-    ' paragraph keeps large manuscript conversions proportional to runs.
     WU_FlushParagraphStyleBatch batch, batchStyle
 End Sub
+
+Private Function WU_HeadingStyleForLevel(ByVal level As Long, ByVal heading1 As Style, ByVal heading2 As Style, ByVal heading3 As Style, ByVal heading4 As Style, ByVal heading5 As Style, ByVal heading6 As Style, ByVal heading7 As Style, ByVal heading8 As Style, ByVal heading9 As Style) As Style
+    Select Case level
+        Case 1: Set WU_HeadingStyleForLevel = heading1
+        Case 2: Set WU_HeadingStyleForLevel = heading2
+        Case 3: Set WU_HeadingStyleForLevel = heading3
+        Case 4: Set WU_HeadingStyleForLevel = heading4
+        Case 5: Set WU_HeadingStyleForLevel = heading5
+        Case 6: Set WU_HeadingStyleForLevel = heading6
+        Case 7: Set WU_HeadingStyleForLevel = heading7
+        Case 8: Set WU_HeadingStyleForLevel = heading8
+        Case 9: Set WU_HeadingStyleForLevel = heading9
+    End Select
+End Function
 
 Private Sub WU_FlushParagraphStyleBatch(ByRef batch As Range, ByRef style As Style)
     If batch Is Nothing Then Exit Sub
