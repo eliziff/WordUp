@@ -65,6 +65,7 @@ func TestNativeComponentCleanup(t *testing.T) {
 		{Name: "Hotkey caller context", Operation: native.Operation{Op: "run", Macro: "Proof.CheckHotkeys"}, Assert: []verify.Assertion{{Kind: "equals", Expected: "PASS"}}},
 		{Name: "Context menu ownership and repetition", Operation: native.Operation{Op: "run", Macro: "Proof.CheckMenus"}, Assert: []verify.Assertion{{Kind: "equals", Expected: "PASS"}}},
 		{Name: "Ribbon dispatch and cooperative cancellation", Operation: native.Operation{Op: "run", Macro: "Proof.CheckRibbonAndProgress"}, Assert: []verify.Assertion{{Kind: "equals", Expected: "PASS"}}},
+		{Name: "Bounded literal replacement and formatting preservation", Operation: native.Operation{Op: "run", Macro: "Proof.CheckTextOperations"}, Assert: []verify.Assertion{{Kind: "equals", Expected: "PASS"}}},
 		{Name: "Form shell native lifecycle", Operation: native.Operation{Op: "run", Macro: "Proof.CheckFormShell"}, Assert: []verify.Assertion{{Kind: "equals", Expected: "PASS"}}},
 		{Name: "Structure counterexamples and cached style votes", Operation: native.Operation{Op: "run", Macro: "StructureProof.Check"}, Assert: []verify.Assertion{{Path: "/array/0", Kind: "equals", Expected: "PASS"}}},
 	}}
@@ -176,6 +177,38 @@ Public Function CheckRibbonAndProgress() As String
     WU_RibbonCommand control
     If WU_Dispatched <> 7 Then Err.Raise 5, , "non-ASCII Ribbon control ID was not escaped deterministically"
     CheckRibbonAndProgress = "PASS"
+End Function
+Public Function CheckTextOperations() As String
+    Dim d As Document, result As Boolean, before As String, formatted As Range, rejected As Boolean
+    Dim i As Long, lines(1 To 400) As String, started As Single, elapsed As Single
+    Set d = Documents.Add
+    d.Content.Text = "Alpha alpha alphabet" & vbCr
+    Set formatted = d.Paragraphs(1).Range.Duplicate
+    formatted.End = formatted.Start + 5
+    formatted.Italic = True
+    before = d.Content.Text
+    result = WU_ReplaceLiteral(d, "alpha", "omega", "main", False, True)
+    If Not result Then Err.Raise 5, , "literal replacement did not report a change"
+    If d.Content.Text <> "omega omega alphabet" & vbCr Then Err.Raise 5, , "whole-word replacement changed the wrong text"
+    If Not d.Paragraphs(1).Range.Characters(1).Italic Then Err.Raise 5, , "replacement lost direct italic formatting"
+    If Not d.Undo Then Err.Raise 5, , "replacement did not create one undo record"
+    If d.Content.Text <> before Then Err.Raise 5, , "replacement undo did not restore text"
+    On Error Resume Next
+    result = WU_ReplaceLiteral(d, "alpha", "omega", "invalid", False, False)
+    rejected = (Err.Number <> 0)
+    Err.Clear
+    On Error GoTo 0
+    If Not rejected Then Err.Raise 5, , "invalid story scope was accepted"
+    For i = 1 To 400: lines(i) = "Alpha text.": Next i
+    d.Content.Text = Join(lines, vbCr)
+    started = Timer
+    result = WU_ReplaceLiteral(d, "Alpha", "Omega", "main", True, True)
+    elapsed = Timer - started
+    If elapsed < 0 Then elapsed = elapsed + 86400
+    If Not result Then Err.Raise 5, , "bulk literal replacement did not report a change"
+    If elapsed * 1000 > 250 Then Err.Raise 5, , "400 literal replacements exceeded 250 ms: " & CStr(elapsed * 1000)
+    d.Close SaveChanges:=wdDoNotSaveChanges
+    CheckTextOperations = "PASS"
 End Function
 Public Function CheckFormShell() As String
     WU_FormShown = False
