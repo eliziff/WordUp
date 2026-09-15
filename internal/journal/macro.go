@@ -693,6 +693,13 @@ Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As St
                 paragraphRange.Style = heading8
             ElseIf level = wdOutlineLevel9 Then
                 paragraphRange.Style = heading9
+            ElseIf StrComp(detectedRole, "body", vbTextCompare) = 0 Then
+                ' The neutral detector has enough evidence to distinguish an
+                ' ordinary body paragraph from a candidate, quotation, or
+                ' front-matter role. Apply the house body style even when the
+                ' source used a custom paragraph style; direct run formatting
+                ' remains direct formatting on the existing range.
+                paragraphRange.Style = bodyStyle
             Else
                 currentStyle = ""
                 On Error Resume Next
