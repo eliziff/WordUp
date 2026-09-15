@@ -94,7 +94,7 @@ func Create(root string, profile Profile) (CreateReport, error) {
 	writes := map[string][]byte{
 		"journal/profile.json":            project.JSON(profile),
 		"vba/WUJournalCore.bas":           []byte(coreSource(profile, module)),
-		"vba/WUJournalSetup.vba":          []byte(formSource()),
+		"vba/WUJournalSetup.vba":          []byte(formSource(profile)),
 		"forms/WUJournalSetup.json":       project.JSON(formDesign(profile)),
 		"package/customUI/customUI14.xml": []byte(ribbonSource(profile, module)),
 	}
@@ -233,6 +233,24 @@ func createAll(root string, profiles []Profile) ([]CreateReport, error) {
 }
 
 func formDesign(profile Profile) office.Design {
+	controls := []office.ControlDesign{
+		{Name: "lblTitle", Type: "Label", Properties: map[string]any{"Left": 14.0, "Top": 12.0, "Width": 348.0, "Height": 28.0, "Caption": profile.Name}},
+		{Name: "lblEvidence", Type: "Label", Properties: map[string]any{"Left": 14.0, "Top": 42.0, "Width": 348.0, "Height": 32.0, "Caption": "Profile-driven tools preserve source text and inline formatting."}},
+		{Name: "cmdStyles", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 86.0, "Width": 164.0, "Height": 28.0, "Caption": "Apply house styles"}},
+		{Name: "cmdReview", Type: "CommandButton", Properties: map[string]any{"Left": 194.0, "Top": 86.0, "Width": 164.0, "Height": 28.0, "Caption": "Review changes"}},
+		{Name: "cmdFields", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 124.0, "Width": 164.0, "Height": 28.0, "Caption": "Refresh fields"}},
+		{Name: "cmdCitations", Type: "CommandButton", Properties: map[string]any{"Left": 194.0, "Top": 124.0, "Width": 164.0, "Height": 28.0, "Caption": "Audit citations"}},
+		{Name: "cmdSupra", Type: "CommandButton", Properties: map[string]any{"Left": 194.0, "Top": 162.0, "Width": 164.0, "Height": 28.0, "Caption": "Supra audit"}},
+		{Name: "cmdCommands", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 200.0, "Width": 164.0, "Height": 28.0, "Caption": "Install commands"}},
+		{Name: "cmdRemoveCommands", Type: "CommandButton", Properties: map[string]any{"Left": 194.0, "Top": 200.0, "Width": 164.0, "Height": 28.0, "Caption": "Remove commands"}},
+		{Name: "cmdTracking", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 238.0, "Width": 164.0, "Height": 28.0, "Caption": "Toggle tracked changes"}},
+		{Name: "cmdQuality", Type: "CommandButton", Properties: map[string]any{"Left": 194.0, "Top": 238.0, "Width": 164.0, "Height": 28.0, "Caption": "Quality report"}},
+		{Name: "cmdPreflight", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 276.0, "Width": 344.0, "Height": 28.0, "Caption": "Run preflight"}},
+		{Name: "cmdClose", Type: "CommandButton", Properties: map[string]any{"Left": 274.0, "Top": 314.0, "Width": 84.0, "Height": 28.0, "Caption": "Close"}},
+	}
+	if !strings.EqualFold(profile.PermalinkPolicy, "none") {
+		controls = append(controls[:6], append([]office.ControlDesign{{Name: "cmdPerma", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 162.0, "Width": 164.0, "Height": 28.0, "Caption": "Perma assistant"}}}, controls[6:]...)...)
+	}
 	return office.Design{
 		Name: "WUJournalSetup",
 		Mode: "replace",
@@ -241,27 +259,23 @@ func formDesign(profile Profile) office.Design {
 			"Width":   380.0,
 			"Height":  350.0,
 		},
-		Controls: []office.ControlDesign{
-			{Name: "lblTitle", Type: "Label", Properties: map[string]any{"Left": 14.0, "Top": 12.0, "Width": 348.0, "Height": 28.0, "Caption": profile.Name}},
-			{Name: "lblEvidence", Type: "Label", Properties: map[string]any{"Left": 14.0, "Top": 42.0, "Width": 348.0, "Height": 32.0, "Caption": "Profile-driven tools preserve source text and inline formatting."}},
-			{Name: "cmdStyles", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 86.0, "Width": 164.0, "Height": 28.0, "Caption": "Apply house styles"}},
-			{Name: "cmdReview", Type: "CommandButton", Properties: map[string]any{"Left": 194.0, "Top": 86.0, "Width": 164.0, "Height": 28.0, "Caption": "Review changes"}},
-			{Name: "cmdFields", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 124.0, "Width": 164.0, "Height": 28.0, "Caption": "Refresh fields"}},
-			{Name: "cmdCitations", Type: "CommandButton", Properties: map[string]any{"Left": 194.0, "Top": 124.0, "Width": 164.0, "Height": 28.0, "Caption": "Audit citations"}},
-			{Name: "cmdPerma", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 162.0, "Width": 164.0, "Height": 28.0, "Caption": "Perma assistant"}},
-			{Name: "cmdSupra", Type: "CommandButton", Properties: map[string]any{"Left": 194.0, "Top": 162.0, "Width": 164.0, "Height": 28.0, "Caption": "Supra audit"}},
-			{Name: "cmdCommands", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 200.0, "Width": 164.0, "Height": 28.0, "Caption": "Install commands"}},
-			{Name: "cmdRemoveCommands", Type: "CommandButton", Properties: map[string]any{"Left": 194.0, "Top": 200.0, "Width": 164.0, "Height": 28.0, "Caption": "Remove commands"}},
-			{Name: "cmdTracking", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 238.0, "Width": 164.0, "Height": 28.0, "Caption": "Toggle tracked changes"}},
-			{Name: "cmdQuality", Type: "CommandButton", Properties: map[string]any{"Left": 194.0, "Top": 238.0, "Width": 164.0, "Height": 28.0, "Caption": "Quality report"}},
-			{Name: "cmdPreflight", Type: "CommandButton", Properties: map[string]any{"Left": 14.0, "Top": 276.0, "Width": 344.0, "Height": 28.0, "Caption": "Run preflight"}},
-			{Name: "cmdClose", Type: "CommandButton", Properties: map[string]any{"Left": 274.0, "Top": 314.0, "Width": 84.0, "Height": 28.0, "Caption": "Close"}},
-		},
+		Controls: controls,
 	}
 }
 
-func formSource() string {
-	return `Attribute VB_Name = "WUJournalSetup"
+func formSource(profile Profile) string {
+	permalinkHandler := `Private Sub cmdPerma_Click()
+    On Error GoTo Failed
+    WU_JournalPermaAssistant
+    Exit Sub
+Failed:
+    MsgBox Err.Description, vbExclamation, "Perma assistant"
+End Sub
+`
+	if strings.EqualFold(profile.PermalinkPolicy, "none") {
+		permalinkHandler = ""
+	}
+	return fmt.Sprintf(`Attribute VB_Name = "WUJournalSetup"
 Option Explicit
 
 Private Sub cmdStyles_Click()
@@ -296,13 +310,7 @@ Failed:
     MsgBox Err.Description, vbExclamation, "Citation audit"
 End Sub
 
-Private Sub cmdPerma_Click()
-    On Error GoTo Failed
-    WU_JournalPermaAssistant
-    Exit Sub
-Failed:
-    MsgBox Err.Description, vbExclamation, "Perma assistant"
-End Sub
+%s
 
 Private Sub cmdSupra_Click()
     On Error GoTo Failed
@@ -355,11 +363,16 @@ End Sub
 Private Sub cmdClose_Click()
     Unload Me
 End Sub
-`
+`, permalinkHandler)
 }
 
 func ribbonSource(profile Profile, module string) string {
 	prefix := "WU_" + module
+	permalinkButton := ""
+	if !strings.EqualFold(profile.PermalinkPolicy, "none") {
+		permalinkButton = fmt.Sprintf(`          <button id="%s_Perma" label="Perma assistant" onAction="WU_JournalPermaAssistantFromRibbon"/>
+`, prefix)
+	}
 	return fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui" onLoad="WU_JournalRibbonLoad">
   <ribbon>
@@ -371,7 +384,7 @@ func ribbonSource(profile Profile, module string) string {
           <button id="%s_Review" label="Review changes" onAction="WU_JournalReviewNextFromRibbon"/>
           <button id="%s_Fields" label="Refresh fields" onAction="WU_JournalRefreshFieldsFromRibbon"/>
           <button id="%s_Citations" label="Audit citations" onAction="WU_JournalCitationAuditFromRibbon"/>
-          <button id="%s_Perma" label="Perma assistant" onAction="WU_JournalPermaAssistantFromRibbon"/>
+%s
           <button id="%s_Supra" label="Supra audit" onAction="WU_JournalSupraAuditFromRibbon"/>
           <button id="%s_Commands" label="Install commands" onAction="WU_JournalInstallCommandsFromRibbon"/>
           <button id="%s_RemoveCommands" label="Remove commands" onAction="WU_JournalRemoveCommandsFromRibbon"/>
@@ -383,7 +396,7 @@ func ribbonSource(profile Profile, module string) string {
     </tabs>
   </ribbon>
 </customUI>
-`, prefix, EscapeXML(profile.Name), prefix, prefix, prefix, prefix, prefix, prefix, prefix, prefix, prefix, prefix, prefix, prefix, prefix)
+`, prefix, EscapeXML(profile.Name), prefix, prefix, prefix, prefix, prefix, prefix, permalinkButton, prefix, prefix, prefix, prefix, prefix, prefix)
 }
 
 func coreSource(profile Profile, module string) string {

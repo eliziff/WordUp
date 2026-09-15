@@ -1,6 +1,52 @@
 package structure
 
-import "testing"
+import (
+	"encoding/json"
+	"math"
+	"testing"
+)
+
+func TestIntValueAcceptsNativeAndReportNumberTypes(t *testing.T) {
+	for _, test := range []struct {
+		value any
+		want  int
+	}{{int8(3), 3}, {int16(4), 4}, {int32(5), 5}, {int64(6), 6}, {uint(7), 7}, {uint8(8), 8}, {uint16(9), 9}, {uint32(10), 10}, {uint64(11), 11}, {json.Number("12"), 12}} {
+		got, ok := intValue(test.value)
+		if !ok || got != test.want {
+			t.Fatalf("%T: got %d, %v; want %d, true", test.value, got, ok, test.want)
+		}
+	}
+	for _, test := range []struct {
+		value any
+		want  int
+	}{{float32(13), 13}, {float64(14), 14}, {json.Number("15.0"), 15}} {
+		if got, ok := intValue(test.value); !ok || got != test.want {
+			t.Fatalf("%T: got %d, %v; want %d, true", test.value, got, ok, test.want)
+		}
+	}
+	for _, value := range []any{float64(1.5), math.NaN(), math.Inf(1), json.Number("not-a-number")} {
+		if _, ok := intValue(value); ok {
+			t.Fatalf("%T unexpectedly accepted as an integer: %v", value, value)
+		}
+	}
+}
+
+func TestFormattingSignalUsesParagraphMarkEvidence(t *testing.T) {
+	for _, evidence := range []any{
+		map[string]bool{"bold": true},
+		map[string]any{"small_caps": true},
+	} {
+		if !formattingSignal(map[string]any{"paragraph_mark_formatting": evidence}) {
+			t.Fatalf("paragraph-mark evidence was ignored: %#v", evidence)
+		}
+	}
+	if formattingSignal(map[string]any{"paragraph_mark_formatting": map[string]bool{"underline": true}}) {
+		t.Fatal("underline alone is not paragraph-level heading evidence")
+	}
+	if !formattingSignal(map[string]any{"direct_formatting_evidence": map[string]any{"text_units": 10.0, "bold_units": 7.0}}) {
+		t.Fatal("decoded direct-formatting counts were ignored")
+	}
+}
 
 func TestResolveKeepsOutlineAndDemotesOrdinaryList(t *testing.T) {
 	rows := []map[string]any{

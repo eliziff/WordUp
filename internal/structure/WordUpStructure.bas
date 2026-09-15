@@ -1,7 +1,7 @@
 Attribute VB_Name = "WordUpStructure"
 Option Explicit
 
-' WordUp structure contract 1.2.9. MIT licensed; editable and dependency-free.
+' WordUp structure contract 1.2.10. MIT licensed; editable and dependency-free.
 ' Detection is separate from publication-specific style mapping.
 Public Const WU_ROLE As Long = 0
 Public Const WU_LEVEL As Long = 1
@@ -34,7 +34,7 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
     Dim hasLists As Boolean, hasTables As Boolean, plausible As Boolean
     Dim headingStyle As Boolean, keepNext As Boolean, upperText As Boolean
     Dim story As Range, pieces As Variant, position As Long, startPosition As Long, endPosition As Long
-    Dim storyTextAligned As Boolean
+    Dim storyTextAligned As Boolean, trailingParagraphMark As Boolean, pieceCount As Long, markLength As Long
     Dim starts() As Long, ends() As Long, texts() As String
     Dim centered() As Boolean, frontEmphasis() As Boolean, frontRoles() As String
     Set story = document.StoryRanges(wdMainTextStory): Set paragraphs = story.Paragraphs
@@ -47,14 +47,23 @@ Public Function WU_DetectStructure(ByVal document As Document) As Variant
     storyTextAligned = False
     If Not hasTables Then
         pieces = Split(story.text, vbCr)
-        storyTextAligned = (UBound(pieces) + 1 = count)
+        pieceCount = UBound(pieces) + 1
+        ' Word's main-story text normally ends with the final paragraph mark,
+        ' so Split returns one trailing empty piece. The old count-only check
+        ' rejected every ordinary story and forced one Range read per
+        ' paragraph. Accept both Word forms while keeping the offset table
+        ' exact for a story whose final mark is absent.
+        trailingParagraphMark = (pieceCount = count + 1 And Len(CStr(pieces(pieceCount - 1))) = 0)
+        storyTextAligned = (pieceCount = count Or trailingParagraphMark)
         If Not storyTextAligned Then GoTo SkipStoryTextCache
         position = story.Start
         ReDim starts(0 To count - 1): ReDim ends(0 To count - 1)
         ReDim texts(0 To count - 1)
         For i = 0 To count - 1
             rawText = CStr(pieces(i)): starts(i) = position
-            ends(i) = position + Len(rawText) + 1: position = ends(i)
+            markLength = 1
+            If i = count - 1 And Not trailingParagraphMark Then markLength = 0
+            ends(i) = position + Len(rawText) + markLength: position = ends(i)
             texts(i) = WU_CleanText(rawText)
         Next i
     End If

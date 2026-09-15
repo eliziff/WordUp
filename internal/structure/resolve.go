@@ -1,7 +1,9 @@
 package structure
 
 import (
+	"encoding/json"
 	"fmt"
+	"math"
 	"strings"
 	"unicode"
 )
@@ -423,10 +425,49 @@ func intValue(v any) (int, bool) {
 	switch n := v.(type) {
 	case int:
 		return n, true
+	case int8:
+		return int(n), true
+	case int16:
+		return int(n), true
+	case int32:
+		return int(n), true
+	case int64:
+		value := int(n)
+		return value, int64(value) == n
+	case uint:
+		value := int(n)
+		return value, uint(value) == n
+	case uint8:
+		return int(n), true
+	case uint16:
+		return int(n), true
+	case uint32:
+		value := int(n)
+		return value, uint32(value) == n
+	case uint64:
+		value := int(n)
+		return value, uint64(value) == n
 	case float64:
-		return int(n), n == float64(int(n))
+		return integralFloat(n)
+	case float32:
+		return integralFloat(float64(n))
+	case json.Number:
+		if value, err := n.Int64(); err == nil {
+			return intValue(value)
+		}
+		if value, err := n.Float64(); err == nil {
+			return integralFloat(value)
+		}
 	}
 	return 0, false
+}
+
+func integralFloat(value float64) (int, bool) {
+	if math.IsNaN(value) || math.IsInf(value, 0) || math.Trunc(value) != value {
+		return 0, false
+	}
+	converted := int(value)
+	return converted, float64(converted) == value
 }
 func headingStyle(s string) bool {
 	for _, token := range styleTokens(s) {
@@ -508,12 +549,17 @@ func hasNativeHeading(row map[string]any) bool {
 	return ok && outline["body_text"] != true
 }
 func formattingSignal(row map[string]any) bool {
-	if evidence, ok := row["direct_formatting_evidence"].(map[string]int); ok {
-		total := evidence["text_units"]
-		if total == 0 {
-			return false
+	if total, bold, caps, smallCaps, ok := formattingCounts(row["direct_formatting_evidence"]); ok && total > 0 {
+		if bold*100 >= total*65 || caps*100 >= total*65 || smallCaps*100 >= total*65 {
+			return true
 		}
-		return evidence["bold_units"]*100 >= total*65 || evidence["caps_units"]*100 >= total*65 || evidence["small_caps_units"]*100 >= total*65
+	}
+	// Word may store a paragraph's heading emphasis on w:pPr/w:rPr rather
+	// than in each text run. The inspector retains that separate evidence;
+	// use it here without treating underline or a single bold run as a
+	// paragraph-wide heading signal.
+	if formattingFlag(row["paragraph_mark_formatting"], "bold") || formattingFlag(row["paragraph_mark_formatting"], "caps") || formattingFlag(row["paragraph_mark_formatting"], "small_caps") {
+		return true
 	}
 	runs, _ := row["run_properties"].([]map[string]any)
 	for _, run := range runs {
@@ -521,6 +567,41 @@ func formattingSignal(row map[string]any) bool {
 		if strings.Contains(x, ":b") || strings.Contains(x, ":smallCaps") || strings.Contains(x, ":caps") {
 			return true
 		}
+	}
+	return false
+}
+
+func formattingCounts(value any) (total, bold, caps, smallCaps int, ok bool) {
+	add := func(values map[string]any) {
+		total = numberAsInt(values["text_units"])
+		bold = numberAsInt(values["bold_units"])
+		caps = numberAsInt(values["caps_units"])
+		smallCaps = numberAsInt(values["small_caps_units"])
+		ok = true
+	}
+	switch values := value.(type) {
+	case map[string]int:
+		return values["text_units"], values["bold_units"], values["caps_units"], values["small_caps_units"], true
+	case map[string]any:
+		add(values)
+	}
+	return total, bold, caps, smallCaps, ok
+}
+
+func numberAsInt(value any) int {
+	if result, ok := intValue(value); ok {
+		return result
+	}
+	return 0
+}
+
+func formattingFlag(value any, key string) bool {
+	switch values := value.(type) {
+	case map[string]bool:
+		return values[key]
+	case map[string]any:
+		flag, _ := values[key].(bool)
+		return flag
 	}
 	return false
 }

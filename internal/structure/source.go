@@ -6,4 +6,4 @@ import _ "embed"
 //go:embed WordUpStructure.bas
 var Source string
 
-const ContractVersion = "1.2.9"
+const ContractVersion = "1.2.10"

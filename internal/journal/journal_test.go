@@ -40,6 +40,22 @@ func TestCatalogEvidenceOverlayPreservesBundledSurface(t *testing.T) {
 	}
 }
 
+func TestProfileWithoutPermalinksOmitsPermaWiring(t *testing.T) {
+	profile := Profile{ID: "NO-PERMA", Name: "No Permalink Journal", PermalinkPolicy: "none"}
+	design := formDesign(profile)
+	for _, control := range design.Controls {
+		if control.Name == "cmdPerma" {
+			t.Fatal("permalink-disabled profile still exposes a Perma form control")
+		}
+	}
+	if source := formSource(profile); strings.Contains(source, "cmdPerma") || strings.Contains(source, "WU_JournalPermaAssistant") {
+		t.Fatal("permalink-disabled form still contains Perma event wiring")
+	}
+	if ribbon := ribbonSource(profile, "NoPerma"); strings.Contains(ribbon, "_Perma") || strings.Contains(ribbon, "Perma assistant") {
+		t.Fatal("permalink-disabled Ribbon still exposes Perma wiring")
+	}
+}
+
 func TestCreateAllPreflightsDestinations(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "all")
 	if err := os.MkdirAll(filepath.Join(root, "ALTA_L_REV"), 0700); err != nil {
