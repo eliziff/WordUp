@@ -108,8 +108,8 @@ func builtin() []Manifest {
 		vbaComponent("ui.ribbon-command", "WordUpRibbon", "WU_RibbonCommand", "Provides a stable Ribbon callback dispatch seam.", "Ribbon callbacks", ribbonSource),
 		vbaComponent("command.hotkey", "WordUpHotkey", "WU_RegisterHotkey", "Registers and removes a template-owned key binding.", "hotkeys", hotkeySource),
 		vbaComponent("command.context-menu", "WordUpContextMenu", "WU_RegisterContextMenu", "Registers and removes a tagged context-menu command.", "context menus", contextMenuSource),
-		vbaComponent("document.style-converter", "WordUpStyleConverter", "WU_ConvertStyle", "Converts one paragraph style in a single safe edit.", "style conversion", styleConverterSource),
-		vbaComponent("document.text-operations", "WordUpTextOperations", "WU_ReplaceLiteral", "Performs bounded literal text replacements across selected Word stories or an exact Range without using Selection.", "text operations", textOperationsSource)}
+		vbaComponent("document.style-converter", "WordUpStyleConverter", "WU_ConvertStyle", "Converts one paragraph style across stories or inside an exact Range in a single safe edit.", "style conversion", styleConverterSource),
+		vbaComponent("document.text-operations", "WordUpTextOperations", "WU_ReplaceLiteral", "Performs bounded literal replacement, batch replacement, and character-style matching across selected Word stories or an exact Range without using Selection.", "text operations", textOperationsSource)}
 	for i := range items {
 		if items[i].ID == "command.hotkey" {
 			items[i].Version = "1.0.5"
@@ -130,11 +130,11 @@ func builtin() []Manifest {
 			items[i].Version = "1.0.3"
 		}
 		if items[i].ID == "document.style-converter" {
-			items[i].Version = "1.0.3"
+			items[i].Version = "1.0.4"
 		}
 		if items[i].ID == "document.text-operations" {
-			items[i].Version = "1.0.5"
-			items[i].Acceptance = "WU_ReplaceLiteral and WU_ReplaceLiteralInRange are public, bounded, no-op aware, and compile without non-Office references."
+			items[i].Version = "1.0.6"
+			items[i].Acceptance = "WU_ReplaceLiteral, WU_ReplaceLiteralBatch, and the character-style match/range operations are public, bounded, state-safe, and compile without non-Office references."
 		}
 		items[i].Schema = 1
 		items[i].License = "MIT"

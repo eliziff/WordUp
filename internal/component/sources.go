@@ -305,7 +305,7 @@ Public Function WU_ConvertStyle(ByVal document As Document, ByVal fromStyle As S
     For Each firstStory In document.StoryRanges
         Set story = firstStory
         Do
-            If WU_ConvertStyleInRange(story, sourceStyle, targetStyle) Then WU_ConvertStyle = True
+            If story.End > story.Start Then If WU_ConvertStyleInStory(story, sourceStyle, targetStyle) Then WU_ConvertStyle = True
             Set story = story.NextStoryRange
         Loop Until story Is Nothing
     Next firstStory
@@ -325,8 +325,53 @@ Failed:
     failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
     Resume CleanUp
 End Function
-Private Function WU_ConvertStyleInRange(ByVal story As Range, ByVal sourceStyle As Style, ByVal targetStyle As Style) As Boolean
+
+' Convert only paragraphs inside the exact caller-supplied Range. A caller
+' can therefore limit a large manuscript pass to a section, table cell, or
+' generated opening without re-enumerating every Word story.
+Public Function WU_ConvertStyleInRange(ByVal target As Range, ByVal fromStyle As String, ByVal toStyle As String) As Boolean
+    Dim updating As Boolean, opened As Boolean, captured As Boolean, targetStart As Long, targetEnd As Long
+    Dim failure As Long, failureSource As String, failureText As String
+    Dim document As Document, sourceStyle As Style, targetStyle As Style
+    On Error GoTo Failed
+    If target Is Nothing Then Err.Raise 91, "WU_ConvertStyleInRange", "target range is required"
+    If Len(Trim$(fromStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyleInRange", "source style is required"
+    If Len(Trim$(toStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyleInRange", "target style is required"
+    Set document = target.Document
+    Set sourceStyle = document.Styles(fromStyle)
+    Set targetStyle = document.Styles(toStyle)
+    If sourceStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ConvertStyleInRange", "source style is not a paragraph style"
+    If targetStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ConvertStyleInRange", "target style is not a paragraph style"
+    targetStart = target.Start: targetEnd = target.End
+    If targetEnd <= targetStart Then Exit Function
+    If StrComp(sourceStyle.NameLocal, targetStyle.NameLocal, vbTextCompare) = 0 Then Exit Function
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Convert style": opened = True
+    WU_ConvertStyleInRange = WU_ConvertStyleInStory(target, sourceStyle, targetStyle)
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
+Private Function WU_ConvertStyleInStory(ByVal story As Range, ByVal sourceStyle As Style, ByVal targetStyle As Style) As Boolean
     Dim scope As Range
+    If story Is Nothing Then Exit Function
+    If story.End <= story.Start Then Exit Function
     Set scope = story.Duplicate
     With scope.Find
         .ClearFormatting
@@ -338,8 +383,8 @@ Private Function WU_ConvertStyleInRange(ByVal story As Range, ByVal sourceStyle 
         .Forward = True
         .Wrap = wdFindStop
         .Format = True
-    End With
-WU_ConvertStyleInRange = scope.Find.Execute(Replace:=wdReplaceAll)
+End With
+WU_ConvertStyleInStory = scope.Find.Execute(Replace:=wdReplaceAll)
 End Function
 `
 
@@ -413,6 +458,160 @@ Failed:
     Resume CleanUp
 End Function
 
+' Replace a two-column Variant array of find/replacement pairs in one safe edit.
+' The first column is the literal find text and the second is its replacement.
+' The array is only a compact command list: Word remains the source of truth
+' for document text and formatting. The return value is the number of pairs
+' that matched at least once, not a guessed character count. Pairs run in row
+' order, so an intentional replacement chain is explicit and deterministic.
+Public Function WU_ReplaceLiteralBatch(ByVal document As Document, ByVal replacements As Variant, Optional ByVal storyScope As String = "main", Optional ByVal matchCase As Boolean = False, Optional ByVal wholeWord As Boolean = False) As Long
+    Dim firstStory As Range, story As Range, updating As Boolean, opened As Boolean, captured As Boolean
+    Dim failure As Long, failureSource As String, failureText As String
+    Dim firstRow As Long, lastRow As Long, firstColumn As Long, activeRows As Long, changed As Long
+    On Error GoTo Failed
+    If document Is Nothing Then Err.Raise 91, "WU_ReplaceLiteralBatch", "document is required"
+    storyScope = LCase$(Trim$(storyScope))
+    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "all" Then Err.Raise 5, "WU_ReplaceLiteralBatch", "story scope must be main, notes, or all"
+    activeRows = WU_ValidateLiteralBatch(replacements, matchCase)
+    If activeRows = 0 Then Exit Function
+    firstRow = LBound(replacements, 1): lastRow = UBound(replacements, 1): firstColumn = LBound(replacements, 2)
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Replace literal text batch": opened = True
+    If storyScope = "main" Then
+        Set story = document.StoryRanges(wdMainTextStory)
+        If Not story Is Nothing Then If story.End > story.Start Then changed = WU_ReplaceLiteralBatchInStory(story, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+    ElseIf storyScope = "notes" Then
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdFootnotesStory)
+        Err.Clear
+        On Error GoTo Failed
+        If Not firstStory Is Nothing Then changed = WU_ReplaceLiteralBatchInStoryChain(firstStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+        Set firstStory = Nothing
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdEndnotesStory)
+        Err.Clear
+        On Error GoTo Failed
+        If Not firstStory Is Nothing Then changed = changed + WU_ReplaceLiteralBatchInStoryChain(firstStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+    Else
+        For Each firstStory In document.StoryRanges
+            changed = changed + WU_ReplaceLiteralBatchInStoryChain(firstStory, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+        Next firstStory
+    End If
+    WU_ReplaceLiteralBatch = changed
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
+' Apply a character or linked style to literal matches without replacing the
+' matched text. This is the neutral primitive for citation, case-name, and
+' short-form emphasis rules; callers decide which terms are eligible.
+Public Function WU_ApplyCharacterStyleToMatches(ByVal document As Document, ByVal findText As String, ByVal styleName As String, Optional ByVal storyScope As String = "main", Optional ByVal matchCase As Boolean = False, Optional ByVal wholeWord As Boolean = True) As Long
+    Dim firstStory As Range, story As Range, updating As Boolean, opened As Boolean, captured As Boolean
+    Dim failure As Long, failureSource As String, failureText As String, style As Style, changed As Long
+    On Error GoTo Failed
+    If document Is Nothing Then Err.Raise 91, "WU_ApplyCharacterStyleToMatches", "document is required"
+    WU_ValidateLiteral findText, "", "WU_ApplyCharacterStyleToMatches"
+    If Len(Trim$(styleName)) = 0 Then Err.Raise 5, "WU_ApplyCharacterStyleToMatches", "style name is required"
+    storyScope = LCase$(Trim$(storyScope))
+    If storyScope <> "main" And storyScope <> "notes" And storyScope <> "all" Then Err.Raise 5, "WU_ApplyCharacterStyleToMatches", "story scope must be main, notes, or all"
+    Set style = document.Styles(styleName)
+    If style.Type <> wdStyleTypeCharacter And Not style.Linked Then Err.Raise 5, "WU_ApplyCharacterStyleToMatches", "style is not a character style"
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Style literal matches": opened = True
+    If storyScope = "main" Then
+        Set story = document.StoryRanges(wdMainTextStory)
+        If Not story Is Nothing Then If story.End > story.Start Then changed = WU_ApplyCharacterStyleInStory(story, findText, style, matchCase, wholeWord)
+    ElseIf storyScope = "notes" Then
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdFootnotesStory)
+        Err.Clear
+        On Error GoTo Failed
+        If Not firstStory Is Nothing Then changed = WU_ApplyCharacterStyleInStoryChain(firstStory, findText, style, matchCase, wholeWord)
+        Set firstStory = Nothing
+        On Error Resume Next
+        Set firstStory = document.StoryRanges(wdEndnotesStory)
+        Err.Clear
+        On Error GoTo Failed
+        If Not firstStory Is Nothing Then changed = changed + WU_ApplyCharacterStyleInStoryChain(firstStory, findText, style, matchCase, wholeWord)
+    Else
+        For Each firstStory In document.StoryRanges
+            changed = changed + WU_ApplyCharacterStyleInStoryChain(firstStory, findText, style, matchCase, wholeWord)
+        Next firstStory
+    End If
+    WU_ApplyCharacterStyleToMatches = changed
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
+' Apply a character style inside the exact caller-supplied Range. The public
+' range boundary is never widened to a story or Selection.
+Public Function WU_ApplyCharacterStyleToRange(ByVal target As Range, ByVal findText As String, ByVal styleName As String, Optional ByVal matchCase As Boolean = False, Optional ByVal wholeWord As Boolean = True) As Long
+    Dim updating As Boolean, opened As Boolean, captured As Boolean, failure As Long, failureSource As String, failureText As String
+    Dim style As Style, document As Document, targetStart As Long, targetEnd As Long
+    On Error GoTo Failed
+    If target Is Nothing Then Err.Raise 91, "WU_ApplyCharacterStyleToRange", "target range is required"
+    WU_ValidateLiteral findText, "", "WU_ApplyCharacterStyleToRange"
+    If Len(Trim$(styleName)) = 0 Then Err.Raise 5, "WU_ApplyCharacterStyleToRange", "style name is required"
+    Set document = target.Document
+    Set style = document.Styles(styleName)
+    If style.Type <> wdStyleTypeCharacter And Not style.Linked Then Err.Raise 5, "WU_ApplyCharacterStyleToRange", "style is not a character style"
+    targetStart = target.Start: targetEnd = target.End
+    If targetEnd <= targetStart Then Exit Function
+    updating = Application.ScreenUpdating
+    captured = True
+    Application.ScreenUpdating = False
+    Application.UndoRecord.StartCustomRecord "Style literal matches": opened = True
+    WU_ApplyCharacterStyleToRange = WU_ApplyCharacterStyleInStory(target, findText, style, matchCase, wholeWord)
+CleanUp:
+    On Error Resume Next
+    If opened Then
+        Application.UndoRecord.EndCustomRecord
+        If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+        Err.Clear
+    End If
+    If captured Then Application.ScreenUpdating = updating
+    If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Function
+
 ' Replace only inside an already-bounded Range. This is the fast path for
 ' callers that have an exact paragraph, content control, table cell, or other
 ' Word range and must not touch any other story. The range's direct formatting
@@ -456,6 +655,96 @@ Private Sub WU_ValidateLiteral(ByVal findText As String, ByVal replaceText As St
     If Len(WU_EscapeFindLiteral(findText)) > 255 Then Err.Raise 5, sourceName, "find text exceeds Word's escaped 255-character limit"
     If Len(WU_EscapeFindLiteral(replaceText)) > 255 Then Err.Raise 5, sourceName, "replacement text exceeds Word's escaped 255-character limit"
 End Sub
+
+Private Function WU_ValidateLiteralBatch(ByVal replacements As Variant, ByVal matchCase As Boolean) As Long
+    Dim firstRow As Long, lastRow As Long, firstColumn As Long, lastColumn As Long, row As Long
+    Dim findText As String, replaceText As String, activeRows As Long, dimensionError As Long
+    Dim failure As Long, failureSource As String, failureText As String
+    On Error GoTo Failed
+    If Not IsArray(replacements) Then Err.Raise 5, "WU_ReplaceLiteralBatch", "replacements must be a two-dimensional array"
+    On Error Resume Next
+    firstRow = LBound(replacements, 1): lastRow = UBound(replacements, 1)
+    firstColumn = LBound(replacements, 2): lastColumn = UBound(replacements, 2)
+    dimensionError = Err.Number
+    Err.Clear
+    On Error GoTo Failed
+    If dimensionError <> 0 Then Err.Raise 5, "WU_ReplaceLiteralBatch", "replacements must be a two-dimensional array"
+    If lastColumn - firstColumn + 1 <> 2 Then Err.Raise 5, "WU_ReplaceLiteralBatch", "replacements must have exactly two columns"
+    For row = firstRow To lastRow
+        findText = CStr(replacements(row, firstColumn))
+        replaceText = CStr(replacements(row, firstColumn + 1))
+        WU_ValidateLiteral findText, replaceText, "WU_ReplaceLiteralBatch"
+        If Not (matchCase And StrComp(findText, replaceText, vbBinaryCompare) = 0) Then activeRows = activeRows + 1
+    Next row
+    WU_ValidateLiteralBatch = activeRows
+    Exit Function
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+End Function
+
+Private Function WU_ReplaceLiteralBatchInStoryChain(ByVal firstStory As Range, ByVal replacements As Variant, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
+    Dim story As Range, changed As Long
+    Set story = firstStory
+    Do While Not story Is Nothing
+        If story.End > story.Start Then changed = changed + WU_ReplaceLiteralBatchInStory(story, replacements, firstRow, lastRow, firstColumn, matchCase, wholeWord)
+        Set story = story.NextStoryRange
+    Loop
+    WU_ReplaceLiteralBatchInStoryChain = changed
+End Function
+
+Private Function WU_ReplaceLiteralBatchInStory(ByVal story As Range, ByVal replacements As Variant, ByVal firstRow As Long, ByVal lastRow As Long, ByVal firstColumn As Long, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
+    Dim row As Long, findText As String, replaceText As String, changed As Long
+    For row = firstRow To lastRow
+        findText = CStr(replacements(row, firstColumn))
+        replaceText = CStr(replacements(row, firstColumn + 1))
+        If Not (matchCase And StrComp(findText, replaceText, vbBinaryCompare) = 0) Then
+            If WU_ReplaceLiteralInStory(story, findText, replaceText, matchCase, wholeWord) Then changed = changed + 1
+        End If
+    Next row
+    WU_ReplaceLiteralBatchInStory = changed
+End Function
+
+Private Function WU_ApplyCharacterStyleInStoryChain(ByVal firstStory As Range, ByVal findText As String, ByVal style As Style, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
+    Dim story As Range, changed As Long
+    Set story = firstStory
+    Do While Not story Is Nothing
+        If story.End > story.Start Then changed = changed + WU_ApplyCharacterStyleInStory(story, findText, style, matchCase, wholeWord)
+        Set story = story.NextStoryRange
+    Loop
+    WU_ApplyCharacterStyleInStoryChain = changed
+End Function
+
+Private Function WU_ApplyCharacterStyleInStory(ByVal story As Range, ByVal findText As String, ByVal style As Style, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Long
+    Dim search As Range, nextStart As Long, changed As Long, currentStyle As String
+    Set search = story.Duplicate
+    With search.Find
+        .ClearFormatting
+        .Text = WU_EscapeFindLiteral(findText)
+        .Forward = True
+        .Wrap = wdFindStop
+        .Format = False
+        .MatchCase = matchCase
+        .MatchWholeWord = wholeWord
+        .MatchWildcards = False
+    End With
+    Do While search.Find.Execute
+        currentStyle = vbNullString
+        On Error Resume Next
+        currentStyle = CStr(search.Style)
+        Err.Clear
+        On Error GoTo 0
+        If StrComp(currentStyle, style.NameLocal, vbTextCompare) <> 0 Then
+            search.Style = style
+            changed = changed + 1
+        End If
+        nextStart = search.End
+        If nextStart >= story.End Then Exit Do
+        search.SetRange Start:=nextStart, End:=story.End
+    Loop
+    WU_ApplyCharacterStyleInStory = changed
+End Function
 
 Private Function WU_ReplaceLiteralInStoryChain(ByVal firstStory As Range, ByVal findText As String, ByVal replaceText As String, ByVal matchCase As Boolean, ByVal wholeWord As Boolean) As Boolean
     Dim story As Range, changed As Boolean

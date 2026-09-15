@@ -180,6 +180,7 @@ Public Function CheckRibbonAndProgress() As String
 End Function
 Public Function CheckTextOperations() As String
     Dim d As Document, result As Boolean, before As String, bodyAfterNote As String, formatted As Range, scoped As Range, rejected As Boolean, note As Footnote, priorUpdating As Boolean
+    Dim replacements(0 To 2, 0 To 1) As Variant, batchChanged As Long, citationStyle As Style, styled As Long
     Dim i As Long, lines(1 To 400) As String, started As Single, elapsed As Single
     Set d = Documents.Add
     d.Content.Text = "Alpha alpha alphabet" & vbCr
@@ -206,6 +207,27 @@ Public Function CheckTextOperations() As String
     If Application.ScreenUpdating <> priorUpdating Then Err.Raise 5, , "range replacement did not restore ScreenUpdating"
     If Not d.Undo Then Err.Raise 5, , "range replacement did not create one undo record"
     If d.Content.Text <> before Then Err.Raise 5, , "range replacement undo did not restore text"
+    d.Content.Text = "Alpha alpha Gamma" & vbCr
+    replacements(0, 0) = "Alpha": replacements(0, 1) = "Omega"
+    replacements(1, 0) = "Gamma": replacements(1, 1) = "Delta"
+    replacements(2, 0) = "Unused": replacements(2, 1) = "Still unused"
+    d.Saved = True
+    batchChanged = WU_ReplaceLiteralBatch(d, replacements, "main", True, True)
+    If batchChanged <> 2 Or d.Content.Text <> "Omega alpha Delta" & vbCr Then Err.Raise 5, , "batch replacement did not apply exactly its matching pairs"
+    If Application.ScreenUpdating <> priorUpdating Then Err.Raise 5, , "batch replacement did not restore ScreenUpdating"
+    If Not d.Undo Then Err.Raise 5, , "batch replacement did not create one undo record"
+    If d.Content.Text <> "Alpha alpha Gamma" & vbCr Then Err.Raise 5, , "batch replacement undo did not restore text"
+    d.Content.Text = "Alpha Alpha Gamma" & vbCr
+    Set citationStyle = d.Styles.Add(Name:="Proof Citation", Type:=wdStyleTypeCharacter)
+    citationStyle.Font.Italic = True
+    d.Saved = True
+    styled = WU_ApplyCharacterStyleToMatches(d, "Alpha", citationStyle.NameLocal, "main", True, True)
+    If styled <> 2 Then Err.Raise 5, , "character style matcher missed a literal occurrence"
+    If d.Content.Text <> "Alpha Alpha Gamma" & vbCr Then Err.Raise 5, , "character style matcher changed text"
+    If Not d.Paragraphs(1).Range.Characters(1).Italic Or Not d.Paragraphs(1).Range.Characters(7).Italic Then Err.Raise 5, , "character style matcher did not apply the requested style"
+    If Not d.Undo Then Err.Raise 5, , "character style matcher did not create one undo record"
+    If d.Paragraphs(1).Range.Characters(1).Italic Or d.Paragraphs(1).Range.Characters(7).Italic Then Err.Raise 5, , "character style matcher undo did not restore formatting"
+    d.Content.Text = before
     Set scoped = d.Paragraphs(1).Range.Duplicate
     scoped.Collapse wdCollapseStart
     d.Saved = True
@@ -331,7 +353,7 @@ Failed:
     Resume CleanUp
 End Sub
 Public Function Check() As String
-    Dim number As Long, source As String, description As String, changed As Boolean, i As Long
+    Dim number As Long, source As String, description As String, changed As Boolean, i As Long, bounded As Range
     Dim lines(1 To 400) As String, started As Single, elapsed As Single
     ActiveDocument.Content.Text = "original"
     Application.ScreenUpdating = False
@@ -356,6 +378,13 @@ Public Function Check() As String
     If WU_ConvertStyle(ActiveDocument, "ProofTarget", "ProofTarget") Then Err.Raise 5, , "same style not a no-op"
     If Not ActiveDocument.Undo Then Err.Raise 5, , "missing conversion undo"
     If ActiveDocument.Paragraphs(1).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Then Err.Raise 5, , "conversion not undone"
+    ActiveDocument.Content.Text = "first" & vbCr & "second" & vbCr
+    ActiveDocument.Content.Style = ActiveDocument.Styles(wdStyleNormal)
+    Set bounded = ActiveDocument.Paragraphs(2).Range.Duplicate
+    changed = WU_ConvertStyleInRange(bounded, ActiveDocument.Styles(wdStyleNormal).NameLocal, "ProofTarget")
+    If Not changed Or ActiveDocument.Paragraphs(1).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Or ActiveDocument.Paragraphs(2).Style.NameLocal <> "ProofTarget" Then Err.Raise 5, , "bounded conversion widened its range"
+    If Not ActiveDocument.Undo Then Err.Raise 5, , "missing bounded conversion undo"
+    If ActiveDocument.Paragraphs(2).Style.NameLocal <> ActiveDocument.Styles(wdStyleNormal).NameLocal Then Err.Raise 5, , "bounded conversion not undone"
     For i = 1 To 400: lines(i) = "Ordinary paragraph.": Next i
     ActiveDocument.Content.Text = Join(lines, vbCr)
     ActiveDocument.Content.Style = ActiveDocument.Styles(wdStyleNormal)

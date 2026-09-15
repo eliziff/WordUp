@@ -359,7 +359,7 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.3" {
+	if item.Version != "1.0.4" {
 		t.Fatalf("style converter version did not advance: %q", item.Version)
 	}
 	var source string
@@ -369,6 +369,8 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 		}
 	}
 	for _, want := range []string{
+		"Public Function WU_ConvertStyleInRange",
+		"Private Function WU_ConvertStyleInStory",
 		`If document Is Nothing Then Err.Raise 91, "WU_ConvertStyle", "document is required"`,
 		`If Len(Trim$(fromStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyle", "source style is required"`,
 		`If Len(Trim$(toStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyle", "target style is required"`,
@@ -376,6 +378,8 @@ func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
 		`If targetStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ConvertStyle", "target style is not a paragraph style"`,
 		"captured = True",
 		"If captured Then Application.ScreenUpdating = updating",
+		"If targetEnd <= targetStart Then Exit Function",
+		"If story.End > story.Start Then If WU_ConvertStyleInStory",
 	} {
 		if !strings.Contains(source, want) {
 			t.Fatalf("style converter source omitted %q", want)
@@ -388,7 +392,7 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.Version != "1.0.5" {
+	if item.Version != "1.0.6" {
 		t.Fatalf("text operations version=%q", item.Version)
 	}
 	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
@@ -397,11 +401,19 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 	source := item.Files[0].Text
 	for _, want := range []string{
 		"Public Function WU_ReplaceLiteral",
+		"Public Function WU_ReplaceLiteralBatch",
 		"Public Function WU_ReplaceLiteralInRange",
+		"Public Function WU_ApplyCharacterStyleToMatches",
+		"Public Function WU_ApplyCharacterStyleToRange",
 		"target range is required",
 		"story scope must be main, notes, or all",
+		"replacements must be a two-dimensional array",
+		"replacements must have exactly two columns",
+		"style is not a character style",
 		"find text exceeds Word's 255-character limit",
 		"Application.UndoRecord.StartCustomRecord \"Replace literal text\"",
+		"Application.UndoRecord.StartCustomRecord \"Replace literal text batch\"",
+		"Application.UndoRecord.StartCustomRecord \"Style literal matches\"",
 		"If captured Then Application.ScreenUpdating = updating",
 		".Replacement.Text = WU_EscapeFindLiteral(replaceText)",
 		"find text exceeds Word's escaped 255-character limit",
@@ -417,6 +429,10 @@ func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
 		"If matchCase And StrComp(findText, replaceText, vbBinaryCompare) = 0 Then Exit Function",
 		"targetStart = target.Start: targetEnd = target.End",
 		"If targetEnd <= targetStart Then Exit Function",
+		"WU_ValidateLiteralBatch(replacements, matchCase)",
+		"WU_ApplyCharacterStyleInStoryChain",
+		"If StrComp(currentStyle, style.NameLocal, vbTextCompare) <> 0 Then",
+		"search.SetRange Start:=nextStart, End:=story.End",
 	} {
 		if !strings.Contains(source, want) {
 			t.Fatalf("text operations source omitted %q", want)
