@@ -2,6 +2,7 @@
 package main
 
 import (
+	"strconv"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -261,7 +262,21 @@ func run(ctx context.Context, args []string) int {
 				}
 			}
 		}
-	case "doctor", "check", "compat", "files":
+	case "doctor":
+		// doctor --word [COUNT] launches owned hidden Word COUNT times (default 1)
+		// and fails when any launch does not handshake or clean up.
+		if len(rest) >= 1 && rest[0] == "--word" {
+			method = "native.probe"
+			p.Count = 1
+			if len(rest) == 2 {
+				p.Count, err = strconv.Atoi(rest[1])
+			} else if len(rest) > 2 {
+				err = fmt.Errorf("doctor --word [COUNT]")
+			}
+		} else if len(rest) != 0 {
+			err = fmt.Errorf("unexpected arguments; use doctor or doctor --word [COUNT]")
+		}
+	case "check", "compat", "files":
 		if len(rest) != 0 {
 			err = fmt.Errorf("unexpected arguments")
 		}
@@ -317,6 +332,7 @@ const usage = `WordUp ` + project.Version + ` — native local Word development 
   wordup --workspace WORKSPACE rpc METHOD @parameters.json
   wordup --workspace WORKSPACE session stop
   wordup doctor
+  wordup doctor --word [COUNT]
   wordup journal.catalog FINAL_CONTRACTS_DIRECTORY
   wordup journal.profile JOURNAL_ID
   wordup journal.create JOURNAL_ID OUTPUT_DIRECTORY [FINAL_CONTRACTS_DIRECTORY]

@@ -62,6 +62,7 @@ type Parameters struct {
 	Limit                int                     `json:"limit,omitempty"`
 	Patches              []office.XMLPatch       `json:"patches,omitempty"`
 	NativeOptions        *native.Options         `json:"native_options,omitempty"`
+	Count                int                     `json:"count,omitempty"`
 }
 type Engine struct {
 	Root          string
@@ -456,6 +457,12 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		return map[string]any{"workspace": out, "build": build, "acceptance": report}, err
 	case "doctor":
 		return native.Describe(), nil
+	case "native.probe":
+		options := e.nativeOptions
+		if p.NativeOptions != nil {
+			options = *p.NativeOptions
+		}
+		return native.Probe(ctx, options, p.Count)
 	case "help":
 		return map[string]any{"instructions": project.AgentInstructions, "tools": Tools(), "native_operation_help": NativeHelp}, nil
 	case "new":

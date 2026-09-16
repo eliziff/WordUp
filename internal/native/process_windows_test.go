@@ -38,3 +38,23 @@ func TestProcessCreationFlagsKeepWordInOwnedJob(t *testing.T) {
 		}
 	}
 }
+
+// The named constants must carry the documented Win32 values. An earlier
+// revision swapped two of them, and a name-only assertion let Word launches
+// fail for a whole day with ERROR_NO_SUCH_LOGON_SESSION.
+func TestProcessCreationFlagValuesMatchWin32(t *testing.T) {
+	for _, c := range []struct {
+		name string
+		got  uint32
+		want uint32
+	}{
+		{"CREATE_SUSPENDED", createSuspended, 0x00000004},
+		{"CREATE_NO_WINDOW", createNoWindow, 0x08000000},
+		{"CREATE_BREAKAWAY_FROM_JOB", createBreakaway, 0x01000000},
+		{"EXTENDED_STARTUPINFO_PRESENT", extendedStartupInfo, 0x00080000},
+	} {
+		if c.got != c.want {
+			t.Fatalf("%s = %#x, want %#x", c.name, c.got, c.want)
+		}
+	}
+}

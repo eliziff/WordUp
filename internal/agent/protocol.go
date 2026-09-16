@@ -44,6 +44,7 @@ var toolSpecs = []struct{ name, parameters, description string }{
 	{"native.start", "native_options", "Start owned local Word lazily; requires installed Word, not a VM."},
 	{"native.call", "operation! timeout_ms", "Raw native operation; see help. op=profile accepts steps (run/eval/get/invoke/put), executes sequentially and returns observations with results, errors and wall-clock duration_ms, retaining partial evidence on failure. Persistent host. Macro execution requires launch --execute."},
 	{"native.stop", "", "Close ONLY the app-owned Word and private desktop."},
+	{"native.probe", "count native_options", "Launch count (default 1, max 50) fresh app-owned hidden Word sessions back to back, handshake, and close each. Reports per-launch startup timings, Word version, desktop isolation and p50/p95; any failed launch or leftover process is an error. This is the headless-Word gate, independent of the warm session."},
 	{"test", "path! suite fresh", "Execute assertion suite against exact artifact path; fresh=true uses an independent process. Returns and saves truthful pass/fail/not_run evidence."},
 	{"structure.source", "", "Return an editable standalone VBA paragraph detection core, separate from house-style mapping. Read-only native evidence plus unresolved marker candidates; no installation or execution."},
 	{"structure.inspect", "path!", "Inspect document path without Word: source-located paragraphs, style inheritance, direct versus inherited outline levels, character-weighted direct formatting, resolved numbering definitions, table/textbox containment and raw evidence XML. Evidence adapter, not editorial truth."},
@@ -100,7 +101,7 @@ func Tools() []Tool {
 	props["journal"] = map[string]any{"type": "string", "description": "Stable journal profile ID such as ALTA-L-REV or UBC-L-REV."}
 	props["years"] = map[string]any{"type": "array", "items": map[string]any{"type": "integer"}, "description": "Current years for journal.catalog; defaults to 2025 and 2026."}
 	props["parameters"] = map[string]any{"type": "object", "additionalProperties": map[string]any{"type": "string"}, "description": "Declared component adaptation values. Currently module_prefix is a validated VBA identifier; undeclared values are rejected."}
-	for _, key := range []string{"timeout_ms", "tolerance", "offset", "limit"} {
+	for _, key := range []string{"timeout_ms", "tolerance", "offset", "limit", "count"} {
 		props[key] = map[string]any{"type": "integer"}
 	}
 	props["fresh"] = map[string]any{"type": "boolean"}

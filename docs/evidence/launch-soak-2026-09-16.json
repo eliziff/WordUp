@@ -1,0 +1,37 @@
+{
+  "cold": {
+    "available": true,
+    "close_errors": 0,
+    "desktop_isolated": 20,
+    "failed": 0,
+    "headless_requirement": "every launch must handshake with owned hidden Word and close without leaving processes",
+    "launched": 20,
+    "requested": 20,
+    "startup_ms_max": 7569.687,
+    "startup_ms_min": 957.036,
+    "startup_ms_p50": 1126.648,
+    "startup_ms_p95": 2059.074,
+    "word_versions": [
+      "16.0"
+    ]
+  },
+  "concurrent": {
+    "available": true,
+    "close_errors": 0,
+    "desktop_isolated": 5,
+    "failed": 0,
+    "headless_requirement": "every launch must handshake with owned hidden Word and close without leaving processes",
+    "launched": 5,
+    "requested": 5,
+    "startup_ms_max": 1755.254,
+    "startup_ms_min": 1075.983,
+    "startup_ms_p50": 1214.666,
+    "startup_ms_p95": 1492.992,
+    "word_versions": [
+      "16.0"
+    ]
+  },
+  "date": "2026-09-16",
+  "test": "internal/verify/launch_windows_test.go TestNativeLaunchSoak",
+  "word": "Microsoft Word 16.0, Windows 11 x64, development machine"
+}
