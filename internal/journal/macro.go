@@ -170,6 +170,12 @@ func validateProfile(profile Profile) error {
 	if profile.BodySizePT <= 0 || profile.NoteSizePT <= 0 {
 		return fmt.Errorf("journal profile font sizes must be positive")
 	}
+	// Word accepts point sizes from 1 through 1638. Rejecting values outside
+	// that host range keeps generated role styles (title/body-minus-one) from
+	// failing later inside Word after an otherwise successful package build.
+	if profile.BodySizePT > 1638 || profile.NoteSizePT > 1638 {
+		return fmt.Errorf("journal profile font sizes exceed Word's 1638 point limit")
+	}
 	if strings.TrimSpace(profile.BodyFont) == "" || strings.TrimSpace(profile.NoteFont) == "" {
 		return fmt.Errorf("journal profile body and note fonts are required")
 	}
@@ -513,6 +519,13 @@ Public Const WU_JOURNAL_STYLE_H6 As String = %s
 Public Const WU_JOURNAL_STYLE_H7 As String = %s
 Public Const WU_JOURNAL_STYLE_H8 As String = %s
 Public Const WU_JOURNAL_STYLE_H9 As String = %s
+Public Const WU_JOURNAL_STYLE_TITLE As String = %s
+Public Const WU_JOURNAL_STYLE_AUTHOR As String = %s
+Public Const WU_JOURNAL_STYLE_ABSTRACT As String = %s
+Public Const WU_JOURNAL_STYLE_QUOTATION As String = %s
+Public Const WU_JOURNAL_STYLE_TOC As String = %s
+Public Const WU_JOURNAL_STYLE_BIBLIOGRAPHY As String = %s
+Public Const WU_JOURNAL_STYLE_CITATION As String = %s
 Private Const WU_JOURNAL_MAX_STORY_CHAIN As Long = 32768
 Private Const WU_WORD_STORY_MISSING As Long = 5941
 
@@ -581,6 +594,8 @@ Public Sub WU_JournalApplyStyles()
     Dim heading1 As Style, heading2 As Style, heading3 As Style
     Dim heading4 As Style, heading5 As Style, heading6 As Style
     Dim heading7 As Style, heading8 As Style, heading9 As Style
+    Dim titleStyle As Style, authorStyle As Style, abstractStyle As Style
+    Dim quotationStyle As Style, tocStyle As Style, bibliographyStyle As Style, citationStyle As Style
     On Error GoTo Failed
     Set doc = ActiveDocument
     priorStatus = Application.StatusBar
@@ -597,6 +612,23 @@ Public Sub WU_JournalApplyStyles()
     Set heading7 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H7, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True, True)
     Set heading8 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H8, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True, True)
     Set heading9 = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_H9, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True, True)
+    ' These role styles are deliberately neutral. Detection supplies a role,
+    ' while a journal-specific adaptation may refine the style definition or
+    ' choose not to apply it. Creating them here gives every generated journal
+    ' the same safe, editable vocabulary for front matter, quotations, TOCs,
+    ' bibliographies, and citation spans without guessing from text.
+    Set titleStyle = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_TITLE, WU_JOURNAL_BODY_FONT, IIf(WU_JOURNAL_BODY_SIZE > 1634, 1638, WU_JOURNAL_BODY_SIZE + 4), True, True, False, 0, 0, wdAlignParagraphCenter)
+    Set authorStyle = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_AUTHOR, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True, False, False, 0, 0, wdAlignParagraphCenter)
+    Set abstractStyle = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_ABSTRACT, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, False, False)
+    Set quotationStyle = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_QUOTATION, WU_JOURNAL_BODY_FONT, IIf(WU_JOURNAL_BODY_SIZE > 1, WU_JOURNAL_BODY_SIZE - 1, 1), False, False, False, 18, 0)
+    Set tocStyle = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_TOC, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, False, False, False, 18, 0)
+    Set bibliographyStyle = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_BIBLIOGRAPHY, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, False, False, False, 18, -18)
+    Set citationStyle = WU_EnsureCharacterStyle(doc, WU_JOURNAL_STYLE_CITATION, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, True)
+    ' BEGIN JOURNAL ADAPTATION. Edit this one seam for publisher-specific
+    ' spacing, indents, alignment, or citation emphasis. The detector remains
+    ' generic and this hook is intentionally empty in the neutral baseline.
+    WU_CustomizeRoleStyles titleStyle, authorStyle, abstractStyle, quotationStyle, tocStyle, bibliographyStyle, citationStyle
+    ' END JOURNAL ADAPTATION.
     ' Keep the neutral core useful as a real authoring base: a newly typed
     ' paragraph after a heading should start in the body style. Existing
     ' direct formatting on document text is unaffected by changing these
@@ -610,6 +642,12 @@ Public Sub WU_JournalApplyStyles()
     WU_SetNextParagraphStyle heading7, bodyStyle
     WU_SetNextParagraphStyle heading8, bodyStyle
     WU_SetNextParagraphStyle heading9, bodyStyle
+    WU_SetNextParagraphStyle titleStyle, authorStyle
+    WU_SetNextParagraphStyle authorStyle, bodyStyle
+    WU_SetNextParagraphStyle abstractStyle, bodyStyle
+    WU_SetNextParagraphStyle quotationStyle, bodyStyle
+    WU_SetNextParagraphStyle tocStyle, bodyStyle
+    WU_SetNextParagraphStyle bibliographyStyle, bibliographyStyle
     ' Outline levels are shared style state too; avoid dirtying each heading
     ' definition on every repeat of an otherwise idempotent operation.
     If heading1.ParagraphFormat.OutlineLevel <> wdOutlineLevel1 Then heading1.ParagraphFormat.OutlineLevel = wdOutlineLevel1
@@ -621,7 +659,7 @@ Public Sub WU_JournalApplyStyles()
     If heading7.ParagraphFormat.OutlineLevel <> wdOutlineLevel7 Then heading7.ParagraphFormat.OutlineLevel = wdOutlineLevel7
     If heading8.ParagraphFormat.OutlineLevel <> wdOutlineLevel8 Then heading8.ParagraphFormat.OutlineLevel = wdOutlineLevel8
     If heading9.ParagraphFormat.OutlineLevel <> wdOutlineLevel9 Then heading9.ParagraphFormat.OutlineLevel = wdOutlineLevel9
-    WU_ApplyParagraphStyles doc, bodyStyle, heading1, heading2, heading3, heading4, heading5, heading6, heading7, heading8, heading9
+    WU_ApplyParagraphStyles doc, bodyStyle, heading1, heading2, heading3, heading4, heading5, heading6, heading7, heading8, heading9, titleStyle, authorStyle, abstractStyle, quotationStyle, tocStyle, bibliographyStyle
     WU_ApplyFootnoteStyle doc, noteStyle
 Cleanup:
     On Error Resume Next
@@ -637,7 +675,7 @@ Failed:
     Resume Cleanup
 End Sub
 
-Private Function WU_EnsureStyle(ByVal doc As Document, ByVal styleName As String, ByVal fontName As String, ByVal fontSize As Single, ByVal keepNext As Boolean, ByVal bold As Boolean) As Style
+Private Function WU_EnsureStyle(ByVal doc As Document, ByVal styleName As String, ByVal fontName As String, ByVal fontSize As Single, ByVal keepNext As Boolean, ByVal bold As Boolean, Optional ByVal italic As Boolean = False, Optional ByVal leftIndent As Single = 0, Optional ByVal firstLineIndent As Single = 0, Optional ByVal alignment As Long = -1) As Style
     Dim value As Style
     On Error Resume Next
     Set value = doc.Styles(styleName)
@@ -657,12 +695,43 @@ Private Function WU_EnsureStyle(ByVal doc As Document, ByVal styleName As String
         If Abs(CSng(.Font.Size) - fontSize) > 0.01 Then .Font.Size = fontSize
         If Abs(CSng(.Font.SizeBi) - fontSize) > 0.01 Then .Font.SizeBi = fontSize
         If .Font.Bold <> bold Then .Font.Bold = bold
+        If .Font.Italic <> italic Then .Font.Italic = italic
         If Abs(CSng(.ParagraphFormat.SpaceAfter) - 6) > 0.01 Then .ParagraphFormat.SpaceAfter = 6
         If .ParagraphFormat.LineSpacingRule <> wdLineSpaceSingle Then .ParagraphFormat.LineSpacingRule = wdLineSpaceSingle
         If .ParagraphFormat.KeepWithNext <> keepNext Then .ParagraphFormat.KeepWithNext = keepNext
+        If Abs(CSng(.ParagraphFormat.LeftIndent) - leftIndent) > 0.01 Then .ParagraphFormat.LeftIndent = leftIndent
+        If Abs(CSng(.ParagraphFormat.FirstLineIndent) - firstLineIndent) > 0.01 Then .ParagraphFormat.FirstLineIndent = firstLineIndent
+        If alignment >= 0 Then If .ParagraphFormat.Alignment <> alignment Then .ParagraphFormat.Alignment = alignment
     End With
     Set WU_EnsureStyle = value
 End Function
+
+Private Function WU_EnsureCharacterStyle(ByVal doc As Document, ByVal styleName As String, ByVal fontName As String, ByVal fontSize As Single, ByVal italic As Boolean) As Style
+    Dim value As Style
+    On Error Resume Next
+    Set value = doc.Styles(styleName)
+    Err.Clear
+    On Error GoTo 0
+    If value Is Nothing Then Set value = doc.Styles.Add(Name:=styleName, Type:=wdStyleTypeCharacter)
+    If value.Type <> wdStyleTypeCharacter Then Err.Raise 5, "WU_EnsureCharacterStyle", "style " & styleName & " is not a character style"
+    With value.Font
+        If StrComp(CStr(.Name), fontName, vbTextCompare) <> 0 Then .Name = fontName
+        If StrComp(CStr(.NameAscii), fontName, vbTextCompare) <> 0 Then .NameAscii = fontName
+        If StrComp(CStr(.NameOther), fontName, vbTextCompare) <> 0 Then .NameOther = fontName
+        If StrComp(CStr(.NameFarEast), fontName, vbTextCompare) <> 0 Then .NameFarEast = fontName
+        If StrComp(CStr(.NameBi), fontName, vbTextCompare) <> 0 Then .NameBi = fontName
+        If Abs(CSng(.Size) - fontSize) > 0.01 Then .Size = fontSize
+        If Abs(CSng(.SizeBi) - fontSize) > 0.01 Then .SizeBi = fontSize
+        If .Italic <> italic Then .Italic = italic
+    End With
+    Set WU_EnsureCharacterStyle = value
+End Function
+
+Private Sub WU_CustomizeRoleStyles(ByVal titleStyle As Style, ByVal authorStyle As Style, ByVal abstractStyle As Style, ByVal quotationStyle As Style, ByVal tocStyle As Style, ByVal bibliographyStyle As Style, ByVal citationStyle As Style)
+    ' Neutral baseline: no publication-specific overrides. Keep this seam
+    ' source-editable so a journal can refine minute typography without
+    ' changing the detector or duplicating its paragraph pass.
+End Sub
 
 Private Sub WU_SetNextParagraphStyle(ByVal style As Style, ByVal nextStyle As Style)
     Dim currentName As String
@@ -674,7 +743,7 @@ Private Sub WU_SetNextParagraphStyle(ByVal style As Style, ByVal nextStyle As St
     If StrComp(currentName, nextStyle.NameLocal, vbTextCompare) <> 0 Then style.NextParagraphStyle = nextStyle
 End Sub
 
-Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As Style, ByVal heading1 As Style, ByVal heading2 As Style, ByVal heading3 As Style, ByVal heading4 As Style, ByVal heading5 As Style, ByVal heading6 As Style, ByVal heading7 As Style, ByVal heading8 As Style, ByVal heading9 As Style)
+Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As Style, ByVal heading1 As Style, ByVal heading2 As Style, ByVal heading3 As Style, ByVal heading4 As Style, ByVal heading5 As Style, ByVal heading6 As Style, ByVal heading7 As Style, ByVal heading8 As Style, ByVal heading9 As Style, ByVal titleStyle As Style, ByVal authorStyle As Style, ByVal abstractStyle As Style, ByVal quotationStyle As Style, ByVal tocStyle As Style, ByVal bibliographyStyle As Style)
     Dim story As Range, paragraphCount As Long, structureRows As Long, structureColumns As Long, storyStart As Long, storyEnd As Long, readError As Long
     Dim offset As Long, startPosition As Long, endPosition As Long, priorEnd As Long, offsetValid As Boolean
     Dim structure As Variant, haveStructure As Boolean
@@ -719,21 +788,24 @@ Private Sub WU_ApplyParagraphStyles(ByVal doc As Document, ByVal bodyStyle As St
     Err.Clear
     On Error GoTo 0
     If haveStructure Then
-        WU_ApplyResolvedParagraphStyles story, structure, bodyStyle, heading1, heading2, heading3, heading4, heading5, heading6, heading7, heading8, heading9
+        WU_ApplyResolvedParagraphStyles story, structure, bodyStyle, heading1, heading2, heading3, heading4, heading5, heading6, heading7, heading8, heading9, titleStyle, authorStyle, abstractStyle, quotationStyle, tocStyle, bibliographyStyle
     Else
         WU_ApplyNativeParagraphStyles story, bodyStyle, heading1, heading2, heading3, heading4, heading5, heading6, heading7, heading8, heading9
     End If
 End Sub
 
-Private Sub WU_ApplyResolvedParagraphStyles(ByVal story As Range, ByRef structure As Variant, ByVal bodyStyle As Style, ByVal heading1 As Style, ByVal heading2 As Style, ByVal heading3 As Style, ByVal heading4 As Style, ByVal heading5 As Style, ByVal heading6 As Style, ByVal heading7 As Style, ByVal heading8 As Style, ByVal heading9 As Style)
+Private Sub WU_ApplyResolvedParagraphStyles(ByVal story As Range, ByRef structure As Variant, ByVal bodyStyle As Style, ByVal heading1 As Style, ByVal heading2 As Style, ByVal heading3 As Style, ByVal heading4 As Style, ByVal heading5 As Style, ByVal heading6 As Style, ByVal heading7 As Style, ByVal heading8 As Style, ByVal heading9 As Style, ByVal titleStyle As Style, ByVal authorStyle As Style, ByVal abstractStyle As Style, ByVal quotationStyle As Style, ByVal tocStyle As Style, ByVal bibliographyStyle As Style)
     Dim batch As Range, batchStyle As Style, desiredStyle As Style
     Dim row As Long, firstRow As Long, lastRow As Long, startPosition As Long, endPosition As Long, level As Long
     Dim role As String, context As String, styleName As String, desiredName As String, valid As Boolean
     Dim bodyName As String, headingNames(1 To 9) As String
+    Dim titleName As String, authorName As String, abstractName As String, quotationName As String, tocName As String, bibliographyName As String
     bodyName = bodyStyle.NameLocal
     headingNames(1) = heading1.NameLocal: headingNames(2) = heading2.NameLocal: headingNames(3) = heading3.NameLocal
     headingNames(4) = heading4.NameLocal: headingNames(5) = heading5.NameLocal: headingNames(6) = heading6.NameLocal
     headingNames(7) = heading7.NameLocal: headingNames(8) = heading8.NameLocal: headingNames(9) = heading9.NameLocal
+    titleName = titleStyle.NameLocal: authorName = authorStyle.NameLocal: abstractName = abstractStyle.NameLocal
+    quotationName = quotationStyle.NameLocal: tocName = tocStyle.NameLocal: bibliographyName = bibliographyStyle.NameLocal
     firstRow = LBound(structure, 1): lastRow = UBound(structure, 1)
     For row = firstRow To lastRow
         If (row - firstRow) Mod 256 = 0 Then
@@ -758,6 +830,18 @@ Private Sub WU_ApplyResolvedParagraphStyles(ByVal story As Range, ByRef structur
                 If level >= 1 And level <= 9 Then desiredName = headingNames(level)
             ElseIf StrComp(role, "body", vbTextCompare) = 0 Then
                 Set desiredStyle = bodyStyle: desiredName = bodyName
+            ElseIf StrComp(role, "title", vbTextCompare) = 0 Then
+                Set desiredStyle = titleStyle: desiredName = titleName
+            ElseIf StrComp(role, "author", vbTextCompare) = 0 Then
+                Set desiredStyle = authorStyle: desiredName = authorName
+            ElseIf StrComp(role, "abstract", vbTextCompare) = 0 Then
+                Set desiredStyle = abstractStyle: desiredName = abstractName
+            ElseIf StrComp(role, "quotation", vbTextCompare) = 0 Then
+                Set desiredStyle = quotationStyle: desiredName = quotationName
+            ElseIf StrComp(role, "toc", vbTextCompare) = 0 Then
+                Set desiredStyle = tocStyle: desiredName = tocName
+            ElseIf StrComp(role, "bibliography", vbTextCompare) = 0 Then
+                Set desiredStyle = bibliographyStyle: desiredName = bibliographyName
             ElseIf Len(role) = 0 Then
                 If StrComp(styleName, "Normal", vbTextCompare) = 0 Or StrComp(styleName, "Body Text", vbTextCompare) = 0 Then Set desiredStyle = bodyStyle: desiredName = bodyName
             End If
@@ -1156,6 +1240,13 @@ Public Sub WU_JournalPreflight()
     If Not WU_HasStyle(doc, WU_JOURNAL_STYLE_H7) Then missing = missing & WU_JOURNAL_STYLE_H7 & ", "
     If Not WU_HasStyle(doc, WU_JOURNAL_STYLE_H8) Then missing = missing & WU_JOURNAL_STYLE_H8 & ", "
     If Not WU_HasStyle(doc, WU_JOURNAL_STYLE_H9) Then missing = missing & WU_JOURNAL_STYLE_H9 & ", "
+    If Not WU_HasStyle(doc, WU_JOURNAL_STYLE_TITLE) Then missing = missing & WU_JOURNAL_STYLE_TITLE & ", "
+    If Not WU_HasStyle(doc, WU_JOURNAL_STYLE_AUTHOR) Then missing = missing & WU_JOURNAL_STYLE_AUTHOR & ", "
+    If Not WU_HasStyle(doc, WU_JOURNAL_STYLE_ABSTRACT) Then missing = missing & WU_JOURNAL_STYLE_ABSTRACT & ", "
+    If Not WU_HasStyle(doc, WU_JOURNAL_STYLE_QUOTATION) Then missing = missing & WU_JOURNAL_STYLE_QUOTATION & ", "
+    If Not WU_HasStyle(doc, WU_JOURNAL_STYLE_TOC) Then missing = missing & WU_JOURNAL_STYLE_TOC & ", "
+    If Not WU_HasStyle(doc, WU_JOURNAL_STYLE_BIBLIOGRAPHY) Then missing = missing & WU_JOURNAL_STYLE_BIBLIOGRAPHY & ", "
+    If Not WU_HasStyle(doc, WU_JOURNAL_STYLE_CITATION) Then missing = missing & WU_JOURNAL_STYLE_CITATION & ", "
     If Len(missing) > 0 Then issues = issues & "Missing generated styles: " & Left$(missing, Len(missing) - 2) & vbCrLf
     ' Detection is evidence only. Preflight surfaces uncertainty for an
     ' editor/agent to resolve instead of silently treating every candidate as
@@ -1255,5 +1346,5 @@ Private Sub WU_TrimAnchorParagraphMark(ByVal target As Range)
     tail = target.Characters.Last.Text
     If tail = Chr$(13) Or tail = Chr$(7) Then target.End = target.End - 1
 End Sub
-`, vbaString(profile.ID), vbaString(profile.Name), vbaString(profile.BodyFont), vbaString(profile.NoteFont), profile.BodySizePT, profile.NoteSizePT, vbaString(profile.PermalinkPolicy), vbaString(styleBase+" Body"), vbaString(styleBase+" Note"), vbaString(styleBase+" Heading 1"), vbaString(styleBase+" Heading 2"), vbaString(styleBase+" Heading 3"), vbaString(styleBase+" Heading 4"), vbaString(styleBase+" Heading 5"), vbaString(styleBase+" Heading 6"), vbaString(styleBase+" Heading 7"), vbaString(styleBase+" Heading 8"), vbaString(styleBase+" Heading 9"), profile.Name)
+`, vbaString(profile.ID), vbaString(profile.Name), vbaString(profile.BodyFont), vbaString(profile.NoteFont), profile.BodySizePT, profile.NoteSizePT, vbaString(profile.PermalinkPolicy), vbaString(styleBase+" Body"), vbaString(styleBase+" Note"), vbaString(styleBase+" Heading 1"), vbaString(styleBase+" Heading 2"), vbaString(styleBase+" Heading 3"), vbaString(styleBase+" Heading 4"), vbaString(styleBase+" Heading 5"), vbaString(styleBase+" Heading 6"), vbaString(styleBase+" Heading 7"), vbaString(styleBase+" Heading 8"), vbaString(styleBase+" Heading 9"), vbaString(styleBase+" Title"), vbaString(styleBase+" Author"), vbaString(styleBase+" Abstract"), vbaString(styleBase+" Quotation"), vbaString(styleBase+" TOC"), vbaString(styleBase+" Bibliography"), vbaString(styleBase+" Citation"), profile.Name)
 }

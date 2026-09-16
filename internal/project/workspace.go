@@ -1302,6 +1302,7 @@ Use the wordup executable. No module imports, VBE typing, or Python setup.
 - package/ is the full original Open XML package, including RibbonX XML, embedded assets and native saved parts. Do not rewrite the ZIP by hand.
 - Local component bundles may keep binary assets under assets/ or package/ and declare ribbon_merges in component.json; the normal build composes those fragments into the named customUI part and rejects collisions before copying source.
 - Edit package XML directly or use native Word operations for document content, styles, numbering and saved building blocks.
+- For fast journal text work, prefer the bundled bounded Find/range helpers (WU_CountLiteral, WU_ReplaceLiteralBatch, WU_ApplyCharacterStyleRuns, and WU_ApplyParagraphStyleRuns) and pass detector offsets directly; they preserve existing text, fields and inline runs. Use the generated neutral role-style seam for publisher-specific typography, and leave ambiguous candidates unresolved until the adaptation decides.
 - Use xml.query for exact XML part offsets and hashes, then xml.patch for guarded byte-range edits that preserve every other byte; use xml.verify/xml.compare for direct expected-output checks.
 - build performs deterministic package and binary checks; it is not a VBA compiler.
 - native execution is local Microsoft Word, never an emulator. Authorize execution only for code the user intends to run. The private desktop is UI separation, NOT a security sandbox.
