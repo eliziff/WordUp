@@ -69,6 +69,10 @@ Its packaged `structure.resolve` sweep likewise completed all 109 documents with
 
 An offline import/build preservation sweep over the same 109 DOCX inputs also completed with zero import failures, zero build failures, and zero unexpected original-part changes or omissions (53.5 s wall time). Every original OPC part outside the explicitly generated VBA/package-wiring set—including document XML, styles, numbering, fonts, notes, headers/footers, fields, media and custom XML—was byte-preserved; ZIP member slash spelling was normalized only for comparison.
 
+## Story access on real manuscripts
+
+A working-tree sweep had replaced every `StoryRanges(wdMainTextStory)` read with `Document.Content`, claiming Word "can block that collection item on real-world packages". A warm-session probe over all 109 retained submissions (`docs/evidence/story-ranges-probe-2026-09-16.json`) found zero errors, a 2 ms worst case, and identical range ends for both reads, so the sweep was discarded rather than committed on an unevidenced claim.
+
 ## Headless Word launch gate
 
 Consistently launching hidden, app-owned Word is a core product requirement, not an environmental nicety. `wordup doctor --word [COUNT]` (RPC `native.probe`) launches fresh owned sessions back to back and fails on any handshake or cleanup fault. The opt-in soak `TestNativeLaunchSoak` (`WORDUP_NATIVE_TEST=1`) runs 20 cold launches and 5 more while another owned Word stays open.

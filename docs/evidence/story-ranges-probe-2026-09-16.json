@@ -1,0 +1,9 @@
+{
+  "date": "2026-09-16",
+  "documents": 109,
+  "errors": 0,
+  "story_ranges_max_ms": 2.0,
+  "content_max_ms": 0.0,
+  "end_mismatches": 0,
+  "method": "warm owned Word; per document open copy, eval timing StoryRanges(wdMainTextStory) vs Document.Content, close"
+}
