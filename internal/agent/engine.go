@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"github.com/eliziff/WordUp/internal/alrmap/grade"
 	"github.com/eliziff/WordUp/internal/compat"
 	"github.com/eliziff/WordUp/internal/component"
 	"github.com/eliziff/WordUp/internal/deploy"
@@ -287,6 +288,16 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 			return office.VerifyXML(a, b, p.Comparison)
 		}
 		return office.CompareXML(a, b, p.XMLPolicy)
+	case "alr.grade":
+		before, err := e.read(p.Reference)
+		if err != nil {
+			return nil, err
+		}
+		after, err := e.read(p.Path)
+		if err != nil {
+			return nil, err
+		}
+		return grade.Grade(before, after, grade.Options{})
 	case "vba.immediate":
 		if !e.Execute {
 			return nil, fmt.Errorf("VBA evaluation requires --execute authority")
