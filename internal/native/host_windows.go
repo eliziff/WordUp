@@ -4,6 +4,7 @@ package native
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -145,12 +146,17 @@ func connectWord(cfg hostConfig) (*wordHost, error) {
 		// re-resolving the window station in restricted sessions.
 		desktop = ""
 	}
+	diagf("connectWord: creating owned Word on desktop %q", desktop)
 	p, e := spawnOnDesktop(cfg.WordPath, []string{"/a", filepath.Join(cfg.Directory, "seed.docx")}, desktop, !cfg.Visible, null, null, null, 0)
+	if e != nil {
+		diagf("connectWord: spawn on desktop %q failed: %v", desktop, e)
+	}
 	if e != nil && !cfg.Visible && noLogonSessionError(e) && desktop != "" {
 		// The host is already running on the private desktop, so inheriting its
 		// current desktop preserves isolation while avoiding a second station
 		// lookup in restricted sessions.
 		initial := e
+		diagf("connectWord: retrying Word on the inherited desktop")
 		p, e = spawnOnDesktop(cfg.WordPath, []string{"/a", filepath.Join(cfg.Directory, "seed.docx")}, "", true, null, null, null, 0)
 		if e != nil && noLogonSessionError(e) {
 			return nil, Fail("native_session_restricted", "Windows refused hidden Word creation in the current logon session", map[string]any{
@@ -158,6 +164,7 @@ func connectWord(cfg hostConfig) (*wordHost, error) {
 				"word_path":              cfg.WordPath,
 				"initial_create_error":   initial.Error(),
 				"inherited_create_error": e.Error(),
+				"worker_diagnostics":     diagTail(),
 			})
 		}
 	}
@@ -167,11 +174,13 @@ func connectWord(cfg hostConfig) (*wordHost, error) {
 			"word_path":                   cfg.WordPath,
 			"create_error":                e.Error(),
 			"inherited_desktop_attempted": desktop == "",
+			"worker_diagnostics":          diagTail(),
 		})
 	}
 	if e != nil {
 		return nil, e
 	}
+	diagf("connectWord: spawned WINWORD pid=%d", p.PID)
 	h := &wordHost{cfg: cfg, process: p, objects: map[string]dispatch{}, staged: map[string]string{}, execute: cfg.Execute}
 	good := false
 	defer func() {
@@ -185,10 +194,16 @@ func connectWord(cfg hostConfig) (*wordHost, error) {
 		duration = 60 * time.Second
 	}
 	end := time.Now().Add(duration)
+	start := end.Add(-duration)
 	var last error
+	tries := 0
 	for time.Now().Before(end) {
+		tries++
 		pump()
 		state, _, _ := waitSingle.Call(uintptr(p.Process), 0)
+		if tries%50 == 0 {
+			diagf("connectWord: waiting elapsed=%.1fs state=0x%X windows=%d", time.Since(start).Seconds(), state, len(windowInventory(p.PID)))
+		}
 		if state == 0 {
 			return nil, Fail("word_process_exited", "The explicitly launched Word process exited before a document window appeared; no other Word instance was attached", nil)
 		}
@@ -255,7 +270,7 @@ func connectWord(cfg hostConfig) (*wordHost, error) {
 		}
 		time.Sleep(40 * time.Millisecond)
 	}
-	return nil, Fail("word_startup_timeout", "The app-owned Word process did not expose its native document window", map[string]any{"last_error": fmt.Sprint(last), "windows": windowInventory(p.PID)})
+	return nil, Fail("word_startup_timeout", "The app-owned Word process did not expose its native document window", map[string]any{"last_error": fmt.Sprint(last), "windows": windowInventory(p.PID), "worker_diagnostics": diagTail()})
 }
 func (h *wordHost) close() {
 	for name, d := range h.objects {
@@ -694,8 +709,106 @@ type queued struct {
 	Task string
 }
 
+// hostDiag records __host startup progress markers. The buffer travels inside
+// fault details so a failed or stalled Word launch reports the last completed
+// startup step; the same lines are mirrored to stderr for deadline reports.
+var hostDiag struct {
+	mu  sync.Mutex
+	buf bytes.Buffer
+}
+
+// hostDiagStderr mirrors diagnostics to stderr only when WORDUP_HOST_DIAG=1;
+// the in-memory buffer is always kept for fault details.
+var hostDiagStderr = os.Getenv("WORDUP_HOST_DIAG") == "1"
+
+func diagf(format string, args ...any) {
+	line := time.Now().Format("15:04:05.000") + " " + fmt.Sprintf(format, args...)
+	hostDiag.mu.Lock()
+	if hostDiag.buf.Len() > 64*1024 {
+		hostDiag.buf.Reset()
+	}
+	fmt.Fprintln(&hostDiag.buf, line)
+	hostDiag.mu.Unlock()
+	if hostDiagStderr {
+		fmt.Fprintln(os.Stderr, line)
+	}
+}
+
+func diagTail() string {
+	hostDiag.mu.Lock()
+	defer hostDiag.mu.Unlock()
+	return hostDiag.buf.String()
+}
+
+func resetDiag() {
+	hostDiag.mu.Lock()
+	hostDiag.buf.Reset()
+	hostDiag.mu.Unlock()
+}
+
+var advapi32 = syscall.NewLazyDLL("advapi32.dll")
+var openProcessToken = advapi32.NewProc("OpenProcessToken")
+var getTokenInformation = advapi32.NewProc("GetTokenInformation")
+var processIdToSession = kernel.NewProc("ProcessIdToSessionId")
+var isProcessInJob = kernel.NewProc("IsProcessInJob")
+
+const (
+	tokenElevationType   = 18
+	tokenIntegrityLevel  = 25
+	tokenUIAccess        = 26
+	tokenQuery           = 0x0008
+	userObjectNameInfo   = 2
+)
+
+// workerState summarizes the identity and desktop binding of the __host
+// process immediately before it creates Word. The line travels inside
+// worker_diagnostics whenever the spawn fails, so a 1312 report states the
+// exact session, integrity, elevation and desktop the refusing CreateProcessW
+// call ran under.
+func workerState() string {
+	parts := []string{}
+	var session uint32
+	if r, _, _ := processIdToSession.Call(uintptr(os.Getpid()), uintptr(unsafe.Pointer(&session))); r != 0 {
+		parts = append(parts, fmt.Sprintf("session=%d", session))
+	}
+	tid, _, _ := getThreadID.Call()
+	desktop, _, _ := getThreadDesktop.Call(tid)
+	var name [128]uint16
+	var n uint32
+	if r, _, _ := getUserObjectInfo.Call(desktop, userObjectNameInfo, uintptr(unsafe.Pointer(&name[0])), uintptr(len(name))*2, uintptr(unsafe.Pointer(&n))); r != 0 {
+		parts = append(parts, fmt.Sprintf("thread_desktop=%q", syscall.UTF16ToString(name[:n/2])))
+	}
+	var inJob int32
+	self, _, _ := currentProcess.Call()
+	if r, _, _ := isProcessInJob.Call(self, 0, uintptr(unsafe.Pointer(&inJob))); r != 0 {
+		parts = append(parts, fmt.Sprintf("in_job=%v", inJob != 0))
+	}
+	var token syscall.Handle
+	if r, _, _ := openProcessToken.Call(self, tokenQuery, uintptr(unsafe.Pointer(&token))); r != 0 {
+		defer closeHandle.Call(uintptr(token))
+		var elev, rl uint32
+		if r, _, _ := getTokenInformation.Call(uintptr(token), tokenElevationType, uintptr(unsafe.Pointer(&elev)), 4, uintptr(unsafe.Pointer(&rl))); r != 0 {
+			parts = append(parts, fmt.Sprintf("elevation=%d", elev))
+		}
+		var label [128]byte
+		if r, _, _ := getTokenInformation.Call(uintptr(token), tokenIntegrityLevel, uintptr(unsafe.Pointer(&label[0])), 128, uintptr(unsafe.Pointer(&rl))); r != 0 && rl >= 16 {
+			count := int(label[13])
+			if count > 0 && rl >= uint32(12+8+count*4) {
+				rid := *(*uint32)(unsafe.Pointer(&label[12+8+(count-1)*4]))
+				parts = append(parts, fmt.Sprintf("integrity=0x%X", rid))
+			}
+		}
+		var ui uint32
+		if r, _, _ := getTokenInformation.Call(uintptr(token), tokenUIAccess, uintptr(unsafe.Pointer(&ui)), 4, uintptr(unsafe.Pointer(&rl))); r != 0 {
+			parts = append(parts, fmt.Sprintf("ui_access=%d", ui))
+		}
+	}
+	return strings.Join(parts, " ")
+}
+
 func HostMain(args []string) error {
 	defer StopOfficeTools()
+	resetDiag()
 	if len(args) != 1 {
 		return fmt.Errorf("private host expects exactly its generated configuration path")
 	}
@@ -713,6 +826,7 @@ func HostMain(args []string) error {
 	if len(cfg.Token) != 32 || !(privateDesktop || previewDesktop || hiddenInherited) || filepath.Clean(args[0]) != filepath.Join(cfg.Directory, "host.json") {
 		return fmt.Errorf("invalid private-host configuration")
 	}
+	diagf("config ok desktop=%q visible=%v word=%q stage=%q", cfg.Desktop, cfg.Visible, cfg.WordPath, cfg.Directory)
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
 	hr, _, _ := coInit.Call(0, 2)
@@ -720,6 +834,7 @@ func HostMain(args []string) error {
 		return fmt.Errorf("CoInitializeEx STA: 0x%08X", uint32(hr))
 	}
 	defer coUninit.Call()
+	diagf("CoInitializeEx STA ok")
 	// Verify that a normal private host is on its own desktop. An empty desktop
 	// is an explicit hidden fallback for restricted logon sessions; it is
 	// reported as degraded isolation rather than silently treated as private.
@@ -728,6 +843,9 @@ func HostMain(args []string) error {
 			return e
 		}
 	}
+	diagf("verifyDesktop ok")
+	diagf("worker state %s", workerState())
+	diagf("connectWord: starting")
 	h, e := connectWord(cfg)
 	if e != nil {
 		// Startup is the first request. Preserve the full fault, including owned
@@ -736,6 +854,7 @@ func HostMain(args []string) error {
 		return e
 	}
 	defer h.close()
+	diagf("connectWord: automation connected to pid=%d", h.process.PID)
 	var output sync.Mutex
 	emit := func(r Response) { output.Lock(); defer output.Unlock(); _ = json.NewEncoder(os.Stdout).Encode(r) }
 	work := make(chan queued, 128)
