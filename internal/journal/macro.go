@@ -90,8 +90,9 @@ func Create(root string, profile Profile) (CreateReport, error) {
 	for _, id := range []string{
 		"structure.detect",
 		"operation.safe-edit",
+		"document.stories",
 		"ui.form-shell",
-		"ui.progress-cancel",
+		"batch.progress",
 		"ui.ribbon-command",
 		"command.hotkey",
 		"command.context-menu",
@@ -1092,7 +1093,7 @@ Private Sub WU_ScanNotes(ByVal doc As Document, ByRef noteCount As Long, ByRef s
     ' engine, so citation audits stay fast on long note-heavy manuscripts and
     ' preserve every note's rich runs, fields, and hyperlinks.
     noteCount = doc.Footnotes.Count + doc.Endnotes.Count
-    supraCount = WU_CountLiteral(doc, "supra", "notes", False, False)
+    supraCount = WU_CountText(doc, "supra", "notes", False, False)
     Exit Sub
 Failed:
     failure = Err.Number: failureSource = Err.Source: failureText = Err.Description

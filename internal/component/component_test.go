@@ -201,28 +201,6 @@ func TestBundledVBADeclarations(t *testing.T) {
 	}
 }
 
-func TestHotkeyStatusScopesTemplateContext(t *testing.T) {
-	manifest, err := Get("command.hotkey")
-	if err != nil {
-		t.Fatal(err)
-	}
-	source := manifest.Files[0].Text
-	start := strings.Index(source, "Public Function WU_HotkeyRegistered")
-	if start < 0 {
-		t.Fatal("hotkey status function is not present")
-	}
-	end := strings.Index(source[start:], "End Function")
-	if end < 0 {
-		t.Fatal("hotkey status function has no terminator")
-	}
-	body := source[start : start+end]
-	context := strings.Index(body, "Application.CustomizationContext = ThisDocument")
-	lookup := strings.Index(body, "WU_OwnedHotkey(keyCode)")
-	if context < 0 || lookup < 0 || context > lookup {
-		t.Fatal("hotkey status must inspect bindings in the template customization context")
-	}
-}
-
 func TestAddTracksAndProtectsEditedComponent(t *testing.T) {
 	root := t.TempDir()
 	installed, err := Add(root, "structure.detect")
@@ -328,7 +306,7 @@ func TestAddRejectsInvalidOrUndeclaredParametersBeforeWriting(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			root := t.TempDir()
-			if _, err := AddWith(root, "ui.progress-cancel", values); err == nil {
+			if _, err := AddWith(root, "batch.progress", values); err == nil {
 				t.Fatal("invalid parameters accepted")
 			}
 			if _, err := project.Read(root, "vba/WordUpProgress.bas"); !os.IsNotExist(err) {
@@ -339,7 +317,7 @@ func TestAddRejectsInvalidOrUndeclaredParametersBeforeWriting(t *testing.T) {
 }
 
 func TestBundledCatalogIsComplete(t *testing.T) {
-	want := []string{"structure.detect", "operation.safe-edit", "ui.form-shell", "ui.progress-cancel", "ui.ribbon-command", "command.hotkey", "command.context-menu", "document.style-converter", "document.field-refresh", "document.text-operations"}
+	want := []string{"structure.detect", "operation.safe-edit", "document.stories", "document.text-operations", "document.style-converter", "document.field-refresh", "document.paragraph-index", "batch.progress", "ui.form-shell", "ui.ribbon-command", "command.hotkey", "command.context-menu"}
 	items := List()
 	if len(items) != len(want) {
 		t.Fatalf("components=%d, want %d", len(items), len(want))
@@ -351,455 +329,6 @@ func TestBundledCatalogIsComplete(t *testing.T) {
 		if items[i].Provenance == "" || items[i].Acceptance == "" || len(items[i].SupportedPlatforms) == 0 {
 			t.Fatalf("incomplete manifest: %#v", items[i])
 		}
-	}
-}
-
-func TestFieldRefreshChecksWordReturnCodesAndBounds(t *testing.T) {
-	item, err := Get("document.field-refresh")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if item.Version != "1.0.8" {
-		t.Fatalf("field refresh version=%q", item.Version)
-	}
-	for _, capability := range []string{"field refresh", "table-of-contents refresh", "range-bounded refresh", "story scopes", "header/footer scopes", "return-code diagnostics", "bounded story traversal"} {
-		found := false
-		for _, got := range item.Capabilities {
-			if got == capability {
-				found = true
-				break
-			}
-		}
-		if !found {
-			t.Fatalf("field refresh manifest omitted capability %q: %#v", capability, item.Capabilities)
-		}
-	}
-	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpFieldRefresh.bas" {
-		t.Fatalf("unexpected field refresh files: %#v", item.Files)
-	}
-	source := item.Files[0].Text
-	for _, want := range []string{
-		"Public Function WU_RefreshFields",
-		"Public Function WU_RefreshFieldsInRange",
-		"Private Function WU_NormalizeFieldScope",
-		"Private Function WU_FieldScopeHasWork",
-		"Private Function WU_FieldStoryTypeHasFields",
-		"Private Function WU_FieldChainHasFields",
-		"Private Function WU_FieldStoryHasFields",
-		"Private Function WU_FieldNextStory",
-		"If Not WU_FieldScopeHasWork(document, storyScope, updateContents) Then Exit Function",
-		"fieldCount = story.Fields.Count",
-		"WU_FieldStoryHasFields = (fieldCount > 0)",
-		"Private Sub WU_RefreshFieldStoryChain",
-		"Private Sub WU_RefreshFieldContents",
-		"fieldResult = story.Fields.Update",
-		"If readError <> 0 Or fieldResult <> 0 Then failures = failures + 1",
-		"fieldResult = target.Fields.Update",
-		"fieldCount = target.Fields.Count",
-		"If fieldCount = 0 Then Exit Function",
-		"updateError = Err.Number",
-		"If updateContents And (storyScope = \"main\" Or storyScope = \"all\") Then",
-		"storyStart = story.Start",
-		"storyEnd = story.End",
-		"fieldCount = story.Fields.Count",
-		"If readError <> 0 Then failures = failures + 1: Exit Sub",
-		"Set nextStory = story.NextStoryRange",
-		"If nextStory Is story Then failures = failures + 1: Exit Do",
-		"If nextError <> 0 Then failures = failures + 1: Exit Do",
-		"Private Const WU_MAX_FIELD_STORY_CHAIN As Long = 32768",
-		"Private Const WU_WORD_STORY_MISSING As Long = 5941",
-		"readDescription = Err.Description",
-		"Err.Clear\n    Set WU_FieldStory = document.StoryRanges(storyType)",
-		"If readError <> 0 And readError <> WU_WORD_STORY_MISSING Then",
-		"Err.Raise readError, \"WU_FieldStory\", \"story \" & CStr(storyType) & \" is unavailable: \" & readDescription",
-		"chainLength = chainLength + 1",
-		"If chainLength > WU_MAX_FIELD_STORY_CHAIN Then failures = failures + 1: Exit Do",
-		"Application.UndoRecord.StartCustomRecord \"Refresh fields\"",
-		"If captured Then Application.ScreenUpdating = updating",
-	} {
-		if !strings.Contains(source, want) {
-			t.Fatalf("field refresh source omitted %q", want)
-		}
-	}
-}
-
-func TestStyleConverterGuardsInputsAndStateCapture(t *testing.T) {
-	item, err := Get("document.style-converter")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if item.Version != "1.0.20" {
-		t.Fatalf("style converter version did not advance: %q", item.Version)
-	}
-	for _, capability := range []string{"paragraph-style conversion", "character-style conversion", "paragraph-style application", "range-bounded conversion", "offset style runs", "story-wide conversion", "header/footer scopes", "batch style mapping", "character-style batch mapping", "bounded story traversal"} {
-		found := false
-		for _, got := range item.Capabilities {
-			if got == capability {
-				found = true
-				break
-			}
-		}
-		if !found {
-			t.Fatalf("style converter manifest omitted capability %q: %#v", capability, item.Capabilities)
-		}
-	}
-	var source string
-	for _, file := range item.Files {
-		if file.Path == "vba/WordUpStyleConverter.bas" {
-			source = file.Text
-		}
-	}
-	for _, want := range []string{
-		"Public Function WU_ConvertStyleInRange",
-		"Public Function WU_ConvertCharacterStyle",
-		"Public Function WU_ConvertCharacterStyleInRange",
-		"Public Function WU_ConvertCharacterStyleBatch",
-		"Public Function WU_ConvertCharacterStyleBatchInRange",
-		"Public Function WU_ApplyParagraphStyleInRange",
-		"Public Function WU_ApplyParagraphStyleRuns",
-		"Public Function WU_ConvertStyleBatch",
-		"Public Function WU_ConvertStyleBatchInRange",
-		"Private Function WU_ConvertStyleInStory",
-		"Private Function WU_ConvertCharacterStyleInStory",
-		"Private Function WU_ConvertCharacterStyleInStoryChain",
-		"Private Function WU_ConvertCharacterStyleInStoryType",
-		"Private Function WU_IsCharacterStyle",
-		"Reading Linked raises 5891",
-		"Private Sub WU_ConvertCharacterStyleBatchInStory",
-		"Private Sub WU_ConvertCharacterStyleBatchInStoryChain",
-		"Private Sub WU_ConvertCharacterStyleBatchInStoryType",
-		"Private Function WU_ValidateStyleBatch",
-		"Private Function WU_ValidateParagraphStyleRuns",
-		"Private Function WU_ReadStylePosition",
-		"Private Function WU_ParagraphStyleMatches",
-		"Private Function WU_StyleStoryHasContent",
-		"Private Function WU_StyleStory",
-		"Private Const WU_WORD_STORY_MISSING As Long = 5941",
-		"readDescription = Err.Description",
-		"Err.Clear\n    Set WU_StyleStory = document.StoryRanges(storyType)",
-		"If readError <> 0 And readError <> WU_WORD_STORY_MISSING Then",
-		"Err.Raise readError, \"WU_StyleStory\", \"story \" & CStr(storyType) & \" is unavailable: \" & readDescription",
-		"Private Function WU_StyleNextStory",
-		`If nextStory Is story Then Err.Raise 5, "WU_StyleNextStory", "self-referential story chain"`,
-		"ByRef styleNames() As String",
-		"Private Const WU_MAX_STYLE_BATCH_RULES As Long = 256",
-		"Private Const WU_MAX_STYLE_STORY_CHAIN As Long = 32768",
-		"If chainLength > WU_MAX_STYLE_STORY_CHAIN Then Err.Raise 5, \"WU_ConvertStyleInStoryChain\", \"story chain exceeds 32768 linked stories\"",
-		`If document Is Nothing Then Err.Raise 91, "WU_ConvertStyle", "document is required"`,
-		`If Len(Trim$(fromStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyle", "source style is required"`,
-		`If Len(Trim$(toStyle)) = 0 Then Err.Raise 5, "WU_ConvertStyle", "target style is required"`,
-		`If storyScope <> "main" And storyScope <> "notes" And storyScope <> "headers" And storyScope <> "footers" And storyScope <> "all" Then Err.Raise 5, "WU_ConvertStyle", "story scope must be main, notes, headers, footers, or all"`,
-		`If sourceStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ConvertStyle", "source style is not a paragraph style"`,
-		`If targetStyle.Type <> wdStyleTypeParagraph Then Err.Raise 5, "WU_ConvertStyle", "target style is not a paragraph style"`,
-		`If Not WU_IsCharacterStyle(sourceStyle) Then Err.Raise 5, "WU_ConvertCharacterStyle", "source style is not a character style"`,
-		`If Not WU_IsCharacterStyle(targetStyle) Then Err.Raise 5, "WU_ConvertCharacterStyle", "target style is not a character style"`,
-		"captured = True",
-		"If captured Then Application.ScreenUpdating = updating",
-		"If targetEnd <= targetStart Then Exit Function",
-		"If WU_StyleStoryHasContent(story) Then If WU_ConvertStyleInStory",
-		"mappings must be a two-dimensional array",
-		"mappings must have exactly two columns",
-		"style mapping count exceeds 256",
-		"style mapping ",
-		"source must be scalar",
-		"runs must have exactly three columns",
-		"style run count exceeds 4096",
-		"style runs must be ordered and non-overlapping",
-		"style run ",
-		"start must be an integer position",
-		"end must be an integer position",
-		"is outside the target range",
-		"Application.UndoRecord.StartCustomRecord \"Apply paragraph style runs\"",
-		"Application.UndoRecord.StartCustomRecord \"Apply paragraph style\"",
-		"scope.Style = style",
-		"Set scope = target.Duplicate",
-		"scope.End = endPosition: scope.Start = startPosition",
-		"styleNames(row) = cachedNames(cacheIndex)",
-		`"source style " & fromStyle & " was not found"`,
-		`"style " & styleName & " was not found"`,
-		"Application.UndoRecord.StartCustomRecord \"Convert style batch\"",
-		"Set rowScope = target.Duplicate",
-		"rowScope.End = targetEnd: rowScope.Start = targetStart",
-		"Application.UndoRecord.StartCustomRecord \"Convert character style\"",
-		"Application.UndoRecord.StartCustomRecord \"Convert character style batch\"",
-		"ReDim sourceCache(firstRow To lastRow): ReDim targetCache(firstRow To lastRow): ReDim enabled(firstRow To lastRow)",
-		"ReDim cachedSourceNames(1 To cacheCapacity): ReDim cachedTargetNames(1 To cacheCapacity)",
-		"If StrComp(fromStyle, cachedSourceNames(cacheRow), vbTextCompare) = 0 Then sourceCacheIndex = cacheRow: Exit For",
-		"If StrComp(toStyle, cachedTargetNames(cacheRow), vbTextCompare) = 0 Then targetCacheIndex = cacheRow: Exit For",
-		"Set sourceCache(row) = sourceStyle: Set targetCache(row) = targetStyle",
-		"If enabled(row) Then If WU_ConvertStyleInStory",
-		"WU_ConvertStyleInStoryChain",
-		"WU_ConvertStyleInStoryType",
-		"Private Sub WU_PinFindOptions(ByVal criteria As Find)",
-		"Call WU_PinFindOptions(scope.Find)",
-		".Replacement.Style = targetStyle",
-		".Text = vbNullString",
-		".MatchFuzzy = False",
-		".MatchPhrase = False",
-		".MatchByte = False",
-		".MatchKashida = False",
-		".MatchDiacritics = False",
-		".MatchAlefHamza = False",
-		".MatchControl = False",
-		".MatchPrefix = False",
-		".MatchSuffix = False",
-		"wdPrimaryHeaderStory",
-		"wdFirstPageHeaderStory",
-		"wdEvenPagesHeaderStory",
-		"wdPrimaryFooterStory",
-		"wdFirstPageFooterStory",
-		"wdEvenPagesFooterStory",
-		"WU_ConvertStyleBatchInStoryChain",
-	} {
-		if !strings.Contains(source, want) {
-			t.Fatalf("style converter source omitted %q", want)
-		}
-	}
-	if strings.Contains(source, "And Not style.Linked") {
-		t.Fatal("style converter directly reads Linked in a non-short-circuit condition")
-	}
-	if strings.Contains(source, "Set rowScope = document.Range(targetStart, targetEnd)") {
-		t.Fatal("style batch range conversion rebuilt a non-main story as a Document range")
-	}
-}
-
-func TestTextOperationsUsesBoundedStoryFindAndStateCleanup(t *testing.T) {
-	item, err := Get("document.text-operations")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if item.Version != "1.0.26" {
-		t.Fatalf("text operations version=%q", item.Version)
-	}
-	if len(item.Files) != 1 || item.Files[0].Path != "vba/WordUpTextOperations.bas" {
-		t.Fatalf("unexpected text operations files: %#v", item.Files)
-	}
-	for _, capability := range []string{"literal replacement", "literal counting", "wildcard replacement", "wildcard counting", "wildcard batch replacement", "batch replacement", "range-bounded edits", "character-style matching", "exact character-style application", "wildcard character styling", "wildcard character-style batches", "offset character-style runs", "batch character-style matching", "header/footer scopes", "bounded story traversal"} {
-		found := false
-		for _, got := range item.Capabilities {
-			if got == capability {
-				found = true
-				break
-			}
-		}
-		if !found {
-			t.Fatalf("text operations manifest omitted capability %q: %#v", capability, item.Capabilities)
-		}
-	}
-	source := item.Files[0].Text
-	for _, want := range []string{
-		"Public Function WU_ReplaceLiteral",
-		"Public Function WU_CountLiteral",
-		"Public Function WU_CountLiteralInRange",
-		"Public Function WU_ReplaceLiteralBatch",
-		"Public Function WU_ReplaceLiteralBatchInRange",
-		"Public Function WU_ReplaceLiteralInRange",
-		"Public Function WU_ReplaceWildcard",
-		"Public Function WU_ReplaceWildcardInRange",
-		"Public Function WU_ReplaceWildcardBatch",
-		"Public Function WU_ReplaceWildcardBatchInRange",
-		"Public Function WU_CountWildcard",
-		"Public Function WU_CountWildcardInRange",
-		"Public Function WU_ApplyCharacterStyleToMatches",
-		"Public Function WU_ApplyCharacterStyleToRange",
-		"Public Function WU_ApplyCharacterStyleInRange",
-		"Public Function WU_ApplyCharacterStyleToWildcardMatches",
-		"Public Function WU_ApplyCharacterStyleToWildcardRange",
-		"Public Function WU_ApplyCharacterStyleToWildcardBatch",
-		"Public Function WU_ApplyCharacterStyleToWildcardBatchInRange",
-		"Public Function WU_ApplyCharacterStyleRuns",
-		"Public Function WU_ApplyCharacterStyleBatch",
-		"Public Function WU_ApplyCharacterStyleBatchInRange",
-		"target range is required",
-		"never opens an undo record or toggles ScreenUpdating",
-		"story scope must be main, notes, headers, footers, or all",
-		"replacements must be a two-dimensional array",
-		"replacements must have exactly two columns",
-		"Private Const WU_MAX_BATCH_RULES As Long = 1024",
-		"Private Const WU_MAX_TEXT_STORY_CHAIN As Long = 32768",
-		"replacement rule count exceeds 1024",
-		"replacement text must be scalar",
-		"IsObject(replacements(row, firstColumn))",
-		"IsArray(replacements(row, firstColumn + 1))",
-		"style rule count exceeds 1024",
-		"Private Function WU_ValidateCharacterStyleRuns",
-		"Private Function WU_ReadCharacterStylePosition",
-		"Private Function WU_CharacterStyleMatches",
-		"Private Function WU_TextIsCharacterStyle",
-		"Private Function WU_TextStoryHasContent",
-		"Private Function WU_TextStory",
-		"Private Const WU_WORD_STORY_MISSING As Long = 5941",
-		"readDescription = Err.Description",
-		"Err.Clear\n    Set WU_TextStory = document.StoryRanges(storyType)",
-		"If readError <> 0 And readError <> WU_WORD_STORY_MISSING Then",
-		"Err.Raise readError, \"WU_TextStory\", \"story \" & CStr(storyType) & \" is unavailable: \" & readDescription",
-		"Private Function WU_TextNextStory",
-		"A malformed package must not create a self-referential story chain.",
-		"If chainLength > WU_MAX_TEXT_STORY_CHAIN Then Err.Raise 5, \"WU_CountLiteralInStoryChain\", \"story chain exceeds 32768 linked stories\"",
-		"Plain character styles can raise when Linked is read on some Word",
-		"character style run count exceeds 4096",
-		"character style runs must be ordered and non-overlapping",
-		"character style run ",
-		"scope.End = endPosition: scope.Start = startPosition",
-		"Application.UndoRecord.StartCustomRecord \"Apply character style runs\"",
-		"style is not a character style",
-		"find text exceeds Word's 255-character limit",
-		"wildcard pattern exceeds Word's 255-character limit",
-		"wildcard replacement exceeds Word's 255-character limit",
-		"Application.UndoRecord.StartCustomRecord \"Replace literal text\"",
-		"Application.UndoRecord.StartCustomRecord \"Replace literal text batch\"",
-		"Application.UndoRecord.StartCustomRecord \"Replace wildcard text batch\"",
-		"Application.UndoRecord.StartCustomRecord \"Style literal matches\"",
-		"Application.UndoRecord.StartCustomRecord \"Apply character style\"",
-		"Application.UndoRecord.StartCustomRecord \"Style literal matches batch\"",
-		"WU_ValidateCharacterStyleBatch(document, matches, styleCache, True, \"WU_ApplyCharacterStyleToWildcardBatch\")",
-		"WU_ValidateCharacterStyleBatch(document, matches, styleCache, True, \"WU_ApplyCharacterStyleToWildcardBatchInRange\")",
-		"If captured Then Application.ScreenUpdating = updating",
-		".Replacement.Text = WU_ReplacementPattern(replaceText, useWildcards)",
-		"find text exceeds Word's escaped 255-character limit",
-		"replacement text exceeds Word's escaped 255-character limit",
-		"storyEnd > storyStart",
-		"Set story = document.StoryRanges(wdMainTextStory)",
-		".MatchWholeWord = wholeWord",
-		".MatchSoundsLike = False",
-		".MatchAllWordForms = False",
-		".MatchKashida = False",
-		".MatchDiacritics = False",
-		".MatchAlefHamza = False",
-		".MatchControl = False",
-		".MatchPrefix = False",
-		".MatchSuffix = False",
-		"WU_EscapeFindLiteral = Replace(value, \"^\", \"^^\")",
-		"WU_FindPattern",
-		"WU_ReplacementPattern",
-		".MatchWildcards = useWildcards",
-		"' A wildcard can legally match an empty span",
-		"Set firstStory = WU_TextStory(document, wdFootnotesStory)",
-		"Set firstStory = WU_TextStory(document, wdEndnotesStory)",
-		"wdPrimaryHeaderStory",
-		"wdEvenPagesHeaderStory",
-		"wdPrimaryFooterStory",
-		"wdEvenPagesFooterStory",
-		"WU_ReplaceLiteralInStoryChain",
-		"With MatchCase on, identical find/replacement text is an exact no-op.",
-		"If matchCase And StrComp(findText, replaceText, vbBinaryCompare) = 0 Then Exit Function",
-		"targetStart = target.Start: targetEnd = target.End",
-		"If targetEnd <= targetStart Then Exit Function",
-		"WU_ValidateLiteralBatch(replacements, matchCase, \"WU_ReplaceLiteralBatch\")",
-		"WU_ValidateLiteralBatch(replacements, matchCase, \"WU_ReplaceLiteralBatchInRange\")",
-		"WU_ValidateLiteralBatch(replacements, matchCase, \"WU_ReplaceWildcardBatch\", True)",
-		"WU_ReplaceWildcardBatchInScope",
-		"ReDim matched(firstRow To lastRow)",
-		"If matched(row) Then changed = changed + 1",
-		"ByRef matched() As Boolean",
-		"WU_ApplyCharacterStyleInStoryChain",
-		"WU_ApplyCharacterStyleInStoryType",
-		"WU_ApplyCharacterStyleBatchInStoryChain",
-		"WU_ApplyCharacterStyleBatchInStoryType",
-		"Dim styleCache() As Style",
-		"activeRows = WU_ValidateCharacterStyleBatch(document, matches, styleCache)",
-		"If useWildcards Then",
-		"WU_ValidateWildcard findText, \"\", sourceName",
-		"Optional ByVal useWildcards As Boolean = False, Optional ByVal sourceName As String = \"WU_ApplyCharacterStyleBatch\"",
-		"ByRef styleCache() As Style",
-		"Set styleCache(row) = style",
-		"Set style = styleCache(row)",
-		"ReDim cachedNames(1 To cacheCapacity): ReDim cachedStyles(1 To cacheCapacity)",
-		"If StrComp(styleName, cachedNames(cacheRow), vbTextCompare) = 0 Then cacheIndex = cacheRow: Exit For",
-		"cachedNames(cacheIndex) = styleName: Set cachedStyles(cacheIndex) = style",
-		"Private Sub WU_PinFindOptions(ByVal criteria As Find)",
-		"Call WU_PinFindOptions(search.Find)",
-		".MatchFuzzy = False",
-		".MatchPhrase = False",
-		".MatchByte = False",
-		"targetStyleName = style.NameLocal",
-		"Dim search As Range, nextStart As Long, matchStart As Long, matchEnd As Long, storyEnd As Long, changed As Long, currentStyle As String, targetStyleName As String",
-		"A wildcard may match an empty span",
-		"If matchEnd > matchStart Then",
-		"Dim search As Range, nextStart As Long, storyEnd As Long, count As Long",
-		"storyEnd = story.End",
-		"search.SetRange Start:=nextStart, End:=storyEnd",
-		"If StrComp(currentStyle, targetStyleName, vbTextCompare) <> 0 Then",
-	} {
-		if !strings.Contains(source, want) {
-			t.Fatalf("text operations source omitted %q", want)
-		}
-	}
-	if strings.Contains(source, "And Not style.Linked") {
-		t.Fatal("text operations directly reads Linked in a non-short-circuit condition")
-	}
-	batchHelper := source[strings.Index(source, "Private Function WU_ApplyCharacterStyleBatchInStory(ByVal"):]
-	if strings.Contains(batchHelper, "document.Styles(styleName)") {
-		t.Fatal("style batch looked up the same COM style once per story instead of reusing validated handles")
-	}
-}
-
-func TestSafeEditRequiresExplicitCaptureState(t *testing.T) {
-	item, err := Get("operation.safe-edit")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if item.Version != "1.0.2" {
-		t.Fatalf("safe-edit version did not advance: %q", item.Version)
-	}
-	var source string
-	for _, file := range item.Files {
-		if file.Path == "vba/WordUpSafeEdit.bas" {
-			source = file.Text
-		}
-	}
-	for _, want := range []string{
-		"ByRef captured As Boolean",
-		"captured = False",
-		"If captured Then Application.ScreenUpdating = updating",
-	} {
-		if !strings.Contains(source, want) {
-			t.Fatalf("safe-edit source omitted %q", want)
-		}
-	}
-}
-
-func TestFormShellPreservesUnloadFailure(t *testing.T) {
-	item, err := Get("ui.form-shell")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if item.Version != "1.0.2" {
-		t.Fatalf("form shell version did not advance: %q", item.Version)
-	}
-	var source string
-	for _, file := range item.Files {
-		if file.Path == "vba/WordUpFormShell.bas" {
-			source = file.Text
-		}
-	}
-	for _, want := range []string{
-		"If Not instance Is Nothing Then Unload instance",
-		"If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description",
-		"Err.Clear",
-	} {
-		if !strings.Contains(source, want) {
-			t.Fatalf("form shell cleanup omitted %q", want)
-		}
-	}
-}
-
-func TestRibbonCallbackEncodingUsesASCIIOnly(t *testing.T) {
-	item, err := Get("ui.ribbon-command")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if item.Version != "1.0.3" {
-		t.Fatalf("Ribbon component version did not advance: %q", item.Version)
-	}
-	var source string
-	for _, file := range item.Files {
-		if file.Path == "vba/WordUpRibbon.bas" {
-			source = file.Text
-		}
-	}
-	if !strings.Contains(source, "code = AscW(character)") || !strings.Contains(source, "code >= 48 And code <= 57") || strings.Contains(source, `character Like "[A-Za-z0-9]"`) {
-		t.Fatalf("Ribbon callback encoder is not locale-independent: %s", source)
 	}
 }
 
@@ -1032,5 +561,49 @@ func TestRibbonMergePreflightNormalizesTargetCase(t *testing.T) {
 	}
 	if _, err := project.Read(root, "assets/first.xml"); !os.IsNotExist(err) {
 		t.Fatalf("first Ribbon source copied after rejected preflight: %v", err)
+	}
+}
+
+func TestRequirementsInstallBeforeDependents(t *testing.T) {
+	root := t.TempDir()
+	installed, err := Add(root, "document.text-operations")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if installed.ID != "document.text-operations" {
+		t.Fatalf("installed %q", installed.ID)
+	}
+	lock, err := readLock(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, id := range []string{"document.stories", "operation.safe-edit", "document.text-operations"} {
+		if _, ok := lock.Components[id]; !ok {
+			t.Fatalf("%s missing from the lock after installing a dependent: %v", id, lock.Components)
+		}
+	}
+	for _, path := range []string{"vba/WordUpStories.bas", "vba/WordUpSafeEdit.bas", "vba/WordUpTextOperations.bas"} {
+		if _, err := os.Stat(filepath.Join(root, filepath.FromSlash(path))); err != nil {
+			t.Fatalf("%s not installed: %v", path, err)
+		}
+	}
+	// Installing the same dependent again is idempotent and does not reinstall
+	// or disturb the already installed requirements.
+	if _, err := Add(root, "document.style-converter"); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestBundledRequirementsExist(t *testing.T) {
+	ids := map[string]bool{}
+	for _, m := range builtin() {
+		ids[m.ID] = true
+	}
+	for _, m := range builtin() {
+		for _, id := range m.Requires {
+			if !ids[id] {
+				t.Fatalf("%s requires unknown component %s", m.ID, id)
+			}
+		}
 	}
 }

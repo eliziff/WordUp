@@ -24,6 +24,9 @@ Private Function WU_RibbonMacroName(ByVal controlID As String) As String
     If Len(value) > 240 Then Err.Raise 5, "WU_RibbonMacroName", "control id is too long for a VBA callback name"
     WU_RibbonMacroName = value
 End Function
+' Word's Application.Run resolves a plain procedure name inside the calling
+' template's project first. The Excel-style 'Template'!Macro qualification is
+' not valid in Word and raises 438 (verified natively).
 Private Function WU_QualifiedMacro(ByVal macroName As String) As String
-    WU_QualifiedMacro = "'" & Replace(ThisDocument.Name, "'", "''") & "'!" & macroName
+    WU_QualifiedMacro = macroName
 End Function

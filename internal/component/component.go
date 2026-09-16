@@ -46,6 +46,7 @@ type Manifest struct {
 	Parameters         map[string]string `json:"parameters,omitempty"`
 	Defaults           map[string]string `json:"defaults,omitempty"`
 	Capabilities       []string          `json:"capabilities"`
+	Requires           []string          `json:"requires,omitempty"`
 	Acceptance         string            `json:"acceptance"`
 	Adaptation         string            `json:"adaptation"`
 	Files              []File            `json:"files"`
@@ -102,49 +103,50 @@ func builtin() []Manifest {
 		Capabilities: []string{"paragraph evidence", "heading candidates", "resolved hierarchy", "ambiguity diagnostics"},
 		Acceptance:   "WU_DetectStructure returns a read-only two-dimensional Variant table.", Adaptation: "Customize WU_CustomizeCandidate for project eligibility and role mapping.",
 		Files: []File{{Path: "vba/WordUpStructure.bas", Text: structure.Source}}},
-		vbaComponent("operation.safe-edit", "WordUpSafeEdit", "WU_BeginSafeEdit", "Paired begin/end procedures scope one undo record and restore ScreenUpdating inside the caller's error handler.", "document editing", safeEditSource),
-		vbaComponent("ui.form-shell", "WordUpFormShell", "WU_ShowForm", "Shows a named UserForm through one stable entry point.", "UserForm lifecycle", formShellSource),
-		vbaComponent("ui.progress-cancel", "WordUpProgress", "WU_CancelRequested", "Provides cooperative progress and cancellation checkpoints.", "progress and cancellation", progressSource),
-		vbaComponent("ui.ribbon-command", "WordUpRibbon", "WU_RibbonCommand", "Provides a stable Ribbon callback dispatch seam.", "Ribbon callbacks", ribbonSource),
-		vbaComponent("command.hotkey", "WordUpHotkey", "WU_RegisterHotkey", "Registers and removes a template-owned key binding.", "hotkeys", hotkeySource),
-		vbaComponent("command.context-menu", "WordUpContextMenu", "WU_RegisterContextMenu", "Registers and removes a tagged context-menu command.", "context menus", contextMenuSource),
-		vbaComponent("document.style-converter", "WordUpStyleConverter", "WU_ConvertStyle", "Converts one or a bounded map of paragraph styles across explicitly selected stories or inside an exact Range in a single safe edit.", "style conversion", styleConverterSource),
-		vbaComponent("document.field-refresh", "WordUpFieldRefresh", "WU_RefreshFields", "Refreshes fields and optionally tables of contents across explicitly selected Word stories without using Selection.", "field refresh", fieldRefreshSource),
-		vbaComponent("document.text-operations", "WordUpTextOperations", "WU_ReplaceLiteral", "Counts and performs bounded literal and explicit wildcard replacement, batch replacement, and exact character-style matching (including offset runs and batches) across explicitly selected Word stories or an exact Range without using Selection.", "text operations", textOperationsSource)}
+		vbaComponent("operation.safe-edit", "1.0.2", "WordUpSafeEdit", safeEditSource,
+			"Paired begin/end procedures scope one undo record and restore ScreenUpdating inside the caller's error handler.",
+			[]string{"document editing", "undo record", "state restoration"},
+			"WU_BeginSafeEdit and WU_EndSafeEdit open and close one custom undo record, restore the caller's ScreenUpdating on success and failure, and never restore an uninitialized state.", nil),
+		vbaComponent("document.stories", "1.0.0", "WordUpStories", storiesSource,
+			"Enumerates the Word stories of a scope (main, notes, headers, footers, all) as Ranges; shared by the document components.",
+			[]string{"story enumeration", "story scopes", "bounded story traversal"},
+			"WU_Stories treats only Word's 5941 missing-story result as absent, raises every other retrieval failure, rejects self-referential chains, and bounds linked chains at 32768 stories.", nil),
+		vbaComponent("document.text-operations", "2.0.0", "WordUpTextOperations", textOperationsSource,
+			"Bounded literal or wildcard replacement, counting, ordered replacement batches, character-style application to matches, and exact character-style offset runs across explicitly selected stories or an exact Range, without Selection.",
+			[]string{"literal replacement", "wildcard replacement", "occurrence counting", "batch replacement", "range-bounded edits", "character-style matches", "offset character-style runs", "story scopes"},
+			"WU_ReplaceText, WU_CountText, WU_ReplaceBatch, WU_StyleMatches, their InRange forms and WU_ApplyCharacterStyleRuns enforce Word's 255-character Find limit before any state change, keep literal carets literal, pin Word's sticky Find flags, return without touching Word state when nothing matches, run inside one undo record, restore ScreenUpdating, preserve text and unrelated formatting, and let Word reset direct formatting inside a styled match as its user interface does.",
+			[]string{"document.stories", "operation.safe-edit"}),
+		vbaComponent("document.style-converter", "2.0.0", "WordUpStyleConverter", styleConverterSource,
+			"Converts paragraph or character styles, ordered style mapping batches, exact-range style application, and paragraph-style offset runs across explicitly selected stories or an exact Range.",
+			[]string{"paragraph-style conversion", "character-style conversion", "batch style mapping", "range-bounded conversion", "offset paragraph-style runs", "story scopes"},
+			"WU_ConvertParagraphStyle, WU_ConvertCharacterStyle, WU_ConvertStyleBatch, WU_ConvertStyleInRange, WU_ApplyParagraphStyleInRange, WU_ApplyCharacterStyleInRange and WU_ApplyParagraphStyleRuns reject missing styles and mismatched style kinds before any state change, treat a same-style mapping as a no-op, use one native formatted Find/Replace pass per story, run inside one undo record, restore ScreenUpdating, and never rewrite text.",
+			[]string{"document.stories", "operation.safe-edit"}),
+		vbaComponent("document.field-refresh", "2.0.0", "WordUpFieldRefresh", fieldRefreshSource,
+			"Refreshes fields and optionally tables of contents across explicitly selected stories or inside an exact Range, without Selection.",
+			[]string{"field refresh", "table-of-contents refresh", "range-bounded refresh", "story scopes", "return-code diagnostics"},
+			"WU_RefreshFields and WU_RefreshFieldsInRange return before changing application state when the scope has no fields, count stories, ranges and tables of contents whose update failed or returned a nonzero Fields.Update result, run inside one undo record, and restore ScreenUpdating.",
+			[]string{"document.stories", "operation.safe-edit"}),
+		vbaComponent("document.paragraph-index", "1.0.0", "WordUpParagraphIndex", paragraphIndexSource,
+			"One-shot main-story paragraph index: start, end, style name, table membership and text per paragraph from one enumeration, one text read and Document.Tables.",
+			[]string{"paragraph index", "table membership", "batch typesetting"},
+			"WU_IndexParagraphs returns the paragraph count and redimensions every array 1 To count; positions are story offsets, table membership comes from Document.Tables, and the bulk text is sliced only when story positions and visible text align.", nil),
+		vbaComponent("batch.progress", "1.0.0", "WordUpBatch", batchSource,
+			"Batch progress with per-stage timing, notification capture and cooperative cancellation for long-running macros.",
+			[]string{"progress", "stage timing", "notification capture", "cancellation"},
+			"WU_BatchStart/WU_BatchStage/WU_BatchEnd log stage_ms rows readable through WU_BatchReport, WU_Notify logs instead of showing MsgBox while a batch is active and marks critical or exclamation messages as failure, and WU_CancelRequested yields at most every 50 ms and reports WU_RequestCancel.", nil),
+		vbaComponent("ui.form-shell", "1.0.2", "WordUpFormShell", formShellSource,
+			"Shows a named UserForm through one stable entry point.", []string{"UserForm lifecycle"},
+			"WU_ShowForm loads, shows and unloads the named form and preserves an Unload failure instead of reporting cleanup success.", nil),
+		vbaComponent("ui.ribbon-command", "1.0.4", "WordUpRibbon", ribbonSource,
+			"Provides a stable Ribbon callback dispatch seam.", []string{"Ribbon callbacks"},
+			"WU_RibbonCommand dispatches by control ID through a locale-independent, collision-free encoding of non-identifier characters and runs the generated procedure by its plain name, which Word resolves inside the template project.", nil),
+		vbaComponent("command.hotkey", "1.0.6", "WordUpHotkey", hotkeySource,
+			"Registers and removes a template-owned key binding.", []string{"hotkeys"},
+			"WU_RegisterHotkey is idempotent, judges existence by KeyBinding.KeyCategory (FindKey returns an object even for an unbound key), clears only a binding owned by the current template before re-adding it, refuses keys bound by Word or another template, and WU_HotkeyRegistered inspects the template customization context and restores the caller's context on every exit.", nil),
+		vbaComponent("command.context-menu", "1.0.4", "WordUpContextMenu", contextMenuSource,
+			"Registers and removes a tagged context-menu command.", []string{"context menus"},
+			"WU_RegisterContextMenu owns its command per template path, installs its error handler before reading the caller's customization context, and WU_RemoveContextMenu removes only that command.", nil)}
 	for i := range items {
-		if items[i].ID == "command.hotkey" {
-			items[i].Version = "1.0.5"
-		}
-		if items[i].ID == "operation.safe-edit" {
-			items[i].Version = "1.0.2"
-		}
-		if items[i].ID == "command.context-menu" {
-			items[i].Version = "1.0.4"
-		}
-		if items[i].ID == "ui.form-shell" {
-			items[i].Version = "1.0.2"
-		}
-		if items[i].ID == "ui.progress-cancel" {
-			items[i].Version = "1.0.1"
-		}
-		if items[i].ID == "ui.ribbon-command" {
-			items[i].Version = "1.0.3"
-		}
-		if items[i].ID == "document.style-converter" {
-			items[i].Version = "1.0.20"
-			items[i].Capabilities = []string{"paragraph-style conversion", "character-style conversion", "paragraph-style application", "range-bounded conversion", "offset style runs", "story-wide conversion", "header/footer scopes", "batch style mapping", "character-style batch mapping", "bounded story traversal"}
-			items[i].Acceptance = "WU_ConvertStyle and WU_ConvertCharacterStyle (including exact-range and bounded batch forms), WU_ApplyParagraphStyleInRange, WU_ApplyParagraphStyleRuns, and their bounded paragraph batch equivalents support main, notes, headers, footers, and all scopes, keep exact-range batches in the caller's original story rather than rebuilding a main-story Document range, cache each unique style handle before editing, recognize plain and linked character styles without unsafe Linked reads, pin Word's sticky Find flags where the host exposes them, preserve text and inline structure on formatting-only conversion, treat only Word's normal 5941 missing-story result as absent, surface other root retrieval failures, skip empty linked stories, reject unavailable or self-referential story chains, bound longer malformed chains at 32768 linked stories, and return a controlled error, are state-safe, and compile without non-Office references."
-		}
-		if items[i].ID == "document.text-operations" {
-			items[i].Version = "1.0.26"
-			items[i].Capabilities = []string{"literal replacement", "literal counting", "wildcard replacement", "wildcard counting", "wildcard batch replacement", "batch replacement", "range-bounded edits", "character-style matching", "exact character-style application", "wildcard character styling", "wildcard character-style batches", "offset character-style runs", "batch character-style matching", "header/footer scopes", "bounded story traversal"}
-			items[i].Acceptance = "Literal and explicit wildcard count/replacement, wildcard batch replacement, exact character-style application, character-style match/range/batch, and exact offset-run operations support main, notes, headers, footers, and all scopes; plain and linked character styles are recognized without unsafe Linked reads, wildcard replacement tokens are opt-in, literal searches remain escaped, Find's sticky fuzzy/phrase/width/Unicode/control/prefix flags are pinned where exposed, one-record style batches resolve each unique style once, cache target names and story boundaries, treat only Word's normal 5941 missing-story result as absent, surface other root retrieval failures, skip empty linked stories, reject unavailable or self-referential story chains, bound longer malformed chains at 32768 linked stories, skip zero-width style matches, all paths remain bounded and state-safe, and the module compiles without non-Office references."
-		}
-		if items[i].ID == "document.field-refresh" {
-			items[i].Version = "1.0.8"
-			items[i].Capabilities = []string{"field refresh", "table-of-contents refresh", "range-bounded refresh", "story scopes", "header/footer scopes", "return-code diagnostics", "bounded story traversal"}
-			items[i].Acceptance = "WU_RefreshFields and WU_RefreshFieldsInRange support explicit story selection, probe the selected stories read-only and return before changing application state when no fields or requested table-of-contents work exists, skip field-free stories and ranges before opening an undo record, treat only Word's normal 5941 missing-story result as absent, surface other root retrieval failures, detect nonzero Fields.Update return codes, bound empty/unavailable/self-referential story traversal with a 32768-story malformed-chain ceiling, provide one-record state-safe cleanup, and compile without non-Office references."
-		}
 		items[i].Schema = 1
 		items[i].License = "MIT"
 		items[i].Provenance = "WordUp 0.4.0 bundled editable source"
@@ -159,9 +161,9 @@ func builtin() []Manifest {
 	return items
 }
 
-func vbaComponent(id, module, entry, description, capability, source string) Manifest {
-	return Manifest{ID: id, Version: "1.0.0", Description: description,
-		Capabilities: []string{capability}, Acceptance: entry + " is public and the module compiles without non-Office references.",
+func vbaComponent(id, version, module, source, description string, capabilities []string, acceptance string, requires []string) Manifest {
+	return Manifest{ID: id, Version: version, Description: description,
+		Capabilities: capabilities, Acceptance: acceptance, Requires: requires,
 		Adaptation: "Rename only the documented WU_ public entry points and keep cleanup paths intact.",
 		Files:      []File{{Path: "vba/" + module + ".bas", Text: source}}}
 }
@@ -213,7 +215,33 @@ func AddWith(root, id string, values map[string]string) (Installed, error) {
 	if err != nil {
 		return Installed{}, err
 	}
+	if err = ensureRequirements(root, m, values); err != nil {
+		return Installed{}, err
+	}
 	return install(root, m)
+}
+
+// ensureRequirements installs a component's declared bundled requirements
+// with the same adaptation values before the component itself, so a shared
+// module such as WordUpStories exists under the same identifier prefix. An
+// already installed requirement is left untouched.
+func ensureRequirements(root string, m Manifest, values map[string]string) error {
+	if len(m.Requires) == 0 {
+		return nil
+	}
+	lock, err := readLock(root)
+	if err != nil {
+		return err
+	}
+	for _, id := range m.Requires {
+		if _, installed := lock.Components[id]; installed {
+			continue
+		}
+		if _, err := AddWith(root, id, values); err != nil {
+			return fmt.Errorf("component %s requires %s: %w", m.ID, id, err)
+		}
+	}
+	return nil
 }
 
 func LoadBundle(dir string) (Manifest, error) {
@@ -306,6 +334,9 @@ func AddBundleWith(root, dir string, values map[string]string) (Installed, error
 	}
 	m, err = adapt(m, values)
 	if err != nil {
+		return Installed{}, err
+	}
+	if err = ensureRequirements(root, m, values); err != nil {
 		return Installed{}, err
 	}
 	return install(root, m)

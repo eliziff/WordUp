@@ -35,7 +35,7 @@ func TestComponentParametersFlowThroughAgent(t *testing.T) {
 	root := t.TempDir()
 	engine := &Engine{Root: root}
 	result, err := engine.Call(context.Background(), "component.add", Parameters{
-		Component: "ui.progress-cancel", Parameters: map[string]string{"module_prefix": "Fast"},
+		Component: "batch.progress", Parameters: map[string]string{"module_prefix": "Fast"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -43,7 +43,7 @@ func TestComponentParametersFlowThroughAgent(t *testing.T) {
 	if result.(component.Installed).Parameters["module_prefix"] != "Fast" {
 		t.Fatalf("parameters not returned: %#v", result)
 	}
-	source, err := os.ReadFile(filepath.Join(root, "vba", "WordUpProgress.bas"))
+	source, err := os.ReadFile(filepath.Join(root, "vba", "WordUpBatch.bas"))
 	if err != nil || !strings.Contains(string(source), "Fast_CancelRequested") {
 		t.Fatalf("parameterized source missing: %v", err)
 	}

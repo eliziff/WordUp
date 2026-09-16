@@ -10,11 +10,26 @@ import _ "embed"
 //go:embed vba/WordUpSafeEdit.bas
 var safeEditSource string
 
+//go:embed vba/WordUpStories.bas
+var storiesSource string
+
+//go:embed vba/WordUpTextOperations.bas
+var textOperationsSource string
+
+//go:embed vba/WordUpStyleConverter.bas
+var styleConverterSource string
+
+//go:embed vba/WordUpFieldRefresh.bas
+var fieldRefreshSource string
+
+//go:embed vba/WordUpParagraphIndex.bas
+var paragraphIndexSource string
+
+//go:embed vba/WordUpBatch.bas
+var batchSource string
+
 //go:embed vba/WordUpFormShell.bas
 var formShellSource string
-
-//go:embed vba/WordUpProgress.bas
-var progressSource string
 
 //go:embed vba/WordUpRibbon.bas
 var ribbonSource string
@@ -24,12 +39,3 @@ var hotkeySource string
 
 //go:embed vba/WordUpContextMenu.bas
 var contextMenuSource string
-
-//go:embed vba/WordUpStyleConverter.bas
-var styleConverterSource string
-
-//go:embed vba/WordUpFieldRefresh.bas
-var fieldRefreshSource string
-
-//go:embed vba/WordUpTextOperations.bas
-var textOperationsSource string
