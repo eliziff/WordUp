@@ -15,6 +15,25 @@ var containerIDs = map[string]string{
 	"MultiPage": "7013e3467a3fce11bed600aa00611080",
 }
 
+// Native designer levels always end with the FormDesignExtender record
+// (major 0, minor 2, three dwords). Word rewrites these bytes on save, but a
+// freshly created level missing the trailer fails the template open with an
+// opaque "Errors occurred during load" VBA message. The middle dword differs
+// between the root canvas and nested page containers.
+var (
+	formDesignExtenderRoot = []byte{0x00, 0x02, 0x0c, 0x00, 0x19, 0x00, 0x00, 0x00, 0xf3, 0x7f, 0x01, 0x00, 0xff, 0x01, 0x00, 0x00}
+	formDesignExtenderPage = []byte{0x00, 0x02, 0x0c, 0x00, 0x19, 0x00, 0x00, 0x00, 0xf3, 0xff, 0x01, 0x00, 0xff, 0x01, 0x00, 0x00}
+)
+
+// nativeRootFontAsset returns the StdFont stream asset ("Tahoma") that Word
+// writes for a freshly designed UserForm root. The record carries only the
+// 2-byte Font field value 0xFFFF; these blob bytes follow the record in the
+// f stream. See the internal/native native-form baseline dumps.
+func nativeRootFontAsset() []byte {
+	b, _ := hex.DecodeString("0352e30b918fce119de300aa004bb851010000009001b0300100065461686f6d61")
+	return b
+}
+
 func containerCompObj(kind string) []byte {
 	id, _ := hex.DecodeString(containerIDs[kind])
 	b, _ := hex.DecodeString("0100feff030a0000ffffffff")
@@ -383,7 +402,8 @@ func (f *Form) applyPages(l *formLevel, designs []ControlDesign, remove []string
 				return e
 			}
 			_ = r.size("DisplayedSize", 144, 108)
-			pages = append(pages, &formControl{site: s, kind: "Form", child: &formLevel{path: fmt.Sprintf("%s/i%02d", l.path, id), record: r, structural: true, kind: "Form"}})
+			_ = r.set("BooleanProperties", 0xc004)
+			pages = append(pages, &formControl{site: s, kind: "Form", child: &formLevel{path: fmt.Sprintf("%s/i%02d", l.path, id), record: r, structural: true, kind: "Form", trailing: append([]byte(nil), formDesignExtenderPage...)}})
 			l.controls = append(l.controls, pages[len(pages)-1])
 			at = len(pages) - 1
 			book.ids = append(book.ids, uint32(id))

@@ -366,11 +366,17 @@ func NewForm(name string, cp int) (*Form, error) {
 	}
 	_ = r.size("DisplayedSize", 360, 240)
 	_ = r.size("LogicalSize", 0, 0)
-	_ = r.set("BooleanProperties", nil)
+	// Native roots store BooleanProperties 0x4004 and a StdFont stream asset
+	// for the designer font; Word refuses to load a fresh form lacking them.
+	_ = r.set("BooleanProperties", 0x4004)
 	// Word compares the designer's ShapeCookie with VBFrame.TypeInfoVer.
 	// A missing cookie defaults to zero and makes a newly saved form unloadable.
 	_ = r.set("ShapeCookie", 1)
-	return &Form{Name: name, Codepage: cp, CFB: NewCompound(), root: &formLevel{path: name, record: r, structural: true, classes: []byte{0, 0}}}, nil
+	r.values["Font"] = 65535
+	r.mask |= 1 << 20
+	r.dirty = true
+	root := &formLevel{path: name, record: r, structural: true, classes: []byte{0, 0}, streams: nativeRootFontAsset(), trailing: append([]byte(nil), formDesignExtenderRoot...)}
+	return &Form{Name: name, Codepage: cp, CFB: NewCompound(), root: root}, nil
 }
 func floatValue(m map[string]any, key string, def float64) (float64, error) {
 	x, ok := m[key]
@@ -636,7 +642,8 @@ func (f *Form) apply(d Design) error {
 	for _, item := range []struct {
 		key, field string
 		scale      float64
-	}{{"Caption", "Caption", 1}, {"Width", "ClientWidth", 20}, {"Height", "ClientHeight", 20}, {"StartUpPosition", "StartUpPosition", 1}} {
+		integer    bool
+	}{{"Caption", "Caption", 1, false}, {"Width", "ClientWidth", 20, false}, {"Height", "ClientHeight", 20, false}, {"StartUpPosition", "StartUpPosition", 1, true}} {
 		v, ok := d.Properties[item.key]
 		if !ok {
 			continue
@@ -653,7 +660,11 @@ func (f *Form) apply(d Design) error {
 			if e != nil {
 				return e
 			}
-			value = fmt.Sprintf("%.3f", n*item.scale)
+			if item.integer {
+				value = fmt.Sprint(int(n * item.scale))
+			} else {
+				value = fmt.Sprintf("%.3f", n*item.scale)
+			}
 		}
 		re := regexp.MustCompile(`(?m)^\s*` + item.field + `\s*=.*\r?$`)
 		if re.MatchString(f.vbframe) {

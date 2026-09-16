@@ -262,10 +262,11 @@ func moduleRecords(m Module, cp int) ([]byte, error) {
 		return nil, e
 	}
 	b := []byte{}
+	cookie := word(moduleCookie(m))
 	for _, r := range []struct {
 		t uint16
 		b []byte
-	}{{0x19, nm}, {0x47, utf16bytes(m.Name)}, {0x1a, nm}, {0x32, utf16bytes(m.Name)}, {0x1c, nil}, {0x48, nil}, {0x31, dword(0)}, {0x1e, dword(0)}, {0x2c, word(0)}} {
+	}{{0x19, nm}, {0x47, utf16bytes(m.Name)}, {0x1a, nm}, {0x32, utf16bytes(m.Name)}, {0x1c, nil}, {0x48, nil}, {0x31, dword(0)}, {0x1e, dword(0)}, {0x2c, cookie}} {
 		b = append(b, tlv(r.t, r.b)...)
 	}
 	typ := uint16(0x22)
@@ -273,8 +274,24 @@ func moduleRecords(m Module, cp int) ([]byte, error) {
 		typ = 0x21
 	}
 	b = append(b, tlv(typ, nil)...)
+	if m.Kind == "form" {
+		// Native Word writes every UserForm module as a private module
+		// (MODULEPRIVATE 0x28 with empty payload).
+		b = append(b, tlv(0x28, nil)...)
+	}
 	b = append(b, tlv(0x2b, nil)...)
 	return b, nil
+}
+
+// moduleCookie mirrors Word, which never writes a zero MODULECOOKIE; MS-OVBA
+// requires the cookie to be greater than 0x0000 and less than 0xFFFF.
+func moduleCookie(m Module) uint16 {
+	sum := sha256.Sum256([]byte("WordUp cookie:" + m.Name))
+	c := uint16(sum[0]) | uint16(sum[1])<<8
+	if c == 0 {
+		c = 1
+	}
+	return c
 }
 func StableGUID(scope string) string {
 	sum := sha256.Sum256([]byte("WordUp:" + scope))

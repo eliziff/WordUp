@@ -31,7 +31,9 @@ Public Function HotkeyAcceptance() As Boolean
 End Function
 Public Sub ShowContextMenu()
     CommandInvocations = 0
-    ActiveDocument.Range(0, 0).Select
+    ' RibbonX ContextMenuText is exposed only for a text selection. Keep the
+    ' fixture deterministic while exercising the same menu a user sees.
+    ActiveDocument.Range(0, 1).Select
 End Sub
 Public Function ContextAcceptance() As Boolean
     ContextAcceptance = CommandInvocations = 1
