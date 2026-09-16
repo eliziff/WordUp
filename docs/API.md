@@ -113,6 +113,9 @@ JSON-lines and MCP continue to use the same engine and core.
 
 ## Direct native object access (Windows)
 
+`native.probe` (`count`, optional `native_options`) launches up to 50 fresh app-owned hidden Word sessions back to back, handshakes each, and closes it. The result lists per-launch startup timings, Word version, desktop isolation and p50/p95; any launch or cleanup fault returns `native_launch_failed` with the full record. It never reuses or disturbs the warm session. The CLI form is `wordup doctor --word [COUNT]`, and it is the headless-Word gate every agent runs before native work.
+
+
 Create `operation.json`:
 
 ```json
