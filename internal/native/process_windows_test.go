@@ -2,7 +2,23 @@
 
 package native
 
-import "testing"
+import (
+	"fmt"
+	"syscall"
+	"testing"
+)
+
+func TestNoLogonSessionErrorClassification(t *testing.T) {
+	if !noLogonSessionError(fmt.Errorf("CreateProcessW: %w", syscall.Errno(1312))) {
+		t.Fatal("1312 must trigger the restricted-session fallback")
+	}
+	if !noLogonSessionError(fmt.Errorf("The specified logon session does not exist")) {
+		t.Fatal("the Windows error text must trigger the restricted-session fallback")
+	}
+	if noLogonSessionError(syscall.Errno(5)) {
+		t.Fatal("unrelated Windows errors must not trigger the fallback")
+	}
+}
 
 func TestProcessCreationFlagsKeepWordInOwnedJob(t *testing.T) {
 	worker := processCreationFlags(1)

@@ -44,11 +44,10 @@ var duplicateHandle = kernel.NewProc("DuplicateHandle")
 var currentProcess = kernel.NewProc("GetCurrentProcess")
 
 const (
-	createNewProcessGroup = 0x00000200
-	createSuspended       = 0x00000004
-	createNoWindow        = 0x08000000
-	createBreakaway       = 0x01000000
-	extendedStartupInfo   = 0x00080000
+	createSuspended     = 0x00000004
+	createNoWindow      = 0x08000000
+	createBreakaway     = 0x01000000
+	extendedStartupInfo = 0x00080000
 )
 
 func processCreationFlags(job uintptr) uint32 {
@@ -211,12 +210,16 @@ func spawnOnDesktop(exe string, args []string, desktop string, hidden bool, stdi
 		return result, winError("InitializeProcThreadAttributeList", e)
 	}
 	defer deleteAttributes.Call(attr)
+	// Keep the extended startup-info structure and inherited-handle whitelist in
+	// every branch: the creation flags always include
+	// EXTENDED_STARTUPINFO_PRESENT, so Cb must always be the full
+	// STARTUPINFOEXW size.
+	si := startupEX{Attributes: attr}
+	si.Info.Cb = uint32(unsafe.Sizeof(si))
 	r, _, e = updateAttributes.Call(attr, 0, 0x00020002, uintptr(unsafe.Pointer(&handles[0])), uintptr(len(handles))*unsafe.Sizeof(handles[0]), 0, 0)
 	if r == 0 {
 		return result, winError("UpdateProcThreadAttribute(handle list)", e)
 	}
-	si := startupEX{Attributes: attr}
-	si.Info.Cb = uint32(unsafe.Sizeof(si))
 	si.Info.Desktop = dp
 	si.Info.Flags = 0x100 // STARTF_USESTDHANDLES
 	if hidden {
@@ -258,7 +261,17 @@ func spawnOnDesktop(exe string, args []string, desktop string, hidden bool, stdi
 	return result, nil
 }
 func Available() bool { _, e := findWord(); return e == nil }
+// Start launches the app-owned Word session. Restricted logon sessions can let
+// CreateDesktopW succeed yet refuse every CreateProcessW attempted from that
+// desktop-bound worker (ERROR_NO_SUCH_LOGON_SESSION, 1312). When the startup
+// handshake reports native_session_restricted, Start rebuilds the whole session
+// once with the worker and Word hidden on the inherited desktop; the handshake
+// then reports the loss of desktop isolation explicitly.
 func Start(ctx context.Context, opt Options) (Host, error) {
+	return start(ctx, opt, false)
+}
+
+func start(ctx context.Context, opt Options, degraded bool) (Host, error) {
 	started := time.Now()
 	if opt.MemoryLimitMB == 0 {
 		opt.MemoryLimitMB = 2048
@@ -294,13 +307,28 @@ func Start(ctx context.Context, opt Options) (Host, error) {
 	}()
 	if opt.Visible {
 		h.cfg.Desktop = "Default"
+	} else if degraded {
+		// Explicit degraded-isolation retry: the previous private-desktop
+		// handshake failed with native_session_restricted, so this worker
+		// stays hidden on the inherited desktop instead.
+		h.cfg.Desktop = ""
 	} else {
 		dn, _ := utf(h.cfg.Desktop)
 		hd, _, er := createDesktop.Call(uintptr(unsafe.Pointer(dn)), 0, 0, 0, 0x000F01FF, 0)
 		if hd == 0 {
-			return nil, winError("CreateDesktopW", er)
+			desktopErr := winError("CreateDesktopW", er)
+			// A restricted/service-like logon can reject the desktop object
+			// itself with the same 1312 boundary that may otherwise appear at
+			// CreateProcessW. Fall back before creating any owned processes; the
+			// handshake will report degraded isolation explicitly.
+			if !noLogonSessionError(desktopErr) {
+				return nil, desktopErr
+			}
+			degraded = true
+			h.cfg.Desktop = ""
+		} else {
+			h.desktop = hd
 		}
-		h.desktop = hd
 	}
 	j, _, er := createJob.Call(0, 0)
 	if j == 0 {
@@ -425,6 +453,34 @@ func Start(ctx context.Context, opt Options) (Host, error) {
 	defer cancel()
 	result, e := h.Call(boot, Operation{Op: "hello", Value: h.cfg.Token})
 	if e != nil {
+		var restricted *Fault
+		if !degraded && !opt.Visible && h.desktop != 0 && errors.As(e, &restricted) && restricted.Code == "native_session_restricted" {
+			// The worker ran on the private desktop but every process it tried
+			// to create there (and by inheritance from that thread) failed with
+			// 1312. Rebuild the whole session once on the inherited desktop so
+			// verification can still run; desktop_isolation stays false in the
+			// handshake info so the lost sandbox is reported, never silent.
+			h.Close()
+			opt.Directory = base
+			retry, retryErr := start(ctx, opt, true)
+			if retryErr != nil {
+				var retryFault *Fault
+				if !errors.As(retryErr, &retryFault) {
+					retryFault = &Fault{Code: "native_error", Message: retryErr.Error()}
+				}
+				return nil, Fail("native_session_restricted", "Windows refused hidden Word creation in the current logon session", map[string]any{
+					"private_desktop_fault":   restricted,
+					"inherited_desktop_fault": retryFault,
+				})
+			}
+			if retryHost, okHost := retry.(*localHost); okHost {
+				retryHost.mu.Lock()
+				retryHost.info["degraded_isolation"] = true
+				retryHost.info["degraded_isolation_cause"] = restricted.Message
+				retryHost.mu.Unlock()
+			}
+			return retry, nil
+		}
 		return nil, e
 	}
 	m, okInfo := result.(map[string]any)
