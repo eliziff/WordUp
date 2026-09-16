@@ -1,0 +1,12 @@
+{
+  "id": "alr-screenupdating-leak",
+  "title": "ALR Setup batch turns screen redraw back on mid-batch",
+  "tags": ["alr", "seeded-defect", "performance"],
+  "fixture": { "type": "workspace", "path": "workspaces/alr-refactor" },
+  "prompt": "This is the Alberta Law Review editing template (ALR_V1). The Setup batch (frmALRSetup, cmdRun_Click) disables Application.ScreenUpdating for the whole batch, but profiling shows that every stage after 'Styling abstract' runs with redraw enabled, which makes the later stages slow. Find where a routine in the batch forces ScreenUpdating back to True instead of restoring the caller's value, and fix it (and any sibling routines with the same defect) so that a routine never leaves ScreenUpdating in a different state than it found it. Keep all other behavior identical. Verify in real Word by calling the routine with ScreenUpdating already False and checking it is still False afterwards.",
+  "grade": {
+    "build_output": "dist/bench.dotm",
+    "suite": "suites/alr-screenupdating-leak.json"
+  },
+  "timeout_s": 1800
+}

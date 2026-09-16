@@ -111,6 +111,9 @@ func Tools() []Tool {
 	props["suite"] = map[string]any{"type": "object", "description": "schema=1,name,steps:[{name,operation,assert:[{kind,path,expected,tolerance}],timeout_ms}], optional platforms and require_compile"}
 	tools := make([]Tool, 0, len(toolSpecs))
 	for _, spec := range toolSpecs {
+		if hiddenByProfile(spec.name) {
+			continue
+		}
 		selected := map[string]any{}
 		required := []string{}
 		for _, field := range strings.Fields(spec.parameters) {

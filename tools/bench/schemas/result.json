@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "summary": { "type": "string", "description": "What was changed and how it was verified, in a few sentences." },
+    "files_changed": { "type": "array", "items": { "type": "string" }, "description": "Workspace-relative paths that were created or edited." },
+    "components_used": { "type": "array", "items": { "type": "string" }, "description": "Bundled component IDs installed or reused; empty when none." },
+    "native_tests_run": { "type": "boolean", "description": "Whether the change was executed in real Word through the tool before finishing." },
+    "confidence": { "type": "string", "enum": ["low", "medium", "high"] }
+  },
+  "required": ["summary", "files_changed", "components_used", "native_tests_run", "confidence"],
+  "additionalProperties": false
+}

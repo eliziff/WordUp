@@ -96,6 +96,10 @@ func run(ctx context.Context, args []string) int {
 		fmt.Fprintln(os.Stderr, err)
 		return 1
 	}
+	if err = agent.SetToolProfile(os.Getenv("WORDUP_TOOL_PROFILE")); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return 2
+	}
 	e := &agent.Engine{Root: root, Execute: execute}
 	defer e.Close()
 	if clean[0] == "serve" || clean[0] == "mcp" {

@@ -43,3 +43,6 @@ Wordwright-*-ALR-*
 /VBALexer.tokens
 /VBAParser.interp
 /VBAParser.tokens
+
+# Agent benchmark runs (large event logs, disposable workspaces)
+/tools/bench/results/

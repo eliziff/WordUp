@@ -1,0 +1,13 @@
+{
+  "id": "studio-italicize-supra-notes",
+  "title": "Add a Ribbon button that italicizes 'supra' in notes only, with one-step undo",
+  "tags": ["studio", "feature", "ribbon", "notes"],
+  "fixture": { "type": "example" },
+  "prompt": "This workspace is the WordUp Studio example template (VBA in workspace\\vba, RibbonX under workspace\\package). Add a new feature: a public procedure `ItalicizeSupraInNotes` (in Studio.bas or a new standard module) that italicizes every whole-word occurrence of 'supra' (case-insensitive) in the document's footnotes and endnotes only. The main body must not change. The whole operation must be one undo step (a single custom undo record) and must restore Application.ScreenUpdating to whatever it was before. Wire a new button labelled 'Italicize Supra' on the existing Studio Ribbon tab whose onAction runs it. Build, then prove it in real Word with your own acceptance suite: a document with 'supra' in the body and twice in a footnote, run the procedure, check only the footnote occurrences are italic, and check that one Undo restores the footnote.",
+  "grade": {
+    "build_output": "dist/bench.dotm",
+    "suite": "suites/studio-italicize-supra-notes.json",
+    "file_contains": [ { "path": "package/**/customUI*.xml", "text": "ItalicizeSupraInNotes" } ]
+  },
+  "timeout_s": 1800
+}

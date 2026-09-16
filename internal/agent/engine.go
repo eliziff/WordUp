@@ -144,6 +144,9 @@ func (e *Engine) openWorkspace() (*project.Workspace, error) {
 	return e.workspace, nil
 }
 func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, error) {
+	if hiddenByProfile(method) {
+		return nil, fmt.Errorf("tool %q is not available in the %s tool profile", method, ToolProfile())
+	}
 	if !strings.HasPrefix(method, "native.") {
 		e.fsMu.Lock()
 		defer e.fsMu.Unlock()
