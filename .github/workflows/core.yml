@@ -33,11 +33,8 @@ jobs:
         with:
           go-version-file: go.mod
           cache: false
-      - name: Locate toolchain for repository wrapper
-        run: |
-          $tools = Join-Path (Split-Path -Parent $PWD.Path) '.tools'
-          New-Item -ItemType Directory -Force $tools | Out-Null
-          New-Item -ItemType Junction -Path (Join-Path $tools 'go') -Target $env:GOROOT | Out-Null
+      - name: Select the installed toolchain explicitly
+        run: '"WORDUP_GO=$((Get-Command go).Source)" >> $env:GITHUB_ENV'
       - uses: actions/cache@v4
         with:
           path: |
@@ -47,6 +44,17 @@ jobs:
           restore-keys: core-${{ runner.os }}-${{ hashFiles('go.mod', 'go.sum') }}-
       - name: Download declared dependencies
         run: ./tools/go.ps1 -Online mod download
+      - name: Export offline dependency sources
+        run: |
+          ./tools/go.ps1 -Online mod vendor
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          tar -cf dependencies.tar vendor
+          Remove-Item -Recurse -Force vendor
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dependency-sources
+          path: dependencies.tar
+          retention-days: 7
       - name: Offline regression checks (not native Word acceptance)
         run: ./tools/go.ps1 test -count=1 ./internal/... ./cmd/...
       - name: Static checks
