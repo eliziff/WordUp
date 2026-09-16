@@ -691,8 +691,7 @@ Private Function WU_EnsureStyle(ByVal doc As Document, ByVal styleName As String
         If StrComp(CStr(.Font.Name), fontName, vbTextCompare) <> 0 Then .Font.Name = fontName
         If StrComp(CStr(.Font.NameAscii), fontName, vbTextCompare) <> 0 Then .Font.NameAscii = fontName
         If StrComp(CStr(.Font.NameOther), fontName, vbTextCompare) <> 0 Then .Font.NameOther = fontName
-        If StrComp(CStr(.Font.NameFarEast), fontName, vbTextCompare) <> 0 Then .Font.NameFarEast = fontName
-        If StrComp(CStr(.Font.NameBi), fontName, vbTextCompare) <> 0 Then .Font.NameBi = fontName
+        WU_SetScriptFonts .Font, fontName
         If Abs(CSng(.Font.Size) - fontSize) > 0.01 Then .Font.Size = fontSize
         If Abs(CSng(.Font.SizeBi) - fontSize) > 0.01 Then .Font.SizeBi = fontSize
         If .Font.Bold <> bold Then .Font.Bold = bold
@@ -719,14 +718,25 @@ Private Function WU_EnsureCharacterStyle(ByVal doc As Document, ByVal styleName 
         If StrComp(CStr(.Name), fontName, vbTextCompare) <> 0 Then .Name = fontName
         If StrComp(CStr(.NameAscii), fontName, vbTextCompare) <> 0 Then .NameAscii = fontName
         If StrComp(CStr(.NameOther), fontName, vbTextCompare) <> 0 Then .NameOther = fontName
-        If StrComp(CStr(.NameFarEast), fontName, vbTextCompare) <> 0 Then .NameFarEast = fontName
-        If StrComp(CStr(.NameBi), fontName, vbTextCompare) <> 0 Then .NameBi = fontName
+        WU_SetScriptFonts value.Font, fontName
         If Abs(CSng(.Size) - fontSize) > 0.01 Then .Size = fontSize
         If Abs(CSng(.SizeBi) - fontSize) > 0.01 Then .SizeBi = fontSize
         If .Italic <> italic Then .Italic = italic
     End With
     Set WU_EnsureCharacterStyle = value
 End Function
+
+' East Asian and complex-script font slots are best effort: Word raises 5844
+' when a style is given a font that does not cover that script (Cambria for
+' NameFarEast, for example), and a Latin journal never needs the slot.
+Private Sub WU_SetScriptFonts(ByVal target As Font, ByVal fontName As String)
+    On Error Resume Next
+    If StrComp(CStr(target.NameFarEast), fontName, vbTextCompare) <> 0 Then target.NameFarEast = fontName
+    Err.Clear
+    If StrComp(CStr(target.NameBi), fontName, vbTextCompare) <> 0 Then target.NameBi = fontName
+    Err.Clear
+    On Error GoTo 0
+End Sub
 
 Private Sub WU_CustomizeRoleStyles(ByVal titleStyle As Style, ByVal authorStyle As Style, ByVal abstractStyle As Style, ByVal quotationStyle As Style, ByVal tocStyle As Style, ByVal bibliographyStyle As Style, ByVal citationStyle As Style)
     ' Neutral baseline: no publication-specific overrides. Keep this seam
