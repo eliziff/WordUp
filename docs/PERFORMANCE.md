@@ -14,6 +14,36 @@ Measured in real Microsoft Word on Windows x64, September 12, 2026. Processes ru
 
 The signed Studio acceptance suite freshly executes 17 assertions: actual whole-project compilation, native signature presence, persisted nested UserForm, Ribbon initialization and button action, scratch VBA, native page rendering, form callback, template hotkey, context-menu callback, document contents, inherited content control, saved building block, and selection/format preservation. It also captures the real Word and UserForm windows. It does not substitute a cached pass for Word execution.
 
+## Real-manuscript macro timings
+
+These are separate from the primitive and generated-template measurements above.
+Each row ran the actual VBA against a supplied manuscript copy in hidden
+Microsoft Word 16.0, with the source and result checked through Word's exact
+`WordOpenXML`. The macro time is the operation's own timer; the native-step time
+also includes the surrounding assertions and Word calls. It excludes Word host
+startup unless noted.
+
+| Operation and input | Document facts | Macro time | Native operation step | Result |
+|---|---|---:|---:|---|
+| `UBC.FormatManuscript` on Dyson | 61,775 characters; 156 footnotes; 82,335-byte DOCX | 3.297 s | 3.773 s | Passed; body, notes, fields/bookmarks and exact source content preserved |
+| `UBC.FormatManuscript` on Rizzuto | 43,151 characters; 146 footnotes; 84,485-byte DOCX | 3.969 s | 4.456 s | Passed; table, two sections, notes and exact source content preserved |
+| ALR full Setup on Dyson | 190 paragraphs; 156 footnotes; 684,955-byte Word XML | 12.504 s | 12.504 s job timer | Passed; 20 selected tasks, output XML captured |
+| ALR full Setup on Rizzuto | 169 paragraphs; 146 footnotes; one table; 692,344-byte Word XML | 22.183 s | 22.183 s job timer | Passed; 20 selected tasks, output XML captured and state/undo check passed |
+
+The complete fresh Word runs were 8.274 s and 8.370 s for the two UBC rows,
+including startup, compilation, document open, XML snapshots and cleanup. The
+ALR Dyson quiet run was 18.602 s end to end; the ALR Rizzuto state/undo run was
+36.609 s because it additionally measured a 7.029-second full undo/state
+restoration check. Those wall times are harness workflows, not the macro
+throughput numbers.
+
+The ALR rows are useful performance evidence but not a 5x claim against the
+older approximately 40-second implementation: Dyson is about 3.2x faster and
+Rizzuto about 1.8x faster on this machine. The slowest current Rizzuto stages
+are fixing indents (6.031 s), quote/punctuation normalization (3.102 s), page
+setup (2.852 s), and style normalization (2.781 s); those are the next profiling
+targets rather than something to hide behind test-suite timing.
+
 | Run | Wall time | Owned-job CPU time |
 |---|---:|---:|
 | Earlier warm suite before UI Automation optimization | 4.70 s | 5.33 s |
