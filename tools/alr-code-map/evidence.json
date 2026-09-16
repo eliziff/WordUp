@@ -1,0 +1,58 @@
+{
+  "evidence_type": "offline executable specification; not native Word acceptance",
+  "tests": {
+    "named_tests": 149,
+    "prior_named_tests": 53,
+    "new_named_tests": 96,
+    "result": "passed",
+    "python": "3.13.5",
+    "system": "Linux",
+    "additional_subtest_coverage": "all 1024 citation-switch combinations; token run segmentation; structural wrappers"
+  },
+  "corpus": {
+    "archive_sha256": "f6ba652f417a70ecc78f4ee546ae13f675ce1a67716a5c59c037095aea182f01",
+    "counts": {
+      "footnote_parts_seen": 108,
+      "notes_seen": 17261,
+      "hard_protection_intervals": 37097,
+      "derived_lexical_protection_intervals": 39774,
+      "one_paragraph_notes": 17122,
+      "whole_syntax_refusals": 14616,
+      "whole_syntax_parsed": 2506,
+      "syntax_semantic_roundtrips": 2506,
+      "already_canonical": 2261,
+      "syntax_text_differences": 245,
+      "xml_copy_writes_verified": 212,
+      "changed_text_nodes": 213,
+      "multi_paragraph_notes": 139,
+      "native_xml_guard_refusals": 33,
+      "documents_with_verified_xml_copy_writes": 36
+    },
+    "parsed_productions": {
+      "case": 73,
+      "ibid": 2218,
+      "web": 66,
+      "supra": 87,
+      "legislation": 64
+    },
+    "refusal_reasons": {
+      "note paragraph has a protected structural role": 22,
+      "citation production depends on opaque native structure": 11
+    },
+    "elapsed_seconds": 26.586,
+    "limits": [
+      "No supplied journal/case-name/title/alias dictionaries; no bare-at page inference.",
+      "All eligible notes in a part are batched against its original snapshot; no Word edit is simulated.",
+      "Preserved text-node-external bytes and XML nodes/attributes are checked after every write.",
+      "No certification of source truth, unmarked-quotation absence, Word tracking, rendering or save/reopen."
+    ]
+  },
+  "native_word": {
+    "compiled": false,
+    "executed": false,
+    "tracked_change_rejection_verified": false,
+    "rendering_verified": false,
+    "deployed": false
+  },
+  "privacy": "Only aggregate values; no source manuscript text is included."
+}
