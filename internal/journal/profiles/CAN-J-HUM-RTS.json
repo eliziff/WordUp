@@ -1,0 +1,1552 @@
+{
+ "dataset": "CAN-J-HUM-RTS",
+ "journal": "Canadian Journal of Human Rights",
+ "abbrev": "Can J Hum Rts",
+ "platform": "cjhr",
+ "years": [
+  "2025",
+  "2026"
+ ],
+ "articles_measured": [
+  8096,
+  8100,
+  28331,
+  28333,
+  28332,
+  8097,
+  28334,
+  8095,
+  8093,
+  8099
+ ],
+ "units": "points and inches; boxes measured at 144 dpi",
+ "page": {
+  "width_pt": 468,
+  "height_pt": 684,
+  "width_in": 6.5,
+  "height_in": 9.5,
+  "confidence": 0.7,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 8096,
+    "page": 1,
+    "value": {
+     "width_pt": 468,
+     "height_pt": 684
+    }
+   },
+   {
+    "article_id": 8100,
+    "page": 1,
+    "value": {
+     "width_pt": 468,
+     "height_pt": 684
+    }
+   },
+   {
+    "article_id": 28331,
+    "page": 1,
+    "value": {
+     "width_pt": 612,
+     "height_pt": 792
+    }
+   },
+   {
+    "article_id": 28333,
+    "page": 1,
+    "value": {
+     "width_pt": 612,
+     "height_pt": 792
+    }
+   },
+   {
+    "article_id": 28332,
+    "page": 1,
+    "value": {
+     "width_pt": 612,
+     "height_pt": 792
+    }
+   },
+   {
+    "article_id": 8097,
+    "page": 1,
+    "value": {
+     "width_pt": 468,
+     "height_pt": 684
+    }
+   }
+  ]
+ },
+ "margins_in": {
+  "mirrored": true,
+  "left_odd_pages": {
+   "value": 0.75,
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.55
+     }
+    },
+    {
+     "article_id": 8100,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.55
+     }
+    },
+    {
+     "article_id": 28331,
+     "page": null,
+     "value": {
+      "odd": 1.45,
+      "even": 1.2
+     }
+    },
+    {
+     "article_id": 28333,
+     "page": null,
+     "value": {
+      "odd": 1.45,
+      "even": 1.2
+     }
+    },
+    {
+     "article_id": 28332,
+     "page": null,
+     "value": {
+      "odd": 1.45,
+      "even": 1.2
+     }
+    },
+    {
+     "article_id": 8097,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.55
+     }
+    }
+   ]
+  },
+  "left_even_pages": {
+   "value": 0.55,
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.55
+     }
+    },
+    {
+     "article_id": 8100,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.55
+     }
+    },
+    {
+     "article_id": 28331,
+     "page": null,
+     "value": {
+      "odd": 1.45,
+      "even": 1.2
+     }
+    },
+    {
+     "article_id": 28333,
+     "page": null,
+     "value": {
+      "odd": 1.45,
+      "even": 1.2
+     }
+    },
+    {
+     "article_id": 28332,
+     "page": null,
+     "value": {
+      "odd": 1.45,
+      "even": 1.2
+     }
+    },
+    {
+     "article_id": 8097,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.55
+     }
+    }
+   ]
+  },
+  "right_odd_pages": {
+   "value": 0.5,
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": null,
+     "value": {
+      "odd": 0.5,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 8100,
+     "page": null,
+     "value": {
+      "odd": 0.5,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 28331,
+     "page": null,
+     "value": {
+      "odd": 1.2,
+      "even": 1.4
+     }
+    },
+    {
+     "article_id": 28333,
+     "page": null,
+     "value": {
+      "odd": 1.2,
+      "even": 1.4
+     }
+    },
+    {
+     "article_id": 28332,
+     "page": null,
+     "value": {
+      "odd": 1.2,
+      "even": 1.4
+     }
+    },
+    {
+     "article_id": 8097,
+     "page": null,
+     "value": {
+      "odd": 0.5,
+      "even": 0.7
+     }
+    }
+   ]
+  },
+  "right_even_pages": {
+   "value": 0.7,
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": null,
+     "value": {
+      "odd": 0.5,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 8100,
+     "page": null,
+     "value": {
+      "odd": 0.5,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 28331,
+     "page": null,
+     "value": {
+      "odd": 1.2,
+      "even": 1.4
+     }
+    },
+    {
+     "article_id": 28333,
+     "page": null,
+     "value": {
+      "odd": 1.2,
+      "even": 1.4
+     }
+    },
+    {
+     "article_id": 28332,
+     "page": null,
+     "value": {
+      "odd": 1.2,
+      "even": 1.4
+     }
+    },
+    {
+     "article_id": 8097,
+     "page": null,
+     "value": {
+      "odd": 0.5,
+      "even": 0.7
+     }
+    }
+   ]
+  },
+  "top": {
+   "value": 1.15,
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": null,
+     "value": 1.15
+    },
+    {
+     "article_id": 8100,
+     "page": null,
+     "value": 1.15
+    },
+    {
+     "article_id": 28331,
+     "page": null,
+     "value": 1.45
+    },
+    {
+     "article_id": 28333,
+     "page": null,
+     "value": 1.45
+    },
+    {
+     "article_id": 28332,
+     "page": null,
+     "value": 1.45
+    },
+    {
+     "article_id": 8097,
+     "page": null,
+     "value": 1.15
+    }
+   ]
+  },
+  "bottom": {
+   "value": null,
+   "confidence": 0.2,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": null,
+     "value": 1.3
+    },
+    {
+     "article_id": 8100,
+     "page": null,
+     "value": 1.55
+    },
+    {
+     "article_id": 28331,
+     "page": null,
+     "value": 1.95
+    },
+    {
+     "article_id": 28333,
+     "page": null,
+     "value": 1.9
+    },
+    {
+     "article_id": 28332,
+     "page": null,
+     "value": 2.05
+    },
+    {
+     "article_id": 8097,
+     "page": null,
+     "value": 1.7
+    }
+   ]
+  }
+ },
+ "body": {
+  "font": {
+   "value": "BookAntiqua",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": null,
+     "value": "BookAntiqua"
+    },
+    {
+     "article_id": 8100,
+     "page": null,
+     "value": "BookAntiqua"
+    },
+    {
+     "article_id": 28331,
+     "page": null,
+     "value": "BookAntiqua"
+    },
+    {
+     "article_id": 28333,
+     "page": null,
+     "value": "BookAntiqua"
+    },
+    {
+     "article_id": 28332,
+     "page": null,
+     "value": "BookAntiqua"
+    },
+    {
+     "article_id": 8097,
+     "page": null,
+     "value": "BookAntiqua"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 11.0,
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 8100,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 28331,
+     "page": null,
+     "value": 12.4
+    },
+    {
+     "article_id": 28333,
+     "page": null,
+     "value": 12.4
+    },
+    {
+     "article_id": 28332,
+     "page": null,
+     "value": 12.4
+    },
+    {
+     "article_id": 8097,
+     "page": null,
+     "value": 11.0
+    }
+   ]
+  },
+  "line_height_pt": {
+   "value": 13.5,
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": null,
+     "value": 13.0
+    },
+    {
+     "article_id": 8100,
+     "page": null,
+     "value": 13.0
+    },
+    {
+     "article_id": 28331,
+     "page": null,
+     "value": 15.0
+    },
+    {
+     "article_id": 28333,
+     "page": null,
+     "value": 15.0
+    },
+    {
+     "article_id": 28332,
+     "page": null,
+     "value": 15.0
+    },
+    {
+     "article_id": 8097,
+     "page": null,
+     "value": 13.5
+    }
+   ]
+  }
+ },
+ "footnotes": {
+  "font": {
+   "value": "BookAntiqua",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": null,
+     "value": "BookAntiqua"
+    },
+    {
+     "article_id": 8100,
+     "page": null,
+     "value": "BookAntiqua"
+    },
+    {
+     "article_id": 28331,
+     "page": null,
+     "value": "BookAntiqua"
+    },
+    {
+     "article_id": 28333,
+     "page": null,
+     "value": "BookAntiqua"
+    },
+    {
+     "article_id": 28332,
+     "page": null,
+     "value": "BookAntiqua"
+    },
+    {
+     "article_id": 8097,
+     "page": null,
+     "value": "BookAntiqua"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 8.0,
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": null,
+     "value": 8.0
+    },
+    {
+     "article_id": 8100,
+     "page": null,
+     "value": 8.0
+    },
+    {
+     "article_id": 28331,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 28333,
+     "page": null,
+     "value": 8.9
+    },
+    {
+     "article_id": 28332,
+     "page": null,
+     "value": 8.9
+    },
+    {
+     "article_id": 8097,
+     "page": null,
+     "value": 8.0
+    }
+   ]
+  },
+  "present": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": null,
+     "value": 339
+    },
+    {
+     "article_id": 8100,
+     "page": null,
+     "value": 475
+    },
+    {
+     "article_id": 28331,
+     "page": null,
+     "value": 442
+    },
+    {
+     "article_id": 28333,
+     "page": null,
+     "value": 338
+    },
+    {
+     "article_id": 28332,
+     "page": null,
+     "value": 436
+    },
+    {
+     "article_id": 8097,
+     "page": null,
+     "value": 369
+    }
+   ]
+  },
+  "number_style": {
+   "value": "number_gap",
+   "confidence": 0.6,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": null,
+     "value": [
+      "† Frédéric Mégret is a Professor and the holder of the Hans & Tamar Oppenheimer Chair in Public"
+     ]
+    },
+    {
+     "article_id": 8100,
+     "page": null,
+     "value": [
+      "† Paul T. Clarke is a professor of educational leadership at the University of Regina. Robyn Trask was"
+     ]
+    },
+    {
+     "article_id": 28331,
+     "page": null,
+     "value": [
+      "†  Kali Faingold is an associate at Thompson Dorfman Sweatman LLP in Winnipeg, Manitoba, with a"
+     ]
+    },
+    {
+     "article_id": 28333,
+     "page": null,
+     "value": [
+      "† Bethany Hastie is an Associate Professor at the Faculty of Law, Queen’s University. Sofia Cornejo is a"
+     ]
+    },
+    {
+     "article_id": 28332,
+     "page": null,
+     "value": [
+      "† Mark Kersten is an assistant professor of criminology and criminal justice at the University of the Fraser"
+     ]
+    },
+    {
+     "article_id": 8097,
+     "page": null,
+     "value": [
+      "†  Stephen Flaherty has a BA in philosophy (Queen’s), a Master of Public Administration (Queen’s), an"
+     ]
+    }
+   ]
+  },
+  "indent_vs_body_in": {
+   "value": -0.2,
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": null,
+     "value": -0.2
+    },
+    {
+     "article_id": 8100,
+     "page": null,
+     "value": -0.2
+    },
+    {
+     "article_id": 28331,
+     "page": null,
+     "value": -0.2
+    },
+    {
+     "article_id": 28333,
+     "page": null,
+     "value": -0.2
+    },
+    {
+     "article_id": 28332,
+     "page": null,
+     "value": -0.2
+    },
+    {
+     "article_id": 8097,
+     "page": null,
+     "value": -0.2
+    }
+   ]
+  },
+  "first_page_author_note": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": 1,
+     "value": [
+      "† Frédéric Mégret is a Professor and the holder of the Hans & Tamar Oppenheimer Chair in Public"
+     ]
+    },
+    {
+     "article_id": 8100,
+     "page": 1,
+     "value": [
+      "† Paul T. Clarke is a professor of educational leadership at the University of Regina. Robyn Trask was"
+     ]
+    },
+    {
+     "article_id": 28331,
+     "page": 1,
+     "value": [
+      "†  Kali Faingold is an associate at Thompson Dorfman Sweatman LLP in Winnipeg, Manitoba, with a"
+     ]
+    },
+    {
+     "article_id": 28333,
+     "page": 1,
+     "value": [
+      "† Bethany Hastie is an Associate Professor at the Faculty of Law, Queen’s University. Sofia Cornejo is a"
+     ]
+    },
+    {
+     "article_id": 28332,
+     "page": 1,
+     "value": [
+      "† Mark Kersten is an assistant professor of criminology and criminal justice at the University of the Fraser"
+     ]
+    },
+    {
+     "article_id": 8097,
+     "page": 1,
+     "value": [
+      "†  Stephen Flaherty has a BA in philosophy (Queen’s), a Master of Public Administration (Queen’s), an"
+     ]
+    }
+   ]
+  }
+ },
+ "headings": {
+  "numbering_levels": {
+   "value": [
+    "roman_period",
+    "alpha_period",
+    "unnumbered"
+   ],
+   "confidence": 0.6,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": 3,
+     "value": [
+      "I. Introduction",
+      "II. Modeling Just Criticism",
+      "A. Possible Analogies"
+     ]
+    },
+    {
+     "article_id": 8100,
+     "page": 3,
+     "value": [
+      "I. Introduction",
+      "II. Part One: Judicial Recognition of Discriminati",
+      "TAXPAYER FUNDED CBC REPORTER JON THOMPSON HAS AN A"
+     ]
+    },
+    {
+     "article_id": 28331,
+     "page": 3,
+     "value": [
+      "I. Introduction",
+      "A. Method of Analysis",
+      "II. Origins of Pregnancy Discrimination Discussion"
+     ]
+    },
+    {
+     "article_id": 28333,
+     "page": 3,
+     "value": [
+      "I. Introduction",
+      "II. Wrongful Dismissal: Core Legal Principles",
+      "III. Sexual Harassment and Wrongful Dismissal: A R"
+     ]
+    },
+    {
+     "article_id": 28332,
+     "page": 3,
+     "value": [
+      "I. Introduction",
+      "II. Externalization: Outsourced Migration Control",
+      "A. European Borders on the Mediterranean"
+     ]
+    },
+    {
+     "article_id": 8097,
+     "page": 3,
+     "value": [
+      "I. Introduction",
+      "II. The Iron Hand in the Velvet Glove Reconfigured",
+      "III. A Question of Two Hats"
+     ]
+    }
+   ]
+  },
+  "top_level_case": {
+   "value": "title",
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": 3,
+     "value": "I. Introduction"
+    },
+    {
+     "article_id": 8100,
+     "page": 3,
+     "value": "I. Introduction"
+    },
+    {
+     "article_id": 28331,
+     "page": 3,
+     "value": "I. Introduction"
+    },
+    {
+     "article_id": 28333,
+     "page": 3,
+     "value": "I. Introduction"
+    },
+    {
+     "article_id": 28332,
+     "page": 3,
+     "value": "I. Introduction"
+    },
+    {
+     "article_id": 8097,
+     "page": 3,
+     "value": "I. Introduction"
+    }
+   ]
+  },
+  "top_level_size_pt": {
+   "value": 14.0,
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": 3,
+     "value": "I. Introduction"
+    },
+    {
+     "article_id": 8100,
+     "page": 3,
+     "value": "I. Introduction"
+    },
+    {
+     "article_id": 28331,
+     "page": 3,
+     "value": "I. Introduction"
+    },
+    {
+     "article_id": 28333,
+     "page": 3,
+     "value": "I. Introduction"
+    },
+    {
+     "article_id": 28332,
+     "page": 3,
+     "value": "I. Introduction"
+    },
+    {
+     "article_id": 8097,
+     "page": 3,
+     "value": "I. Introduction"
+    }
+   ]
+  },
+  "top_level_alignment": {
+   "value": "left",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": 3,
+     "value": "I. Introduction"
+    },
+    {
+     "article_id": 8100,
+     "page": 3,
+     "value": "I. Introduction"
+    },
+    {
+     "article_id": 28331,
+     "page": 3,
+     "value": "I. Introduction"
+    },
+    {
+     "article_id": 28333,
+     "page": 3,
+     "value": "I. Introduction"
+    },
+    {
+     "article_id": 28332,
+     "page": 3,
+     "value": "I. Introduction"
+    },
+    {
+     "article_id": 8097,
+     "page": 3,
+     "value": "I. Introduction"
+    }
+   ]
+  },
+  "samples": [
+   "I. Introduction",
+   "II. Modeling Just Criticism",
+   "A. Possible Analogies",
+   "B. Three Models for an Ethics of Criticizing",
+   "I. Introduction",
+   "II. Part One: Judicial Recognition of Discrimination Faced by",
+   "TAXPAYER FUNDED CBC REPORTER JON THOMPSON HAS AN AGENDA TO",
+   "PROMOTE",
+   "I. Introduction",
+   "A. Method of Analysis",
+   "II. Origins of Pregnancy Discrimination Discussions in",
+   "A. It Starts with Bliss"
+  ]
+ },
+ "block_quotes": {
+  "indent_in": {
+   "value": 0.05,
+   "confidence": 1.0,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 8100,
+     "page": null,
+     "value": 0.05
+    },
+    {
+     "article_id": 28331,
+     "page": null,
+     "value": 0.05
+    },
+    {
+     "article_id": 28333,
+     "page": null,
+     "value": 0.05
+    },
+    {
+     "article_id": 28332,
+     "page": null,
+     "value": 0.05
+    },
+    {
+     "article_id": 8097,
+     "page": null,
+     "value": 0.05
+    },
+    {
+     "article_id": 28334,
+     "page": null,
+     "value": 0.05
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 9.0,
+   "confidence": 0.62,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 8100,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 28331,
+     "page": null,
+     "value": 10.099
+    },
+    {
+     "article_id": 28333,
+     "page": null,
+     "value": 10.233
+    },
+    {
+     "article_id": 28332,
+     "page": null,
+     "value": 10.233
+    },
+    {
+     "article_id": 8097,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 28334,
+     "page": null,
+     "value": 9.0
+    }
+   ]
+  },
+  "articles_with_block_quotes": 8
+ },
+ "running_heads": {
+  "odd_pages": {
+   "value": [
+    "article_title",
+    "author"
+   ],
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": null,
+     "value": [
+      "Mégret, Just Criticism?         3",
+      "Mégret, Just Criticism?          5"
+     ]
+    },
+    {
+     "article_id": 8100,
+     "page": null,
+     "value": [
+      "Clarke & Trask, Challenges to Teacher Professionalism         157",
+      "Clarke & Trask, Challenges to Teacher Professionalism          159"
+     ]
+    },
+    {
+     "article_id": 28331,
+     "page": null,
+     "value": [
+      "Faingold, From Bliss to Brooks and Beyond        3",
+      "Faingold, From Bliss to Brooks and Beyond          5"
+     ]
+    },
+    {
+     "article_id": 28333,
+     "page": null,
+     "value": [
+      "Hastie & Cornejo, Serious Enough?         85",
+      "Hastie & Cornejo, Serious Enough?          87"
+     ]
+    },
+    {
+     "article_id": 28332,
+     "page": null,
+     "value": [
+      "Kersten, Crimes Against Migrants as Crimes Against All of Us         47",
+      "Kersten, Crimes Against Migrants as Crimes Against All of Us        49"
+     ]
+    },
+    {
+     "article_id": 8097,
+     "page": null,
+     "value": [
+      "Flaherty, Guardians of the Human Rights Tribunal         59",
+      "Flaherty, Guardians of the Human Rights Tribunal          61"
+     ]
+    }
+   ]
+  },
+  "even_pages": {
+   "value": [
+    "journal_abbrev",
+    "journal_name",
+    "volume_or_year"
+   ],
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": null,
+     "value": [
+      "(2025) 13:1 Can J Hum Rts",
+      "4        Canadian Journal of Human Rights"
+     ]
+    },
+    {
+     "article_id": 8100,
+     "page": null,
+     "value": [
+      "(2025) 13:1 Can J Hum Rts",
+      "158        Canadian Journal of Human Rights"
+     ]
+    },
+    {
+     "article_id": 28331,
+     "page": null,
+     "value": [
+      "(2026) 14:1 Can J Hum Rts",
+      "4        Canadian Journal of Human Rights"
+     ]
+    },
+    {
+     "article_id": 28333,
+     "page": null,
+     "value": [
+      "(2026) 14:1 Can J Hum Rts",
+      "86        Canadian Journal of Human Rights"
+     ]
+    },
+    {
+     "article_id": 28332,
+     "page": null,
+     "value": [
+      "(2026) 14:1 Can J Hum Rts",
+      "48        Canadian Journal of Human Rights"
+     ]
+    },
+    {
+     "article_id": 8097,
+     "page": null,
+     "value": [
+      "(2025) 13:1 Can J Hum Rts",
+      "60        Canadian Journal of Human Rights"
+     ]
+    }
+   ]
+  },
+  "page_number": {
+   "value": null,
+   "confidence": 1.0,
+   "articles": 1,
+   "evidence": [
+    {
+     "article_id": 28334,
+     "page": null,
+     "value": "top-outer"
+    }
+   ]
+  }
+ },
+ "title_block": {
+  "title_size_pt": {
+   "value": 18.0,
+   "confidence": 0.75,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": 1,
+     "value": "Just Criticism?"
+    },
+    {
+     "article_id": 28331,
+     "page": 1,
+     "value": "From Bliss to Brooks and Beyond:"
+    },
+    {
+     "article_id": 28332,
+     "page": 1,
+     "value": "Crimes Against Migrants as"
+    },
+    {
+     "article_id": 8097,
+     "page": 1,
+     "value": "The Guardians of the Human Rights"
+    },
+    {
+     "article_id": 28334,
+     "page": 1,
+     "value": "Canada and the Global Rules-Based Order: Third"
+    },
+    {
+     "article_id": 8095,
+     "page": 1,
+     "value": "Les Rapports Entre les Droits Coutumiers"
+    }
+   ]
+  },
+  "title_alignment": {
+   "value": "center",
+   "confidence": 1.0,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": 1,
+     "value": "Just Criticism?"
+    },
+    {
+     "article_id": 28331,
+     "page": 1,
+     "value": "From Bliss to Brooks and Beyond:"
+    },
+    {
+     "article_id": 28332,
+     "page": 1,
+     "value": "Crimes Against Migrants as"
+    },
+    {
+     "article_id": 8097,
+     "page": 1,
+     "value": "The Guardians of the Human Rights"
+    },
+    {
+     "article_id": 28334,
+     "page": 1,
+     "value": "Canada and the Global Rules-Based Order: Third"
+    },
+    {
+     "article_id": 8095,
+     "page": 1,
+     "value": "Les Rapports Entre les Droits Coutumiers"
+    }
+   ]
+  },
+  "title_case": {
+   "value": "sentence",
+   "confidence": 0.62,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": 1,
+     "value": "Just Criticism?"
+    },
+    {
+     "article_id": 28331,
+     "page": 1,
+     "value": "From Bliss to Brooks and Beyond:"
+    },
+    {
+     "article_id": 28332,
+     "page": 1,
+     "value": "Crimes Against Migrants as"
+    },
+    {
+     "article_id": 8097,
+     "page": 1,
+     "value": "The Guardians of the Human Rights"
+    },
+    {
+     "article_id": 28334,
+     "page": 1,
+     "value": "Canada and the Global Rules-Based Order: Third"
+    },
+    {
+     "article_id": 8095,
+     "page": 1,
+     "value": "Les Rapports Entre les Droits Coutumiers"
+    }
+   ]
+  },
+  "author_case": {
+   "value": "title",
+   "confidence": 1.0,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": 1,
+     "value": "Just Criticism?"
+    },
+    {
+     "article_id": 28331,
+     "page": 1,
+     "value": "From Bliss to Brooks and Beyond:"
+    },
+    {
+     "article_id": 28332,
+     "page": 1,
+     "value": "Crimes Against Migrants as"
+    },
+    {
+     "article_id": 8097,
+     "page": 1,
+     "value": "The Guardians of the Human Rights"
+    },
+    {
+     "article_id": 28334,
+     "page": 1,
+     "value": "Canada and the Global Rules-Based Order: Third"
+    },
+    {
+     "article_id": 8095,
+     "page": 1,
+     "value": "Les Rapports Entre les Droits Coutumiers"
+    }
+   ]
+  },
+  "author_alignment": {
+   "value": "center",
+   "confidence": 1.0,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": 1,
+     "value": "Just Criticism?"
+    },
+    {
+     "article_id": 28331,
+     "page": 1,
+     "value": "From Bliss to Brooks and Beyond:"
+    },
+    {
+     "article_id": 28332,
+     "page": 1,
+     "value": "Crimes Against Migrants as"
+    },
+    {
+     "article_id": 8097,
+     "page": 1,
+     "value": "The Guardians of the Human Rights"
+    },
+    {
+     "article_id": 28334,
+     "page": 1,
+     "value": "Canada and the Global Rules-Based Order: Third"
+    },
+    {
+     "article_id": 8095,
+     "page": 1,
+     "value": "Les Rapports Entre les Droits Coutumiers"
+    }
+   ]
+  },
+  "first_pdf_page_is_article": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8096,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 8100,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 28331,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 28333,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 28332,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 8097,
+     "page": 1,
+     "value": null
+    }
+   ]
+  }
+ },
+ "table_of_contents": {
+  "value": false,
+  "confidence": 1.0,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 8096,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 8100,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 28331,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 28333,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 28332,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 8097,
+    "page": null,
+    "value": 0
+   }
+  ]
+ },
+ "citations": {
+  "ibid_case": {
+   "value": "Ibid",
+   "counts": {
+    "Ibid": 583,
+    "ibid": 13
+   },
+   "confidence": 0.98
+  },
+  "ibid_punctuation": {
+   "value": "Ibid.",
+   "counts": {
+    "Ibid.": 192,
+    "Ibid,": 11
+   },
+   "confidence": 0.95
+  },
+  "supra_form": {
+   "value": "supra note N",
+   "counts": {
+    "supra note N": 734,
+    "supra, note N": 0
+   },
+   "confidence": 1.0
+  },
+  "paragraph_pinpoint": {
+   "value": "at para N",
+   "counts": {
+    "at para N": 438,
+    "at para. N": 2
+   },
+   "confidence": 1.0
+  },
+  "page_pinpoint_label": {
+   "value": "at N",
+   "counts": {
+    "at N": 658,
+    "at p N": 0
+   },
+   "confidence": 1.0
+  },
+  "range_dash": {
+   "value": "en dash",
+   "counts": {
+    "en dash": 160,
+    "hyphen": 13
+   },
+   "confidence": 0.92
+  },
+  "emphasis_note": {
+   "value": "[emphasis added]",
+   "counts": {
+    "[emphasis added]": 9,
+    "(emphasis added)": 1
+   },
+   "confidence": 0.9
+  },
+  "section_abbreviation": {
+   "value": "s N",
+   "counts": {
+    "s N": 37,
+    "s. N": 1
+   },
+   "confidence": 0.97
+  },
+  "et_al": {
+   "value": "et al",
+   "counts": {
+    "et al": 23,
+    "et al.": 5
+   },
+   "confidence": 0.82
+  },
+  "eg": {
+   "value": "e.g.",
+   "counts": {
+    "eg": 0,
+    "e.g.": 34
+   },
+   "confidence": 1.0
+  },
+  "ie": {
+   "value": "i.e.",
+   "counts": {
+    "ie": 0,
+    "i.e.": 1
+   },
+   "confidence": 1.0
+  },
+  "see_signal_case": {
+   "value": "See",
+   "counts": {
+    "See": 155,
+    "see": 92
+   },
+   "confidence": 0.63
+  },
+  "online_angle_brackets": {
+   "value": "online: <url>",
+   "counts": {
+    "online: <url>": 1,
+    "online: url": 1
+   },
+   "confidence": 0.5
+  },
+  "quotes": {
+   "value": "curly",
+   "counts": {
+    "curly": 1580,
+    "straight": 39
+   },
+   "confidence": 0.98
+  },
+  "raw_counts": {
+   "ibid_capitalized": 583,
+   "ibid_lower": 13,
+   "ibid_period": 192,
+   "ibid_comma": 11,
+   "ibid_at": 373,
+   "supra_note": 734,
+   "supra_comma_note": 0,
+   "at_para": 438,
+   "at_para_period": 2,
+   "at_pilcrow": 0,
+   "at_page": 658,
+   "at_p": 0,
+   "range_endash": 160,
+   "range_hyphen": 13,
+   "emphasis_brackets": 9,
+   "emphasis_parens": 1,
+   "section_s_period": 1,
+   "section_s_bare": 37,
+   "online_colon": 1,
+   "online_angle": 1,
+   "perma": 346,
+   "et_al_period": 5,
+   "et_al_bare": 23,
+   "neutral_citation": 93,
+   "canlii": 27,
+   "eg_bare": 0,
+   "eg_period": 34,
+   "ie_bare": 0,
+   "ie_period": 1,
+   "curly_double": 1580,
+   "straight_double": 39,
+   "see_signal_upper": 155,
+   "see_signal_lower": 92
+  },
+  "footnote_lines": 3908
+ },
+ "status": "ok",
+ "candidates": 19
+}

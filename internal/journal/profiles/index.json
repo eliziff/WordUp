@@ -1,0 +1,152 @@
+[
+ {
+  "dataset": "ALTA-L-REV",
+  "articles": 10,
+  "path": "ALTA-L-REV.json"
+ },
+ {
+  "dataset": "APPEAL",
+  "articles": 10,
+  "path": "APPEAL.json"
+ },
+ {
+  "dataset": "CAN-BAR-REV",
+  "articles": 10,
+  "path": "CAN-BAR-REV.json"
+ },
+ {
+  "dataset": "CAN-COMP-L-REV",
+  "articles": 4,
+  "path": "CAN-COMP-L-REV.json"
+ },
+ {
+  "dataset": "CAN-J-FAM-L",
+  "articles": 10,
+  "path": "CAN-J-FAM-L.json"
+ },
+ {
+  "dataset": "CAN-J-HUM-RTS",
+  "articles": 10,
+  "path": "CAN-J-HUM-RTS.json"
+ },
+ {
+  "dataset": "CAN-JL-JUR",
+  "articles": 10,
+  "path": "CAN-JL-JUR.json"
+ },
+ {
+  "dataset": "CAN-US-LJ",
+  "articles": 10,
+  "path": "CAN-US-LJ.json"
+ },
+ {
+  "dataset": "CIJS-ANN-REV",
+  "articles": 3,
+  "path": "CIJS-ANN-REV.json"
+ },
+ {
+  "dataset": "CJLS",
+  "articles": 10,
+  "path": "CJLS.json"
+ },
+ {
+  "dataset": "CONST-FORUM",
+  "articles": 10,
+  "path": "CONST-FORUM.json"
+ },
+ {
+  "dataset": "DALHOUSIE-J-LEG-STUD",
+  "articles": 9,
+  "path": "DALHOUSIE-J-LEG-STUD.json"
+ },
+ {
+  "dataset": "DALHOUSIE-LJ",
+  "articles": 10,
+  "path": "DALHOUSIE-LJ.json"
+ },
+ {
+  "dataset": "JL-SOC-POLY",
+  "articles": 6,
+  "path": "JL-SOC-POLY.json"
+ },
+ {
+  "dataset": "LAKEHEAD-LJ",
+  "articles": 1,
+  "path": "LAKEHEAD-LJ.json"
+ },
+ {
+  "dataset": "MAN-LJ",
+  "articles": 10,
+  "path": "MAN-LJ.json"
+ },
+ {
+  "dataset": "MCGILL-J-DISP-RES",
+  "articles": 4,
+  "path": "MCGILL-J-DISP-RES.json"
+ },
+ {
+  "dataset": "MCGILL-J-SUSTAINABLE-DEV-L",
+  "articles": 6,
+  "path": "MCGILL-J-SUSTAINABLE-DEV-L.json"
+ },
+ {
+  "dataset": "MCGILL-LJ",
+  "articles": 10,
+  "path": "MCGILL-LJ.json"
+ },
+ {
+  "dataset": "MCGILL-LJ-ERUDIT",
+  "articles": 10,
+  "path": "MCGILL-LJ-ERUDIT.json"
+ },
+ {
+  "dataset": "MCGILL-LJ-HEALTH",
+  "articles": 4,
+  "path": "MCGILL-LJ-HEALTH.json"
+ },
+ {
+  "dataset": "OSGOODE-HALL-LJ",
+  "articles": 10,
+  "path": "OSGOODE-HALL-LJ.json"
+ },
+ {
+  "dataset": "OTTAWA-L-REV",
+  "articles": 10,
+  "path": "OTTAWA-L-REV.json"
+ },
+ {
+  "dataset": "QUEENS-LJ",
+  "articles": 9,
+  "path": "QUEENS-LJ.json"
+ },
+ {
+  "dataset": "U-TORONTO-FAC-L-REV",
+  "articles": 6,
+  "path": "U-TORONTO-FAC-L-REV.json"
+ },
+ {
+  "dataset": "U-TORONTO-J-L-EQUALITY",
+  "articles": 10,
+  "path": "U-TORONTO-J-L-EQUALITY.json"
+ },
+ {
+  "dataset": "UBC-L-REV",
+  "articles": 10,
+  "path": "UBC-L-REV.json"
+ },
+ {
+  "dataset": "UNB-LJ",
+  "articles": 10,
+  "path": "UNB-LJ.json"
+ },
+ {
+  "dataset": "W-J-LEG-STUD",
+  "articles": 10,
+  "path": "W-J-LEG-STUD.json"
+ },
+ {
+  "dataset": "WRONGFUL-CONVICTION-L-REV",
+  "articles": 8,
+  "path": "WRONGFUL-CONVICTION-L-REV.json"
+ }
+]

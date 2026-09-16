@@ -1,0 +1,1542 @@
+{
+ "dataset": "MAN-LJ",
+ "journal": "Manitoba Law Journal",
+ "abbrev": "Man LJ",
+ "platform": "OJS",
+ "years": [
+  "2025",
+  "2026"
+ ],
+ "articles_measured": [
+  15656,
+  15629,
+  15571,
+  15635,
+  15522,
+  15578,
+  15609,
+  8109,
+  15528,
+  15597
+ ],
+ "units": "points and inches; boxes measured at 144 dpi",
+ "page": {
+  "width_pt": 430,
+  "height_pt": 649,
+  "width_in": 5.97,
+  "height_in": 9.01,
+  "confidence": 0.6,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 15656,
+    "page": 1,
+    "value": {
+     "width_pt": 430,
+     "height_pt": 649
+    }
+   },
+   {
+    "article_id": 15629,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 15571,
+    "page": 1,
+    "value": {
+     "width_pt": 430,
+     "height_pt": 649
+    }
+   },
+   {
+    "article_id": 15635,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 15522,
+    "page": 1,
+    "value": {
+     "width_pt": 430,
+     "height_pt": 649
+    }
+   },
+   {
+    "article_id": 15578,
+    "page": 1,
+    "value": {
+     "width_pt": 430,
+     "height_pt": 649
+    }
+   }
+  ]
+ },
+ "margins_in": {
+  "mirrored": false,
+  "left_odd_pages": {
+   "value": 1.0,
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 15629,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.55
+     }
+    },
+    {
+     "article_id": 15571,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.55
+     }
+    },
+    {
+     "article_id": 15635,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 15522,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 15578,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.55
+     }
+    }
+   ]
+  },
+  "left_even_pages": {
+   "value": 1.0,
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 15629,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.55
+     }
+    },
+    {
+     "article_id": 15571,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.55
+     }
+    },
+    {
+     "article_id": 15635,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 15522,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 15578,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.55
+     }
+    }
+   ]
+  },
+  "right_odd_pages": {
+   "value": 0.95,
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 15629,
+     "page": null,
+     "value": {
+      "odd": 0.5,
+      "even": 0.9
+     }
+    },
+    {
+     "article_id": 15571,
+     "page": null,
+     "value": {
+      "odd": 0.5,
+      "even": 0.9
+     }
+    },
+    {
+     "article_id": 15635,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 15522,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 15578,
+     "page": null,
+     "value": {
+      "odd": 0.5,
+      "even": 0.9
+     }
+    }
+   ]
+  },
+  "right_even_pages": {
+   "value": 0.95,
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 15629,
+     "page": null,
+     "value": {
+      "odd": 0.5,
+      "even": 0.9
+     }
+    },
+    {
+     "article_id": 15571,
+     "page": null,
+     "value": {
+      "odd": 0.5,
+      "even": 0.9
+     }
+    },
+    {
+     "article_id": 15635,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 15522,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 15578,
+     "page": null,
+     "value": {
+      "odd": 0.5,
+      "even": 0.9
+     }
+    }
+   ]
+  },
+  "top": {
+   "value": 1.0,
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": null,
+     "value": 1.0
+    },
+    {
+     "article_id": 15629,
+     "page": null,
+     "value": 1.0
+    },
+    {
+     "article_id": 15571,
+     "page": null,
+     "value": 1.0
+    },
+    {
+     "article_id": 15635,
+     "page": null,
+     "value": 1.0
+    },
+    {
+     "article_id": 15522,
+     "page": null,
+     "value": 1.0
+    },
+    {
+     "article_id": 15578,
+     "page": null,
+     "value": 0.65
+    }
+   ]
+  },
+  "bottom": {
+   "value": null,
+   "confidence": 0.1,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": null,
+     "value": 1.35
+    },
+    {
+     "article_id": 15629,
+     "page": null,
+     "value": 2.4
+    },
+    {
+     "article_id": 15571,
+     "page": null,
+     "value": 1.5
+    },
+    {
+     "article_id": 15635,
+     "page": null,
+     "value": 1.65
+    },
+    {
+     "article_id": 15522,
+     "page": null,
+     "value": 2.05
+    },
+    {
+     "article_id": 15578,
+     "page": null,
+     "value": 2.1
+    }
+   ]
+  }
+ },
+ "body": {
+  "font": {
+   "value": "GoudyOldStyleT-Regular",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": null,
+     "value": "GoudyOldStyleT-Regular"
+    },
+    {
+     "article_id": 15629,
+     "page": null,
+     "value": "GoudyOldStyleT-Regular"
+    },
+    {
+     "article_id": 15571,
+     "page": null,
+     "value": "GoudyOldStyleT-Regular"
+    },
+    {
+     "article_id": 15635,
+     "page": null,
+     "value": "GoudyOldStyleT-Regular"
+    },
+    {
+     "article_id": 15522,
+     "page": null,
+     "value": "GoudyOldStyleT-Regular"
+    },
+    {
+     "article_id": 15578,
+     "page": null,
+     "value": "GoudyOldStyleT-Regular"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 11.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 15629,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 15571,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 15635,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 15522,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 15578,
+     "page": null,
+     "value": 11.0
+    }
+   ]
+  },
+  "line_height_pt": {
+   "value": 12.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 15629,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 15571,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 15635,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 15522,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 15578,
+     "page": null,
+     "value": 12.0
+    }
+   ]
+  }
+ },
+ "footnotes": {
+  "font": {
+   "value": "GoudyOldStyleT-Regular",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": null,
+     "value": "GoudyOldStyleT-Regular"
+    },
+    {
+     "article_id": 15629,
+     "page": null,
+     "value": "GoudyOldStyleT-Regular"
+    },
+    {
+     "article_id": 15571,
+     "page": null,
+     "value": "GoudyOldStyleT-Regular"
+    },
+    {
+     "article_id": 15635,
+     "page": null,
+     "value": "GoudyOldStyleT-Regular"
+    },
+    {
+     "article_id": 15522,
+     "page": null,
+     "value": "GoudyOldStyleT-Regular"
+    },
+    {
+     "article_id": 15578,
+     "page": null,
+     "value": "GoudyOldStyleT-Regular"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 9.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 15629,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 15571,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 15635,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 15522,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 15578,
+     "page": null,
+     "value": 9.0
+    }
+   ]
+  },
+  "present": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": null,
+     "value": 228
+    },
+    {
+     "article_id": 15629,
+     "page": null,
+     "value": 365
+    },
+    {
+     "article_id": 15571,
+     "page": null,
+     "value": 412
+    },
+    {
+     "article_id": 15635,
+     "page": null,
+     "value": 320
+    },
+    {
+     "article_id": 15522,
+     "page": null,
+     "value": 452
+    },
+    {
+     "article_id": 15578,
+     "page": null,
+     "value": 555
+    }
+   ]
+  },
+  "number_style": {
+   "value": "number_space",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": null,
+     "value": [
+      "*"
+     ]
+    },
+    {
+     "article_id": 15629,
+     "page": null,
+     "value": [
+      "*"
+     ]
+    },
+    {
+     "article_id": 15571,
+     "page": null,
+     "value": [
+      "1 1985 ABCA 218 at paras 1, 13, 17 [Sandercock]."
+     ]
+    },
+    {
+     "article_id": 15635,
+     "page": null,
+     "value": [
+      "* Interview of Honorable Chief Justice Marianne Rivoalen, Chief Justice of"
+     ]
+    },
+    {
+     "article_id": 15522,
+     "page": null,
+     "value": [
+      "* Nigel Olesen is a recent graduate of Western Law. He is currently an articling"
+     ]
+    },
+    {
+     "article_id": 15578,
+     "page": null,
+     "value": [
+      "* Associate Professor, Department of Justice Studies, University of Regina."
+     ]
+    }
+   ]
+  },
+  "indent_vs_body_in": {
+   "value": 0.0,
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 15629,
+     "page": null,
+     "value": -0.3
+    },
+    {
+     "article_id": 15571,
+     "page": null,
+     "value": -0.2
+    },
+    {
+     "article_id": 15635,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 15522,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 15578,
+     "page": null,
+     "value": 0.0
+    }
+   ]
+  },
+  "first_page_author_note": {
+   "value": true,
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": 1,
+     "value": [
+      "*"
+     ]
+    },
+    {
+     "article_id": 15629,
+     "page": 1,
+     "value": [
+      "*"
+     ]
+    },
+    {
+     "article_id": 15571,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 15635,
+     "page": 1,
+     "value": [
+      "* Interview of Honorable Chief Justice Marianne Rivoalen, Chief Justice of"
+     ]
+    },
+    {
+     "article_id": 15522,
+     "page": 1,
+     "value": [
+      "* Nigel Olesen is a recent graduate of Western Law. He is currently an articling"
+     ]
+    },
+    {
+     "article_id": 15578,
+     "page": 1,
+     "value": [
+      "* Associate Professor, Department of Justice Studies, University of Regina."
+     ]
+    }
+   ]
+  }
+ },
+ "headings": {
+  "numbering_levels": {
+   "value": [
+    "roman_period",
+    "alpha_period",
+    "unnumbered"
+   ],
+   "confidence": 0.5,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 15629,
+     "page": 1,
+     "value": [
+      "I. INTRODUCTION",
+      "II. BACKGROUND",
+      "A. The Access to Justice Crisis in Canada12"
+     ]
+    },
+    {
+     "article_id": 15571,
+     "page": 2,
+     "value": [
+      "I. INTRODUCTION",
+      "II. THE CANADIAN APPROACH TO SENTENCING",
+      "AND “CURRENT” JURISPRUDENCE"
+     ]
+    },
+    {
+     "article_id": 15635,
+     "page": 1,
+     "value": [
+      "B R Y A N P . S C H W A R T Z , D A R C Y",
+      "L . M A C P H E R S O N",
+      "PART I"
+     ]
+    },
+    {
+     "article_id": 15522,
+     "page": 2,
+     "value": [
+      "INTRODUCTION",
+      "I. THE COURT’S INTERPRETATION OF REASONABLE",
+      "STEPS AND MISTAKEN BELIEF IN MORRISON"
+     ]
+    },
+    {
+     "article_id": 15578,
+     "page": 2,
+     "value": [
+      "I. INTRODUCTION1",
+      "II. SETTING THE CONTEXT",
+      "III.THE PROCESS, PROBLEMS, AND POLITICS OF DEATH A"
+     ]
+    },
+    {
+     "article_id": 15609,
+     "page": 2,
+     "value": [
+      "I. INTRODUCTION",
+      "II. HOW AI AFFECTS LEGAL EMPLOYMENT",
+      "A. Issues of AI Automation"
+     ]
+    }
+   ]
+  },
+  "top_level_case": {
+   "value": "title",
+   "confidence": 0.5,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 15629,
+     "page": 10,
+     "value": "Licensee Ethnicity (122 respondents)"
+    },
+    {
+     "article_id": 15571,
+     "page": 4,
+     "value": "II. THE CANADIAN APPROACH TO SENTENCING"
+    },
+    {
+     "article_id": 15635,
+     "page": 24,
+     "value": "PART III"
+    },
+    {
+     "article_id": 15522,
+     "page": 2,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 15578,
+     "page": 17,
+     "value": "A. Switzerland"
+    },
+    {
+     "article_id": 15609,
+     "page": 4,
+     "value": "A. Issues of AI Automation"
+    }
+   ]
+  },
+  "top_level_size_pt": {
+   "value": 13.0,
+   "confidence": 0.88,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 15629,
+     "page": 10,
+     "value": "Licensee Ethnicity (122 respondents)"
+    },
+    {
+     "article_id": 15571,
+     "page": 4,
+     "value": "II. THE CANADIAN APPROACH TO SENTENCING"
+    },
+    {
+     "article_id": 15635,
+     "page": 24,
+     "value": "PART III"
+    },
+    {
+     "article_id": 15522,
+     "page": 2,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 15578,
+     "page": 17,
+     "value": "A. Switzerland"
+    },
+    {
+     "article_id": 15609,
+     "page": 4,
+     "value": "A. Issues of AI Automation"
+    }
+   ]
+  },
+  "top_level_alignment": {
+   "value": "left",
+   "confidence": 0.75,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 15629,
+     "page": 10,
+     "value": "Licensee Ethnicity (122 respondents)"
+    },
+    {
+     "article_id": 15571,
+     "page": 4,
+     "value": "II. THE CANADIAN APPROACH TO SENTENCING"
+    },
+    {
+     "article_id": 15635,
+     "page": 24,
+     "value": "PART III"
+    },
+    {
+     "article_id": 15522,
+     "page": 2,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 15578,
+     "page": 17,
+     "value": "A. Switzerland"
+    },
+    {
+     "article_id": 15609,
+     "page": 4,
+     "value": "A. Issues of AI Automation"
+    }
+   ]
+  },
+  "samples": [
+   "I. INTRODUCTION",
+   "II. BACKGROUND",
+   "A. The Access to Justice Crisis in Canada12",
+   "III. THE SURVEY24",
+   "I. INTRODUCTION",
+   "II. THE CANADIAN APPROACH TO SENTENCING",
+   "AND “CURRENT” JURISPRUDENCE",
+   "A. Sandercock: Not as Modern as It Once Was"
+  ]
+ },
+ "block_quotes": {
+  "indent_in": {
+   "value": 0.25,
+   "confidence": 0.67,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": null,
+     "value": 0.25
+    },
+    {
+     "article_id": 15629,
+     "page": null,
+     "value": -0.1
+    },
+    {
+     "article_id": 15571,
+     "page": null,
+     "value": 0.05
+    },
+    {
+     "article_id": 15522,
+     "page": null,
+     "value": 0.25
+    },
+    {
+     "article_id": 15578,
+     "page": null,
+     "value": 0.25
+    },
+    {
+     "article_id": 15609,
+     "page": null,
+     "value": 0.45
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 9.0,
+   "confidence": 0.67,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 15629,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 15571,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 15522,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 15578,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 15609,
+     "page": null,
+     "value": 11.0
+    }
+   ]
+  },
+  "articles_with_block_quotes": 9
+ },
+ "running_heads": {
+  "odd_pages": {
+   "value": [
+    "other"
+   ],
+   "confidence": 0.56,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": null,
+     "value": [
+      "Interview, Honourable Chief Justice Richard. J. F. Chartier 3",
+      "Interview, Honourable Chief Justice Richard. J. F. Chartier 5"
+     ]
+    },
+    {
+     "article_id": 15629,
+     "page": null,
+     "value": [
+      "• Not Applicable",
+      "The Access to Justice Needs of Manitobans   3"
+     ]
+    },
+    {
+     "article_id": 15571,
+     "page": null,
+     "value": [
+      "MANITOBA LAW JOURNAL| VOLUME 47 ISSUE 4"
+     ]
+    },
+    {
+     "article_id": 15635,
+     "page": null,
+     "value": [
+      "Interview with Marianne Rivoalen 113",
+      "Interview with Marianne Rivoalen 115"
+     ]
+    },
+    {
+     "article_id": 15522,
+     "page": null,
+     "value": [
+      "The Effect of R. v. Morrison 81",
+      "The Effect of R. v. Morrison 83"
+     ]
+    },
+    {
+     "article_id": 15578,
+     "page": null,
+     "value": [
+      "MANITOBA LAW JOURNAL| VOLUME 47 ISSUE 4"
+     ]
+    }
+   ]
+  },
+  "even_pages": {
+   "value": [
+    "journal_name",
+    "volume_or_year"
+   ],
+   "confidence": 0.88,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": null,
+     "value": [
+      "2 MANITOBA LAW JOURNAL| VOLUME 47 ISSUE 1",
+      "4 MANITOBA LAW JOURNAL| VOLUME 47 ISSUE 1"
+     ]
+    },
+    {
+     "article_id": 15629,
+     "page": null,
+     "value": [
+      "2 MANITOBA LAW JOURNAL | VOLUME 47 ISSUE 2",
+      "4 MANITOBA LAW JOURNAL | VOLUME 47 ISSUE 2"
+     ]
+    },
+    {
+     "article_id": 15571,
+     "page": null,
+     "value": [
+      "Speaking into a Void   66",
+      "Speaking into a Void   68"
+     ]
+    },
+    {
+     "article_id": 15635,
+     "page": null,
+     "value": [
+      "112 MANITOBA LAW JOURNAL| VOLUME 47 ISSUE 2",
+      "114 MANITOBA LAW JOURNAL| VOLUME 47 ISSUE 2"
+     ]
+    },
+    {
+     "article_id": 15522,
+     "page": null,
+     "value": [
+      "80  MANITOBA LAW JOURNAL| VOLUME 47 ISSUE 6",
+      "82  MANITOBA LAW JOURNAL| VOLUME 47 ISSUE 6"
+     ]
+    },
+    {
+     "article_id": 15609,
+     "page": null,
+     "value": [
+      "108 MANITOBA LAW JOURNAL | VOLUME 47 ISSUE 3",
+      "110 MANITOBA LAW JOURNAL | VOLUME 47 ISSUE 3"
+     ]
+    }
+   ]
+  },
+  "page_number": {
+   "value": null,
+   "confidence": 1.0,
+   "articles": 1,
+   "evidence": [
+    {
+     "article_id": 15629,
+     "page": null,
+     "value": "middle-outer"
+    }
+   ]
+  }
+ },
+ "title_block": {
+  "title_size_pt": {
+   "value": 20.0,
+   "confidence": 1.0,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": 1,
+     "value": "Interview with the Honourable"
+    },
+    {
+     "article_id": 15629,
+     "page": 1,
+     "value": "The Access to Justice Needs of"
+    },
+    {
+     "article_id": 15571,
+     "page": 1,
+     "value": "Speaking into a Void: Parliamentary"
+    },
+    {
+     "article_id": 15522,
+     "page": 1,
+     "value": "The Effect of R. v. Morrison on"
+    },
+    {
+     "article_id": 15578,
+     "page": 1,
+     "value": "Morbid Matters: Medical Assistance in"
+    },
+    {
+     "article_id": 15609,
+     "page": 1,
+     "value": "Legal-Technological Unemployment in"
+    }
+   ]
+  },
+  "title_alignment": {
+   "value": "center",
+   "confidence": 0.86,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": 1,
+     "value": "Interview with the Honourable"
+    },
+    {
+     "article_id": 15629,
+     "page": 1,
+     "value": "The Access to Justice Needs of"
+    },
+    {
+     "article_id": 15571,
+     "page": 1,
+     "value": "Speaking into a Void: Parliamentary"
+    },
+    {
+     "article_id": 15522,
+     "page": 1,
+     "value": "The Effect of R. v. Morrison on"
+    },
+    {
+     "article_id": 15578,
+     "page": 1,
+     "value": "Morbid Matters: Medical Assistance in"
+    },
+    {
+     "article_id": 15609,
+     "page": 1,
+     "value": "Legal-Technological Unemployment in"
+    }
+   ]
+  },
+  "title_case": {
+   "value": "sentence",
+   "confidence": 0.71,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": 1,
+     "value": "Interview with the Honourable"
+    },
+    {
+     "article_id": 15629,
+     "page": 1,
+     "value": "The Access to Justice Needs of"
+    },
+    {
+     "article_id": 15571,
+     "page": 1,
+     "value": "Speaking into a Void: Parliamentary"
+    },
+    {
+     "article_id": 15522,
+     "page": 1,
+     "value": "The Effect of R. v. Morrison on"
+    },
+    {
+     "article_id": 15578,
+     "page": 1,
+     "value": "Morbid Matters: Medical Assistance in"
+    },
+    {
+     "article_id": 15609,
+     "page": 1,
+     "value": "Legal-Technological Unemployment in"
+    }
+   ]
+  },
+  "author_case": {
+   "value": "upper",
+   "confidence": 1.0,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": 1,
+     "value": "Interview with the Honourable"
+    },
+    {
+     "article_id": 15629,
+     "page": 1,
+     "value": "The Access to Justice Needs of"
+    },
+    {
+     "article_id": 15571,
+     "page": 1,
+     "value": "Speaking into a Void: Parliamentary"
+    },
+    {
+     "article_id": 15522,
+     "page": 1,
+     "value": "The Effect of R. v. Morrison on"
+    },
+    {
+     "article_id": 15578,
+     "page": 1,
+     "value": "Morbid Matters: Medical Assistance in"
+    },
+    {
+     "article_id": 15609,
+     "page": 1,
+     "value": "Legal-Technological Unemployment in"
+    }
+   ]
+  },
+  "author_alignment": {
+   "value": "center",
+   "confidence": 0.71,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": 1,
+     "value": "Interview with the Honourable"
+    },
+    {
+     "article_id": 15629,
+     "page": 1,
+     "value": "The Access to Justice Needs of"
+    },
+    {
+     "article_id": 15571,
+     "page": 1,
+     "value": "Speaking into a Void: Parliamentary"
+    },
+    {
+     "article_id": 15522,
+     "page": 1,
+     "value": "The Effect of R. v. Morrison on"
+    },
+    {
+     "article_id": 15578,
+     "page": 1,
+     "value": "Morbid Matters: Medical Assistance in"
+    },
+    {
+     "article_id": 15609,
+     "page": 1,
+     "value": "Legal-Technological Unemployment in"
+    }
+   ]
+  },
+  "first_pdf_page_is_article": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 15656,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 15629,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 15571,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 15635,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 15522,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 15578,
+     "page": 1,
+     "value": null
+    }
+   ]
+  }
+ },
+ "table_of_contents": {
+  "value": false,
+  "confidence": 1.0,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 15656,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 15629,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 15571,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 15635,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 15522,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 15578,
+    "page": null,
+    "value": 0
+   }
+  ]
+ },
+ "citations": {
+  "ibid_case": {
+   "value": "Ibid",
+   "counts": {
+    "Ibid": 439,
+    "ibid": 4
+   },
+   "confidence": 0.99
+  },
+  "ibid_punctuation": {
+   "value": "Ibid.",
+   "counts": {
+    "Ibid.": 162,
+    "Ibid,": 31
+   },
+   "confidence": 0.84
+  },
+  "supra_form": {
+   "value": "supra note N",
+   "counts": {
+    "supra note N": 505,
+    "supra, note N": 0
+   },
+   "confidence": 1.0
+  },
+  "paragraph_pinpoint": {
+   "value": "at para N",
+   "counts": {
+    "at para N": 428,
+    "at para. N": 1
+   },
+   "confidence": 1.0
+  },
+  "page_pinpoint_label": {
+   "value": "at N",
+   "counts": {
+    "at N": 551,
+    "at p N": 0
+   },
+   "confidence": 1.0
+  },
+  "range_dash": {
+   "value": "hyphen",
+   "counts": {
+    "en dash": 3,
+    "hyphen": 87
+   },
+   "confidence": 0.97
+  },
+  "emphasis_note": {
+   "value": "(emphasis added)",
+   "counts": {
+    "[emphasis added]": 0,
+    "(emphasis added)": 8
+   },
+   "confidence": 1.0
+  },
+  "section_abbreviation": {
+   "value": "s N",
+   "counts": {
+    "s N": 73,
+    "s. N": 24
+   },
+   "confidence": 0.75
+  },
+  "et_al": {
+   "value": "et al",
+   "counts": {
+    "et al": 31,
+    "et al.": 0
+   },
+   "confidence": 1.0
+  },
+  "eg": {
+   "value": "e.g.",
+   "counts": {
+    "eg": 0,
+    "e.g.": 28
+   },
+   "confidence": 1.0
+  },
+  "ie": {
+   "value": "i.e.",
+   "counts": {
+    "ie": 0,
+    "i.e.": 3
+   },
+   "confidence": 1.0
+  },
+  "see_signal_case": {
+   "value": "See",
+   "counts": {
+    "See": 175,
+    "see": 41
+   },
+   "confidence": 0.81
+  },
+  "online_angle_brackets": {
+   "value": "online: url",
+   "counts": {
+    "online: <url>": 8,
+    "online: url": 12
+   },
+   "confidence": 0.6
+  },
+  "quotes": {
+   "value": "curly",
+   "counts": {
+    "curly": 1206,
+    "straight": 14
+   },
+   "confidence": 0.99
+  },
+  "raw_counts": {
+   "ibid_capitalized": 439,
+   "ibid_lower": 4,
+   "ibid_period": 162,
+   "ibid_comma": 31,
+   "ibid_at": 239,
+   "supra_note": 505,
+   "supra_comma_note": 0,
+   "at_para": 428,
+   "at_para_period": 1,
+   "at_pilcrow": 0,
+   "at_page": 551,
+   "at_p": 0,
+   "range_endash": 3,
+   "range_hyphen": 87,
+   "emphasis_brackets": 0,
+   "emphasis_parens": 8,
+   "section_s_period": 24,
+   "section_s_bare": 73,
+   "online_colon": 12,
+   "online_angle": 8,
+   "perma": 200,
+   "et_al_period": 0,
+   "et_al_bare": 31,
+   "neutral_citation": 122,
+   "canlii": 29,
+   "eg_bare": 0,
+   "eg_period": 28,
+   "ie_bare": 0,
+   "ie_period": 3,
+   "curly_double": 1206,
+   "straight_double": 14,
+   "see_signal_upper": 175,
+   "see_signal_lower": 41
+  },
+  "footnote_lines": 3871
+ },
+ "status": "ok",
+ "candidates": 45
+}

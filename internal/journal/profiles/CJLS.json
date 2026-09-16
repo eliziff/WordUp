@@ -1,0 +1,1543 @@
+{
+ "dataset": "CJLS",
+ "journal": "Canadian Journal of Law and Society",
+ "abbrev": "CJLS",
+ "platform": "Cambridge",
+ "years": [
+  "2025",
+  "2026"
+ ],
+ "articles_measured": [
+  12989,
+  12772,
+  13045,
+  12916,
+  8188,
+  13014,
+  13054,
+  12800,
+  12814,
+  13043
+ ],
+ "units": "points and inches; boxes measured at 144 dpi",
+ "page": {
+  "width_pt": 432,
+  "height_pt": 648,
+  "width_in": 6.0,
+  "height_in": 9.0,
+  "confidence": 1.0,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 12989,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 12772,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 13045,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 12916,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 8188,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 13014,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   }
+  ]
+ },
+ "margins_in": {
+  "mirrored": false,
+  "left_odd_pages": {
+   "value": 0.8,
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 12772,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 13045,
+     "page": null,
+     "value": {
+      "odd": 1.05,
+      "even": 0.9
+     }
+    },
+    {
+     "article_id": 12916,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.8
+     }
+    },
+    {
+     "article_id": 8188,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 13014,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 0.7
+     }
+    }
+   ]
+  },
+  "left_even_pages": {
+   "value": 0.7,
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 12772,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 13045,
+     "page": null,
+     "value": {
+      "odd": 1.05,
+      "even": 0.9
+     }
+    },
+    {
+     "article_id": 12916,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.8
+     }
+    },
+    {
+     "article_id": 8188,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 13014,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 0.7
+     }
+    }
+   ]
+  },
+  "right_odd_pages": {
+   "value": 0.7,
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.8
+     }
+    },
+    {
+     "article_id": 12772,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.8
+     }
+    },
+    {
+     "article_id": 13045,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.8
+     }
+    },
+    {
+     "article_id": 12916,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 8188,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.8
+     }
+    },
+    {
+     "article_id": 13014,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.8
+     }
+    }
+   ]
+  },
+  "right_even_pages": {
+   "value": 0.8,
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.8
+     }
+    },
+    {
+     "article_id": 12772,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.8
+     }
+    },
+    {
+     "article_id": 13045,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.8
+     }
+    },
+    {
+     "article_id": 12916,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 8188,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.8
+     }
+    },
+    {
+     "article_id": 13014,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.8
+     }
+    }
+   ]
+  },
+  "top": {
+   "value": 0.75,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": null,
+     "value": 0.75
+    },
+    {
+     "article_id": 12772,
+     "page": null,
+     "value": 0.75
+    },
+    {
+     "article_id": 13045,
+     "page": null,
+     "value": 0.75
+    },
+    {
+     "article_id": 12916,
+     "page": null,
+     "value": 0.75
+    },
+    {
+     "article_id": 8188,
+     "page": null,
+     "value": 0.75
+    },
+    {
+     "article_id": 13014,
+     "page": null,
+     "value": 0.75
+    }
+   ]
+  },
+  "bottom": {
+   "value": null,
+   "confidence": 0.3,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": null,
+     "value": 1.75
+    },
+    {
+     "article_id": 12772,
+     "page": null,
+     "value": 1.6
+    },
+    {
+     "article_id": 13045,
+     "page": null,
+     "value": 1.35
+    },
+    {
+     "article_id": 12916,
+     "page": null,
+     "value": 1.05
+    },
+    {
+     "article_id": 8188,
+     "page": null,
+     "value": 1.05
+    },
+    {
+     "article_id": 13014,
+     "page": null,
+     "value": 1.35
+    }
+   ]
+  }
+ },
+ "body": {
+  "font": {
+   "value": "AdvTT60649ef1",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": null,
+     "value": "AdvTT60649ef1"
+    },
+    {
+     "article_id": 12772,
+     "page": null,
+     "value": "AdvTT60649ef1"
+    },
+    {
+     "article_id": 13045,
+     "page": null,
+     "value": "AdvTT60649ef1"
+    },
+    {
+     "article_id": 12916,
+     "page": null,
+     "value": "AdvTT60649ef1"
+    },
+    {
+     "article_id": 8188,
+     "page": null,
+     "value": "AdvTT60649ef1"
+    },
+    {
+     "article_id": 13014,
+     "page": null,
+     "value": "AdvTT60649ef1"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 10.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 12772,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 13045,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 12916,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 8188,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 13014,
+     "page": null,
+     "value": 10.0
+    }
+   ]
+  },
+  "line_height_pt": {
+   "value": 10.0,
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 12772,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 13045,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 12916,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 8188,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 13014,
+     "page": null,
+     "value": 10.0
+    }
+   ]
+  }
+ },
+ "footnotes": {
+  "font": {
+   "value": "AdvTT60649ef1",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": null,
+     "value": "AdvTT60649ef1"
+    },
+    {
+     "article_id": 12772,
+     "page": null,
+     "value": "AdvTT60649ef1"
+    },
+    {
+     "article_id": 13045,
+     "page": null,
+     "value": "AdvTT60649ef1"
+    },
+    {
+     "article_id": 12916,
+     "page": null,
+     "value": "AdvTT60649ef1"
+    },
+    {
+     "article_id": 8188,
+     "page": null,
+     "value": "AdvTT60649ef1"
+    },
+    {
+     "article_id": 13014,
+     "page": null,
+     "value": "AdvTT60649ef1"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 8.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": null,
+     "value": 8.0
+    },
+    {
+     "article_id": 12772,
+     "page": null,
+     "value": 8.0
+    },
+    {
+     "article_id": 13045,
+     "page": null,
+     "value": 8.0
+    },
+    {
+     "article_id": 12916,
+     "page": null,
+     "value": 8.0
+    },
+    {
+     "article_id": 8188,
+     "page": null,
+     "value": 8.0
+    },
+    {
+     "article_id": 13014,
+     "page": null,
+     "value": 8.0
+    }
+   ]
+  },
+  "present": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": null,
+     "value": 597
+    },
+    {
+     "article_id": 12772,
+     "page": null,
+     "value": 307
+    },
+    {
+     "article_id": 13045,
+     "page": null,
+     "value": 202
+    },
+    {
+     "article_id": 12916,
+     "page": null,
+     "value": 33
+    },
+    {
+     "article_id": 8188,
+     "page": null,
+     "value": 66
+    },
+    {
+     "article_id": 13014,
+     "page": null,
+     "value": 159
+    }
+   ]
+  },
+  "number_style": {
+   "value": "number_space",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": null,
+     "value": [
+      "*Seule la version anglaise de cet article a été évaluée par des pairs."
+     ]
+    },
+    {
+     "article_id": 12772,
+     "page": null,
+     "value": [
+      "1 Dont la quasi-totalité est affiliée au Groupe interuniversitaire et interdisciplinaire de recherche"
+     ]
+    },
+    {
+     "article_id": 13045,
+     "page": null,
+     "value": [
+      "1 Centre for Gender Advocacy c Attorney General of Quebec, 2021 QCCS 191 au para 21."
+     ]
+    },
+    {
+     "article_id": 12916,
+     "page": null,
+     "value": [
+      "1 Use-of-force encounters are understood here as intentional use of force, including police"
+     ]
+    },
+    {
+     "article_id": 8188,
+     "page": null,
+     "value": [
+      "1 In this paper, sex is defined as the biological characteristics of an individual (i.e. chromosomes,"
+     ]
+    },
+    {
+     "article_id": 13014,
+     "page": null,
+     "value": [
+      "1 See, for example, Trevor C. W. Farrow et al., Everyday Legal Problems and the Cost of Justice in Canada:"
+     ]
+    }
+   ]
+  },
+  "indent_vs_body_in": {
+   "value": 0.0,
+   "confidence": 0.6,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 12772,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 13045,
+     "page": null,
+     "value": -0.25
+    },
+    {
+     "article_id": 12916,
+     "page": null,
+     "value": -0.05
+    },
+    {
+     "article_id": 8188,
+     "page": null,
+     "value": -0.05
+    },
+    {
+     "article_id": 13014,
+     "page": null,
+     "value": 0.0
+    }
+   ]
+  },
+  "first_page_author_note": {
+   "value": false,
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": 1,
+     "value": [
+      "*Seule la version anglaise de cet article a été évaluée par des pairs."
+     ]
+    },
+    {
+     "article_id": 12772,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 13045,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 12916,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 8188,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 13014,
+     "page": 1,
+     "value": []
+    }
+   ]
+  }
+ },
+ "headings": {
+  "numbering_levels": {
+   "value": [
+    "unnumbered"
+   ],
+   "confidence": 0.6,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": 1,
+     "value": [
+      "R E S E A R C H A RT I C L E / A RT I C L E D E R ",
+      "I. Person-Centred Justice",
+      "1. Themes and Definition"
+     ]
+    },
+    {
+     "article_id": 12772,
+     "page": 1,
+     "value": [
+      "R E S E A R C H A RT I C L E / A RT I C L E D E R ",
+      "I. Introduction",
+      "III. Méthodologie"
+     ]
+    },
+    {
+     "article_id": 13045,
+     "page": 1,
+     "value": [
+      "R E S E A R C H A RT I C L E / A RT I C L E D E R "
+     ]
+    },
+    {
+     "article_id": 12916,
+     "page": 1,
+     "value": [
+      "R E S E A R C H A RT I C L E / A RT I C L E D E R "
+     ]
+    },
+    {
+     "article_id": 8188,
+     "page": 1,
+     "value": [
+      "R E S E A R C H A RT I C L E / A RT I C L E D E R "
+     ]
+    },
+    {
+     "article_id": 13014,
+     "page": 1,
+     "value": [
+      "R E S E A R C H A RT I C L E / A RT I C L E D E R ",
+      "I. Background",
+      "1. Access to Justice"
+     ]
+    }
+   ]
+  },
+  "top_level_case": {
+   "value": "upper",
+   "confidence": 0.6,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": 25,
+     "value": "I. Person-Centred Justice"
+    },
+    {
+     "article_id": 12772,
+     "page": 2,
+     "value": "I. Introduction"
+    },
+    {
+     "article_id": 13045,
+     "page": 1,
+     "value": "R E S E A R C H A RT I C L E / A RT I C L E D E R E C H E R "
+    },
+    {
+     "article_id": 12916,
+     "page": 1,
+     "value": "R E S E A R C H A RT I C L E / A RT I C L E D E R E C H E R "
+    },
+    {
+     "article_id": 8188,
+     "page": 1,
+     "value": "R E S E A R C H A RT I C L E / A RT I C L E D E R E C H E R "
+    },
+    {
+     "article_id": 13014,
+     "page": 3,
+     "value": "I. Background"
+    }
+   ]
+  },
+  "top_level_size_pt": {
+   "value": 7.0,
+   "confidence": 0.6,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": 25,
+     "value": "I. Person-Centred Justice"
+    },
+    {
+     "article_id": 12772,
+     "page": 2,
+     "value": "I. Introduction"
+    },
+    {
+     "article_id": 13045,
+     "page": 1,
+     "value": "R E S E A R C H A RT I C L E / A RT I C L E D E R E C H E R "
+    },
+    {
+     "article_id": 12916,
+     "page": 1,
+     "value": "R E S E A R C H A RT I C L E / A RT I C L E D E R E C H E R "
+    },
+    {
+     "article_id": 8188,
+     "page": 1,
+     "value": "R E S E A R C H A RT I C L E / A RT I C L E D E R E C H E R "
+    },
+    {
+     "article_id": 13014,
+     "page": 3,
+     "value": "I. Background"
+    }
+   ]
+  },
+  "top_level_alignment": {
+   "value": "left",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": 25,
+     "value": "I. Person-Centred Justice"
+    },
+    {
+     "article_id": 12772,
+     "page": 2,
+     "value": "I. Introduction"
+    },
+    {
+     "article_id": 13045,
+     "page": 1,
+     "value": "R E S E A R C H A RT I C L E / A RT I C L E D E R E C H E R "
+    },
+    {
+     "article_id": 12916,
+     "page": 1,
+     "value": "R E S E A R C H A RT I C L E / A RT I C L E D E R E C H E R "
+    },
+    {
+     "article_id": 8188,
+     "page": 1,
+     "value": "R E S E A R C H A RT I C L E / A RT I C L E D E R E C H E R "
+    },
+    {
+     "article_id": 13014,
+     "page": 3,
+     "value": "I. Background"
+    }
+   ]
+  },
+  "samples": [
+   "R E S E A R C H A RT I C L E / A RT I C L E D E R E C H E R C H E",
+   "I. Person-Centred Justice",
+   "1. Themes and Definition",
+   "2. Person-Centred Dispute Resolution: A Key Challenge",
+   "R E S E A R C H A RT I C L E / A RT I C L E D E R E C H E R C H E",
+   "I. Introduction",
+   "III. Méthodologie",
+   "1. Dollarama",
+   "R E S E A R C H A RT I C L E / A RT I C L E D E R E C H E R C H E"
+  ]
+ },
+ "block_quotes": {
+  "indent_in": {
+   "value": 0.1,
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": null,
+     "value": 0.1
+    },
+    {
+     "article_id": 12772,
+     "page": null,
+     "value": 0.1
+    },
+    {
+     "article_id": 13045,
+     "page": null,
+     "value": -0.05
+    },
+    {
+     "article_id": 12916,
+     "page": null,
+     "value": 0.1
+    },
+    {
+     "article_id": 8188,
+     "page": null,
+     "value": 0.1
+    },
+    {
+     "article_id": 13014,
+     "page": null,
+     "value": 0.15
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 10.0,
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": null,
+     "value": 8.966
+    },
+    {
+     "article_id": 12772,
+     "page": null,
+     "value": 9.963
+    },
+    {
+     "article_id": 13045,
+     "page": null,
+     "value": 9.963
+    },
+    {
+     "article_id": 12916,
+     "page": null,
+     "value": 7.97
+    },
+    {
+     "article_id": 8188,
+     "page": null,
+     "value": 9.963
+    },
+    {
+     "article_id": 13014,
+     "page": null,
+     "value": 9.963
+    }
+   ]
+  },
+  "articles_with_block_quotes": 10
+ },
+ "running_heads": {
+  "odd_pages": {
+   "value": [
+    "other"
+   ],
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": null,
+     "value": [
+      "Jérémy Boulanger-Bonnelly"
+     ]
+    },
+    {
+     "article_id": 12772,
+     "page": null,
+     "value": [
+      "Martine D’Amours et al."
+     ]
+    },
+    {
+     "article_id": 13045,
+     "page": null,
+     "value": [
+      "Léo Lecomte, Laurence Gauvin-Joyal et Djemila Carron"
+     ]
+    },
+    {
+     "article_id": 12916,
+     "page": null,
+     "value": [
+      "Tracking (In)Justice"
+     ]
+    },
+    {
+     "article_id": 8188,
+     "page": null,
+     "value": [
+      "Sam Ghebrai"
+     ]
+    },
+    {
+     "article_id": 13014,
+     "page": null,
+     "value": [
+      "Amy Salyzyn et al."
+     ]
+    }
+   ]
+  },
+  "even_pages": {
+   "value": [
+    "article_title"
+   ],
+   "confidence": 0.6,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": null,
+     "value": [
+      "Justice centrée sur la personne et règlement des différends",
+      "Person-Centred Justice and Dispute Resolution: The Potential of Lay Courts"
+     ]
+    },
+    {
+     "article_id": 12772,
+     "page": null,
+     "value": [
+      "De la nécessité d’articuler droit du travail, droit de la santé et sécurité et droit de l’immigration",
+      "Dollarama (N=37)"
+     ]
+    },
+    {
+     "article_id": 13045,
+     "page": null,
+     "value": [
+      "Centre de lutte contre l’oppression des genres c. Procureur général du Québec"
+     ]
+    },
+    {
+     "article_id": 12916,
+     "page": null,
+     "value": [
+      "Andrew Crosby et al."
+     ]
+    },
+    {
+     "article_id": 8188,
+     "page": null,
+     "value": [
+      "“Coming Out as Female Has Been a Gradual Process”"
+     ]
+    },
+    {
+     "article_id": 13014,
+     "page": null,
+     "value": [
+      "Court Form Accessibility"
+     ]
+    }
+   ]
+  },
+  "page_number": {
+   "value": "top-inner",
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 12772,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 13045,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 12916,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 8188,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 13014,
+     "page": null,
+     "value": "top-inner"
+    }
+   ]
+  }
+ },
+ "title_block": {
+  "title_size_pt": {
+   "value": 14.0,
+   "confidence": 1.0,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 12772,
+     "page": 1,
+     "value": "De la nécessité d’articuler droit du travail, droit de"
+    },
+    {
+     "article_id": 13045,
+     "page": 1,
+     "value": "Centre de lutte contre l’oppression des genres"
+    },
+    {
+     "article_id": 12916,
+     "page": 1,
+     "value": "Tracking (In)Justice: Documenting Fatal"
+    },
+    {
+     "article_id": 8188,
+     "page": 1,
+     "value": "“Coming Out as Female Has Been a Gradual"
+    },
+    {
+     "article_id": 13054,
+     "page": 1,
+     "value": "The “Unusual” Suspect—Race, Class, and Crime:"
+    },
+    {
+     "article_id": 12800,
+     "page": 1,
+     "value": "Equitable Pretrial Justice for Indigenous Accused?"
+    }
+   ]
+  },
+  "title_alignment": {
+   "value": "center",
+   "confidence": 0.75,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 12772,
+     "page": 1,
+     "value": "De la nécessité d’articuler droit du travail, droit de"
+    },
+    {
+     "article_id": 13045,
+     "page": 1,
+     "value": "Centre de lutte contre l’oppression des genres"
+    },
+    {
+     "article_id": 12916,
+     "page": 1,
+     "value": "Tracking (In)Justice: Documenting Fatal"
+    },
+    {
+     "article_id": 8188,
+     "page": 1,
+     "value": "“Coming Out as Female Has Been a Gradual"
+    },
+    {
+     "article_id": 13054,
+     "page": 1,
+     "value": "The “Unusual” Suspect—Race, Class, and Crime:"
+    },
+    {
+     "article_id": 12800,
+     "page": 1,
+     "value": "Equitable Pretrial Justice for Indigenous Accused?"
+    }
+   ]
+  },
+  "title_case": {
+   "value": "title",
+   "confidence": 0.62,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 12772,
+     "page": 1,
+     "value": "De la nécessité d’articuler droit du travail, droit de"
+    },
+    {
+     "article_id": 13045,
+     "page": 1,
+     "value": "Centre de lutte contre l’oppression des genres"
+    },
+    {
+     "article_id": 12916,
+     "page": 1,
+     "value": "Tracking (In)Justice: Documenting Fatal"
+    },
+    {
+     "article_id": 8188,
+     "page": 1,
+     "value": "“Coming Out as Female Has Been a Gradual"
+    },
+    {
+     "article_id": 13054,
+     "page": 1,
+     "value": "The “Unusual” Suspect—Race, Class, and Crime:"
+    },
+    {
+     "article_id": 12800,
+     "page": 1,
+     "value": "Equitable Pretrial Justice for Indigenous Accused?"
+    }
+   ]
+  },
+  "author_case": {
+   "value": null,
+   "confidence": 0.0,
+   "articles": 0,
+   "evidence": [
+    {
+     "article_id": 12772,
+     "page": 1,
+     "value": "De la nécessité d’articuler droit du travail, droit de"
+    },
+    {
+     "article_id": 13045,
+     "page": 1,
+     "value": "Centre de lutte contre l’oppression des genres"
+    },
+    {
+     "article_id": 12916,
+     "page": 1,
+     "value": "Tracking (In)Justice: Documenting Fatal"
+    },
+    {
+     "article_id": 8188,
+     "page": 1,
+     "value": "“Coming Out as Female Has Been a Gradual"
+    },
+    {
+     "article_id": 13054,
+     "page": 1,
+     "value": "The “Unusual” Suspect—Race, Class, and Crime:"
+    },
+    {
+     "article_id": 12800,
+     "page": 1,
+     "value": "Equitable Pretrial Justice for Indigenous Accused?"
+    }
+   ]
+  },
+  "author_alignment": {
+   "value": null,
+   "confidence": 0.0,
+   "articles": 0,
+   "evidence": [
+    {
+     "article_id": 12772,
+     "page": 1,
+     "value": "De la nécessité d’articuler droit du travail, droit de"
+    },
+    {
+     "article_id": 13045,
+     "page": 1,
+     "value": "Centre de lutte contre l’oppression des genres"
+    },
+    {
+     "article_id": 12916,
+     "page": 1,
+     "value": "Tracking (In)Justice: Documenting Fatal"
+    },
+    {
+     "article_id": 8188,
+     "page": 1,
+     "value": "“Coming Out as Female Has Been a Gradual"
+    },
+    {
+     "article_id": 13054,
+     "page": 1,
+     "value": "The “Unusual” Suspect—Race, Class, and Crime:"
+    },
+    {
+     "article_id": 12800,
+     "page": 1,
+     "value": "Equitable Pretrial Justice for Indigenous Accused?"
+    }
+   ]
+  },
+  "first_pdf_page_is_article": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 12989,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 12772,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 13045,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 12916,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 8188,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 13014,
+     "page": 1,
+     "value": null
+    }
+   ]
+  }
+ },
+ "table_of_contents": {
+  "value": false,
+  "confidence": 1.0,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 12989,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 12772,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 13045,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 12916,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 8188,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 13014,
+    "page": null,
+    "value": 0
+   }
+  ]
+ },
+ "citations": {
+  "ibid_case": {
+   "value": "Ibid",
+   "counts": {
+    "Ibid": 47,
+    "ibid": 10
+   },
+   "confidence": 0.82
+  },
+  "ibid_punctuation": {
+   "value": "Ibid.",
+   "counts": {
+    "Ibid.": 43,
+    "Ibid,": 3
+   },
+   "confidence": 0.93
+  },
+  "supra_form": {
+   "value": "supra note N",
+   "counts": {
+    "supra note N": 35,
+    "supra, note N": 0
+   },
+   "confidence": 1.0
+  },
+  "paragraph_pinpoint": {
+   "value": "at para N",
+   "counts": {
+    "at para N": 1,
+    "at para. N": 0
+   },
+   "confidence": 1.0
+  },
+  "page_pinpoint_label": {
+   "value": "at N",
+   "counts": {
+    "at N": 8,
+    "at p N": 0
+   },
+   "confidence": 1.0
+  },
+  "range_dash": {
+   "value": "en dash",
+   "counts": {
+    "en dash": 107,
+    "hyphen": 0
+   },
+   "confidence": 1.0
+  },
+  "emphasis_note": {
+   "value": "(emphasis added)",
+   "counts": {
+    "[emphasis added]": 0,
+    "(emphasis added)": 4
+   },
+   "confidence": 1.0
+  },
+  "section_abbreviation": {
+   "value": "s N",
+   "counts": {
+    "s N": 10,
+    "s. N": 0
+   },
+   "confidence": 1.0
+  },
+  "et_al": {
+   "value": "et al.",
+   "counts": {
+    "et al": 1,
+    "et al.": 22
+   },
+   "confidence": 0.96
+  },
+  "eg": {
+   "value": "e.g.",
+   "counts": {
+    "eg": 0,
+    "e.g.": 24
+   },
+   "confidence": 1.0
+  },
+  "ie": {
+   "value": "i.e.",
+   "counts": {
+    "ie": 0,
+    "i.e.": 1
+   },
+   "confidence": 1.0
+  },
+  "see_signal_case": {
+   "value": "see",
+   "counts": {
+    "See": 35,
+    "see": 50
+   },
+   "confidence": 0.59
+  },
+  "online_angle_brackets": {
+   "value": null,
+   "counts": {
+    "online: <url>": 0,
+    "online: url": 0
+   },
+   "confidence": 0.0
+  },
+  "quotes": {
+   "value": "curly",
+   "counts": {
+    "curly": 503,
+    "straight": 0
+   },
+   "confidence": 1.0
+  },
+  "raw_counts": {
+   "ibid_capitalized": 47,
+   "ibid_lower": 10,
+   "ibid_period": 43,
+   "ibid_comma": 3,
+   "ibid_at": 0,
+   "supra_note": 35,
+   "supra_comma_note": 0,
+   "at_para": 1,
+   "at_para_period": 0,
+   "at_pilcrow": 0,
+   "at_page": 8,
+   "at_p": 0,
+   "range_endash": 107,
+   "range_hyphen": 0,
+   "emphasis_brackets": 0,
+   "emphasis_parens": 4,
+   "section_s_period": 0,
+   "section_s_bare": 10,
+   "online_colon": 0,
+   "online_angle": 0,
+   "perma": 0,
+   "et_al_period": 22,
+   "et_al_bare": 1,
+   "neutral_citation": 21,
+   "canlii": 2,
+   "eg_bare": 0,
+   "eg_period": 24,
+   "ie_bare": 0,
+   "ie_period": 1,
+   "curly_double": 503,
+   "straight_double": 0,
+   "see_signal_upper": 35,
+   "see_signal_lower": 50
+  },
+  "footnote_lines": 1671
+ },
+ "status": "ok",
+ "candidates": 53
+}

@@ -1,0 +1,1523 @@
+{
+ "dataset": "MCGILL-J-SUSTAINABLE-DEV-L",
+ "journal": "McGill Journal of Sustainable Development Law",
+ "abbrev": "McGill J Sustainable Dev L",
+ "platform": "mjsdl",
+ "years": [
+  "2025",
+  "2026"
+ ],
+ "articles_measured": [
+  1511,
+  28308,
+  1514,
+  1512,
+  1515,
+  1513
+ ],
+ "units": "points and inches; boxes measured at 144 dpi",
+ "page": {
+  "width_pt": 486,
+  "height_pt": 702,
+  "width_in": 6.75,
+  "height_in": 9.75,
+  "confidence": 1.0,
+  "articles": 6,
+  "evidence": [
+   {
+    "article_id": 1511,
+    "page": 1,
+    "value": {
+     "width_pt": 486,
+     "height_pt": 702
+    }
+   },
+   {
+    "article_id": 28308,
+    "page": 1,
+    "value": {
+     "width_pt": 486,
+     "height_pt": 702
+    }
+   },
+   {
+    "article_id": 1514,
+    "page": 1,
+    "value": {
+     "width_pt": 486,
+     "height_pt": 702
+    }
+   },
+   {
+    "article_id": 1512,
+    "page": 1,
+    "value": {
+     "width_pt": 486,
+     "height_pt": 702
+    }
+   },
+   {
+    "article_id": 1515,
+    "page": 1,
+    "value": {
+     "width_pt": 486,
+     "height_pt": 702
+    }
+   },
+   {
+    "article_id": 1513,
+    "page": 1,
+    "value": {
+     "width_pt": 486,
+     "height_pt": 702
+    }
+   }
+  ]
+ },
+ "margins_in": {
+  "mirrored": false,
+  "left_odd_pages": {
+   "value": 0.75,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 28308,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 1514,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 1512,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 1515,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 1513,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    }
+   ]
+  },
+  "left_even_pages": {
+   "value": 0.75,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 28308,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 1514,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 1512,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 1515,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 1513,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    }
+   ]
+  },
+  "right_odd_pages": {
+   "value": 0.7,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 28308,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 1514,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 1512,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 1515,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 1513,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    }
+   ]
+  },
+  "right_even_pages": {
+   "value": 0.7,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 28308,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 1514,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 1512,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 1515,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 1513,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    }
+   ]
+  },
+  "top": {
+   "value": 0.95,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": null,
+     "value": 0.95
+    },
+    {
+     "article_id": 28308,
+     "page": null,
+     "value": 0.95
+    },
+    {
+     "article_id": 1514,
+     "page": null,
+     "value": 0.95
+    },
+    {
+     "article_id": 1512,
+     "page": null,
+     "value": 0.95
+    },
+    {
+     "article_id": 1515,
+     "page": null,
+     "value": 0.95
+    },
+    {
+     "article_id": 1513,
+     "page": null,
+     "value": 0.95
+    }
+   ]
+  },
+  "bottom": {
+   "value": null,
+   "confidence": 0.17,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": null,
+     "value": 2.15
+    },
+    {
+     "article_id": 28308,
+     "page": null,
+     "value": 1.75
+    },
+    {
+     "article_id": 1514,
+     "page": null,
+     "value": 1.85
+    },
+    {
+     "article_id": 1512,
+     "page": null,
+     "value": 2.2
+    },
+    {
+     "article_id": 1515,
+     "page": null,
+     "value": 1.5
+    },
+    {
+     "article_id": 1513,
+     "page": null,
+     "value": 1.65
+    }
+   ]
+  }
+ },
+ "body": {
+  "font": {
+   "value": "AGaramondPro-Regular",
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 28308,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 1514,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 1512,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 1515,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 1513,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 10.5,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 28308,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 1514,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 1512,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 1515,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 1513,
+     "page": null,
+     "value": 10.5
+    }
+   ]
+  },
+  "line_height_pt": {
+   "value": 13.5,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 28308,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 1514,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 1512,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 1515,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 1513,
+     "page": null,
+     "value": 13.5
+    }
+   ]
+  }
+ },
+ "footnotes": {
+  "font": {
+   "value": "AGaramondPro-Regular",
+   "confidence": 0.67,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 28308,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 1514,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 1512,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 1515,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 1513,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 9.0,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 28308,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 1514,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 1512,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 1515,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 1513,
+     "page": null,
+     "value": 9.0
+    }
+   ]
+  },
+  "present": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": null,
+     "value": 654
+    },
+    {
+     "article_id": 28308,
+     "page": null,
+     "value": 525
+    },
+    {
+     "article_id": 1514,
+     "page": null,
+     "value": 503
+    },
+    {
+     "article_id": 1512,
+     "page": null,
+     "value": 614
+    },
+    {
+     "article_id": 1515,
+     "page": null,
+     "value": 275
+    },
+    {
+     "article_id": 1513,
+     "page": null,
+     "value": 147
+    }
+   ]
+  },
+  "number_style": {
+   "value": "number_space",
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": null,
+     "value": [
+      "1 Yuill Herbert, Ann Dale et Chris Stashok, « Canadian Cities: Climate Change Action and Plans » (2022)"
+     ]
+    },
+    {
+     "article_id": 28308,
+     "page": null,
+     "value": [
+      "1 Hans-Martin Füssel & Richard JT Klein, “Climate Change Vulnerability Assessments: An Evolution of"
+     ]
+    },
+    {
+     "article_id": 1514,
+     "page": null,
+     "value": [
+      "1 Venkatachalam Anbumozhi, Fukunari Kimura & Shandre Mugan Thangavelu, “Global Supply"
+     ]
+    },
+    {
+     "article_id": 1512,
+     "page": null,
+     "value": [
+      "1 Voir Daniel Mockle, « Ordre normatif et organisations », (1992) 33 :4 C de D 965 à la p 1053."
+     ]
+    },
+    {
+     "article_id": 1515,
+     "page": null,
+     "value": [
+      "1 See e.g. Robert McLeman, “Environmental Migration Scholarship and Policy: Recent Progress, Future"
+     ]
+    },
+    {
+     "article_id": 1513,
+     "page": null,
+     "value": [
+      "1 This is mentioned in particular in the Ordonnance of Villers-Cotterêts sur le fait de la Justice of"
+     ]
+    }
+   ]
+  },
+  "indent_vs_body_in": {
+   "value": 0.0,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 28308,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 1514,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 1512,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 1515,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 1513,
+     "page": null,
+     "value": 0.0
+    }
+   ]
+  },
+  "first_page_author_note": {
+   "value": false,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 28308,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 1514,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 1512,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 1515,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 1513,
+     "page": 1,
+     "value": []
+    }
+   ]
+  }
+ },
+ "headings": {
+  "numbering_levels": {
+   "value": [
+    "arabic_period",
+    "arabic_multi",
+    "unnumbered"
+   ],
+   "confidence": 0.67,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": 2,
+     "value": [
+      "3.\t HISTORIQUE ET CONTEXTE : LES DÉFIS CROISÉS DU",
+      "VERDISSEMENT ET DE L’ACCESSIBILITÉ DE MONTRÉAL",
+      "ESPACES VERTS À MONTRÉAL"
+     ]
+    },
+    {
+     "article_id": 28308,
+     "page": 3,
+     "value": [
+      "1.\t INTRODUCTION",
+      "2.\t CONCEPTUAL FRAMEWORK AND METHODOLOGY",
+      "2.1.\tConceptual Framework"
+     ]
+    },
+    {
+     "article_id": 1514,
+     "page": 3,
+     "value": [
+      "1.\t INTRODUCTION",
+      "2.\t RESILIENCE CAPACITIES",
+      "3.\t ABSORPTIVE CAPACITY"
+     ]
+    },
+    {
+     "article_id": 1512,
+     "page": 2,
+     "value": [
+      "2.\t LE MOUVEMENT DE RECONNAISSANCE DES DROITS DE L",
+      "NATURE",
+      "3.\t ANALYSE DU MOUVEMENT DE RECONNAISSANCE DES DRO"
+     ]
+    },
+    {
+     "article_id": 1515,
+     "page": 2,
+     "value": [
+      "UNSTABLE CLIMATES",
+      "2.\t PART 1: OUTLINING THE PROTECTIONS AFFORDED TO ",
+      "CLIMATE MIGRANTS BY THE CRC"
+     ]
+    },
+    {
+     "article_id": 1513,
+     "page": 2,
+     "value": [
+      "ENVIRONNEMENT ET AL.",
+      "4.\t MEETING THE CRITERION OF NOT COMPROMISING THE",
+      "ABILITY OF FUTURE GENERATIONS TO MEET THEIR OWN NE"
+     ]
+    }
+   ]
+  },
+  "top_level_case": {
+   "value": "upper",
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": 2,
+     "value": "3.\t HISTORIQUE ET CONTEXTE : LES DÉFIS CROISÉS DU"
+    },
+    {
+     "article_id": 28308,
+     "page": 3,
+     "value": "1.\t INTRODUCTION"
+    },
+    {
+     "article_id": 1514,
+     "page": 3,
+     "value": "1.\t INTRODUCTION"
+    },
+    {
+     "article_id": 1512,
+     "page": 2,
+     "value": "2.\t LE MOUVEMENT DE RECONNAISSANCE DES DROITS DE LA"
+    },
+    {
+     "article_id": 1515,
+     "page": 2,
+     "value": "UNSTABLE CLIMATES"
+    },
+    {
+     "article_id": 1513,
+     "page": 2,
+     "value": "ENVIRONNEMENT ET AL."
+    }
+   ]
+  },
+  "top_level_size_pt": {
+   "value": 10.5,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": 2,
+     "value": "3.\t HISTORIQUE ET CONTEXTE : LES DÉFIS CROISÉS DU"
+    },
+    {
+     "article_id": 28308,
+     "page": 3,
+     "value": "1.\t INTRODUCTION"
+    },
+    {
+     "article_id": 1514,
+     "page": 3,
+     "value": "1.\t INTRODUCTION"
+    },
+    {
+     "article_id": 1512,
+     "page": 2,
+     "value": "2.\t LE MOUVEMENT DE RECONNAISSANCE DES DROITS DE LA"
+    },
+    {
+     "article_id": 1515,
+     "page": 2,
+     "value": "UNSTABLE CLIMATES"
+    },
+    {
+     "article_id": 1513,
+     "page": 2,
+     "value": "ENVIRONNEMENT ET AL."
+    }
+   ]
+  },
+  "top_level_alignment": {
+   "value": "left",
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": 2,
+     "value": "3.\t HISTORIQUE ET CONTEXTE : LES DÉFIS CROISÉS DU"
+    },
+    {
+     "article_id": 28308,
+     "page": 3,
+     "value": "1.\t INTRODUCTION"
+    },
+    {
+     "article_id": 1514,
+     "page": 3,
+     "value": "1.\t INTRODUCTION"
+    },
+    {
+     "article_id": 1512,
+     "page": 2,
+     "value": "2.\t LE MOUVEMENT DE RECONNAISSANCE DES DROITS DE LA"
+    },
+    {
+     "article_id": 1515,
+     "page": 2,
+     "value": "UNSTABLE CLIMATES"
+    },
+    {
+     "article_id": 1513,
+     "page": 2,
+     "value": "ENVIRONNEMENT ET AL."
+    }
+   ]
+  },
+  "samples": [
+   "3.\t HISTORIQUE ET CONTEXTE : LES DÉFIS CROISÉS DU",
+   "VERDISSEMENT ET DE L’ACCESSIBILITÉ DE MONTRÉAL",
+   "ESPACES VERTS À MONTRÉAL",
+   "1.\t INTRODUCTION",
+   "1.\t INTRODUCTION",
+   "2.\t CONCEPTUAL FRAMEWORK AND METHODOLOGY",
+   "2.1.\tConceptual Framework",
+   "2.1.1.\tOnifade’s Climate Justice Framework",
+   "1.\t INTRODUCTION",
+   "2.\t RESILIENCE CAPACITIES",
+   "3.\t ABSORPTIVE CAPACITY",
+   "3.1.\tRisk Identification"
+  ]
+ },
+ "block_quotes": {
+  "indent_in": {
+   "value": 0.25,
+   "confidence": 1.0,
+   "articles": 5,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": null,
+     "value": 0.25
+    },
+    {
+     "article_id": 28308,
+     "page": null,
+     "value": 0.25
+    },
+    {
+     "article_id": 1514,
+     "page": null,
+     "value": 0.25
+    },
+    {
+     "article_id": 1512,
+     "page": null,
+     "value": 0.25
+    },
+    {
+     "article_id": 1515,
+     "page": null,
+     "value": 0.25
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 10.5,
+   "confidence": 0.8,
+   "articles": 5,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 28308,
+     "page": null,
+     "value": 9.5
+    },
+    {
+     "article_id": 1514,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 1512,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 1515,
+     "page": null,
+     "value": 10.5
+    }
+   ]
+  },
+  "articles_with_block_quotes": 5
+ },
+ "running_heads": {
+  "odd_pages": {
+   "value": [
+    "volume_or_year"
+   ],
+   "confidence": 0.67,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": null,
+     "value": [
+      "Jodoin et al.",
+      "Volume 19: Issue 3"
+     ]
+    },
+    {
+     "article_id": 28308,
+     "page": null,
+     "value": [
+      "Onifade et al.",
+      "Volume 22: Issue 1"
+     ]
+    },
+    {
+     "article_id": 1514,
+     "page": null,
+     "value": [
+      "Penttinen and Burlinghaus",
+      "Volume 21: Issue 2"
+     ]
+    },
+    {
+     "article_id": 1512,
+     "page": null,
+     "value": [
+      "Emerich",
+      "Volume 19: Issue 3"
+     ]
+    },
+    {
+     "article_id": 1515,
+     "page": null,
+     "value": [
+      "Arbelaez",
+      "Volume 21: Issue 2"
+     ]
+    },
+    {
+     "article_id": 1513,
+     "page": null,
+     "value": [
+      "Jourdain",
+      "Volume 21: Issue 2"
+     ]
+    }
+   ]
+  },
+  "even_pages": {
+   "value": [
+    "other"
+   ],
+   "confidence": 0.67,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": null,
+     "value": [
+      "MJSDL - RDDDM",
+      "Jodoin et al."
+     ]
+    },
+    {
+     "article_id": 28308,
+     "page": null,
+     "value": [
+      "Onifade et al.",
+      "MJSDL - RDDDM"
+     ]
+    },
+    {
+     "article_id": 1514,
+     "page": null,
+     "value": [
+      "MJSDL - RDDDM",
+      "Penttinen and Burlingaus"
+     ]
+    },
+    {
+     "article_id": 1512,
+     "page": null,
+     "value": [
+      "MJSDL - RDDDM",
+      "Emerich"
+     ]
+    },
+    {
+     "article_id": 1515,
+     "page": null,
+     "value": [
+      "MJSDL - RDDDM",
+      "Arbelaez"
+     ]
+    },
+    {
+     "article_id": 1513,
+     "page": null,
+     "value": [
+      "MJSDL - RDDDM",
+      "Jourdain"
+     ]
+    }
+   ]
+  },
+  "page_number": {
+   "value": "top-outer",
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 28308,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 1514,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 1512,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 1515,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 1513,
+     "page": null,
+     "value": "top-outer"
+    }
+   ]
+  }
+ },
+ "title_block": {
+  "title_size_pt": {
+   "value": 23.0,
+   "confidence": 1.0,
+   "articles": 5,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": 1,
+     "value": "L’accessibilité de la nature en milieu urbain :"
+    },
+    {
+     "article_id": 28308,
+     "page": 1,
+     "value": "Loss and Damage Justice"
+    },
+    {
+     "article_id": 1514,
+     "page": 1,
+     "value": "The Battery Rush and Global Supply Chains:"
+    },
+    {
+     "article_id": 1512,
+     "page": 1,
+     "value": "Les droits de la Nature en question :"
+    },
+    {
+     "article_id": 1515,
+     "page": 1,
+     "value": "Bringing Child Climate Migrants Out of the"
+    }
+   ]
+  },
+  "title_alignment": {
+   "value": "center",
+   "confidence": 1.0,
+   "articles": 5,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": 1,
+     "value": "L’accessibilité de la nature en milieu urbain :"
+    },
+    {
+     "article_id": 28308,
+     "page": 1,
+     "value": "Loss and Damage Justice"
+    },
+    {
+     "article_id": 1514,
+     "page": 1,
+     "value": "The Battery Rush and Global Supply Chains:"
+    },
+    {
+     "article_id": 1512,
+     "page": 1,
+     "value": "Les droits de la Nature en question :"
+    },
+    {
+     "article_id": 1515,
+     "page": 1,
+     "value": "Bringing Child Climate Migrants Out of the"
+    }
+   ]
+  },
+  "title_case": {
+   "value": "sentence",
+   "confidence": 0.6,
+   "articles": 5,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": 1,
+     "value": "L’accessibilité de la nature en milieu urbain :"
+    },
+    {
+     "article_id": 28308,
+     "page": 1,
+     "value": "Loss and Damage Justice"
+    },
+    {
+     "article_id": 1514,
+     "page": 1,
+     "value": "The Battery Rush and Global Supply Chains:"
+    },
+    {
+     "article_id": 1512,
+     "page": 1,
+     "value": "Les droits de la Nature en question :"
+    },
+    {
+     "article_id": 1515,
+     "page": 1,
+     "value": "Bringing Child Climate Migrants Out of the"
+    }
+   ]
+  },
+  "author_case": {
+   "value": "title",
+   "confidence": 1.0,
+   "articles": 2,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": 1,
+     "value": "L’accessibilité de la nature en milieu urbain :"
+    },
+    {
+     "article_id": 28308,
+     "page": 1,
+     "value": "Loss and Damage Justice"
+    },
+    {
+     "article_id": 1514,
+     "page": 1,
+     "value": "The Battery Rush and Global Supply Chains:"
+    },
+    {
+     "article_id": 1512,
+     "page": 1,
+     "value": "Les droits de la Nature en question :"
+    },
+    {
+     "article_id": 1515,
+     "page": 1,
+     "value": "Bringing Child Climate Migrants Out of the"
+    }
+   ]
+  },
+  "author_alignment": {
+   "value": "left",
+   "confidence": 1.0,
+   "articles": 2,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": 1,
+     "value": "L’accessibilité de la nature en milieu urbain :"
+    },
+    {
+     "article_id": 28308,
+     "page": 1,
+     "value": "Loss and Damage Justice"
+    },
+    {
+     "article_id": 1514,
+     "page": 1,
+     "value": "The Battery Rush and Global Supply Chains:"
+    },
+    {
+     "article_id": 1512,
+     "page": 1,
+     "value": "Les droits de la Nature en question :"
+    },
+    {
+     "article_id": 1515,
+     "page": 1,
+     "value": "Bringing Child Climate Migrants Out of the"
+    }
+   ]
+  },
+  "first_pdf_page_is_article": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 1511,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 28308,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 1514,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 1512,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 1515,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 1513,
+     "page": 1,
+     "value": null
+    }
+   ]
+  }
+ },
+ "table_of_contents": {
+  "value": true,
+  "confidence": 0.67,
+  "articles": 6,
+  "evidence": [
+   {
+    "article_id": 1511,
+    "page": null,
+    "value": 4
+   },
+   {
+    "article_id": 28308,
+    "page": null,
+    "value": 4
+   },
+   {
+    "article_id": 1514,
+    "page": null,
+    "value": 4
+   },
+   {
+    "article_id": 1512,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 1515,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 1513,
+    "page": null,
+    "value": 4
+   }
+  ]
+ },
+ "citations": {
+  "ibid_case": {
+   "value": "Ibid",
+   "counts": {
+    "Ibid": 164,
+    "ibid": 15
+   },
+   "confidence": 0.92
+  },
+  "ibid_punctuation": {
+   "value": "Ibid.",
+   "counts": {
+    "Ibid.": 40,
+    "Ibid,": 17
+   },
+   "confidence": 0.7
+  },
+  "supra_form": {
+   "value": "supra note N",
+   "counts": {
+    "supra note N": 417,
+    "supra, note N": 0
+   },
+   "confidence": 1.0
+  },
+  "paragraph_pinpoint": {
+   "value": "at para N",
+   "counts": {
+    "at para N": 68,
+    "at para. N": 0
+   },
+   "confidence": 1.0
+  },
+  "page_pinpoint_label": {
+   "value": "at N",
+   "counts": {
+    "at N": 310,
+    "at p N": 0
+   },
+   "confidence": 1.0
+  },
+  "range_dash": {
+   "value": "en dash",
+   "counts": {
+    "en dash": 195,
+    "hyphen": 3
+   },
+   "confidence": 0.98
+  },
+  "emphasis_note": {
+   "value": "[emphasis added]",
+   "counts": {
+    "[emphasis added]": 2,
+    "(emphasis added)": 0
+   },
+   "confidence": 1.0
+  },
+  "section_abbreviation": {
+   "value": "s N",
+   "counts": {
+    "s N": 1,
+    "s. N": 0
+   },
+   "confidence": 1.0
+  },
+  "et_al": {
+   "value": "et al",
+   "counts": {
+    "et al": 70,
+    "et al.": 20
+   },
+   "confidence": 0.78
+  },
+  "eg": {
+   "value": "e.g.",
+   "counts": {
+    "eg": 0,
+    "e.g.": 38
+   },
+   "confidence": 1.0
+  },
+  "ie": {
+   "value": null,
+   "counts": {
+    "ie": 0,
+    "i.e.": 0
+   },
+   "confidence": 0.0
+  },
+  "see_signal_case": {
+   "value": "See",
+   "counts": {
+    "See": 172,
+    "see": 35
+   },
+   "confidence": 0.83
+  },
+  "online_angle_brackets": {
+   "value": "online: <url>",
+   "counts": {
+    "online: <url>": 36,
+    "online: url": 36
+   },
+   "confidence": 0.5
+  },
+  "quotes": {
+   "value": "curly",
+   "counts": {
+    "curly": 578,
+    "straight": 2
+   },
+   "confidence": 1.0
+  },
+  "raw_counts": {
+   "ibid_capitalized": 164,
+   "ibid_lower": 15,
+   "ibid_period": 40,
+   "ibid_comma": 17,
+   "ibid_at": 47,
+   "supra_note": 417,
+   "supra_comma_note": 0,
+   "at_para": 68,
+   "at_para_period": 0,
+   "at_pilcrow": 0,
+   "at_page": 310,
+   "at_p": 0,
+   "range_endash": 195,
+   "range_hyphen": 3,
+   "emphasis_brackets": 2,
+   "emphasis_parens": 0,
+   "section_s_period": 0,
+   "section_s_bare": 1,
+   "online_colon": 36,
+   "online_angle": 36,
+   "perma": 0,
+   "et_al_period": 20,
+   "et_al_bare": 70,
+   "neutral_citation": 17,
+   "canlii": 15,
+   "eg_bare": 0,
+   "eg_period": 38,
+   "ie_bare": 0,
+   "ie_period": 0,
+   "curly_double": 578,
+   "straight_double": 2,
+   "see_signal_upper": 172,
+   "see_signal_lower": 35
+  },
+  "footnote_lines": 2718
+ },
+ "status": "ok",
+ "candidates": 6
+}

@@ -1,0 +1,1474 @@
+{
+ "dataset": "CAN-JL-JUR",
+ "journal": "Canadian Journal of Law and Jurisprudence",
+ "abbrev": "Can JL & Jur",
+ "platform": "Cambridge",
+ "years": [
+  "2025",
+  "2026"
+ ],
+ "articles_measured": [
+  666,
+  11136,
+  656,
+  28324,
+  28327,
+  661,
+  11124,
+  11277,
+  11239,
+  11328
+ ],
+ "units": "points and inches; boxes measured at 144 dpi",
+ "page": {
+  "width_pt": 477,
+  "height_pt": 702,
+  "width_in": 6.62,
+  "height_in": 9.75,
+  "confidence": 1.0,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 666,
+    "page": 1,
+    "value": {
+     "width_pt": 477,
+     "height_pt": 702
+    }
+   },
+   {
+    "article_id": 11136,
+    "page": 1,
+    "value": {
+     "width_pt": 477,
+     "height_pt": 702
+    }
+   },
+   {
+    "article_id": 656,
+    "page": 1,
+    "value": {
+     "width_pt": 477,
+     "height_pt": 702
+    }
+   },
+   {
+    "article_id": 28324,
+    "page": 1,
+    "value": {
+     "width_pt": 477,
+     "height_pt": 702
+    }
+   },
+   {
+    "article_id": 28327,
+    "page": 1,
+    "value": {
+     "width_pt": 477,
+     "height_pt": 702
+    }
+   },
+   {
+    "article_id": 661,
+    "page": 1,
+    "value": {
+     "width_pt": 477,
+     "height_pt": 702
+    }
+   }
+  ]
+ },
+ "margins_in": {
+  "mirrored": true,
+  "left_odd_pages": {
+   "value": 1.15,
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 0.85
+     }
+    },
+    {
+     "article_id": 11136,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 0.85
+     }
+    },
+    {
+     "article_id": 656,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 0.85
+     }
+    },
+    {
+     "article_id": 28324,
+     "page": null,
+     "value": {
+      "odd": 0.85,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 28327,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 0.85
+     }
+    },
+    {
+     "article_id": 661,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 0.85
+     }
+    }
+   ]
+  },
+  "left_even_pages": {
+   "value": 0.85,
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 0.85
+     }
+    },
+    {
+     "article_id": 11136,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 0.85
+     }
+    },
+    {
+     "article_id": 656,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 0.85
+     }
+    },
+    {
+     "article_id": 28324,
+     "page": null,
+     "value": {
+      "odd": 0.85,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 28327,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 0.85
+     }
+    },
+    {
+     "article_id": 661,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 0.85
+     }
+    }
+   ]
+  },
+  "right_odd_pages": {
+   "value": 0.85,
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": null,
+     "value": {
+      "odd": 0.85,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 11136,
+     "page": null,
+     "value": {
+      "odd": 0.85,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 656,
+     "page": null,
+     "value": {
+      "odd": 0.85,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 28324,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 0.85
+     }
+    },
+    {
+     "article_id": 28327,
+     "page": null,
+     "value": {
+      "odd": 0.85,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 661,
+     "page": null,
+     "value": {
+      "odd": 0.85,
+      "even": 1.15
+     }
+    }
+   ]
+  },
+  "right_even_pages": {
+   "value": 1.15,
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": null,
+     "value": {
+      "odd": 0.85,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 11136,
+     "page": null,
+     "value": {
+      "odd": 0.85,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 656,
+     "page": null,
+     "value": {
+      "odd": 0.85,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 28324,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 0.85
+     }
+    },
+    {
+     "article_id": 28327,
+     "page": null,
+     "value": {
+      "odd": 0.85,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 661,
+     "page": null,
+     "value": {
+      "odd": 0.85,
+      "even": 1.15
+     }
+    }
+   ]
+  },
+  "top": {
+   "value": 1.1,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": null,
+     "value": 1.1
+    },
+    {
+     "article_id": 11136,
+     "page": null,
+     "value": 1.1
+    },
+    {
+     "article_id": 656,
+     "page": null,
+     "value": 1.1
+    },
+    {
+     "article_id": 28324,
+     "page": null,
+     "value": 1.1
+    },
+    {
+     "article_id": 28327,
+     "page": null,
+     "value": 1.1
+    },
+    {
+     "article_id": 661,
+     "page": null,
+     "value": 1.1
+    }
+   ]
+  },
+  "bottom": {
+   "value": null,
+   "confidence": 0.2,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": null,
+     "value": 2.0
+    },
+    {
+     "article_id": 11136,
+     "page": null,
+     "value": 1.5
+    },
+    {
+     "article_id": 656,
+     "page": null,
+     "value": 1.65
+    },
+    {
+     "article_id": 28324,
+     "page": null,
+     "value": 2.4
+    },
+    {
+     "article_id": 28327,
+     "page": null,
+     "value": 1.9
+    },
+    {
+     "article_id": 661,
+     "page": null,
+     "value": 1.75
+    }
+   ]
+  }
+ },
+ "body": {
+  "font": {
+   "value": "AdvOT40514f85",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": null,
+     "value": "AdvOT40514f85"
+    },
+    {
+     "article_id": 11136,
+     "page": null,
+     "value": "AdvOT40514f85"
+    },
+    {
+     "article_id": 656,
+     "page": null,
+     "value": "AdvOT40514f85"
+    },
+    {
+     "article_id": 28324,
+     "page": null,
+     "value": "AdvOT40514f85"
+    },
+    {
+     "article_id": 28327,
+     "page": null,
+     "value": "AdvOT40514f85"
+    },
+    {
+     "article_id": 661,
+     "page": null,
+     "value": "AdvOT40514f85"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 10.5,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 11136,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 656,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 28324,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 28327,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 661,
+     "page": null,
+     "value": 10.5
+    }
+   ]
+  },
+  "line_height_pt": {
+   "value": 10.5,
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 11136,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 656,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 28324,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 28327,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 661,
+     "page": null,
+     "value": 10.5
+    }
+   ]
+  }
+ },
+ "footnotes": {
+  "font": {
+   "value": "AdvOT40514f85",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": null,
+     "value": "AdvOT40514f85"
+    },
+    {
+     "article_id": 11136,
+     "page": null,
+     "value": "AdvOT40514f85"
+    },
+    {
+     "article_id": 656,
+     "page": null,
+     "value": "AdvOT40514f85"
+    },
+    {
+     "article_id": 28324,
+     "page": null,
+     "value": "AdvOT40514f85"
+    },
+    {
+     "article_id": 28327,
+     "page": null,
+     "value": "AdvOT40514f85"
+    },
+    {
+     "article_id": 661,
+     "page": null,
+     "value": "AdvOT40514f85"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 8.5,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": null,
+     "value": 8.5
+    },
+    {
+     "article_id": 11136,
+     "page": null,
+     "value": 8.5
+    },
+    {
+     "article_id": 656,
+     "page": null,
+     "value": 8.5
+    },
+    {
+     "article_id": 28324,
+     "page": null,
+     "value": 8.5
+    },
+    {
+     "article_id": 28327,
+     "page": null,
+     "value": 8.5
+    },
+    {
+     "article_id": 661,
+     "page": null,
+     "value": 8.5
+    }
+   ]
+  },
+  "present": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": null,
+     "value": 669
+    },
+    {
+     "article_id": 11136,
+     "page": null,
+     "value": 425
+    },
+    {
+     "article_id": 656,
+     "page": null,
+     "value": 401
+    },
+    {
+     "article_id": 28324,
+     "page": null,
+     "value": 777
+    },
+    {
+     "article_id": 28327,
+     "page": null,
+     "value": 480
+    },
+    {
+     "article_id": 661,
+     "page": null,
+     "value": 460
+    }
+   ]
+  },
+  "number_style": {
+   "value": "number_period",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": null,
+     "value": [
+      "1. See Canadian Charter of Rights and Freedoms, Part I of the Constitution Act, 1982, being"
+     ]
+    },
+    {
+     "article_id": 11136,
+     "page": null,
+     "value": [
+      "1. See e.g. Konrad Zweigert & Hein Kötz, An Introduction to Comparative Law, 3d ed translated"
+     ]
+    },
+    {
+     "article_id": 656,
+     "page": null,
+     "value": [
+      "1. In this paper I will be talking of norms. I realise that there is no universally shared terminology:"
+     ]
+    },
+    {
+     "article_id": 28324,
+     "page": null,
+     "value": [
+      "1. See John Borrows, “Foreword: Democratic Self-and-Other-Determination and the More-than-"
+     ]
+    },
+    {
+     "article_id": 28327,
+     "page": null,
+     "value": [
+      "1. I will use the word ‘intent’, but I mean, where appropriate, the same thing as ‘original public"
+     ]
+    },
+    {
+     "article_id": 661,
+     "page": null,
+     "value": [
+      "1. TRS Allan, “Constitutionalism at Common Law: The Rule of Law and Judicial Review”"
+     ]
+    }
+   ]
+  },
+  "indent_vs_body_in": {
+   "value": null,
+   "confidence": 0.4,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": null,
+     "value": -0.15
+    },
+    {
+     "article_id": 11136,
+     "page": null,
+     "value": -0.15
+    },
+    {
+     "article_id": 656,
+     "page": null,
+     "value": -0.1
+    },
+    {
+     "article_id": 28324,
+     "page": null,
+     "value": -0.25
+    },
+    {
+     "article_id": 28327,
+     "page": null,
+     "value": 0.1
+    },
+    {
+     "article_id": 661,
+     "page": null,
+     "value": -0.1
+    }
+   ]
+  },
+  "first_page_author_note": {
+   "value": true,
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": 1,
+     "value": [
+      "Schedule B to the Canada Act 1982 (UK), 1982, c 11 at s 33 [Charter]."
+     ]
+    },
+    {
+     "article_id": 11136,
+     "page": 1,
+     "value": [
+      "by Tony Weir (Oxford University Press, 1998) ch 4. See also Arthur T von Mehren, “An"
+     ]
+    },
+    {
+     "article_id": 656,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 28324,
+     "page": 1,
+     "value": [
+      "Human World” in James Tully et al, eds, Democratic Multiplicity: Perceiving, Enacting, and"
+     ]
+    },
+    {
+     "article_id": 28327,
+     "page": 1,
+     "value": [
+      "meaning’, or ‘original meaning to the reasonable person’. I realize that these terms have dif-"
+     ]
+    },
+    {
+     "article_id": 661,
+     "page": 1,
+     "value": [
+      "(2023) 82:2 Cambridge LJ 236 at 241 [footnote omitted]."
+     ]
+    }
+   ]
+  }
+ },
+ "headings": {
+  "numbering_levels": {
+   "value": [
+    "arabic_period"
+   ],
+   "confidence": 0.67,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 28327,
+     "page": 1,
+     "value": [
+      "1. Introduction",
+      "2. The Case for Originalism",
+      "3. Problems with Originalism"
+     ]
+    },
+    {
+     "article_id": 11277,
+     "page": 4,
+     "value": [
+      "I. The General Shape of the Problem",
+      "II. The Darkness and the Light",
+      "III. No Way Out?"
+     ]
+    },
+    {
+     "article_id": 11239,
+     "page": 1,
+     "value": [
+      "1. Introduction",
+      "2. Conceptualising Principled Disobedience",
+      "3. A Legally Framed Defence of Principled Disobedi"
+     ]
+    }
+   ]
+  },
+  "top_level_case": {
+   "value": "title",
+   "confidence": 0.67,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 28327,
+     "page": 1,
+     "value": "1. Introduction"
+    },
+    {
+     "article_id": 11277,
+     "page": 4,
+     "value": "I. The General Shape of the Problem"
+    },
+    {
+     "article_id": 11239,
+     "page": 1,
+     "value": "1. Introduction"
+    }
+   ]
+  },
+  "top_level_size_pt": {
+   "value": 10.5,
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 28327,
+     "page": 1,
+     "value": "1. Introduction"
+    },
+    {
+     "article_id": 11277,
+     "page": 4,
+     "value": "I. The General Shape of the Problem"
+    },
+    {
+     "article_id": 11239,
+     "page": 1,
+     "value": "1. Introduction"
+    }
+   ]
+  },
+  "top_level_alignment": {
+   "value": "left",
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 28327,
+     "page": 1,
+     "value": "1. Introduction"
+    },
+    {
+     "article_id": 11277,
+     "page": 4,
+     "value": "I. The General Shape of the Problem"
+    },
+    {
+     "article_id": 11239,
+     "page": 1,
+     "value": "1. Introduction"
+    }
+   ]
+  },
+  "samples": []
+ },
+ "block_quotes": {
+  "indent_in": {
+   "value": 0.0,
+   "confidence": 0.78,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 11136,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 656,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 28324,
+     "page": null,
+     "value": -0.15
+    },
+    {
+     "article_id": 28327,
+     "page": null,
+     "value": 0.15
+    },
+    {
+     "article_id": 661,
+     "page": null,
+     "value": 0.0
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 9.5,
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": null,
+     "value": 9.5
+    },
+    {
+     "article_id": 11136,
+     "page": null,
+     "value": 9.5
+    },
+    {
+     "article_id": 656,
+     "page": null,
+     "value": 9.5
+    },
+    {
+     "article_id": 28324,
+     "page": null,
+     "value": 9.5
+    },
+    {
+     "article_id": 28327,
+     "page": null,
+     "value": 9.5
+    },
+    {
+     "article_id": 661,
+     "page": null,
+     "value": 9.5
+    }
+   ]
+  },
+  "articles_with_block_quotes": 9
+ },
+ "running_heads": {
+  "odd_pages": {
+   "value": [
+    "article_title"
+   ],
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": null,
+     "value": [
+      "Underuse of the Override"
+     ]
+    },
+    {
+     "article_id": 11136,
+     "page": null,
+     "value": [
+      "‘Difference’ and ‘Similarity’ in Comparative Law"
+     ]
+    },
+    {
+     "article_id": 656,
+     "page": null,
+     "value": [
+      "Against ‘Legal Facts’"
+     ]
+    },
+    {
+     "article_id": 28324,
+     "page": null,
+     "value": [
+      "Borrows"
+     ]
+    },
+    {
+     "article_id": 28327,
+     "page": null,
+     "value": [
+      "Originalism, Official History, and Perspectives versus Methodologies 107",
+      "Originalism, Official History, and Perspectives versus Methodologies 109"
+     ]
+    },
+    {
+     "article_id": 661,
+     "page": null,
+     "value": [
+      "The Declaratory Theory of Judicial Law-Making"
+     ]
+    }
+   ]
+  },
+  "even_pages": {
+   "value": [
+    "other"
+   ],
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": null,
+     "value": [
+      "Kavanagh"
+     ]
+    },
+    {
+     "article_id": 11136,
+     "page": null,
+     "value": [
+      "Stephenson"
+     ]
+    },
+    {
+     "article_id": 656,
+     "page": null,
+     "value": [
+      "Carpentier"
+     ]
+    },
+    {
+     "article_id": 28324,
+     "page": null,
+     "value": [
+      "Anishinaabe Treaties and the Rule of Law"
+     ]
+    },
+    {
+     "article_id": 28327,
+     "page": null,
+     "value": [
+      "Hylton"
+     ]
+    },
+    {
+     "article_id": 661,
+     "page": null,
+     "value": [
+      "Beswick"
+     ]
+    }
+   ]
+  },
+  "page_number": {
+   "value": "top-outer",
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 11136,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 656,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 28324,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 28327,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 661,
+     "page": null,
+     "value": "top-outer"
+    }
+   ]
+  }
+ },
+ "title_block": {
+  "title_size_pt": {
+   "value": 18.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": 1,
+     "value": "Underuse of the Override"
+    },
+    {
+     "article_id": 11136,
+     "page": 1,
+     "value": "‘Difference’ and ‘Similarity’ in"
+    },
+    {
+     "article_id": 656,
+     "page": 1,
+     "value": "Against ‘Legal Facts’"
+    },
+    {
+     "article_id": 28324,
+     "page": 1,
+     "value": "Anishinaabe Treaties and the"
+    },
+    {
+     "article_id": 28327,
+     "page": 1,
+     "value": "Originalism, Official History, and"
+    },
+    {
+     "article_id": 661,
+     "page": 1,
+     "value": "The Declaratory Theory of Judicial"
+    }
+   ]
+  },
+  "title_alignment": {
+   "value": "left",
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": 1,
+     "value": "Underuse of the Override"
+    },
+    {
+     "article_id": 11136,
+     "page": 1,
+     "value": "‘Difference’ and ‘Similarity’ in"
+    },
+    {
+     "article_id": 656,
+     "page": 1,
+     "value": "Against ‘Legal Facts’"
+    },
+    {
+     "article_id": 28324,
+     "page": 1,
+     "value": "Anishinaabe Treaties and the"
+    },
+    {
+     "article_id": 28327,
+     "page": 1,
+     "value": "Originalism, Official History, and"
+    },
+    {
+     "article_id": 661,
+     "page": 1,
+     "value": "The Declaratory Theory of Judicial"
+    }
+   ]
+  },
+  "title_case": {
+   "value": "sentence",
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": 1,
+     "value": "Underuse of the Override"
+    },
+    {
+     "article_id": 11136,
+     "page": 1,
+     "value": "‘Difference’ and ‘Similarity’ in"
+    },
+    {
+     "article_id": 656,
+     "page": 1,
+     "value": "Against ‘Legal Facts’"
+    },
+    {
+     "article_id": 28324,
+     "page": 1,
+     "value": "Anishinaabe Treaties and the"
+    },
+    {
+     "article_id": 28327,
+     "page": 1,
+     "value": "Originalism, Official History, and"
+    },
+    {
+     "article_id": 661,
+     "page": 1,
+     "value": "The Declaratory Theory of Judicial"
+    }
+   ]
+  },
+  "author_case": {
+   "value": null,
+   "confidence": 0.0,
+   "articles": 0,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": 1,
+     "value": "Underuse of the Override"
+    },
+    {
+     "article_id": 11136,
+     "page": 1,
+     "value": "‘Difference’ and ‘Similarity’ in"
+    },
+    {
+     "article_id": 656,
+     "page": 1,
+     "value": "Against ‘Legal Facts’"
+    },
+    {
+     "article_id": 28324,
+     "page": 1,
+     "value": "Anishinaabe Treaties and the"
+    },
+    {
+     "article_id": 28327,
+     "page": 1,
+     "value": "Originalism, Official History, and"
+    },
+    {
+     "article_id": 661,
+     "page": 1,
+     "value": "The Declaratory Theory of Judicial"
+    }
+   ]
+  },
+  "author_alignment": {
+   "value": null,
+   "confidence": 0.0,
+   "articles": 0,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": 1,
+     "value": "Underuse of the Override"
+    },
+    {
+     "article_id": 11136,
+     "page": 1,
+     "value": "‘Difference’ and ‘Similarity’ in"
+    },
+    {
+     "article_id": 656,
+     "page": 1,
+     "value": "Against ‘Legal Facts’"
+    },
+    {
+     "article_id": 28324,
+     "page": 1,
+     "value": "Anishinaabe Treaties and the"
+    },
+    {
+     "article_id": 28327,
+     "page": 1,
+     "value": "Originalism, Official History, and"
+    },
+    {
+     "article_id": 661,
+     "page": 1,
+     "value": "The Declaratory Theory of Judicial"
+    }
+   ]
+  },
+  "first_pdf_page_is_article": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 666,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 11136,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 656,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 28324,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 28327,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 661,
+     "page": 1,
+     "value": null
+    }
+   ]
+  }
+ },
+ "table_of_contents": {
+  "value": false,
+  "confidence": 1.0,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 666,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 11136,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 656,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 28324,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 28327,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 661,
+    "page": null,
+    "value": 0
+   }
+  ]
+ },
+ "citations": {
+  "ibid_case": {
+   "value": "Ibid",
+   "counts": {
+    "Ibid": 151,
+    "ibid": 111
+   },
+   "confidence": 0.58
+  },
+  "ibid_punctuation": {
+   "value": "Ibid.",
+   "counts": {
+    "Ibid.": 31,
+    "Ibid,": 4
+   },
+   "confidence": 0.89
+  },
+  "supra_form": {
+   "value": "supra note N",
+   "counts": {
+    "supra note N": 1066,
+    "supra, note N": 0
+   },
+   "confidence": 1.0
+  },
+  "paragraph_pinpoint": {
+   "value": "at para N",
+   "counts": {
+    "at para N": 61,
+    "at para. N": 0
+   },
+   "confidence": 1.0
+  },
+  "page_pinpoint_label": {
+   "value": "at N",
+   "counts": {
+    "at N": 1293,
+    "at p N": 0
+   },
+   "confidence": 1.0
+  },
+  "range_dash": {
+   "value": "hyphen",
+   "counts": {
+    "en dash": 2,
+    "hyphen": 311
+   },
+   "confidence": 0.99
+  },
+  "emphasis_note": {
+   "value": "[emphasis added]",
+   "counts": {
+    "[emphasis added]": 118,
+    "(emphasis added)": 0
+   },
+   "confidence": 1.0
+  },
+  "section_abbreviation": {
+   "value": "s N",
+   "counts": {
+    "s N": 24,
+    "s. N": 2
+   },
+   "confidence": 0.92
+  },
+  "et_al": {
+   "value": "et al",
+   "counts": {
+    "et al": 16,
+    "et al.": 0
+   },
+   "confidence": 1.0
+  },
+  "eg": {
+   "value": "e.g.",
+   "counts": {
+    "eg": 0,
+    "e.g.": 162
+   },
+   "confidence": 1.0
+  },
+  "ie": {
+   "value": "i.e.",
+   "counts": {
+    "ie": 0,
+    "i.e.": 6
+   },
+   "confidence": 1.0
+  },
+  "see_signal_case": {
+   "value": "See",
+   "counts": {
+    "See": 772,
+    "see": 252
+   },
+   "confidence": 0.75
+  },
+  "online_angle_brackets": {
+   "value": "online: url",
+   "counts": {
+    "online: <url>": 0,
+    "online: url": 1
+   },
+   "confidence": 1.0
+  },
+  "quotes": {
+   "value": "curly",
+   "counts": {
+    "curly": 2136,
+    "straight": 0
+   },
+   "confidence": 1.0
+  },
+  "raw_counts": {
+   "ibid_capitalized": 151,
+   "ibid_lower": 111,
+   "ibid_period": 31,
+   "ibid_comma": 4,
+   "ibid_at": 210,
+   "supra_note": 1066,
+   "supra_comma_note": 0,
+   "at_para": 61,
+   "at_para_period": 0,
+   "at_pilcrow": 0,
+   "at_page": 1293,
+   "at_p": 0,
+   "range_endash": 2,
+   "range_hyphen": 311,
+   "emphasis_brackets": 118,
+   "emphasis_parens": 0,
+   "section_s_period": 2,
+   "section_s_bare": 24,
+   "online_colon": 1,
+   "online_angle": 0,
+   "perma": 0,
+   "et_al_period": 0,
+   "et_al_bare": 16,
+   "neutral_citation": 19,
+   "canlii": 0,
+   "eg_bare": 0,
+   "eg_period": 162,
+   "ie_bare": 0,
+   "ie_period": 6,
+   "curly_double": 2136,
+   "straight_double": 0,
+   "see_signal_upper": 772,
+   "see_signal_lower": 252
+  },
+  "footnote_lines": 4565
+ },
+ "status": "ok",
+ "candidates": 35
+}

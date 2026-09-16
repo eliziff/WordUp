@@ -1,0 +1,1010 @@
+{
+ "dataset": "MCGILL-J-DISP-RES",
+ "journal": "McGill Journal of Dispute Resolution",
+ "abbrev": "McGill J Disp Res",
+ "platform": "mjdr",
+ "years": [
+  "2025",
+  "2026"
+ ],
+ "articles_measured": [
+  740,
+  738,
+  739,
+  734
+ ],
+ "units": "points and inches; boxes measured at 144 dpi",
+ "page": {
+  "width_pt": 595,
+  "height_pt": 842,
+  "width_in": 8.26,
+  "height_in": 11.69,
+  "confidence": 0.5,
+  "articles": 4,
+  "evidence": [
+   {
+    "article_id": 740,
+    "page": 3,
+    "value": {
+     "width_pt": 596,
+     "height_pt": 842
+    }
+   },
+   {
+    "article_id": 738,
+    "page": 2,
+    "value": {
+     "width_pt": 595,
+     "height_pt": 842
+    }
+   },
+   {
+    "article_id": 739,
+    "page": 2,
+    "value": {
+     "width_pt": 595,
+     "height_pt": 842
+    }
+   },
+   {
+    "article_id": 734,
+    "page": 2,
+    "value": {
+     "width_pt": 612,
+     "height_pt": 792
+    }
+   }
+  ]
+ },
+ "margins_in": {
+  "mirrored": false,
+  "left_odd_pages": {
+   "value": 1.0,
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 738,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 739,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    }
+   ]
+  },
+  "left_even_pages": {
+   "value": 1.0,
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 738,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 739,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    }
+   ]
+  },
+  "right_odd_pages": {
+   "value": 0.95,
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 738,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 739,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    }
+   ]
+  },
+  "right_even_pages": {
+   "value": 0.95,
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 738,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 739,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    }
+   ]
+  },
+  "top": {
+   "value": 1.0,
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": null,
+     "value": 1.0
+    },
+    {
+     "article_id": 738,
+     "page": null,
+     "value": 1.0
+    },
+    {
+     "article_id": 739,
+     "page": null,
+     "value": 1.0
+    }
+   ]
+  },
+  "bottom": {
+   "value": 1.8,
+   "confidence": 0.67,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": null,
+     "value": 1.95
+    },
+    {
+     "article_id": 738,
+     "page": null,
+     "value": 1.8
+    },
+    {
+     "article_id": 739,
+     "page": null,
+     "value": 1.8
+    }
+   ]
+  }
+ },
+ "body": {
+  "font": {
+   "value": "TimesNewRomanPSMT",
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 738,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 739,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 734,
+     "page": null,
+     "value": null
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 12.0,
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 738,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 739,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 734,
+     "page": null,
+     "value": null
+    }
+   ]
+  },
+  "line_height_pt": {
+   "value": 13.5,
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 738,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 739,
+     "page": null,
+     "value": 13.5
+    }
+   ]
+  }
+ },
+ "footnotes": {
+  "font": {
+   "value": "TimesNewRomanPSMT",
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 738,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 739,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 734,
+     "page": null,
+     "value": null
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 10.0,
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 738,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 739,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 734,
+     "page": null,
+     "value": null
+    }
+   ]
+  },
+  "present": {
+   "value": true,
+   "confidence": 0.75,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": null,
+     "value": 301
+    },
+    {
+     "article_id": 738,
+     "page": null,
+     "value": 239
+    },
+    {
+     "article_id": 739,
+     "page": null,
+     "value": 195
+    },
+    {
+     "article_id": 734,
+     "page": null,
+     "value": 0
+    }
+   ]
+  },
+  "number_style": {
+   "value": "number_space",
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": null,
+     "value": [
+      "1 See Dongdoo Choi, “Choice of Law Rules Applicable for International Arbitration Agreements” (2015) 11:2"
+     ]
+    },
+    {
+     "article_id": 738,
+     "page": null,
+     "value": [
+      "1 Pour une définition du terme « État tiers », voir Jean Salmon, dir, Dictionnaire de droit international public, 7e"
+     ]
+    },
+    {
+     "article_id": 739,
+     "page": null,
+     "value": [
+      "1 État de l’intégration en Afrique ARIA IX : prochaines étapes pour la zone de libre-échange continentale"
+     ]
+    }
+   ]
+  },
+  "indent_vs_body_in": {
+   "value": 0.0,
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 738,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 739,
+     "page": null,
+     "value": 0.0
+    }
+   ]
+  },
+  "first_page_author_note": {
+   "value": false,
+   "confidence": 0.75,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": 3,
+     "value": [
+      "Asian Intl Arb J 105; see also Ian Glick & Niranjan Venkatesan, “Choosing the Law Governing the Arbitration"
+     ]
+    },
+    {
+     "article_id": 738,
+     "page": 2,
+     "value": []
+    },
+    {
+     "article_id": 739,
+     "page": 2,
+     "value": []
+    },
+    {
+     "article_id": 734,
+     "page": 2,
+     "value": []
+    }
+   ]
+  }
+ },
+ "headings": {
+  "numbering_levels": {
+   "value": [
+    "arabic_multi",
+    "unnumbered"
+   ],
+   "confidence": 0.75,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": 3,
+     "value": [
+      "Introduction",
+      "Approaches to Law Governing Arbitration Agreements",
+      "1.1 - The Law of the Seat"
+     ]
+    },
+    {
+     "article_id": 738,
+     "page": 4,
+     "value": [
+      "Introduction",
+      "1.1 Un statut contesté",
+      "1.2 Un statut reconnu"
+     ]
+    },
+    {
+     "article_id": 739,
+     "page": 5,
+     "value": [
+      "Introduction",
+      "d’investissement interafricains sous la ZLECAf",
+      "1.1 La coexistence de l’arbitrage interétatique et"
+     ]
+    },
+    {
+     "article_id": 734,
+     "page": 4,
+     "value": [
+      "I. The Changing Topography of Disputes",
+      "II. The Essential Skills for Jurists in an Age of ",
+      "III. Legal Education for a Changing Order"
+     ]
+    }
+   ]
+  },
+  "top_level_case": {
+   "value": "title",
+   "confidence": 0.5,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": 3,
+     "value": "Introduction"
+    },
+    {
+     "article_id": 738,
+     "page": 19,
+     "value": "2.2 Un rôle nouveau dans le contentieux international ?"
+    },
+    {
+     "article_id": 739,
+     "page": 5,
+     "value": "Introduction"
+    },
+    {
+     "article_id": 734,
+     "page": 4,
+     "value": "I. The Changing Topography of Disputes"
+    }
+   ]
+  },
+  "top_level_size_pt": {
+   "value": 12.0,
+   "confidence": 0.5,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": 3,
+     "value": "Introduction"
+    },
+    {
+     "article_id": 738,
+     "page": 19,
+     "value": "2.2 Un rôle nouveau dans le contentieux international ?"
+    },
+    {
+     "article_id": 739,
+     "page": 5,
+     "value": "Introduction"
+    },
+    {
+     "article_id": 734,
+     "page": 4,
+     "value": "I. The Changing Topography of Disputes"
+    }
+   ]
+  },
+  "top_level_alignment": {
+   "value": "left",
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": 3,
+     "value": "Introduction"
+    },
+    {
+     "article_id": 738,
+     "page": 19,
+     "value": "2.2 Un rôle nouveau dans le contentieux international ?"
+    },
+    {
+     "article_id": 739,
+     "page": 5,
+     "value": "Introduction"
+    },
+    {
+     "article_id": 734,
+     "page": 4,
+     "value": "I. The Changing Topography of Disputes"
+    }
+   ]
+  },
+  "samples": [
+   "Introduction",
+   "Approaches to Law Governing Arbitration Agreements",
+   "1.1 - The Law of the Seat",
+   "1.2 - The Law of the Main Contract",
+   "Introduction",
+   "1.1 Un statut contesté",
+   "1.2 Un statut reconnu",
+   "2.1 Un rôle affirmé dans la protection contre l’arbitraire",
+   "Introduction",
+   "d’investissement interafricains sous la ZLECAf",
+   "1.1 La coexistence de l’arbitrage interétatique et de l’arbitrage investisseur-É",
+   "1.1.1 Le projet du protocole d’investissement de la ZLECAf"
+  ]
+ },
+ "block_quotes": {
+  "indent_in": {
+   "value": 0.5,
+   "confidence": 0.67,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": null,
+     "value": 0.5
+    },
+    {
+     "article_id": 738,
+     "page": null,
+     "value": 0.4
+    },
+    {
+     "article_id": 739,
+     "page": null,
+     "value": 0.5
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 12.0,
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 738,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 739,
+     "page": null,
+     "value": 12.0
+    }
+   ]
+  },
+  "articles_with_block_quotes": 3
+ },
+ "running_heads": {
+  "odd_pages": {
+   "value": [
+    "volume_or_year"
+   ],
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": null,
+     "value": [
+      "Volume 9 (2025-2026)                Cracking the Code: A Structured Solution to the Law",
+      "Governing Arbitration Agreement Issue for Indian Arbitration"
+     ]
+    },
+    {
+     "article_id": 738,
+     "page": null,
+     "value": [
+      "Vol 9 (2025–2026)         Sanctions unilatérales et protection juridictionnelle de l’Etat tiers :",
+      "observations sur le rôle du juge de l’Union européenne à la lumière de l’affaire Venezuela/Conseil"
+     ]
+    },
+    {
+     "article_id": 739,
+     "page": null,
+     "value": [
+      "investissements à la lumière de la Zone de libre-échange continentale africaine",
+      "Volume 9 (2025-2026)  La multiplication des procédures de règlement des différends relatives aux                  2"
+     ]
+    },
+    {
+     "article_id": 734,
+     "page": null,
+     "value": [
+      "Vol 10 (2026-2027)",
+      "Keynote Address of the Honourable Russell Brown:"
+     ]
+    }
+   ]
+  },
+  "even_pages": {
+   "value": [
+    "journal_name",
+    "volume_or_year"
+   ],
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": null,
+     "value": [
+      "Vol 9 (2025-2026)                   MCGILL JOURNAL OF DISPUTE RESOLUTION",
+      "REVUE DE RÈGLEMENT DES DIFFÉRENDS DE MCGILL"
+     ]
+    },
+    {
+     "article_id": 738,
+     "page": null,
+     "value": [
+      "Vol 9 (2025–2026)",
+      "MCGILL JOURNAL OF DISPUTE RESOLUTION"
+     ]
+    },
+    {
+     "article_id": 739,
+     "page": null,
+     "value": [
+      "Volume 9 (2025-2026)",
+      "MCGILL JOURNAL OF DISPUTE RESOLUTION"
+     ]
+    },
+    {
+     "article_id": 734,
+     "page": null,
+     "value": [
+      "Vol 10 (2026-2027)",
+      "MCGILL JOURNAL OF DISPUTE RESOLUTION"
+     ]
+    }
+   ]
+  },
+  "page_number": {
+   "value": "top-inner",
+   "confidence": 0.5,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 738,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 739,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 734,
+     "page": null,
+     "value": "top-outer"
+    }
+   ]
+  }
+ },
+ "title_block": {
+  "title_size_pt": {
+   "value": null,
+   "confidence": 0.0,
+   "articles": 0,
+   "evidence": []
+  },
+  "title_alignment": {
+   "value": null,
+   "confidence": 0.0,
+   "articles": 0,
+   "evidence": []
+  },
+  "title_case": {
+   "value": null,
+   "confidence": 0.0,
+   "articles": 0,
+   "evidence": []
+  },
+  "author_case": {
+   "value": null,
+   "confidence": 0.0,
+   "articles": 0,
+   "evidence": []
+  },
+  "author_alignment": {
+   "value": null,
+   "confidence": 0.0,
+   "articles": 0,
+   "evidence": []
+  },
+  "first_pdf_page_is_article": {
+   "value": false,
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 740,
+     "page": 3,
+     "value": null
+    },
+    {
+     "article_id": 738,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 739,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 734,
+     "page": 2,
+     "value": null
+    }
+   ]
+  }
+ },
+ "table_of_contents": {
+  "value": false,
+  "confidence": 0.75,
+  "articles": 4,
+  "evidence": [
+   {
+    "article_id": 740,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 738,
+    "page": null,
+    "value": 8
+   },
+   {
+    "article_id": 739,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 734,
+    "page": null,
+    "value": 0
+   }
+  ]
+ },
+ "citations": {
+  "ibid_case": {
+   "value": "Ibid",
+   "counts": {
+    "Ibid": 115,
+    "ibid": 1
+   },
+   "confidence": 0.99
+  },
+  "ibid_punctuation": {
+   "value": "Ibid.",
+   "counts": {
+    "Ibid.": 35,
+    "Ibid,": 7
+   },
+   "confidence": 0.83
+  },
+  "supra_form": {
+   "value": "supra note N",
+   "counts": {
+    "supra note N": 142,
+    "supra, note N": 0
+   },
+   "confidence": 1.0
+  },
+  "paragraph_pinpoint": {
+   "value": "at para N",
+   "counts": {
+    "at para N": 82,
+    "at para. N": 0
+   },
+   "confidence": 1.0
+  },
+  "page_pinpoint_label": {
+   "value": "at N",
+   "counts": {
+    "at N": 30,
+    "at p N": 0
+   },
+   "confidence": 1.0
+  },
+  "range_dash": {
+   "value": "en dash",
+   "counts": {
+    "en dash": 40,
+    "hyphen": 0
+   },
+   "confidence": 1.0
+  },
+  "emphasis_note": {
+   "value": null,
+   "counts": {
+    "[emphasis added]": 0,
+    "(emphasis added)": 0
+   },
+   "confidence": 0.0
+  },
+  "section_abbreviation": {
+   "value": "s N",
+   "counts": {
+    "s N": 20,
+    "s. N": 0
+   },
+   "confidence": 1.0
+  },
+  "et_al": {
+   "value": "et al",
+   "counts": {
+    "et al": 5,
+    "et al.": 0
+   },
+   "confidence": 1.0
+  },
+  "eg": {
+   "value": "e.g.",
+   "counts": {
+    "eg": 0,
+    "e.g.": 1
+   },
+   "confidence": 1.0
+  },
+  "ie": {
+   "value": null,
+   "counts": {
+    "ie": 0,
+    "i.e.": 0
+   },
+   "confidence": 0.0
+  },
+  "see_signal_case": {
+   "value": "See",
+   "counts": {
+    "See": 9,
+    "see": 3
+   },
+   "confidence": 0.75
+  },
+  "online_angle_brackets": {
+   "value": null,
+   "counts": {
+    "online: <url>": 0,
+    "online: url": 0
+   },
+   "confidence": 0.0
+  },
+  "quotes": {
+   "value": "curly",
+   "counts": {
+    "curly": 136,
+    "straight": 0
+   },
+   "confidence": 1.0
+  },
+  "raw_counts": {
+   "ibid_capitalized": 115,
+   "ibid_lower": 1,
+   "ibid_period": 35,
+   "ibid_comma": 7,
+   "ibid_at": 49,
+   "supra_note": 142,
+   "supra_comma_note": 0,
+   "at_para": 82,
+   "at_para_period": 0,
+   "at_pilcrow": 0,
+   "at_page": 30,
+   "at_p": 0,
+   "range_endash": 40,
+   "range_hyphen": 0,
+   "emphasis_brackets": 0,
+   "emphasis_parens": 0,
+   "section_s_period": 0,
+   "section_s_bare": 20,
+   "online_colon": 0,
+   "online_angle": 0,
+   "perma": 54,
+   "et_al_period": 0,
+   "et_al_bare": 5,
+   "neutral_citation": 0,
+   "canlii": 0,
+   "eg_bare": 0,
+   "eg_period": 1,
+   "ie_bare": 0,
+   "ie_period": 0,
+   "curly_double": 136,
+   "straight_double": 0,
+   "see_signal_upper": 9,
+   "see_signal_lower": 3
+  },
+  "footnote_lines": 735
+ },
+ "status": "ok",
+ "candidates": 4
+}

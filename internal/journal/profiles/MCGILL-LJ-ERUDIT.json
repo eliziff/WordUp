@@ -1,0 +1,1548 @@
+{
+ "dataset": "MCGILL-LJ-ERUDIT",
+ "journal": "McGill Law Journal (Érudit back issues)",
+ "abbrev": "McGill LJ",
+ "platform": "erudit",
+ "years": [
+  "2025",
+  "2026"
+ ],
+ "articles_measured": [
+  227,
+  230,
+  10324,
+  10340,
+  229,
+  228,
+  226,
+  10323,
+  10264,
+  10287
+ ],
+ "units": "points and inches; boxes measured at 144 dpi",
+ "page": {
+  "width_pt": 498,
+  "height_pt": 732,
+  "width_in": 6.92,
+  "height_in": 10.17,
+  "confidence": 0.9,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 227,
+    "page": 2,
+    "value": {
+     "width_pt": 498,
+     "height_pt": 732
+    }
+   },
+   {
+    "article_id": 230,
+    "page": 2,
+    "value": {
+     "width_pt": 498,
+     "height_pt": 732
+    }
+   },
+   {
+    "article_id": 10324,
+    "page": 2,
+    "value": {
+     "width_pt": 498,
+     "height_pt": 732
+    }
+   },
+   {
+    "article_id": 10340,
+    "page": 2,
+    "value": {
+     "width_pt": 498,
+     "height_pt": 732
+    }
+   },
+   {
+    "article_id": 229,
+    "page": 2,
+    "value": {
+     "width_pt": 612,
+     "height_pt": 792
+    }
+   },
+   {
+    "article_id": 228,
+    "page": 2,
+    "value": {
+     "width_pt": 498,
+     "height_pt": 732
+    }
+   }
+  ]
+ },
+ "margins_in": {
+  "mirrored": false,
+  "left_odd_pages": {
+   "value": 1.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 230,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 10324,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 10340,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 229,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 228,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    }
+   ]
+  },
+  "left_even_pages": {
+   "value": 1.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 230,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 10324,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 10340,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 229,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 228,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    }
+   ]
+  },
+  "right_odd_pages": {
+   "value": 0.95,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 230,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 10324,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 10340,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 229,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 228,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    }
+   ]
+  },
+  "right_even_pages": {
+   "value": 0.95,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 230,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 10324,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 10340,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 229,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 228,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    }
+   ]
+  },
+  "top": {
+   "value": 1.45,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": null,
+     "value": 1.45
+    },
+    {
+     "article_id": 230,
+     "page": null,
+     "value": 1.45
+    },
+    {
+     "article_id": 10324,
+     "page": null,
+     "value": 1.45
+    },
+    {
+     "article_id": 10340,
+     "page": null,
+     "value": 1.45
+    },
+    {
+     "article_id": 229,
+     "page": null,
+     "value": 1.45
+    },
+    {
+     "article_id": 228,
+     "page": null,
+     "value": 1.45
+    }
+   ]
+  },
+  "bottom": {
+   "value": null,
+   "confidence": 0.3,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": null,
+     "value": 2.2
+    },
+    {
+     "article_id": 230,
+     "page": null,
+     "value": 1.7
+    },
+    {
+     "article_id": 10324,
+     "page": null,
+     "value": 1.7
+    },
+    {
+     "article_id": 10340,
+     "page": null,
+     "value": 1.9
+    },
+    {
+     "article_id": 229,
+     "page": null,
+     "value": 1.6
+    },
+    {
+     "article_id": 228,
+     "page": null,
+     "value": 2.05
+    }
+   ]
+  }
+ },
+ "body": {
+  "font": {
+   "value": "GalliardPro-Roman",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": null,
+     "value": "GalliardPro-Roman"
+    },
+    {
+     "article_id": 230,
+     "page": null,
+     "value": "GalliardPro-Roman"
+    },
+    {
+     "article_id": 10324,
+     "page": null,
+     "value": "GalliardPro-Roman"
+    },
+    {
+     "article_id": 10340,
+     "page": null,
+     "value": "GalliardPro-Roman"
+    },
+    {
+     "article_id": 229,
+     "page": null,
+     "value": "GalliardPro-Roman"
+    },
+    {
+     "article_id": 228,
+     "page": null,
+     "value": "GalliardPro-Roman"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 11.5,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": null,
+     "value": 11.5
+    },
+    {
+     "article_id": 230,
+     "page": null,
+     "value": 11.5
+    },
+    {
+     "article_id": 10324,
+     "page": null,
+     "value": 11.5
+    },
+    {
+     "article_id": 10340,
+     "page": null,
+     "value": 11.5
+    },
+    {
+     "article_id": 229,
+     "page": null,
+     "value": 11.5
+    },
+    {
+     "article_id": 228,
+     "page": null,
+     "value": 11.5
+    }
+   ]
+  },
+  "line_height_pt": {
+   "value": 11.5,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": null,
+     "value": 11.5
+    },
+    {
+     "article_id": 230,
+     "page": null,
+     "value": 11.5
+    },
+    {
+     "article_id": 10324,
+     "page": null,
+     "value": 11.5
+    },
+    {
+     "article_id": 10340,
+     "page": null,
+     "value": 11.5
+    },
+    {
+     "article_id": 229,
+     "page": null,
+     "value": 11.5
+    },
+    {
+     "article_id": 228,
+     "page": null,
+     "value": 11.5
+    }
+   ]
+  }
+ },
+ "footnotes": {
+  "font": {
+   "value": "GalliardPro-Roman",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": null,
+     "value": "GalliardPro-Roman"
+    },
+    {
+     "article_id": 230,
+     "page": null,
+     "value": "GalliardPro-Roman"
+    },
+    {
+     "article_id": 10324,
+     "page": null,
+     "value": "GalliardPro-Roman"
+    },
+    {
+     "article_id": 10340,
+     "page": null,
+     "value": "GalliardPro-Roman"
+    },
+    {
+     "article_id": 229,
+     "page": null,
+     "value": "GalliardPro-Roman"
+    },
+    {
+     "article_id": 228,
+     "page": null,
+     "value": "GalliardPro-Roman"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 9.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 230,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 10324,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 10340,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 229,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 228,
+     "page": null,
+     "value": 9.0
+    }
+   ]
+  },
+  "present": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": null,
+     "value": 719
+    },
+    {
+     "article_id": 230,
+     "page": null,
+     "value": 519
+    },
+    {
+     "article_id": 10324,
+     "page": null,
+     "value": 397
+    },
+    {
+     "article_id": 10340,
+     "page": null,
+     "value": 538
+    },
+    {
+     "article_id": 229,
+     "page": null,
+     "value": 364
+    },
+    {
+     "article_id": 228,
+     "page": null,
+     "value": 593
+    }
+   ]
+  },
+  "number_style": {
+   "value": "number_gap",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": null,
+     "value": [
+      "* Spencer Nestico-Semianiw is a 2021 graduate of the University of Toronto Faculty of"
+     ]
+    },
+    {
+     "article_id": 230,
+     "page": null,
+     "value": [
+      "* René Provost, Titulaire de la Chaire James McGill sur la justice au-delà de l’État, Faculté"
+     ]
+    },
+    {
+     "article_id": 10324,
+     "page": null,
+     "value": [
+      "*"
+     ]
+    },
+    {
+     "article_id": 10340,
+     "page": null,
+     "value": [
+      "*"
+     ]
+    },
+    {
+     "article_id": 229,
+     "page": null,
+     "value": [
+      "*"
+     ]
+    },
+    {
+     "article_id": 228,
+     "page": null,
+     "value": [
+      "* The authors thank Rosalie Abella, Myim Bakan Kline, Bethany Hastie, Brian Langille,"
+     ]
+    }
+   ]
+  },
+  "indent_vs_body_in": {
+   "value": 0.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 230,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 10324,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 10340,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 229,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 228,
+     "page": null,
+     "value": 0.0
+    }
+   ]
+  },
+  "first_page_author_note": {
+   "value": true,
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": 2,
+     "value": [
+      "* Spencer Nestico-Semianiw is a 2021 graduate of the University of Toronto Faculty of"
+     ]
+    },
+    {
+     "article_id": 230,
+     "page": 2,
+     "value": [
+      "* René Provost, Titulaire de la Chaire James McGill sur la justice au-delà de l’État, Faculté"
+     ]
+    },
+    {
+     "article_id": 10324,
+     "page": 2,
+     "value": [
+      "*"
+     ]
+    },
+    {
+     "article_id": 10340,
+     "page": 2,
+     "value": [
+      "*"
+     ]
+    },
+    {
+     "article_id": 229,
+     "page": 2,
+     "value": [
+      "*"
+     ]
+    },
+    {
+     "article_id": 228,
+     "page": 2,
+     "value": [
+      "* The authors thank Rosalie Abella, Myim Bakan Kline, Bethany Hastie, Brian Langille,"
+     ]
+    }
+   ]
+  }
+ },
+ "headings": {
+  "numbering_levels": {
+   "value": [
+    "roman_period",
+    "unnumbered"
+   ],
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": 2,
+     "value": [
+      "ABSTRACT",
+      "III. Proposed Changes to Canadian Law",
+      "INTRODUCTION"
+     ]
+    },
+    {
+     "article_id": 230,
+     "page": 3,
+     "value": [
+      "ABSTRACT",
+      "INTRODUCTION",
+      "I. LA PROTECTION DE LA JEUNESSE ET LA JUSTICE"
+     ]
+    },
+    {
+     "article_id": 10324,
+     "page": 2,
+     "value": [
+      "ABSTRACT",
+      "INTRODUCTION",
+      "THE REPUBLIC OF DISSENT"
+     ]
+    },
+    {
+     "article_id": 10340,
+     "page": 3,
+     "value": [
+      "ABSTRACT",
+      "I. LE CONTRÔLE PRÉCOLONIAL DU TERRITOIRE IGNORÉ",
+      "AU DÉTRIMENT DU TITRE ANCESTRAL"
+     ]
+    },
+    {
+     "article_id": 229,
+     "page": 2,
+     "value": [
+      "ABSTRACT",
+      "II.  KGB Sexual Assault Case Law",
+      "III.  Judges Must Provide Direction to Police on t"
+     ]
+    },
+    {
+     "article_id": 228,
+     "page": 2,
+     "value": [
+      "ABSTRACT",
+      "III. A Charter Right for Platform Workers to Barga",
+      "I. THE EVOLUTION AND NATURE OF DIGITAL PLATFORM"
+     ]
+    }
+   ]
+  },
+  "top_level_case": {
+   "value": "upper",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": 6,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 230,
+     "page": 5,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 10324,
+     "page": 5,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 10340,
+     "page": 9,
+     "value": "I. LE CONTRÔLE PRÉCOLONIAL DU TERRITOIRE IGNORÉ"
+    },
+    {
+     "article_id": 229,
+     "page": 13,
+     "value": "I. KGB PROCEDURE WAS NOT INTENDED FOR THE VAST"
+    },
+    {
+     "article_id": 228,
+     "page": 6,
+     "value": "I. THE EVOLUTION AND NATURE OF DIGITAL PLATFORM"
+    }
+   ]
+  },
+  "top_level_size_pt": {
+   "value": 12.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": 6,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 230,
+     "page": 5,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 10324,
+     "page": 5,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 10340,
+     "page": 9,
+     "value": "I. LE CONTRÔLE PRÉCOLONIAL DU TERRITOIRE IGNORÉ"
+    },
+    {
+     "article_id": 229,
+     "page": 13,
+     "value": "I. KGB PROCEDURE WAS NOT INTENDED FOR THE VAST"
+    },
+    {
+     "article_id": 228,
+     "page": 6,
+     "value": "I. THE EVOLUTION AND NATURE OF DIGITAL PLATFORM"
+    }
+   ]
+  },
+  "top_level_alignment": {
+   "value": "center",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": 6,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 230,
+     "page": 5,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 10324,
+     "page": 5,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 10340,
+     "page": 9,
+     "value": "I. LE CONTRÔLE PRÉCOLONIAL DU TERRITOIRE IGNORÉ"
+    },
+    {
+     "article_id": 229,
+     "page": 13,
+     "value": "I. KGB PROCEDURE WAS NOT INTENDED FOR THE VAST"
+    },
+    {
+     "article_id": 228,
+     "page": 6,
+     "value": "I. THE EVOLUTION AND NATURE OF DIGITAL PLATFORM"
+    }
+   ]
+  },
+  "samples": [
+   "ABSTRACT",
+   "III. Proposed Changes to Canadian Law",
+   "INTRODUCTION",
+   "I. THE INTERNATIONAL REPARATIONS FRAMEWORK",
+   "ABSTRACT",
+   "INTRODUCTION",
+   "I. LA PROTECTION DE LA JEUNESSE ET LA JUSTICE",
+   "PÉNALE ADOLESCENTE : INTERSECTIONS HISTORIQUES,",
+   "ABSTRACT",
+   "INTRODUCTION",
+   "THE REPUBLIC OF DISSENT",
+   "THE REPUBLIC OF DISSENT AND THE LIMITS OF"
+  ]
+ },
+ "block_quotes": {
+  "indent_in": {
+   "value": 0.5,
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": null,
+     "value": 0.5
+    },
+    {
+     "article_id": 230,
+     "page": null,
+     "value": 0.5
+    },
+    {
+     "article_id": 10324,
+     "page": null,
+     "value": 0.5
+    },
+    {
+     "article_id": 10340,
+     "page": null,
+     "value": 0.5
+    },
+    {
+     "article_id": 229,
+     "page": null,
+     "value": 0.5
+    },
+    {
+     "article_id": 228,
+     "page": null,
+     "value": 0.5
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 10.5,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": null,
+     "value": 10.56
+    },
+    {
+     "article_id": 230,
+     "page": null,
+     "value": 10.56
+    },
+    {
+     "article_id": 10324,
+     "page": null,
+     "value": 10.56
+    },
+    {
+     "article_id": 10340,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 229,
+     "page": null,
+     "value": 10.56
+    },
+    {
+     "article_id": 228,
+     "page": null,
+     "value": 10.56
+    }
+   ]
+  },
+  "articles_with_block_quotes": 10
+ },
+ "running_heads": {
+  "odd_pages": {
+   "value": [
+    "volume_or_year"
+   ],
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": null,
+     "value": [
+      "698 (2025) 70:4 MCGILL LAW JOURNAL —REVUE DE DROIT DE MCGILL",
+      "700 (2025) 70:4 MCGILL LAW JOURNAL —REVUE DE DROIT DE MCGILL"
+     ]
+    },
+    {
+     "article_id": 230,
+     "page": null,
+     "value": [
+      "392 (2025) 70:3 MCGILL LAW JOURNAL —REVUE DE DROIT DE MCGILL",
+      "394 (2025) 70:3 MCGILL LAW JOURNAL —REVUE DE DROIT DE MCGILL"
+     ]
+    },
+    {
+     "article_id": 10324,
+     "page": null,
+     "value": [
+      "340 (2025) 70:2 MCGILL LAW JOURNAL —REVUE DE DROIT DE MCGILL",
+      "342 (2025) 70:2 MCGILL LAW JOURNAL —REVUE DE DROIT DE MCGILL"
+     ]
+    },
+    {
+     "article_id": 10340,
+     "page": null,
+     "value": [
+      "2      (2025)  70:1  MCGILL LAW JOURNAL — REVUE DE DROIT DE MCGILL",
+      "Introduction"
+     ]
+    },
+    {
+     "article_id": 229,
+     "page": null,
+     "value": [
+      "242 (2025) 70:2 MCGILL LAW JOURNAL —REVUE DE DROIT DE MCGILL",
+      "244 (2025) 70:2 MCGILL LAW JOURNAL —REVUE DE DROIT DE MCGILL"
+     ]
+    },
+    {
+     "article_id": 228,
+     "page": null,
+     "value": [
+      "444 (2025) 70:3 MCGILL LAW JOURNAL —REVUE DE DROIT DE MCGILL",
+      "446 (2025) 70:3 MCGILL LAW JOURNAL —REVUE DE DROIT DE MCGILL"
+     ]
+    }
+   ]
+  },
+  "even_pages": {
+   "value": [
+    "article_title"
+   ],
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": null,
+     "value": [
+      "CRIMES AGAINST HUMANITY AND AGGRESSION COMMITTED ABROAD  699",
+      "CRIMES AGAINST HUMANITY AND AGGRESSION COMMITTED ABROAD  701"
+     ]
+    },
+    {
+     "article_id": 230,
+     "page": null,
+     "value": [
+      "COMPÉTENCE AUTOCHTONE EN MATIÈRE DE JUSTICE PÉNALE ADOLESCENTE 395",
+      "COMPÉTENCE AUTOCHTONE EN MATIÈRE DE JUSTICE PÉNALE ADOLESCENTE 397"
+     ]
+    },
+    {
+     "article_id": 10324,
+     "page": null,
+     "value": [
+      "THE REPUBLIC OF DISSENT 341",
+      "THE REPUBLIC OF DISSENT 343"
+     ]
+    },
+    {
+     "article_id": 10340,
+     "page": null,
+     "value": [
+      "LE TITRE ANCESTRAL AUTOCHTONE EN JEU",
+      "INTRODUCTION"
+     ]
+    },
+    {
+     "article_id": 229,
+     "page": null,
+     "value": [
+      "THE DISCRIMINATORY USE OF THE “KGB” PROCEDURE   243",
+      "Introduction"
+     ]
+    },
+    {
+     "article_id": 228,
+     "page": null,
+     "value": [
+      "CONSTITUTIONAL LABOUR RIGHTS IN THE GIG ECONOMY  445",
+      "Introduction"
+     ]
+    }
+   ]
+  },
+  "page_number": {
+   "value": null,
+   "confidence": 1.0,
+   "articles": 1,
+   "evidence": [
+    {
+     "article_id": 10340,
+     "page": null,
+     "value": "top-inner"
+    }
+   ]
+  }
+ },
+ "title_block": {
+  "title_size_pt": {
+   "value": 14.5,
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": 2,
+     "value": "NEWCOMERS TO CANADA: ASSESSING A"
+    },
+    {
+     "article_id": 230,
+     "page": 2,
+     "value": "VERS LA RECONNAISSANCE D’UNE"
+    },
+    {
+     "article_id": 10324,
+     "page": 2,
+     "value": "THE REPUBLIC OF DISSENT:"
+    },
+    {
+     "article_id": 10340,
+     "page": 2,
+     "value": "ENTRE AFFIRMATIONS FRANÇAISE ET"
+    },
+    {
+     "article_id": 229,
+     "page": 2,
+     "value": "THE DISCRIMINATORY USE OF THE"
+    },
+    {
+     "article_id": 228,
+     "page": 2,
+     "value": "CONSTITUTIONAL LABOUR RIGHTS IN"
+    }
+   ]
+  },
+  "title_alignment": {
+   "value": "center",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": 2,
+     "value": "NEWCOMERS TO CANADA: ASSESSING A"
+    },
+    {
+     "article_id": 230,
+     "page": 2,
+     "value": "VERS LA RECONNAISSANCE D’UNE"
+    },
+    {
+     "article_id": 10324,
+     "page": 2,
+     "value": "THE REPUBLIC OF DISSENT:"
+    },
+    {
+     "article_id": 10340,
+     "page": 2,
+     "value": "ENTRE AFFIRMATIONS FRANÇAISE ET"
+    },
+    {
+     "article_id": 229,
+     "page": 2,
+     "value": "THE DISCRIMINATORY USE OF THE"
+    },
+    {
+     "article_id": 228,
+     "page": 2,
+     "value": "CONSTITUTIONAL LABOUR RIGHTS IN"
+    }
+   ]
+  },
+  "title_case": {
+   "value": "upper",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": 2,
+     "value": "NEWCOMERS TO CANADA: ASSESSING A"
+    },
+    {
+     "article_id": 230,
+     "page": 2,
+     "value": "VERS LA RECONNAISSANCE D’UNE"
+    },
+    {
+     "article_id": 10324,
+     "page": 2,
+     "value": "THE REPUBLIC OF DISSENT:"
+    },
+    {
+     "article_id": 10340,
+     "page": 2,
+     "value": "ENTRE AFFIRMATIONS FRANÇAISE ET"
+    },
+    {
+     "article_id": 229,
+     "page": 2,
+     "value": "THE DISCRIMINATORY USE OF THE"
+    },
+    {
+     "article_id": 228,
+     "page": 2,
+     "value": "CONSTITUTIONAL LABOUR RIGHTS IN"
+    }
+   ]
+  },
+  "author_case": {
+   "value": null,
+   "confidence": 0.0,
+   "articles": 0,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": 2,
+     "value": "NEWCOMERS TO CANADA: ASSESSING A"
+    },
+    {
+     "article_id": 230,
+     "page": 2,
+     "value": "VERS LA RECONNAISSANCE D’UNE"
+    },
+    {
+     "article_id": 10324,
+     "page": 2,
+     "value": "THE REPUBLIC OF DISSENT:"
+    },
+    {
+     "article_id": 10340,
+     "page": 2,
+     "value": "ENTRE AFFIRMATIONS FRANÇAISE ET"
+    },
+    {
+     "article_id": 229,
+     "page": 2,
+     "value": "THE DISCRIMINATORY USE OF THE"
+    },
+    {
+     "article_id": 228,
+     "page": 2,
+     "value": "CONSTITUTIONAL LABOUR RIGHTS IN"
+    }
+   ]
+  },
+  "author_alignment": {
+   "value": null,
+   "confidence": 0.0,
+   "articles": 0,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": 2,
+     "value": "NEWCOMERS TO CANADA: ASSESSING A"
+    },
+    {
+     "article_id": 230,
+     "page": 2,
+     "value": "VERS LA RECONNAISSANCE D’UNE"
+    },
+    {
+     "article_id": 10324,
+     "page": 2,
+     "value": "THE REPUBLIC OF DISSENT:"
+    },
+    {
+     "article_id": 10340,
+     "page": 2,
+     "value": "ENTRE AFFIRMATIONS FRANÇAISE ET"
+    },
+    {
+     "article_id": 229,
+     "page": 2,
+     "value": "THE DISCRIMINATORY USE OF THE"
+    },
+    {
+     "article_id": 228,
+     "page": 2,
+     "value": "CONSTITUTIONAL LABOUR RIGHTS IN"
+    }
+   ]
+  },
+  "first_pdf_page_is_article": {
+   "value": false,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 227,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 230,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 10324,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 10340,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 229,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 228,
+     "page": 2,
+     "value": null
+    }
+   ]
+  }
+ },
+ "table_of_contents": {
+  "value": true,
+  "confidence": 0.5,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 227,
+    "page": null,
+    "value": 3
+   },
+   {
+    "article_id": 230,
+    "page": null,
+    "value": 6
+   },
+   {
+    "article_id": 10324,
+    "page": null,
+    "value": 2
+   },
+   {
+    "article_id": 10340,
+    "page": null,
+    "value": 5
+   },
+   {
+    "article_id": 229,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 228,
+    "page": null,
+    "value": 0
+   }
+  ]
+ },
+ "citations": {
+  "ibid_case": {
+   "value": "Ibid",
+   "counts": {
+    "Ibid": 324,
+    "ibid": 62
+   },
+   "confidence": 0.84
+  },
+  "ibid_punctuation": {
+   "value": "Ibid.",
+   "counts": {
+    "Ibid.": 43,
+    "Ibid,": 38
+   },
+   "confidence": 0.53
+  },
+  "supra_form": {
+   "value": "supra note N",
+   "counts": {
+    "supra note N": 763,
+    "supra, note N": 0
+   },
+   "confidence": 1.0
+  },
+  "paragraph_pinpoint": {
+   "value": "at para N",
+   "counts": {
+    "at para N": 598,
+    "at para. N": 0
+   },
+   "confidence": 1.0
+  },
+  "page_pinpoint_label": {
+   "value": "at N",
+   "counts": {
+    "at N": 736,
+    "at p N": 0
+   },
+   "confidence": 1.0
+  },
+  "range_dash": {
+   "value": "en dash",
+   "counts": {
+    "en dash": 475,
+    "hyphen": 0
+   },
+   "confidence": 1.0
+  },
+  "emphasis_note": {
+   "value": "[emphasis added]",
+   "counts": {
+    "[emphasis added]": 22,
+    "(emphasis added)": 1
+   },
+   "confidence": 0.96
+  },
+  "section_abbreviation": {
+   "value": "s N",
+   "counts": {
+    "s N": 80,
+    "s. N": 20
+   },
+   "confidence": 0.8
+  },
+  "et_al": {
+   "value": "et al",
+   "counts": {
+    "et al": 62,
+    "et al.": 0
+   },
+   "confidence": 1.0
+  },
+  "eg": {
+   "value": "e.g.",
+   "counts": {
+    "eg": 0,
+    "e.g.": 99
+   },
+   "confidence": 1.0
+  },
+  "ie": {
+   "value": "i.e.",
+   "counts": {
+    "ie": 0,
+    "i.e.": 5
+   },
+   "confidence": 1.0
+  },
+  "see_signal_case": {
+   "value": "see",
+   "counts": {
+    "See": 236,
+    "see": 249
+   },
+   "confidence": 0.51
+  },
+  "online_angle_brackets": {
+   "value": null,
+   "counts": {
+    "online: <url>": 0,
+    "online: url": 0
+   },
+   "confidence": 0.0
+  },
+  "quotes": {
+   "value": "curly",
+   "counts": {
+    "curly": 1685,
+    "straight": 0
+   },
+   "confidence": 1.0
+  },
+  "raw_counts": {
+   "ibid_capitalized": 324,
+   "ibid_lower": 62,
+   "ibid_period": 43,
+   "ibid_comma": 38,
+   "ibid_at": 251,
+   "supra_note": 763,
+   "supra_comma_note": 0,
+   "at_para": 598,
+   "at_para_period": 0,
+   "at_pilcrow": 0,
+   "at_page": 736,
+   "at_p": 0,
+   "range_endash": 475,
+   "range_hyphen": 0,
+   "emphasis_brackets": 22,
+   "emphasis_parens": 1,
+   "section_s_period": 20,
+   "section_s_bare": 80,
+   "online_colon": 0,
+   "online_angle": 0,
+   "perma": 220,
+   "et_al_period": 0,
+   "et_al_bare": 62,
+   "neutral_citation": 185,
+   "canlii": 94,
+   "eg_bare": 0,
+   "eg_period": 99,
+   "ie_bare": 0,
+   "ie_period": 5,
+   "curly_double": 1685,
+   "straight_double": 0,
+   "see_signal_upper": 236,
+   "see_signal_lower": 249
+  },
+  "footnote_lines": 5101
+ },
+ "status": "ok",
+ "candidates": 22
+}

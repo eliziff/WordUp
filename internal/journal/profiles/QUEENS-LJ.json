@@ -1,0 +1,1506 @@
+{
+ "dataset": "QUEENS-LJ",
+ "journal": "Queen's Law Journal",
+ "abbrev": "Queen's LJ",
+ "platform": "qlr",
+ "years": [
+  "2025",
+  "2026"
+ ],
+ "articles_measured": [
+  8418,
+  8417,
+  8422,
+  8426,
+  8421,
+  8425,
+  8420,
+  8424,
+  8427
+ ],
+ "units": "points and inches; boxes measured at 144 dpi",
+ "page": {
+  "width_pt": 432,
+  "height_pt": 648,
+  "width_in": 6.0,
+  "height_in": 9.0,
+  "confidence": 1.0,
+  "articles": 9,
+  "evidence": [
+   {
+    "article_id": 8418,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 8417,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 8422,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 8426,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 8421,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 8425,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   }
+  ]
+ },
+ "margins_in": {
+  "mirrored": false,
+  "left_odd_pages": {
+   "value": 0.8,
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 0.8
+     }
+    },
+    {
+     "article_id": 8417,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 0.8
+     }
+    },
+    {
+     "article_id": 8422,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 0.8
+     }
+    },
+    {
+     "article_id": 8426,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 0.8
+     }
+    },
+    {
+     "article_id": 8421,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 0.8
+     }
+    },
+    {
+     "article_id": 8425,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 0.8
+     }
+    }
+   ]
+  },
+  "left_even_pages": {
+   "value": 0.8,
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 0.8
+     }
+    },
+    {
+     "article_id": 8417,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 0.8
+     }
+    },
+    {
+     "article_id": 8422,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 0.8
+     }
+    },
+    {
+     "article_id": 8426,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 0.8
+     }
+    },
+    {
+     "article_id": 8421,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 0.8
+     }
+    },
+    {
+     "article_id": 8425,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 0.8
+     }
+    }
+   ]
+  },
+  "right_odd_pages": {
+   "value": 0.75,
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 8417,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 8422,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 8426,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 8421,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 8425,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    }
+   ]
+  },
+  "right_even_pages": {
+   "value": 0.75,
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 8417,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 8422,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 8426,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 8421,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 8425,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    }
+   ]
+  },
+  "top": {
+   "value": 0.95,
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": null,
+     "value": 0.95
+    },
+    {
+     "article_id": 8417,
+     "page": null,
+     "value": 0.95
+    },
+    {
+     "article_id": 8422,
+     "page": null,
+     "value": 0.95
+    },
+    {
+     "article_id": 8426,
+     "page": null,
+     "value": 0.95
+    },
+    {
+     "article_id": 8421,
+     "page": null,
+     "value": 0.95
+    },
+    {
+     "article_id": 8425,
+     "page": null,
+     "value": 0.95
+    }
+   ]
+  },
+  "bottom": {
+   "value": null,
+   "confidence": 0.33,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": null,
+     "value": 2.0
+    },
+    {
+     "article_id": 8417,
+     "page": null,
+     "value": 2.05
+    },
+    {
+     "article_id": 8422,
+     "page": null,
+     "value": 1.6
+    },
+    {
+     "article_id": 8426,
+     "page": null,
+     "value": 2.05
+    },
+    {
+     "article_id": 8421,
+     "page": null,
+     "value": 2.15
+    },
+    {
+     "article_id": 8425,
+     "page": null,
+     "value": 2.25
+    }
+   ]
+  }
+ },
+ "body": {
+  "font": {
+   "value": "AGaramondPro-Regular",
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 8417,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 8422,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 8426,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 8421,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 8425,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 10.5,
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 8417,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 8422,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 8426,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 8421,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 8425,
+     "page": null,
+     "value": 10.5
+    }
+   ]
+  },
+  "line_height_pt": {
+   "value": 13.5,
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 8417,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 8422,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 8426,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 8421,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 8425,
+     "page": null,
+     "value": 13.5
+    }
+   ]
+  }
+ },
+ "footnotes": {
+  "font": {
+   "value": "AGaramondPro-Regular",
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 8417,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 8422,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 8426,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 8421,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 8425,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 8.5,
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": null,
+     "value": 8.5
+    },
+    {
+     "article_id": 8417,
+     "page": null,
+     "value": 8.5
+    },
+    {
+     "article_id": 8422,
+     "page": null,
+     "value": 8.5
+    },
+    {
+     "article_id": 8426,
+     "page": null,
+     "value": 8.5
+    },
+    {
+     "article_id": 8421,
+     "page": null,
+     "value": 8.5
+    },
+    {
+     "article_id": 8425,
+     "page": null,
+     "value": 8.5
+    }
+   ]
+  },
+  "present": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": null,
+     "value": 257
+    },
+    {
+     "article_id": 8417,
+     "page": null,
+     "value": 354
+    },
+    {
+     "article_id": 8422,
+     "page": null,
+     "value": 142
+    },
+    {
+     "article_id": 8426,
+     "page": null,
+     "value": 323
+    },
+    {
+     "article_id": 8421,
+     "page": null,
+     "value": 385
+    },
+    {
+     "article_id": 8425,
+     "page": null,
+     "value": 375
+    }
+   ]
+  },
+  "number_style": {
+   "value": "number_period",
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": null,
+     "value": [
+      "*   Mike Madden, CD, BA, MA, LLB, LLM, PhD. This research was generously funded"
+     ]
+    },
+    {
+     "article_id": 8417,
+     "page": null,
+     "value": [
+      "*   Associate Professor, Toronto Metropolitan University, Law and Business, Ted Rogers School"
+     ]
+    },
+    {
+     "article_id": 8422,
+     "page": null,
+     "value": [
+      "1.  Royal Canadian Mounted Police, “Information for Sexual Assault Survivors: What will"
+     ]
+    },
+    {
+     "article_id": 8426,
+     "page": null,
+     "value": [
+      "*   JD candidate and MA (philosophy) at Queen’s University. I am grateful to Colin Grey and"
+     ]
+    },
+    {
+     "article_id": 8421,
+     "page": null,
+     "value": [
+      "Copyright © 2025 by Sakshi Agarwal"
+     ]
+    },
+    {
+     "article_id": 8425,
+     "page": null,
+     "value": [
+      "1.  Sex Offender Information Registration Act, SC 2004, c 10 [SOIRA]."
+     ]
+    }
+   ]
+  },
+  "indent_vs_body_in": {
+   "value": 0.1,
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": null,
+     "value": 0.1
+    },
+    {
+     "article_id": 8417,
+     "page": null,
+     "value": 0.1
+    },
+    {
+     "article_id": 8422,
+     "page": null,
+     "value": 0.1
+    },
+    {
+     "article_id": 8426,
+     "page": null,
+     "value": 0.1
+    },
+    {
+     "article_id": 8421,
+     "page": null,
+     "value": 0.1
+    },
+    {
+     "article_id": 8425,
+     "page": null,
+     "value": 0.1
+    }
+   ]
+  },
+  "first_page_author_note": {
+   "value": true,
+   "confidence": 0.78,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": 1,
+     "value": [
+      "*   Mike Madden, CD, BA, MA, LLB, LLM, PhD. This research was generously funded"
+     ]
+    },
+    {
+     "article_id": 8417,
+     "page": 1,
+     "value": [
+      "*   Associate Professor, Toronto Metropolitan University, Law and Business, Ted Rogers School"
+     ]
+    },
+    {
+     "article_id": 8422,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 8426,
+     "page": 1,
+     "value": [
+      "*   JD candidate and MA (philosophy) at Queen’s University. I am grateful to Colin Grey and"
+     ]
+    },
+    {
+     "article_id": 8421,
+     "page": 1,
+     "value": [
+      "Copyright © 2025 by Sakshi Agarwal"
+     ]
+    },
+    {
+     "article_id": 8425,
+     "page": 1,
+     "value": []
+    }
+   ]
+  }
+ },
+ "headings": {
+  "numbering_levels": {
+   "value": [
+    "roman_period"
+   ],
+   "confidence": 0.56,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": 2,
+     "value": [
+      "I.\t Background—Understanding Readability and MADRS",
+      "III.\t Method: Getting MADRS Results for a Large Sa",
+      "IV. \t Results: Some Examples and a Resource for Fu"
+     ]
+    },
+    {
+     "article_id": 8417,
+     "page": 2,
+     "value": [
+      "I. Legal Analysis",
+      "II. The Function of the Pollution Exclusion",
+      "III. Interpreting the Pollution Exclusion"
+     ]
+    },
+    {
+     "article_id": 8422,
+     "page": 2,
+     "value": [
+      "Introduction",
+      "I. Understanding the Legal Context in Which Police",
+      "Interviews of Sexual Offence Complainants Are"
+     ]
+    },
+    {
+     "article_id": 8426,
+     "page": 2,
+     "value": [
+      "II. Vavilov",
+      "III. Doré, Vavilov, and the Culture of Justificati",
+      "IV. Two-Step Review - The Argument for Bifurcation"
+     ]
+    },
+    {
+     "article_id": 8421,
+     "page": 2,
+     "value": [
+      "I. Understanding Caste",
+      "II. Caste as Social Hierarchy in Canada",
+      "III. Institutional Recognition of Caste Discrimina"
+     ]
+    },
+    {
+     "article_id": 8425,
+     "page": 2,
+     "value": [
+      "I. Sex Offender Registries in Canada",
+      "B. SOIRA",
+      "II. SOIRA and the Charter"
+     ]
+    }
+   ]
+  },
+  "top_level_case": {
+   "value": "title",
+   "confidence": 0.89,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": 2,
+     "value": "Introduction"
+    },
+    {
+     "article_id": 8417,
+     "page": 6,
+     "value": "I. Legal Analysis"
+    },
+    {
+     "article_id": 8422,
+     "page": 2,
+     "value": "Introduction"
+    },
+    {
+     "article_id": 8426,
+     "page": 3,
+     "value": "I. Doré"
+    },
+    {
+     "article_id": 8421,
+     "page": 3,
+     "value": "I. Understanding Caste"
+    },
+    {
+     "article_id": 8425,
+     "page": 5,
+     "value": "I. Sex Offender Registries in Canada"
+    }
+   ]
+  },
+  "top_level_size_pt": {
+   "value": 15.0,
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": 2,
+     "value": "Introduction"
+    },
+    {
+     "article_id": 8417,
+     "page": 6,
+     "value": "I. Legal Analysis"
+    },
+    {
+     "article_id": 8422,
+     "page": 2,
+     "value": "Introduction"
+    },
+    {
+     "article_id": 8426,
+     "page": 3,
+     "value": "I. Doré"
+    },
+    {
+     "article_id": 8421,
+     "page": 3,
+     "value": "I. Understanding Caste"
+    },
+    {
+     "article_id": 8425,
+     "page": 5,
+     "value": "I. Sex Offender Registries in Canada"
+    }
+   ]
+  },
+  "top_level_alignment": {
+   "value": "left",
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": 2,
+     "value": "Introduction"
+    },
+    {
+     "article_id": 8417,
+     "page": 6,
+     "value": "I. Legal Analysis"
+    },
+    {
+     "article_id": 8422,
+     "page": 2,
+     "value": "Introduction"
+    },
+    {
+     "article_id": 8426,
+     "page": 3,
+     "value": "I. Doré"
+    },
+    {
+     "article_id": 8421,
+     "page": 3,
+     "value": "I. Understanding Caste"
+    },
+    {
+     "article_id": 8425,
+     "page": 5,
+     "value": "I. Sex Offender Registries in Canada"
+    }
+   ]
+  },
+  "samples": [
+   "I.\t Background—Understanding Readability and MADRS",
+   "III.\t Method: Getting MADRS Results for a Large Sample of Decisions",
+   "IV. \t Results: Some Examples and a Resource for Further Study",
+   "Introduction",
+   "I. Legal Analysis",
+   "II. The Function of the Pollution Exclusion",
+   "III. Interpreting the Pollution Exclusion",
+   "I. Legal Analysis",
+   "Introduction",
+   "I. Understanding the Legal Context in Which Police",
+   "Interviews of Sexual Offence Complainants Are",
+   "Situated"
+  ]
+ },
+ "block_quotes": {
+  "indent_in": {
+   "value": 0.5,
+   "confidence": 0.75,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": null,
+     "value": 0.2
+    },
+    {
+     "article_id": 8417,
+     "page": null,
+     "value": 0.5
+    },
+    {
+     "article_id": 8422,
+     "page": null,
+     "value": 0.5
+    },
+    {
+     "article_id": 8426,
+     "page": null,
+     "value": 0.5
+    },
+    {
+     "article_id": 8421,
+     "page": null,
+     "value": 0.5
+    },
+    {
+     "article_id": 8425,
+     "page": null,
+     "value": 0.25
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 10.5,
+   "confidence": 1.0,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 8417,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 8422,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 8426,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 8421,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 8425,
+     "page": null,
+     "value": 10.5
+    }
+   ]
+  },
+  "articles_with_block_quotes": 8
+ },
+ "running_heads": {
+  "odd_pages": {
+   "value": [
+    "other"
+   ],
+   "confidence": 1.0,
+   "articles": 2,
+   "evidence": [
+    {
+     "article_id": 8417,
+     "page": null,
+     "value": [
+      "1. The Duty to Defend"
+     ]
+    },
+    {
+     "article_id": 8420,
+     "page": null,
+     "value": [
+      "II. Emergency Powers in Canadian History"
+     ]
+    }
+   ]
+  },
+  "even_pages": {
+   "value": [
+    "other"
+   ],
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 8417,
+     "page": null,
+     "value": [
+      "1. The Duty to Defend"
+     ]
+    },
+    {
+     "article_id": 8425,
+     "page": null,
+     "value": [
+      "A. Christopher’s Law"
+     ]
+    },
+    {
+     "article_id": 8420,
+     "page": null,
+     "value": [
+      "II. Emergency Powers in Canadian History"
+     ]
+    }
+   ]
+  },
+  "page_number": {
+   "value": "bottom-outer",
+   "confidence": 0.78,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": null,
+     "value": "bottom-outer"
+    },
+    {
+     "article_id": 8417,
+     "page": null,
+     "value": "bottom-outer"
+    },
+    {
+     "article_id": 8422,
+     "page": null,
+     "value": "bottom-inner"
+    },
+    {
+     "article_id": 8426,
+     "page": null,
+     "value": "bottom-outer"
+    },
+    {
+     "article_id": 8421,
+     "page": null,
+     "value": "bottom-outer"
+    },
+    {
+     "article_id": 8425,
+     "page": null,
+     "value": "bottom-inner"
+    }
+   ]
+  }
+ },
+ "title_block": {
+  "title_size_pt": {
+   "value": 20.0,
+   "confidence": 0.86,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": 1,
+     "value": "Getting Personal: Individualized and"
+    },
+    {
+     "article_id": 8417,
+     "page": 1,
+     "value": "Contracting Out Pollution: A Proposed"
+    },
+    {
+     "article_id": 8422,
+     "page": 1,
+     "value": "Irrelevant"
+    },
+    {
+     "article_id": 8421,
+     "page": 1,
+     "value": "Caste Away: The Case for Recognizing"
+    },
+    {
+     "article_id": 8420,
+     "page": 1,
+     "value": "“Order and Security”: The Legitimacy"
+    },
+    {
+     "article_id": 8424,
+     "page": 1,
+     "value": "Gendered Eviction in Saskatchewan"
+    }
+   ]
+  },
+  "title_alignment": {
+   "value": "center",
+   "confidence": 0.71,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": 1,
+     "value": "Getting Personal: Individualized and"
+    },
+    {
+     "article_id": 8417,
+     "page": 1,
+     "value": "Contracting Out Pollution: A Proposed"
+    },
+    {
+     "article_id": 8422,
+     "page": 1,
+     "value": "Irrelevant"
+    },
+    {
+     "article_id": 8421,
+     "page": 1,
+     "value": "Caste Away: The Case for Recognizing"
+    },
+    {
+     "article_id": 8420,
+     "page": 1,
+     "value": "“Order and Security”: The Legitimacy"
+    },
+    {
+     "article_id": 8424,
+     "page": 1,
+     "value": "Gendered Eviction in Saskatchewan"
+    }
+   ]
+  },
+  "title_case": {
+   "value": "title",
+   "confidence": 0.57,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": 1,
+     "value": "Getting Personal: Individualized and"
+    },
+    {
+     "article_id": 8417,
+     "page": 1,
+     "value": "Contracting Out Pollution: A Proposed"
+    },
+    {
+     "article_id": 8422,
+     "page": 1,
+     "value": "Irrelevant"
+    },
+    {
+     "article_id": 8421,
+     "page": 1,
+     "value": "Caste Away: The Case for Recognizing"
+    },
+    {
+     "article_id": 8420,
+     "page": 1,
+     "value": "“Order and Security”: The Legitimacy"
+    },
+    {
+     "article_id": 8424,
+     "page": 1,
+     "value": "Gendered Eviction in Saskatchewan"
+    }
+   ]
+  },
+  "author_case": {
+   "value": "title",
+   "confidence": 1.0,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": 1,
+     "value": "Getting Personal: Individualized and"
+    },
+    {
+     "article_id": 8417,
+     "page": 1,
+     "value": "Contracting Out Pollution: A Proposed"
+    },
+    {
+     "article_id": 8422,
+     "page": 1,
+     "value": "Irrelevant"
+    },
+    {
+     "article_id": 8421,
+     "page": 1,
+     "value": "Caste Away: The Case for Recognizing"
+    },
+    {
+     "article_id": 8420,
+     "page": 1,
+     "value": "“Order and Security”: The Legitimacy"
+    },
+    {
+     "article_id": 8424,
+     "page": 1,
+     "value": "Gendered Eviction in Saskatchewan"
+    }
+   ]
+  },
+  "author_alignment": {
+   "value": "left",
+   "confidence": 1.0,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": 1,
+     "value": "Getting Personal: Individualized and"
+    },
+    {
+     "article_id": 8417,
+     "page": 1,
+     "value": "Contracting Out Pollution: A Proposed"
+    },
+    {
+     "article_id": 8422,
+     "page": 1,
+     "value": "Irrelevant"
+    },
+    {
+     "article_id": 8421,
+     "page": 1,
+     "value": "Caste Away: The Case for Recognizing"
+    },
+    {
+     "article_id": 8420,
+     "page": 1,
+     "value": "“Order and Security”: The Legitimacy"
+    },
+    {
+     "article_id": 8424,
+     "page": 1,
+     "value": "Gendered Eviction in Saskatchewan"
+    }
+   ]
+  },
+  "first_pdf_page_is_article": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 8418,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 8417,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 8422,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 8426,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 8421,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 8425,
+     "page": 1,
+     "value": null
+    }
+   ]
+  }
+ },
+ "table_of_contents": {
+  "value": false,
+  "confidence": 1.0,
+  "articles": 9,
+  "evidence": [
+   {
+    "article_id": 8418,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 8417,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 8422,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 8426,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 8421,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 8425,
+    "page": null,
+    "value": 0
+   }
+  ]
+ },
+ "citations": {
+  "ibid_case": {
+   "value": "Ibid",
+   "counts": {
+    "Ibid": 356,
+    "ibid": 51
+   },
+   "confidence": 0.87
+  },
+  "ibid_punctuation": {
+   "value": "Ibid.",
+   "counts": {
+    "Ibid.": 109,
+    "Ibid,": 38
+   },
+   "confidence": 0.74
+  },
+  "supra_form": {
+   "value": "supra note N",
+   "counts": {
+    "supra note N": 512,
+    "supra, note N": 0
+   },
+   "confidence": 1.0
+  },
+  "paragraph_pinpoint": {
+   "value": "at para N",
+   "counts": {
+    "at para N": 452,
+    "at para. N": 0
+   },
+   "confidence": 1.0
+  },
+  "page_pinpoint_label": {
+   "value": "at N",
+   "counts": {
+    "at N": 487,
+    "at p N": 0
+   },
+   "confidence": 1.0
+  },
+  "range_dash": {
+   "value": "en dash",
+   "counts": {
+    "en dash": 259,
+    "hyphen": 1
+   },
+   "confidence": 1.0
+  },
+  "emphasis_note": {
+   "value": "[emphasis added]",
+   "counts": {
+    "[emphasis added]": 12,
+    "(emphasis added)": 0
+   },
+   "confidence": 1.0
+  },
+  "section_abbreviation": {
+   "value": "s N",
+   "counts": {
+    "s N": 107,
+    "s. N": 2
+   },
+   "confidence": 0.98
+  },
+  "et_al": {
+   "value": "et al",
+   "counts": {
+    "et al": 39,
+    "et al.": 3
+   },
+   "confidence": 0.93
+  },
+  "eg": {
+   "value": "e.g.",
+   "counts": {
+    "eg": 1,
+    "e.g.": 45
+   },
+   "confidence": 0.98
+  },
+  "ie": {
+   "value": "i.e.",
+   "counts": {
+    "ie": 0,
+    "i.e.": 1
+   },
+   "confidence": 1.0
+  },
+  "see_signal_case": {
+   "value": "See",
+   "counts": {
+    "See": 278,
+    "see": 73
+   },
+   "confidence": 0.79
+  },
+  "online_angle_brackets": {
+   "value": "online: <url>",
+   "counts": {
+    "online: <url>": 1,
+    "online: url": 1
+   },
+   "confidence": 0.5
+  },
+  "quotes": {
+   "value": "curly",
+   "counts": {
+    "curly": 883,
+    "straight": 4
+   },
+   "confidence": 1.0
+  },
+  "raw_counts": {
+   "ibid_capitalized": 356,
+   "ibid_lower": 51,
+   "ibid_period": 109,
+   "ibid_comma": 38,
+   "ibid_at": 245,
+   "supra_note": 512,
+   "supra_comma_note": 0,
+   "at_para": 452,
+   "at_para_period": 0,
+   "at_pilcrow": 0,
+   "at_page": 487,
+   "at_p": 0,
+   "range_endash": 259,
+   "range_hyphen": 1,
+   "emphasis_brackets": 12,
+   "emphasis_parens": 0,
+   "section_s_period": 2,
+   "section_s_bare": 107,
+   "online_colon": 1,
+   "online_angle": 1,
+   "perma": 73,
+   "et_al_period": 3,
+   "et_al_bare": 39,
+   "neutral_citation": 136,
+   "canlii": 69,
+   "eg_bare": 1,
+   "eg_period": 45,
+   "ie_bare": 0,
+   "ie_period": 1,
+   "curly_double": 883,
+   "straight_double": 4,
+   "see_signal_upper": 278,
+   "see_signal_lower": 73
+  },
+  "footnote_lines": 2564
+ },
+ "status": "ok",
+ "candidates": 12
+}

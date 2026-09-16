@@ -1,0 +1,1572 @@
+{
+ "dataset": "UBC-L-REV",
+ "journal": "UBC Law Review",
+ "abbrev": "UBC L Rev",
+ "platform": "ubclr",
+ "years": [
+  "2025",
+  "2026"
+ ],
+ "articles_measured": [
+  7383,
+  7380,
+  7335,
+  7368,
+  7372,
+  7378,
+  7371,
+  7373,
+  7357,
+  7385
+ ],
+ "units": "points and inches; boxes measured at 144 dpi",
+ "page": {
+  "width_pt": 432,
+  "height_pt": 648,
+  "width_in": 6.0,
+  "height_in": 9.0,
+  "confidence": 1.0,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 7383,
+    "page": 2,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 7380,
+    "page": 2,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 7335,
+    "page": 2,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 7368,
+    "page": 2,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 7372,
+    "page": 2,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 7378,
+    "page": 2,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   }
+  ]
+ },
+ "margins_in": {
+  "mirrored": true,
+  "left_odd_pages": {
+   "value": 0.8,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 7380,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 7335,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 7368,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 7372,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 7378,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 1.0
+     }
+    }
+   ]
+  },
+  "left_even_pages": {
+   "value": 1.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 7380,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 7335,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 7368,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 7372,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 7378,
+     "page": null,
+     "value": {
+      "odd": 0.8,
+      "even": 1.0
+     }
+    }
+   ]
+  },
+  "right_odd_pages": {
+   "value": 1.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 7380,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 7335,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 7368,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 7372,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 7378,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 0.75
+     }
+    }
+   ]
+  },
+  "right_even_pages": {
+   "value": 0.75,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 7380,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 7335,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 7368,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 7372,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 7378,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 0.75
+     }
+    }
+   ]
+  },
+  "top": {
+   "value": 1.25,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": null,
+     "value": 1.25
+    },
+    {
+     "article_id": 7380,
+     "page": null,
+     "value": 1.25
+    },
+    {
+     "article_id": 7335,
+     "page": null,
+     "value": 1.25
+    },
+    {
+     "article_id": 7368,
+     "page": null,
+     "value": 1.25
+    },
+    {
+     "article_id": 7372,
+     "page": null,
+     "value": 1.25
+    },
+    {
+     "article_id": 7378,
+     "page": null,
+     "value": 1.25
+    }
+   ]
+  },
+  "bottom": {
+   "value": null,
+   "confidence": 0.3,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": null,
+     "value": 1.3
+    },
+    {
+     "article_id": 7380,
+     "page": null,
+     "value": 1.6
+    },
+    {
+     "article_id": 7335,
+     "page": null,
+     "value": 1.85
+    },
+    {
+     "article_id": 7368,
+     "page": null,
+     "value": 1.85
+    },
+    {
+     "article_id": 7372,
+     "page": null,
+     "value": 1.55
+    },
+    {
+     "article_id": 7378,
+     "page": null,
+     "value": 1.7
+    }
+   ]
+  }
+ },
+ "body": {
+  "font": {
+   "value": "Cambria",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": null,
+     "value": "Cambria"
+    },
+    {
+     "article_id": 7380,
+     "page": null,
+     "value": "Cambria"
+    },
+    {
+     "article_id": 7335,
+     "page": null,
+     "value": "Cambria"
+    },
+    {
+     "article_id": 7368,
+     "page": null,
+     "value": "Cambria"
+    },
+    {
+     "article_id": 7372,
+     "page": null,
+     "value": "Cambria"
+    },
+    {
+     "article_id": 7378,
+     "page": null,
+     "value": "Cambria"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 11.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 7380,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 7335,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 7368,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 7372,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 7378,
+     "page": null,
+     "value": 11.0
+    }
+   ]
+  },
+  "line_height_pt": {
+   "value": 13.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": null,
+     "value": 13.0
+    },
+    {
+     "article_id": 7380,
+     "page": null,
+     "value": 13.0
+    },
+    {
+     "article_id": 7335,
+     "page": null,
+     "value": 13.0
+    },
+    {
+     "article_id": 7368,
+     "page": null,
+     "value": 13.0
+    },
+    {
+     "article_id": 7372,
+     "page": null,
+     "value": 13.0
+    },
+    {
+     "article_id": 7378,
+     "page": null,
+     "value": 13.0
+    }
+   ]
+  }
+ },
+ "footnotes": {
+  "font": {
+   "value": "Cambria",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": null,
+     "value": "Cambria"
+    },
+    {
+     "article_id": 7380,
+     "page": null,
+     "value": "Cambria"
+    },
+    {
+     "article_id": 7335,
+     "page": null,
+     "value": "Cambria"
+    },
+    {
+     "article_id": 7368,
+     "page": null,
+     "value": "Cambria"
+    },
+    {
+     "article_id": 7372,
+     "page": null,
+     "value": "Cambria"
+    },
+    {
+     "article_id": 7378,
+     "page": null,
+     "value": "Cambria"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 9.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": null,
+     "value": 9.1
+    },
+    {
+     "article_id": 7380,
+     "page": null,
+     "value": 9.1
+    },
+    {
+     "article_id": 7335,
+     "page": null,
+     "value": 9.1
+    },
+    {
+     "article_id": 7368,
+     "page": null,
+     "value": 9.1
+    },
+    {
+     "article_id": 7372,
+     "page": null,
+     "value": 9.1
+    },
+    {
+     "article_id": 7378,
+     "page": null,
+     "value": 9.1
+    }
+   ]
+  },
+  "present": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": null,
+     "value": 433
+    },
+    {
+     "article_id": 7380,
+     "page": null,
+     "value": 660
+    },
+    {
+     "article_id": 7335,
+     "page": null,
+     "value": 744
+    },
+    {
+     "article_id": 7368,
+     "page": null,
+     "value": 705
+    },
+    {
+     "article_id": 7372,
+     "page": null,
+     "value": 504
+    },
+    {
+     "article_id": 7378,
+     "page": null,
+     "value": 676
+    }
+   ]
+  },
+  "number_style": {
+   "value": "number_space",
+   "confidence": 0.6,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": null,
+     "value": [
+      "†  JD (Dalhousie), PhD (University of Saskatchewan), Adjunct Professor,"
+     ]
+    },
+    {
+     "article_id": 7380,
+     "page": null,
+     "value": [
+      "† JD (Harvard); LLM (Cantab); DPhil (Oxon); Associate, Orr Taylor LLP. This"
+     ]
+    },
+    {
+     "article_id": 7335,
+     "page": null,
+     "value": [
+      "† PhD student, University of Victoria, Faculty of Law. The author is supported"
+     ]
+    },
+    {
+     "article_id": 7368,
+     "page": null,
+     "value": [
+      "†  LLB (Université de Sherbrooke). I am grateful to Professor Benjamin Berger"
+     ]
+    },
+    {
+     "article_id": 7372,
+     "page": null,
+     "value": [
+      "†  Associate Professor, Osgoode Hall Law School of York University. Earlier"
+     ]
+    },
+    {
+     "article_id": 7378,
+     "page": null,
+     "value": [
+      "† Bradley Henderson is a recent JD graduate of the University of Ottawa"
+     ]
+    }
+   ]
+  },
+  "indent_vs_body_in": {
+   "value": -0.1,
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": null,
+     "value": -0.1
+    },
+    {
+     "article_id": 7380,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 7335,
+     "page": null,
+     "value": -0.1
+    },
+    {
+     "article_id": 7368,
+     "page": null,
+     "value": -0.1
+    },
+    {
+     "article_id": 7372,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 7378,
+     "page": null,
+     "value": -0.1
+    }
+   ]
+  },
+  "first_page_author_note": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": 2,
+     "value": [
+      "†  JD (Dalhousie), PhD (University of Saskatchewan), Adjunct Professor,"
+     ]
+    },
+    {
+     "article_id": 7380,
+     "page": 2,
+     "value": [
+      "† JD (Harvard); LLM (Cantab); DPhil (Oxon); Associate, Orr Taylor LLP. This"
+     ]
+    },
+    {
+     "article_id": 7335,
+     "page": 2,
+     "value": [
+      "† PhD student, University of Victoria, Faculty of Law. The author is supported"
+     ]
+    },
+    {
+     "article_id": 7368,
+     "page": 2,
+     "value": [
+      "†  LLB (Université de Sherbrooke). I am grateful to Professor Benjamin Berger"
+     ]
+    },
+    {
+     "article_id": 7372,
+     "page": 2,
+     "value": [
+      "†  Associate Professor, Osgoode Hall Law School of York University. Earlier"
+     ]
+    },
+    {
+     "article_id": 7378,
+     "page": 2,
+     "value": [
+      "† Bradley Henderson is a recent JD graduate of the University of Ottawa"
+     ]
+    }
+   ]
+  }
+ },
+ "headings": {
+  "numbering_levels": {
+   "value": null,
+   "confidence": 0.4,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": 6,
+     "value": [
+      "II. JUSTICE IN JOINT SENTENCING SUBMISSIONS",
+      "A. PLEA BARGAINING IS SENTENCING",
+      "B. SEEKING JUSTICE IN JOINT SENTENCING SUBMISSIONS"
+     ]
+    },
+    {
+     "article_id": 7380,
+     "page": 4,
+     "value": [
+      "II. LANGUAGE MODELS",
+      "III. NEGLIGENT MISREPRESENTATION",
+      "A REPRESENTATION"
+     ]
+    },
+    {
+     "article_id": 7335,
+     "page": 7,
+     "value": [
+      "II. THE LA ROSE AND MATHUR DECISIONS",
+      "III. A BACKGROUNDER ON THE POSITIVE RIGHTS DISCUSS",
+      "IV. ADVANTAGES OF A POSITIVE RIGHTS FRAMING IN CLI"
+     ]
+    },
+    {
+     "article_id": 7368,
+     "page": 6,
+     "value": [
+      "II. FREE-STANDING CONSTITUTIONAL EXEMPTIONS IN THE",
+      "AFTERMATH OF FERGUSON",
+      "III. SENTENCE REDUCTION WITHIN STATUTORY PARAMETER"
+     ]
+    },
+    {
+     "article_id": 7372,
+     "page": 8,
+     "value": [
+      "II. EVOLVING ATTITUDES TOWARDS PLEA BARGAINING IN",
+      "CANADA",
+      "THE PRE-CHARTER CASELAW: JUSTICE SHOULD NOT BE"
+     ]
+    },
+    {
+     "article_id": 7378,
+     "page": 7,
+     "value": [
+      "II. ARTIFICIAL INTELLIGENCE",
+      "III. AUTOMATED DECISION MAKING AT THE FEDERAL LEVE",
+      "IV. FEDERAL OVERSIGHT: THE DIRECTIVE ON AUTOMATED"
+     ]
+    }
+   ]
+  },
+  "top_level_case": {
+   "value": "upper",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": 6,
+     "value": "II. JUSTICE IN JOINT SENTENCING SUBMISSIONS"
+    },
+    {
+     "article_id": 7380,
+     "page": 4,
+     "value": "II. LANGUAGE MODELS"
+    },
+    {
+     "article_id": 7335,
+     "page": 7,
+     "value": "II. THE LA ROSE AND MATHUR DECISIONS"
+    },
+    {
+     "article_id": 7368,
+     "page": 6,
+     "value": "II. FREE-STANDING CONSTITUTIONAL EXEMPTIONS IN THE"
+    },
+    {
+     "article_id": 7372,
+     "page": 8,
+     "value": "II. EVOLVING ATTITUDES TOWARDS PLEA BARGAINING IN"
+    },
+    {
+     "article_id": 7378,
+     "page": 7,
+     "value": "II. ARTIFICIAL INTELLIGENCE"
+    }
+   ]
+  },
+  "top_level_size_pt": {
+   "value": 11.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": 6,
+     "value": "II. JUSTICE IN JOINT SENTENCING SUBMISSIONS"
+    },
+    {
+     "article_id": 7380,
+     "page": 4,
+     "value": "II. LANGUAGE MODELS"
+    },
+    {
+     "article_id": 7335,
+     "page": 7,
+     "value": "II. THE LA ROSE AND MATHUR DECISIONS"
+    },
+    {
+     "article_id": 7368,
+     "page": 6,
+     "value": "II. FREE-STANDING CONSTITUTIONAL EXEMPTIONS IN THE"
+    },
+    {
+     "article_id": 7372,
+     "page": 8,
+     "value": "II. EVOLVING ATTITUDES TOWARDS PLEA BARGAINING IN"
+    },
+    {
+     "article_id": 7378,
+     "page": 7,
+     "value": "II. ARTIFICIAL INTELLIGENCE"
+    }
+   ]
+  },
+  "top_level_alignment": {
+   "value": "left",
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": 6,
+     "value": "II. JUSTICE IN JOINT SENTENCING SUBMISSIONS"
+    },
+    {
+     "article_id": 7380,
+     "page": 4,
+     "value": "II. LANGUAGE MODELS"
+    },
+    {
+     "article_id": 7335,
+     "page": 7,
+     "value": "II. THE LA ROSE AND MATHUR DECISIONS"
+    },
+    {
+     "article_id": 7368,
+     "page": 6,
+     "value": "II. FREE-STANDING CONSTITUTIONAL EXEMPTIONS IN THE"
+    },
+    {
+     "article_id": 7372,
+     "page": 8,
+     "value": "II. EVOLVING ATTITUDES TOWARDS PLEA BARGAINING IN"
+    },
+    {
+     "article_id": 7378,
+     "page": 7,
+     "value": "II. ARTIFICIAL INTELLIGENCE"
+    }
+   ]
+  },
+  "samples": [
+   "II. JUSTICE IN JOINT SENTENCING SUBMISSIONS",
+   "A. PLEA BARGAINING IS SENTENCING",
+   "B. SEEKING JUSTICE IN JOINT SENTENCING SUBMISSIONS",
+   "III. THE PRESENT STUDY",
+   "II. LANGUAGE MODELS",
+   "III. NEGLIGENT MISREPRESENTATION",
+   "A REPRESENTATION",
+   "MAKING A REPRESENTATION OR PERFORMING A SERVICE",
+   "II. THE LA ROSE AND MATHUR DECISIONS",
+   "III. A BACKGROUNDER ON THE POSITIVE RIGHTS DISCUSSION",
+   "IV. ADVANTAGES OF A POSITIVE RIGHTS FRAMING IN CLIMATE",
+   "CHANGE LITIGATION AND BEYOND"
+  ]
+ },
+ "block_quotes": {
+  "indent_in": {
+   "value": 0.2,
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": null,
+     "value": 0.1
+    },
+    {
+     "article_id": 7380,
+     "page": null,
+     "value": 0.2
+    },
+    {
+     "article_id": 7335,
+     "page": null,
+     "value": 0.1
+    },
+    {
+     "article_id": 7368,
+     "page": null,
+     "value": 0.1
+    },
+    {
+     "article_id": 7372,
+     "page": null,
+     "value": 0.2
+    },
+    {
+     "article_id": 7378,
+     "page": null,
+     "value": 0.3
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 10.0,
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": null,
+     "value": 10.08
+    },
+    {
+     "article_id": 7380,
+     "page": null,
+     "value": 11.04
+    },
+    {
+     "article_id": 7335,
+     "page": null,
+     "value": 10.08
+    },
+    {
+     "article_id": 7368,
+     "page": null,
+     "value": 10.08
+    },
+    {
+     "article_id": 7372,
+     "page": null,
+     "value": 10.08
+    },
+    {
+     "article_id": 7378,
+     "page": null,
+     "value": 11.04
+    }
+   ]
+  },
+  "articles_with_block_quotes": 10
+ },
+ "running_heads": {
+  "odd_pages": {
+   "value": [
+    "journal_name",
+    "volume_or_year"
+   ],
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": null,
+     "value": [
+      "UBC Law Review, Vol. 58, Iss. 1 [2025], Art. 3",
+      "UBC LAW REVIEW"
+     ]
+    },
+    {
+     "article_id": 7380,
+     "page": null,
+     "value": [
+      "UBC Law Review, Vol. 58, Iss. 2 [], Art. 7",
+      "UBC LAW REVIEW"
+     ]
+    },
+    {
+     "article_id": 7335,
+     "page": null,
+     "value": [
+      "UBC Law Review, Vol. 59, Iss. 1 [], Art. 5",
+      "UBC LAW REVIEW"
+     ]
+    },
+    {
+     "article_id": 7368,
+     "page": null,
+     "value": [
+      "UBC Law Review, Vol. 59, Iss. 1 [], Art. 3",
+      "UBC LAW REVIEW"
+     ]
+    },
+    {
+     "article_id": 7372,
+     "page": null,
+     "value": [
+      "UBC Law Review, Vol. 58, Iss. 3 [2025], Art. 4",
+      "UBC LAW REVIEW"
+     ]
+    },
+    {
+     "article_id": 7378,
+     "page": null,
+     "value": [
+      "UBC Law Review, Vol. 58, Iss. 2 [], Art. 5",
+      "UBC LAW REVIEW"
+     ]
+    }
+   ]
+  },
+  "even_pages": {
+   "value": [
+    "article_title",
+    "volume_or_year"
+   ],
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": null,
+     "value": [
+      "JaggiPlacing Expediency Before Principle: An Empirical Analysis of the",
+      "2025"
+     ]
+    },
+    {
+     "article_id": 7380,
+     "page": null,
+     "value": [
+      "WillsCare for Chatbots",
+      "2025"
+     ]
+    },
+    {
+     "article_id": 7335,
+     "page": null,
+     "value": [
+      "LindeWho's Afraid of Positive Rights?",
+      "2026"
+     ]
+    },
+    {
+     "article_id": 7368,
+     "page": null,
+     "value": [
+      "ForliniRevisiting the Remedial Spectrum",
+      "2026"
+     ]
+    },
+    {
+     "article_id": 7372,
+     "page": null,
+     "value": [
+      "PacioccoIs Plea Bargaining Justified?",
+      "2025"
+     ]
+    },
+    {
+     "article_id": 7378,
+     "page": null,
+     "value": [
+      "HendersonMaintaining Legitimacy: Artificial Intelligence, Automated Decisi",
+      "2025"
+     ]
+    }
+   ]
+  },
+  "page_number": {
+   "value": "top-inner",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 7380,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 7335,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 7368,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 7372,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 7378,
+     "page": null,
+     "value": "top-inner"
+    }
+   ]
+  }
+ },
+ "title_block": {
+  "title_size_pt": {
+   "value": 12.0,
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": 2,
+     "value": "PLACING EXPEDIENCY BEFORE PRINCIPLE: AN"
+    },
+    {
+     "article_id": 7335,
+     "page": 2,
+     "value": "WHO’S AFRAID OF POSITIVE RIGHTS?"
+    },
+    {
+     "article_id": 7368,
+     "page": 2,
+     "value": "REVISITING THE REMEDIAL SPECTRUM: A PROPOSED"
+    },
+    {
+     "article_id": 7372,
+     "page": 2,
+     "value": "(HOW) IS PLEA BARGAINING JUSTIFIED?"
+    },
+    {
+     "article_id": 7378,
+     "page": 2,
+     "value": "MAINTAINING LEGITIMACY: ARTIFICIAL INTELLIGENCE,"
+    },
+    {
+     "article_id": 7371,
+     "page": 2,
+     "value": "IS ABORIGINAL TITLE TO SUBMERGED LAND"
+    }
+   ]
+  },
+  "title_alignment": {
+   "value": "center",
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": 2,
+     "value": "PLACING EXPEDIENCY BEFORE PRINCIPLE: AN"
+    },
+    {
+     "article_id": 7335,
+     "page": 2,
+     "value": "WHO’S AFRAID OF POSITIVE RIGHTS?"
+    },
+    {
+     "article_id": 7368,
+     "page": 2,
+     "value": "REVISITING THE REMEDIAL SPECTRUM: A PROPOSED"
+    },
+    {
+     "article_id": 7372,
+     "page": 2,
+     "value": "(HOW) IS PLEA BARGAINING JUSTIFIED?"
+    },
+    {
+     "article_id": 7378,
+     "page": 2,
+     "value": "MAINTAINING LEGITIMACY: ARTIFICIAL INTELLIGENCE,"
+    },
+    {
+     "article_id": 7371,
+     "page": 2,
+     "value": "IS ABORIGINAL TITLE TO SUBMERGED LAND"
+    }
+   ]
+  },
+  "title_case": {
+   "value": "upper",
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": 2,
+     "value": "PLACING EXPEDIENCY BEFORE PRINCIPLE: AN"
+    },
+    {
+     "article_id": 7335,
+     "page": 2,
+     "value": "WHO’S AFRAID OF POSITIVE RIGHTS?"
+    },
+    {
+     "article_id": 7368,
+     "page": 2,
+     "value": "REVISITING THE REMEDIAL SPECTRUM: A PROPOSED"
+    },
+    {
+     "article_id": 7372,
+     "page": 2,
+     "value": "(HOW) IS PLEA BARGAINING JUSTIFIED?"
+    },
+    {
+     "article_id": 7378,
+     "page": 2,
+     "value": "MAINTAINING LEGITIMACY: ARTIFICIAL INTELLIGENCE,"
+    },
+    {
+     "article_id": 7371,
+     "page": 2,
+     "value": "IS ABORIGINAL TITLE TO SUBMERGED LAND"
+    }
+   ]
+  },
+  "author_case": {
+   "value": "upper",
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": 2,
+     "value": "PLACING EXPEDIENCY BEFORE PRINCIPLE: AN"
+    },
+    {
+     "article_id": 7335,
+     "page": 2,
+     "value": "WHO’S AFRAID OF POSITIVE RIGHTS?"
+    },
+    {
+     "article_id": 7368,
+     "page": 2,
+     "value": "REVISITING THE REMEDIAL SPECTRUM: A PROPOSED"
+    },
+    {
+     "article_id": 7372,
+     "page": 2,
+     "value": "(HOW) IS PLEA BARGAINING JUSTIFIED?"
+    },
+    {
+     "article_id": 7378,
+     "page": 2,
+     "value": "MAINTAINING LEGITIMACY: ARTIFICIAL INTELLIGENCE,"
+    },
+    {
+     "article_id": 7371,
+     "page": 2,
+     "value": "IS ABORIGINAL TITLE TO SUBMERGED LAND"
+    }
+   ]
+  },
+  "author_alignment": {
+   "value": "center",
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": 2,
+     "value": "PLACING EXPEDIENCY BEFORE PRINCIPLE: AN"
+    },
+    {
+     "article_id": 7335,
+     "page": 2,
+     "value": "WHO’S AFRAID OF POSITIVE RIGHTS?"
+    },
+    {
+     "article_id": 7368,
+     "page": 2,
+     "value": "REVISITING THE REMEDIAL SPECTRUM: A PROPOSED"
+    },
+    {
+     "article_id": 7372,
+     "page": 2,
+     "value": "(HOW) IS PLEA BARGAINING JUSTIFIED?"
+    },
+    {
+     "article_id": 7378,
+     "page": 2,
+     "value": "MAINTAINING LEGITIMACY: ARTIFICIAL INTELLIGENCE,"
+    },
+    {
+     "article_id": 7371,
+     "page": 2,
+     "value": "IS ABORIGINAL TITLE TO SUBMERGED LAND"
+    }
+   ]
+  },
+  "first_pdf_page_is_article": {
+   "value": false,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 7383,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 7380,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 7335,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 7368,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 7372,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 7378,
+     "page": 2,
+     "value": null
+    }
+   ]
+  }
+ },
+ "table_of_contents": {
+  "value": false,
+  "confidence": 1.0,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 7383,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 7380,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 7335,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 7368,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 7372,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 7378,
+    "page": null,
+    "value": 0
+   }
+  ]
+ },
+ "citations": {
+  "ibid_case": {
+   "value": "Ibid",
+   "counts": {
+    "Ibid": 623,
+    "ibid": 145
+   },
+   "confidence": 0.81
+  },
+  "ibid_punctuation": {
+   "value": "Ibid.",
+   "counts": {
+    "Ibid.": 121,
+    "Ibid,": 37
+   },
+   "confidence": 0.77
+  },
+  "supra_form": {
+   "value": "supra note N",
+   "counts": {
+    "supra note N": 1367,
+    "supra, note N": 0
+   },
+   "confidence": 1.0
+  },
+  "paragraph_pinpoint": {
+   "value": "at para N",
+   "counts": {
+    "at para N": 1403,
+    "at para. N": 0
+   },
+   "confidence": 1.0
+  },
+  "page_pinpoint_label": {
+   "value": "at N",
+   "counts": {
+    "at N": 1031,
+    "at p N": 0
+   },
+   "confidence": 1.0
+  },
+  "range_dash": {
+   "value": "en dash",
+   "counts": {
+    "en dash": 774,
+    "hyphen": 7
+   },
+   "confidence": 0.99
+  },
+  "emphasis_note": {
+   "value": "[emphasis added]",
+   "counts": {
+    "[emphasis added]": 41,
+    "(emphasis added)": 0
+   },
+   "confidence": 1.0
+  },
+  "section_abbreviation": {
+   "value": "s N",
+   "counts": {
+    "s N": 164,
+    "s. N": 15
+   },
+   "confidence": 0.92
+  },
+  "et_al": {
+   "value": "et al",
+   "counts": {
+    "et al": 128,
+    "et al.": 0
+   },
+   "confidence": 1.0
+  },
+  "eg": {
+   "value": "e.g.",
+   "counts": {
+    "eg": 0,
+    "e.g.": 140
+   },
+   "confidence": 1.0
+  },
+  "ie": {
+   "value": "i.e.",
+   "counts": {
+    "ie": 0,
+    "i.e.": 6
+   },
+   "confidence": 1.0
+  },
+  "see_signal_case": {
+   "value": "See",
+   "counts": {
+    "See": 935,
+    "see": 151
+   },
+   "confidence": 0.86
+  },
+  "online_angle_brackets": {
+   "value": null,
+   "counts": {
+    "online: <url>": 0,
+    "online: url": 0
+   },
+   "confidence": 0.0
+  },
+  "quotes": {
+   "value": "curly",
+   "counts": {
+    "curly": 1708,
+    "straight": 2
+   },
+   "confidence": 1.0
+  },
+  "raw_counts": {
+   "ibid_capitalized": 623,
+   "ibid_lower": 145,
+   "ibid_period": 121,
+   "ibid_comma": 37,
+   "ibid_at": 579,
+   "supra_note": 1367,
+   "supra_comma_note": 0,
+   "at_para": 1403,
+   "at_para_period": 0,
+   "at_pilcrow": 0,
+   "at_page": 1031,
+   "at_p": 0,
+   "range_endash": 774,
+   "range_hyphen": 7,
+   "emphasis_brackets": 41,
+   "emphasis_parens": 0,
+   "section_s_period": 15,
+   "section_s_bare": 164,
+   "online_colon": 0,
+   "online_angle": 0,
+   "perma": 1,
+   "et_al_period": 0,
+   "et_al_bare": 128,
+   "neutral_citation": 347,
+   "canlii": 185,
+   "eg_bare": 0,
+   "eg_period": 140,
+   "ie_bare": 0,
+   "ie_period": 6,
+   "curly_double": 1708,
+   "straight_double": 2,
+   "see_signal_upper": 935,
+   "see_signal_lower": 151
+  },
+  "footnote_lines": 6121
+ },
+ "status": "ok",
+ "candidates": 27
+}

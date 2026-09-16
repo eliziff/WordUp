@@ -1,0 +1,1569 @@
+{
+ "dataset": "CAN-BAR-REV",
+ "journal": "Canadian Bar Review",
+ "abbrev": "Can Bar Rev",
+ "platform": "OJS",
+ "years": [
+  "2025",
+  "2026"
+ ],
+ "articles_measured": [
+  28296,
+  8877,
+  8864,
+  8860,
+  28294,
+  8914,
+  8862,
+  8917,
+  8920,
+  8128
+ ],
+ "units": "points and inches; boxes measured at 144 dpi",
+ "page": {
+  "width_pt": 423,
+  "height_pt": 630,
+  "width_in": 5.88,
+  "height_in": 8.75,
+  "confidence": 1.0,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 28296,
+    "page": 1,
+    "value": {
+     "width_pt": 423,
+     "height_pt": 630
+    }
+   },
+   {
+    "article_id": 8877,
+    "page": 1,
+    "value": {
+     "width_pt": 423,
+     "height_pt": 630
+    }
+   },
+   {
+    "article_id": 8864,
+    "page": 1,
+    "value": {
+     "width_pt": 423,
+     "height_pt": 630
+    }
+   },
+   {
+    "article_id": 8860,
+    "page": 1,
+    "value": {
+     "width_pt": 423,
+     "height_pt": 630
+    }
+   },
+   {
+    "article_id": 28294,
+    "page": 1,
+    "value": {
+     "width_pt": 423,
+     "height_pt": 630
+    }
+   },
+   {
+    "article_id": 8914,
+    "page": 1,
+    "value": {
+     "width_pt": 423,
+     "height_pt": 630
+    }
+   }
+  ]
+ },
+ "margins_in": {
+  "mirrored": false,
+  "left_odd_pages": {
+   "value": 0.75,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 8877,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 8864,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 8860,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 28294,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 8914,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    }
+   ]
+  },
+  "left_even_pages": {
+   "value": 0.75,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 8877,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 8864,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 8860,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 28294,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 8914,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    }
+   ]
+  },
+  "right_odd_pages": {
+   "value": 0.7,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 8877,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 8864,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 8860,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 28294,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 8914,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    }
+   ]
+  },
+  "right_even_pages": {
+   "value": 0.7,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 8877,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 8864,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 8860,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 28294,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 8914,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    }
+   ]
+  },
+  "top": {
+   "value": 0.7,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": null,
+     "value": 0.7
+    },
+    {
+     "article_id": 8877,
+     "page": null,
+     "value": 0.7
+    },
+    {
+     "article_id": 8864,
+     "page": null,
+     "value": 0.7
+    },
+    {
+     "article_id": 8860,
+     "page": null,
+     "value": 0.7
+    },
+    {
+     "article_id": 28294,
+     "page": null,
+     "value": 0.7
+    },
+    {
+     "article_id": 8914,
+     "page": null,
+     "value": 0.7
+    }
+   ]
+  },
+  "bottom": {
+   "value": 1.2,
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": null,
+     "value": 1.5
+    },
+    {
+     "article_id": 8877,
+     "page": null,
+     "value": 1.2
+    },
+    {
+     "article_id": 8864,
+     "page": null,
+     "value": 1.5
+    },
+    {
+     "article_id": 8860,
+     "page": null,
+     "value": 1.2
+    },
+    {
+     "article_id": 28294,
+     "page": null,
+     "value": 1.05
+    },
+    {
+     "article_id": 8914,
+     "page": null,
+     "value": 1.2
+    }
+   ]
+  }
+ },
+ "body": {
+  "font": {
+   "value": "MinionPro-Regular",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": null,
+     "value": "MinionPro-Regular"
+    },
+    {
+     "article_id": 8877,
+     "page": null,
+     "value": "MinionPro-Regular"
+    },
+    {
+     "article_id": 8864,
+     "page": null,
+     "value": "MinionPro-Regular"
+    },
+    {
+     "article_id": 8860,
+     "page": null,
+     "value": "MinionPro-Regular"
+    },
+    {
+     "article_id": 28294,
+     "page": null,
+     "value": "MinionPro-Regular"
+    },
+    {
+     "article_id": 8914,
+     "page": null,
+     "value": "MinionPro-Regular"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 11.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 8877,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 8864,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 8860,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 28294,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 8914,
+     "page": null,
+     "value": 11.0
+    }
+   ]
+  },
+  "line_height_pt": {
+   "value": 15.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": null,
+     "value": 15.0
+    },
+    {
+     "article_id": 8877,
+     "page": null,
+     "value": 15.0
+    },
+    {
+     "article_id": 8864,
+     "page": null,
+     "value": 15.0
+    },
+    {
+     "article_id": 8860,
+     "page": null,
+     "value": 15.0
+    },
+    {
+     "article_id": 28294,
+     "page": null,
+     "value": 15.0
+    },
+    {
+     "article_id": 8914,
+     "page": null,
+     "value": 15.0
+    }
+   ]
+  }
+ },
+ "footnotes": {
+  "font": {
+   "value": "MinionPro-Regular",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": null,
+     "value": "MinionPro-Regular"
+    },
+    {
+     "article_id": 8877,
+     "page": null,
+     "value": "MinionPro-Regular"
+    },
+    {
+     "article_id": 8864,
+     "page": null,
+     "value": "MinionPro-Regular"
+    },
+    {
+     "article_id": 8860,
+     "page": null,
+     "value": "MinionPro-Regular"
+    },
+    {
+     "article_id": 28294,
+     "page": null,
+     "value": "MinionPro-Regular"
+    },
+    {
+     "article_id": 8914,
+     "page": null,
+     "value": "MinionPro-Regular"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 9.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 8877,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 8864,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 8860,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 28294,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 8914,
+     "page": null,
+     "value": 9.0
+    }
+   ]
+  },
+  "present": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": null,
+     "value": 884
+    },
+    {
+     "article_id": 8877,
+     "page": null,
+     "value": 531
+    },
+    {
+     "article_id": 8864,
+     "page": null,
+     "value": 653
+    },
+    {
+     "article_id": 8860,
+     "page": null,
+     "value": 446
+    },
+    {
+     "article_id": 28294,
+     "page": null,
+     "value": 317
+    },
+    {
+     "article_id": 8914,
+     "page": null,
+     "value": 435
+    }
+   ]
+  },
+  "number_style": {
+   "value": "number_gap",
+   "confidence": 0.6,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": null,
+     "value": [
+      "1 Marie-Claire Belleau est professeure titulaire à la Faculté de droit de l’Université"
+     ]
+    },
+    {
+     "article_id": 8877,
+     "page": null,
+     "value": [
+      "1 Stéphane Rousseau, Ad. E., professeur titulaire, président de l’Observatoire du"
+     ]
+    },
+    {
+     "article_id": 8864,
+     "page": null,
+     "value": [
+      "1 Marie-Claire Belleau est professeure titulaire à la Faculté de droit de l’Université"
+     ]
+    },
+    {
+     "article_id": 8860,
+     "page": null,
+     "value": [
+      "1 Faculty of Law, University of British Columbia. The author would like to thank"
+     ]
+    },
+    {
+     "article_id": 28294,
+     "page": null,
+     "value": [
+      "1 Associate Professor and University Research Chair (AI and Law), Faculty of"
+     ]
+    },
+    {
+     "article_id": 8914,
+     "page": null,
+     "value": [
+      "1 LLB (Laval), MA (Laval), LLM (Ottawa), PhD (Queen’s), microprogramme"
+     ]
+    }
+   ]
+  },
+  "indent_vs_body_in": {
+   "value": 0.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 8877,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 8864,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 8860,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 28294,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 8914,
+     "page": null,
+     "value": 0.0
+    }
+   ]
+  },
+  "first_page_author_note": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": 1,
+     "value": [
+      "Laval. Martine Valois est professeure associée à la Faculté de droit de l’Université de"
+     ]
+    },
+    {
+     "article_id": 8877,
+     "page": 1,
+     "value": [
+      "droit québécois des valeurs mobilières et directeur du Centre de droit des affaires et du"
+     ]
+    },
+    {
+     "article_id": 8864,
+     "page": 1,
+     "value": [
+      "Laval. Martine Valois est professeure associée à la Faculté de droit de l’Université de"
+     ]
+    },
+    {
+     "article_id": 8860,
+     "page": 1,
+     "value": [
+      "Christopher Waters, Wissam Aoun and the anonymous reviewers of the CBR for their"
+     ]
+    },
+    {
+     "article_id": 28294,
+     "page": 1,
+     "value": [
+      "Law, University of Calgary. 2023/24 Ontario Bar Association (OBA) Foundation Chief"
+     ]
+    },
+    {
+     "article_id": 8914,
+     "page": 1,
+     "value": [
+      "de 2e cycle en pédagogie (Montréal). Membre du Barreau du Québec et ancien avocat"
+     ]
+    }
+   ]
+  }
+ },
+ "headings": {
+  "numbering_levels": {
+   "value": null,
+   "confidence": 0.3,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": 6,
+     "value": [
+      "1.1. Les notions d’intérêt public et d’ordre publi",
+      "1.1.1. L’intérêt public",
+      "1.1.1.2. Les questions d’intérêt public"
+     ]
+    },
+    {
+     "article_id": 8877,
+     "page": 8,
+     "value": [
+      "1. Investisseurs institutionnels et gouvernance d’",
+      "1.1 Notion de gouvernance",
+      "1.1.1 Définition"
+     ]
+    },
+    {
+     "article_id": 8864,
+     "page": 6,
+     "value": [
+      "1. La réforme de la procédure civile et l’État : l",
+      "1.1. Les modes de PRD : vers une justice renouvelé",
+      "des modes privés de PRD"
+     ]
+    },
+    {
+     "article_id": 8860,
+     "page": 3,
+     "value": [
+      "I. Introduction",
+      "II. Background on Promissory Estoppel’s Inequity",
+      "Requirement"
+     ]
+    },
+    {
+     "article_id": 28294,
+     "page": 3,
+     "value": [
+      "1. Introduction",
+      "2. The Transformative World of Generative Artifici",
+      "Intelligence Technology"
+     ]
+    },
+    {
+     "article_id": 8914,
+     "page": 4,
+     "value": [
+      "1. L’approche canadienne",
+      "1.1 Les limites à la liberté d’association des mil",
+      "1.2 La relation de service entre la Couronne et le"
+     ]
+    }
+   ]
+  },
+  "top_level_case": {
+   "value": "title",
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": 6,
+     "value": "1.1. Les notions d’intérêt public et d’ordre public"
+    },
+    {
+     "article_id": 8877,
+     "page": 8,
+     "value": "1. Investisseurs institutionnels et gouvernance d’entreprise"
+    },
+    {
+     "article_id": 8864,
+     "page": 6,
+     "value": "1. La réforme de la procédure civile et l’État : l’emploi"
+    },
+    {
+     "article_id": 8860,
+     "page": 3,
+     "value": "I. Introduction"
+    },
+    {
+     "article_id": 28294,
+     "page": 3,
+     "value": "1. Introduction"
+    },
+    {
+     "article_id": 8914,
+     "page": 4,
+     "value": "1. L’approche canadienne"
+    }
+   ]
+  },
+  "top_level_size_pt": {
+   "value": 11.0,
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": 6,
+     "value": "1.1. Les notions d’intérêt public et d’ordre public"
+    },
+    {
+     "article_id": 8877,
+     "page": 8,
+     "value": "1. Investisseurs institutionnels et gouvernance d’entreprise"
+    },
+    {
+     "article_id": 8864,
+     "page": 6,
+     "value": "1. La réforme de la procédure civile et l’État : l’emploi"
+    },
+    {
+     "article_id": 8860,
+     "page": 3,
+     "value": "I. Introduction"
+    },
+    {
+     "article_id": 28294,
+     "page": 3,
+     "value": "1. Introduction"
+    },
+    {
+     "article_id": 8914,
+     "page": 4,
+     "value": "1. L’approche canadienne"
+    }
+   ]
+  },
+  "top_level_alignment": {
+   "value": "left",
+   "confidence": 0.6,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": 6,
+     "value": "1.1. Les notions d’intérêt public et d’ordre public"
+    },
+    {
+     "article_id": 8877,
+     "page": 8,
+     "value": "1. Investisseurs institutionnels et gouvernance d’entreprise"
+    },
+    {
+     "article_id": 8864,
+     "page": 6,
+     "value": "1. La réforme de la procédure civile et l’État : l’emploi"
+    },
+    {
+     "article_id": 8860,
+     "page": 3,
+     "value": "I. Introduction"
+    },
+    {
+     "article_id": 28294,
+     "page": 3,
+     "value": "1. Introduction"
+    },
+    {
+     "article_id": 8914,
+     "page": 4,
+     "value": "1. L’approche canadienne"
+    }
+   ]
+  },
+  "samples": [
+   "1.1. Les notions d’intérêt public et d’ordre public",
+   "1.1.1. L’intérêt public",
+   "1.1.1.2. Les questions d’intérêt public",
+   "1.1.2. L’ordre public",
+   "1. Investisseurs institutionnels et gouvernance d’entreprise",
+   "1.1 Notion de gouvernance",
+   "1.1.1 Définition",
+   "actionnariat dispersé",
+   "1. La réforme de la procédure civile et l’État : l’emploi",
+   "1.1. Les modes de PRD : vers une justice renouvelée",
+   "des modes privés de PRD",
+   "1.1.2. Particularités des modes de PRD"
+  ]
+ },
+ "block_quotes": {
+  "indent_in": {
+   "value": 0.25,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": null,
+     "value": 0.25
+    },
+    {
+     "article_id": 8877,
+     "page": null,
+     "value": 0.25
+    },
+    {
+     "article_id": 8864,
+     "page": null,
+     "value": 0.25
+    },
+    {
+     "article_id": 8860,
+     "page": null,
+     "value": 0.25
+    },
+    {
+     "article_id": 28294,
+     "page": null,
+     "value": 0.25
+    },
+    {
+     "article_id": 8914,
+     "page": null,
+     "value": 0.25
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 9.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": null,
+     "value": 8.8
+    },
+    {
+     "article_id": 8877,
+     "page": null,
+     "value": 8.8
+    },
+    {
+     "article_id": 8864,
+     "page": null,
+     "value": 8.8
+    },
+    {
+     "article_id": 8860,
+     "page": null,
+     "value": 8.8
+    },
+    {
+     "article_id": 28294,
+     "page": null,
+     "value": 8.8
+    },
+    {
+     "article_id": 8914,
+     "page": null,
+     "value": 8.8
+    }
+   ]
+  },
+  "articles_with_block_quotes": 10
+ },
+ "running_heads": {
+  "odd_pages": {
+   "value": null,
+   "confidence": 0.4,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": null,
+     "value": [
+      "2026]",
+      "Modes privés de prévention et de règlement des différends …"
+     ]
+    },
+    {
+     "article_id": 8877,
+     "page": null,
+     "value": [
+      "[Vol. 103",
+      "LA REVUE DU BARREAU CANADIEN"
+     ]
+    },
+    {
+     "article_id": 8864,
+     "page": null,
+     "value": [
+      "[Vol. 103",
+      "LA REVUE DU BARREAU CANADIEN"
+     ]
+    },
+    {
+     "article_id": 8860,
+     "page": null,
+     "value": [
+      "2025]",
+      "Estoppel Without Regard to Equity? The Puzzling Omission …"
+     ]
+    },
+    {
+     "article_id": 28294,
+     "page": null,
+     "value": [
+      "2026]",
+      "Ethical Framework for The Use of Generative Artificial …"
+     ]
+    },
+    {
+     "article_id": 8914,
+     "page": null,
+     "value": [
+      "2025]",
+      "Pour une association professionnelle de défense des droits …"
+     ]
+    }
+   ]
+  },
+  "even_pages": {
+   "value": [
+    "journal_name",
+    "volume_or_year"
+   ],
+   "confidence": 0.6,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": null,
+     "value": [
+      "[Vol. 104",
+      "LA REVUE DU BARREAU CANADIEN"
+     ]
+    },
+    {
+     "article_id": 8877,
+     "page": null,
+     "value": [
+      "2025]",
+      "Principes d’intendance : le moment est-il venu d’encadrer …"
+     ]
+    },
+    {
+     "article_id": 8864,
+     "page": null,
+     "value": [
+      "2025]",
+      "Les modes de prévention et de règlement des différends et l’état: …"
+     ]
+    },
+    {
+     "article_id": 8860,
+     "page": null,
+     "value": [
+      "[Vol. 103",
+      "LA REVUE DU BARREAU CANADIEN"
+     ]
+    },
+    {
+     "article_id": 28294,
+     "page": null,
+     "value": [
+      "[Vol. 104",
+      "LA REVUE DU BARREAU CANADIEN"
+     ]
+    },
+    {
+     "article_id": 8914,
+     "page": null,
+     "value": [
+      "[Vol. 103",
+      "LA REVUE DU BARREAU CANADIEN"
+     ]
+    }
+   ]
+  },
+  "page_number": {
+   "value": "top-outer",
+   "confidence": 0.6,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 8877,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 8864,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 8860,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 28294,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 8914,
+     "page": null,
+     "value": "top-outer"
+    }
+   ]
+  }
+ },
+ "title_block": {
+  "title_size_pt": {
+   "value": 13.0,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8864,
+     "page": 1,
+     "value": "LES MODES DE PRÉVENTION ET DE RÈGLEMENT"
+    },
+    {
+     "article_id": 8860,
+     "page": 1,
+     "value": "ESTOPPEL WITHOUT REGARD TO EQUITY?"
+    },
+    {
+     "article_id": 28294,
+     "page": 1,
+     "value": "ETHICAL FRAMEWORK FOR THE USE OF"
+    },
+    {
+     "article_id": 8914,
+     "page": 1,
+     "value": "POUR UNE ASSOCIATION PROFESSIONNELLE"
+    },
+    {
+     "article_id": 8862,
+     "page": 1,
+     "value": "MEASURING IMPROVEMENTS IN ACCESS TO"
+    },
+    {
+     "article_id": 8920,
+     "page": 1,
+     "value": "EMPTY VOTING AND HIDDEN OWNERSHIP IN"
+    }
+   ]
+  },
+  "title_alignment": {
+   "value": "center",
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8864,
+     "page": 1,
+     "value": "LES MODES DE PRÉVENTION ET DE RÈGLEMENT"
+    },
+    {
+     "article_id": 8860,
+     "page": 1,
+     "value": "ESTOPPEL WITHOUT REGARD TO EQUITY?"
+    },
+    {
+     "article_id": 28294,
+     "page": 1,
+     "value": "ETHICAL FRAMEWORK FOR THE USE OF"
+    },
+    {
+     "article_id": 8914,
+     "page": 1,
+     "value": "POUR UNE ASSOCIATION PROFESSIONNELLE"
+    },
+    {
+     "article_id": 8862,
+     "page": 1,
+     "value": "MEASURING IMPROVEMENTS IN ACCESS TO"
+    },
+    {
+     "article_id": 8920,
+     "page": 1,
+     "value": "EMPTY VOTING AND HIDDEN OWNERSHIP IN"
+    }
+   ]
+  },
+  "title_case": {
+   "value": "upper",
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8864,
+     "page": 1,
+     "value": "LES MODES DE PRÉVENTION ET DE RÈGLEMENT"
+    },
+    {
+     "article_id": 8860,
+     "page": 1,
+     "value": "ESTOPPEL WITHOUT REGARD TO EQUITY?"
+    },
+    {
+     "article_id": 28294,
+     "page": 1,
+     "value": "ETHICAL FRAMEWORK FOR THE USE OF"
+    },
+    {
+     "article_id": 8914,
+     "page": 1,
+     "value": "POUR UNE ASSOCIATION PROFESSIONNELLE"
+    },
+    {
+     "article_id": 8862,
+     "page": 1,
+     "value": "MEASURING IMPROVEMENTS IN ACCESS TO"
+    },
+    {
+     "article_id": 8920,
+     "page": 1,
+     "value": "EMPTY VOTING AND HIDDEN OWNERSHIP IN"
+    }
+   ]
+  },
+  "author_case": {
+   "value": "title",
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 8864,
+     "page": 1,
+     "value": "LES MODES DE PRÉVENTION ET DE RÈGLEMENT"
+    },
+    {
+     "article_id": 8860,
+     "page": 1,
+     "value": "ESTOPPEL WITHOUT REGARD TO EQUITY?"
+    },
+    {
+     "article_id": 28294,
+     "page": 1,
+     "value": "ETHICAL FRAMEWORK FOR THE USE OF"
+    },
+    {
+     "article_id": 8914,
+     "page": 1,
+     "value": "POUR UNE ASSOCIATION PROFESSIONNELLE"
+    },
+    {
+     "article_id": 8862,
+     "page": 1,
+     "value": "MEASURING IMPROVEMENTS IN ACCESS TO"
+    },
+    {
+     "article_id": 8920,
+     "page": 1,
+     "value": "EMPTY VOTING AND HIDDEN OWNERSHIP IN"
+    }
+   ]
+  },
+  "author_alignment": {
+   "value": "center",
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 8864,
+     "page": 1,
+     "value": "LES MODES DE PRÉVENTION ET DE RÈGLEMENT"
+    },
+    {
+     "article_id": 8860,
+     "page": 1,
+     "value": "ESTOPPEL WITHOUT REGARD TO EQUITY?"
+    },
+    {
+     "article_id": 28294,
+     "page": 1,
+     "value": "ETHICAL FRAMEWORK FOR THE USE OF"
+    },
+    {
+     "article_id": 8914,
+     "page": 1,
+     "value": "POUR UNE ASSOCIATION PROFESSIONNELLE"
+    },
+    {
+     "article_id": 8862,
+     "page": 1,
+     "value": "MEASURING IMPROVEMENTS IN ACCESS TO"
+    },
+    {
+     "article_id": 8920,
+     "page": 1,
+     "value": "EMPTY VOTING AND HIDDEN OWNERSHIP IN"
+    }
+   ]
+  },
+  "first_pdf_page_is_article": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 28296,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 8877,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 8864,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 8860,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 28294,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 8914,
+     "page": 1,
+     "value": null
+    }
+   ]
+  }
+ },
+ "table_of_contents": {
+  "value": true,
+  "confidence": 0.6,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 28296,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 8877,
+    "page": null,
+    "value": 33
+   },
+   {
+    "article_id": 8864,
+    "page": null,
+    "value": 21
+   },
+   {
+    "article_id": 8860,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 28294,
+    "page": null,
+    "value": 18
+   },
+   {
+    "article_id": 8914,
+    "page": null,
+    "value": 0
+   }
+  ]
+ },
+ "citations": {
+  "ibid_case": {
+   "value": "Ibid",
+   "counts": {
+    "Ibid": 493,
+    "ibid": 84
+   },
+   "confidence": 0.85
+  },
+  "ibid_punctuation": {
+   "value": "Ibid.",
+   "counts": {
+    "Ibid.": 145,
+    "Ibid,": 57
+   },
+   "confidence": 0.72
+  },
+  "supra_form": {
+   "value": "supra note N",
+   "counts": {
+    "supra note N": 871,
+    "supra, note N": 0
+   },
+   "confidence": 1.0
+  },
+  "paragraph_pinpoint": {
+   "value": "at para N",
+   "counts": {
+    "at para N": 234,
+    "at para. N": 0
+   },
+   "confidence": 1.0
+  },
+  "page_pinpoint_label": {
+   "value": "at N",
+   "counts": {
+    "at N": 379,
+    "at p N": 0
+   },
+   "confidence": 1.0
+  },
+  "range_dash": {
+   "value": "en dash",
+   "counts": {
+    "en dash": 282,
+    "hyphen": 10
+   },
+   "confidence": 0.97
+  },
+  "emphasis_note": {
+   "value": "[emphasis added]",
+   "counts": {
+    "[emphasis added]": 3,
+    "(emphasis added)": 0
+   },
+   "confidence": 1.0
+  },
+  "section_abbreviation": {
+   "value": "s N",
+   "counts": {
+    "s N": 83,
+    "s. N": 0
+   },
+   "confidence": 1.0
+  },
+  "et_al": {
+   "value": "et al",
+   "counts": {
+    "et al": 50,
+    "et al.": 0
+   },
+   "confidence": 1.0
+  },
+  "eg": {
+   "value": "e.g.",
+   "counts": {
+    "eg": 0,
+    "e.g.": 27
+   },
+   "confidence": 1.0
+  },
+  "ie": {
+   "value": "ie",
+   "counts": {
+    "ie": 4,
+    "i.e.": 0
+   },
+   "confidence": 1.0
+  },
+  "see_signal_case": {
+   "value": "See",
+   "counts": {
+    "See": 217,
+    "see": 60
+   },
+   "confidence": 0.78
+  },
+  "online_angle_brackets": {
+   "value": "online: url",
+   "counts": {
+    "online: <url>": 11,
+    "online: url": 12
+   },
+   "confidence": 0.52
+  },
+  "quotes": {
+   "value": "curly",
+   "counts": {
+    "curly": 518,
+    "straight": 0
+   },
+   "confidence": 1.0
+  },
+  "raw_counts": {
+   "ibid_capitalized": 493,
+   "ibid_lower": 84,
+   "ibid_period": 145,
+   "ibid_comma": 57,
+   "ibid_at": 222,
+   "supra_note": 871,
+   "supra_comma_note": 0,
+   "at_para": 234,
+   "at_para_period": 0,
+   "at_pilcrow": 0,
+   "at_page": 379,
+   "at_p": 0,
+   "range_endash": 282,
+   "range_hyphen": 10,
+   "emphasis_brackets": 3,
+   "emphasis_parens": 0,
+   "section_s_period": 0,
+   "section_s_bare": 83,
+   "online_colon": 12,
+   "online_angle": 11,
+   "perma": 75,
+   "et_al_period": 0,
+   "et_al_bare": 50,
+   "neutral_citation": 181,
+   "canlii": 34,
+   "eg_bare": 0,
+   "eg_period": 27,
+   "ie_bare": 4,
+   "ie_period": 0,
+   "curly_double": 518,
+   "straight_double": 0,
+   "see_signal_upper": 217,
+   "see_signal_lower": 60
+  },
+  "footnote_lines": 4650
+ },
+ "status": "ok",
+ "candidates": 36
+}

@@ -1,0 +1,1559 @@
+{
+ "dataset": "CAN-J-FAM-L",
+ "journal": "Canadian Journal of Family Law",
+ "abbrev": "Can J Fam L",
+ "platform": "digitalcommons",
+ "years": [
+  "2025",
+  "2026"
+ ],
+ "articles_measured": [
+  8205,
+  8203,
+  10273,
+  10453,
+  2183,
+  8204,
+  10433,
+  10442,
+  10296,
+  10263
+ ],
+ "units": "points and inches; boxes measured at 144 dpi",
+ "page": {
+  "width_pt": 611,
+  "height_pt": 792,
+  "width_in": 8.49,
+  "height_in": 11.0,
+  "confidence": 1.0,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 8205,
+    "page": 2,
+    "value": {
+     "width_pt": 611,
+     "height_pt": 792
+    }
+   },
+   {
+    "article_id": 8203,
+    "page": 2,
+    "value": {
+     "width_pt": 611,
+     "height_pt": 792
+    }
+   },
+   {
+    "article_id": 10273,
+    "page": 2,
+    "value": {
+     "width_pt": 611,
+     "height_pt": 792
+    }
+   },
+   {
+    "article_id": 10453,
+    "page": 2,
+    "value": {
+     "width_pt": 611,
+     "height_pt": 792
+    }
+   },
+   {
+    "article_id": 2183,
+    "page": 2,
+    "value": {
+     "width_pt": 611,
+     "height_pt": 792
+    }
+   },
+   {
+    "article_id": 8204,
+    "page": 2,
+    "value": {
+     "width_pt": 611,
+     "height_pt": 792
+    }
+   }
+  ]
+ },
+ "margins_in": {
+  "mirrored": false,
+  "left_odd_pages": {
+   "value": 2.3,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": null,
+     "value": {
+      "odd": 2.3,
+      "even": 2.3
+     }
+    },
+    {
+     "article_id": 8203,
+     "page": null,
+     "value": {
+      "odd": 2.3,
+      "even": 2.3
+     }
+    },
+    {
+     "article_id": 10273,
+     "page": null,
+     "value": {
+      "odd": 2.3,
+      "even": 2.3
+     }
+    },
+    {
+     "article_id": 10453,
+     "page": null,
+     "value": {
+      "odd": 2.3,
+      "even": 2.3
+     }
+    },
+    {
+     "article_id": 2183,
+     "page": null,
+     "value": {
+      "odd": 2.3,
+      "even": 2.3
+     }
+    },
+    {
+     "article_id": 8204,
+     "page": null,
+     "value": {
+      "odd": 2.3,
+      "even": 2.3
+     }
+    }
+   ]
+  },
+  "left_even_pages": {
+   "value": 2.3,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": null,
+     "value": {
+      "odd": 2.3,
+      "even": 2.3
+     }
+    },
+    {
+     "article_id": 8203,
+     "page": null,
+     "value": {
+      "odd": 2.3,
+      "even": 2.3
+     }
+    },
+    {
+     "article_id": 10273,
+     "page": null,
+     "value": {
+      "odd": 2.3,
+      "even": 2.3
+     }
+    },
+    {
+     "article_id": 10453,
+     "page": null,
+     "value": {
+      "odd": 2.3,
+      "even": 2.3
+     }
+    },
+    {
+     "article_id": 2183,
+     "page": null,
+     "value": {
+      "odd": 2.3,
+      "even": 2.3
+     }
+    },
+    {
+     "article_id": 8204,
+     "page": null,
+     "value": {
+      "odd": 2.3,
+      "even": 2.3
+     }
+    }
+   ]
+  },
+  "right_odd_pages": {
+   "value": 2.25,
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": null,
+     "value": {
+      "odd": 2.3,
+      "even": 2.3
+     }
+    },
+    {
+     "article_id": 8203,
+     "page": null,
+     "value": {
+      "odd": 2.25,
+      "even": 2.25
+     }
+    },
+    {
+     "article_id": 10273,
+     "page": null,
+     "value": {
+      "odd": 2.25,
+      "even": 2.25
+     }
+    },
+    {
+     "article_id": 10453,
+     "page": null,
+     "value": {
+      "odd": 2.25,
+      "even": 2.25
+     }
+    },
+    {
+     "article_id": 2183,
+     "page": null,
+     "value": {
+      "odd": 2.25,
+      "even": 2.25
+     }
+    },
+    {
+     "article_id": 8204,
+     "page": null,
+     "value": {
+      "odd": 2.25,
+      "even": 2.25
+     }
+    }
+   ]
+  },
+  "right_even_pages": {
+   "value": 2.25,
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": null,
+     "value": {
+      "odd": 2.3,
+      "even": 2.3
+     }
+    },
+    {
+     "article_id": 8203,
+     "page": null,
+     "value": {
+      "odd": 2.25,
+      "even": 2.25
+     }
+    },
+    {
+     "article_id": 10273,
+     "page": null,
+     "value": {
+      "odd": 2.25,
+      "even": 2.25
+     }
+    },
+    {
+     "article_id": 10453,
+     "page": null,
+     "value": {
+      "odd": 2.25,
+      "even": 2.25
+     }
+    },
+    {
+     "article_id": 2183,
+     "page": null,
+     "value": {
+      "odd": 2.25,
+      "even": 2.25
+     }
+    },
+    {
+     "article_id": 8204,
+     "page": null,
+     "value": {
+      "odd": 2.25,
+      "even": 2.25
+     }
+    }
+   ]
+  },
+  "top": {
+   "value": 2.2,
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": null,
+     "value": 2.2
+    },
+    {
+     "article_id": 8203,
+     "page": null,
+     "value": 2.2
+    },
+    {
+     "article_id": 10273,
+     "page": null,
+     "value": 2.2
+    },
+    {
+     "article_id": 10453,
+     "page": null,
+     "value": 2.2
+    },
+    {
+     "article_id": 2183,
+     "page": null,
+     "value": 2.15
+    },
+    {
+     "article_id": 8204,
+     "page": null,
+     "value": 2.2
+    }
+   ]
+  },
+  "bottom": {
+   "value": null,
+   "confidence": 0.3,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": null,
+     "value": 3.0
+    },
+    {
+     "article_id": 8203,
+     "page": null,
+     "value": 3.0
+    },
+    {
+     "article_id": 10273,
+     "page": null,
+     "value": 3.3
+    },
+    {
+     "article_id": 10453,
+     "page": null,
+     "value": 3.35
+    },
+    {
+     "article_id": 2183,
+     "page": null,
+     "value": 3.1
+    },
+    {
+     "article_id": 8204,
+     "page": null,
+     "value": 3.5
+    }
+   ]
+  }
+ },
+ "body": {
+  "font": {
+   "value": "TimesNewRomanPSMT",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 8203,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 10273,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 10453,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 2183,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 8204,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 12.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 8203,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 10273,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 10453,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 2183,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 8204,
+     "page": null,
+     "value": 12.0
+    }
+   ]
+  },
+  "line_height_pt": {
+   "value": 13.5,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 8203,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 10273,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 10453,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 2183,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 8204,
+     "page": null,
+     "value": 13.5
+    }
+   ]
+  }
+ },
+ "footnotes": {
+  "font": {
+   "value": "TimesNewRomanPSMT",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 8203,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 10273,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 10453,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 2183,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 8204,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 10.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": null,
+     "value": 10.1
+    },
+    {
+     "article_id": 8203,
+     "page": null,
+     "value": 10.1
+    },
+    {
+     "article_id": 10273,
+     "page": null,
+     "value": 10.1
+    },
+    {
+     "article_id": 10453,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 2183,
+     "page": null,
+     "value": 10.1
+    },
+    {
+     "article_id": 8204,
+     "page": null,
+     "value": 10.1
+    }
+   ]
+  },
+  "present": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": null,
+     "value": 157
+    },
+    {
+     "article_id": 8203,
+     "page": null,
+     "value": 409
+    },
+    {
+     "article_id": 10273,
+     "page": null,
+     "value": 502
+    },
+    {
+     "article_id": 10453,
+     "page": null,
+     "value": 493
+    },
+    {
+     "article_id": 2183,
+     "page": null,
+     "value": 260
+    },
+    {
+     "article_id": 8204,
+     "page": null,
+     "value": 455
+    }
+   ]
+  },
+  "number_style": {
+   "value": "number_gap",
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": null,
+     "value": [
+      "* Amy Fitzgerald is a Professor of Sociology and Criminology at the"
+     ]
+    },
+    {
+     "article_id": 8203,
+     "page": null,
+     "value": [
+      "1 Government of Canada, \"About Family Violence\" (17 May 2024),"
+     ]
+    },
+    {
+     "article_id": 10273,
+     "page": null,
+     "value": [
+      "* Thank you to the Survey Research Centre at the University of"
+     ]
+    },
+    {
+     "article_id": 10453,
+     "page": null,
+     "value": [
+      "* Acknowledgements – Scott Garland (1996 – 2024), a beautiful"
+     ]
+    },
+    {
+     "article_id": 2183,
+     "page": null,
+     "value": [
+      "* Associate Professor, Lincoln Alexander School of Law at Toronto"
+     ]
+    },
+    {
+     "article_id": 8204,
+     "page": null,
+     "value": [
+      "* Associate Professor, Faculty of Law, University of Ottawa, Common"
+     ]
+    }
+   ]
+  },
+  "indent_vs_body_in": {
+   "value": -0.25,
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": null,
+     "value": -0.1
+    },
+    {
+     "article_id": 8203,
+     "page": null,
+     "value": -0.25
+    },
+    {
+     "article_id": 10273,
+     "page": null,
+     "value": -0.25
+    },
+    {
+     "article_id": 10453,
+     "page": null,
+     "value": -0.1
+    },
+    {
+     "article_id": 2183,
+     "page": null,
+     "value": -0.25
+    },
+    {
+     "article_id": 8204,
+     "page": null,
+     "value": -0.25
+    }
+   ]
+  },
+  "first_page_author_note": {
+   "value": true,
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": 2,
+     "value": [
+      "* Amy Fitzgerald is a Professor of Sociology and Criminology at the"
+     ]
+    },
+    {
+     "article_id": 8203,
+     "page": 2,
+     "value": []
+    },
+    {
+     "article_id": 10273,
+     "page": 2,
+     "value": [
+      "* Thank you to the Survey Research Centre at the University of"
+     ]
+    },
+    {
+     "article_id": 10453,
+     "page": 2,
+     "value": [
+      "* Acknowledgements – Scott Garland (1996 – 2024), a beautiful"
+     ]
+    },
+    {
+     "article_id": 2183,
+     "page": 2,
+     "value": [
+      "* Associate Professor, Lincoln Alexander School of Law at Toronto"
+     ]
+    },
+    {
+     "article_id": 8204,
+     "page": 2,
+     "value": [
+      "* Associate Professor, Faculty of Law, University of Ottawa, Common"
+     ]
+    }
+   ]
+  }
+ },
+ "headings": {
+  "numbering_levels": {
+   "value": null,
+   "confidence": 0.3,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": 4,
+     "value": [
+      "I. INTRODUCTION",
+      "II. LITERATURE REVIEW",
+      "III. RESEARCH METHODS AND SAMPLE"
+     ]
+    },
+    {
+     "article_id": 8203,
+     "page": 3,
+     "value": [
+      "186 CANADIAN JOURNAL OF FAMILY LAW [VOL 36, 2025]",
+      "INTRODUCTION",
+      "188 CANADIAN JOURNAL OF FAMILY LAW [VOL 36, 2025]"
+     ]
+    },
+    {
+     "article_id": 10273,
+     "page": 3,
+     "value": [
+      "INTRODUCTION",
+      "A BRIEF HISTORY OF LAW AND",
+      "POLICYMAKING"
+     ]
+    },
+    {
+     "article_id": 10453,
+     "page": 3,
+     "value": [
+      "1. INTRODUCTION",
+      "2. THE SOCIAL AND POLITICAL CONTEXT OF",
+      "CHILD SUPPORT AND FAMILY VIOLENCE"
+     ]
+    },
+    {
+     "article_id": 2183,
+     "page": 4,
+     "value": [
+      "INTRODUCTION",
+      "THE REGULATION OF EGG FREEZING",
+      "CONSENT PROCESSES IN CANADA"
+     ]
+    },
+    {
+     "article_id": 8204,
+     "page": 3,
+     "value": [
+      "INTRODUCTION",
+      "I. CONTEXT",
+      "II. APPROACH, METHODS, AND SAMPLE"
+     ]
+    }
+   ]
+  },
+  "top_level_case": {
+   "value": "upper",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": 4,
+     "value": "I. INTRODUCTION"
+    },
+    {
+     "article_id": 8203,
+     "page": 3,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 10273,
+     "page": 3,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 10453,
+     "page": 3,
+     "value": "1. INTRODUCTION"
+    },
+    {
+     "article_id": 2183,
+     "page": 4,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 8204,
+     "page": 3,
+     "value": "INTRODUCTION"
+    }
+   ]
+  },
+  "top_level_size_pt": {
+   "value": 12.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": 4,
+     "value": "I. INTRODUCTION"
+    },
+    {
+     "article_id": 8203,
+     "page": 3,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 10273,
+     "page": 3,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 10453,
+     "page": 3,
+     "value": "1. INTRODUCTION"
+    },
+    {
+     "article_id": 2183,
+     "page": 4,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 8204,
+     "page": 3,
+     "value": "INTRODUCTION"
+    }
+   ]
+  },
+  "top_level_alignment": {
+   "value": "center",
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": 4,
+     "value": "I. INTRODUCTION"
+    },
+    {
+     "article_id": 8203,
+     "page": 3,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 10273,
+     "page": 3,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 10453,
+     "page": 3,
+     "value": "1. INTRODUCTION"
+    },
+    {
+     "article_id": 2183,
+     "page": 4,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 8204,
+     "page": 3,
+     "value": "INTRODUCTION"
+    }
+   ]
+  },
+  "samples": [
+   "I. INTRODUCTION",
+   "II. LITERATURE REVIEW",
+   "III. RESEARCH METHODS AND SAMPLE",
+   "CHARACTERISTICS",
+   "186 CANADIAN JOURNAL OF FAMILY LAW [VOL 36, 2025]",
+   "INTRODUCTION",
+   "188 CANADIAN JOURNAL OF FAMILY LAW [VOL 36, 2025]",
+   "190 CANADIAN JOURNAL OF FAMILY LAW [VOL 36, 2025]",
+   "INTRODUCTION",
+   "A BRIEF HISTORY OF LAW AND",
+   "POLICYMAKING",
+   "THE EXPLORING SURROGATES’ EXPERIENCES"
+  ]
+ },
+ "block_quotes": {
+  "indent_in": {
+   "value": 0.5,
+   "confidence": 0.83,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": null,
+     "value": 0.5
+    },
+    {
+     "article_id": 10453,
+     "page": null,
+     "value": 0.5
+    },
+    {
+     "article_id": 8204,
+     "page": null,
+     "value": 0.5
+    },
+    {
+     "article_id": 10433,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 10442,
+     "page": null,
+     "value": 0.5
+    },
+    {
+     "article_id": 10296,
+     "page": null,
+     "value": 0.5
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 12.0,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 10453,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 8204,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 10433,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 10442,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 10296,
+     "page": null,
+     "value": 12.0
+    }
+   ]
+  },
+  "articles_with_block_quotes": 6
+ },
+ "running_heads": {
+  "odd_pages": {
+   "value": [
+    "journal_name",
+    "volume_or_year"
+   ],
+   "confidence": 1.0,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": null,
+     "value": [
+      "CANADIAN JOURNAL OF FAMILY LAW [VOL 36, 2025]"
+     ]
+    },
+    {
+     "article_id": 10273,
+     "page": null,
+     "value": [
+      "CANADIAN JOURNAL OF FAMILY LAW [VOL 36, 2025]"
+     ]
+    },
+    {
+     "article_id": 10453,
+     "page": null,
+     "value": [
+      "CANADIAN JOURNAL OF FAMILY LAW [VOL 36, 2025]"
+     ]
+    },
+    {
+     "article_id": 2183,
+     "page": null,
+     "value": [
+      "regulations, guidelines, case law and Health Professions",
+      "142 CANADIAN JOURNAL OF FAMILY LAW [VOL. 36, 2025]"
+     ]
+    },
+    {
+     "article_id": 8204,
+     "page": null,
+     "value": [
+      "CANADIAN JOURNAL OF FAMILY LAW [VOL 36, 2025]"
+     ]
+    },
+    {
+     "article_id": 10433,
+     "page": null,
+     "value": [
+      "CANADIAN JOURNAL OF FAMILY LAW [VOL 36, 2025]"
+     ]
+    }
+   ]
+  },
+  "even_pages": {
+   "value": [
+    "article_title"
+   ],
+   "confidence": 0.6,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": null,
+     "value": [
+      "INTERSECTING ABUSE OF PEOPLE AND ANIMALS",
+      "INTERSECTING ABUSE OF PEOPLE AND ANIMALS 11"
+     ]
+    },
+    {
+     "article_id": 8203,
+     "page": null,
+     "value": [
+      "PRIVATE WRONGS, PUBLIC IMPACT"
+     ]
+    },
+    {
+     "article_id": 10273,
+     "page": null,
+     "value": [
+      "SORTING OUT SURROGACY"
+     ]
+    },
+    {
+     "article_id": 10453,
+     "page": null,
+     "value": [
+      "WORTHLESS? VICTIMS OF FAMILY VIOLENCE"
+     ]
+    },
+    {
+     "article_id": 2183,
+     "page": null,
+     "value": [
+      "EVALUATING ELECTIVE EGG FREEZING"
+     ]
+    },
+    {
+     "article_id": 8204,
+     "page": null,
+     "value": [
+      "SURROGACY AGENCIES IN CANADA"
+     ]
+    }
+   ]
+  },
+  "page_number": {
+   "value": "top-inner",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 8203,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 10273,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 10453,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 2183,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 8204,
+     "page": null,
+     "value": "top-inner"
+    }
+   ]
+  }
+ },
+ "title_block": {
+  "title_size_pt": {
+   "value": 14.0,
+   "confidence": 0.88,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": 2,
+     "value": "INTERSECTING ABUSE OF PEOPLE AND"
+    },
+    {
+     "article_id": 8203,
+     "page": 2,
+     "value": "PRIVATE WRONGS, PUBLIC IMPACT:"
+    },
+    {
+     "article_id": 10453,
+     "page": 2,
+     "value": "WORTHLESS? VICTIMS OF FAMILY VIOLENCE"
+    },
+    {
+     "article_id": 2183,
+     "page": 2,
+     "value": "EVALUATING ELECTIVE EGG"
+    },
+    {
+     "article_id": 10433,
+     "page": 2,
+     "value": "TESTING OUR FAITH:  WHY IT IS"
+    },
+    {
+     "article_id": 10442,
+     "page": 2,
+     "value": "FAMILY VIOLENCE AND CHILD"
+    }
+   ]
+  },
+  "title_alignment": {
+   "value": "center",
+   "confidence": 1.0,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": 2,
+     "value": "INTERSECTING ABUSE OF PEOPLE AND"
+    },
+    {
+     "article_id": 8203,
+     "page": 2,
+     "value": "PRIVATE WRONGS, PUBLIC IMPACT:"
+    },
+    {
+     "article_id": 10453,
+     "page": 2,
+     "value": "WORTHLESS? VICTIMS OF FAMILY VIOLENCE"
+    },
+    {
+     "article_id": 2183,
+     "page": 2,
+     "value": "EVALUATING ELECTIVE EGG"
+    },
+    {
+     "article_id": 10433,
+     "page": 2,
+     "value": "TESTING OUR FAITH:  WHY IT IS"
+    },
+    {
+     "article_id": 10442,
+     "page": 2,
+     "value": "FAMILY VIOLENCE AND CHILD"
+    }
+   ]
+  },
+  "title_case": {
+   "value": "upper",
+   "confidence": 1.0,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": 2,
+     "value": "INTERSECTING ABUSE OF PEOPLE AND"
+    },
+    {
+     "article_id": 8203,
+     "page": 2,
+     "value": "PRIVATE WRONGS, PUBLIC IMPACT:"
+    },
+    {
+     "article_id": 10453,
+     "page": 2,
+     "value": "WORTHLESS? VICTIMS OF FAMILY VIOLENCE"
+    },
+    {
+     "article_id": 2183,
+     "page": 2,
+     "value": "EVALUATING ELECTIVE EGG"
+    },
+    {
+     "article_id": 10433,
+     "page": 2,
+     "value": "TESTING OUR FAITH:  WHY IT IS"
+    },
+    {
+     "article_id": 10442,
+     "page": 2,
+     "value": "FAMILY VIOLENCE AND CHILD"
+    }
+   ]
+  },
+  "author_case": {
+   "value": "title",
+   "confidence": 1.0,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": 2,
+     "value": "INTERSECTING ABUSE OF PEOPLE AND"
+    },
+    {
+     "article_id": 8203,
+     "page": 2,
+     "value": "PRIVATE WRONGS, PUBLIC IMPACT:"
+    },
+    {
+     "article_id": 10453,
+     "page": 2,
+     "value": "WORTHLESS? VICTIMS OF FAMILY VIOLENCE"
+    },
+    {
+     "article_id": 2183,
+     "page": 2,
+     "value": "EVALUATING ELECTIVE EGG"
+    },
+    {
+     "article_id": 10433,
+     "page": 2,
+     "value": "TESTING OUR FAITH:  WHY IT IS"
+    },
+    {
+     "article_id": 10442,
+     "page": 2,
+     "value": "FAMILY VIOLENCE AND CHILD"
+    }
+   ]
+  },
+  "author_alignment": {
+   "value": "center",
+   "confidence": 1.0,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": 2,
+     "value": "INTERSECTING ABUSE OF PEOPLE AND"
+    },
+    {
+     "article_id": 8203,
+     "page": 2,
+     "value": "PRIVATE WRONGS, PUBLIC IMPACT:"
+    },
+    {
+     "article_id": 10453,
+     "page": 2,
+     "value": "WORTHLESS? VICTIMS OF FAMILY VIOLENCE"
+    },
+    {
+     "article_id": 2183,
+     "page": 2,
+     "value": "EVALUATING ELECTIVE EGG"
+    },
+    {
+     "article_id": 10433,
+     "page": 2,
+     "value": "TESTING OUR FAITH:  WHY IT IS"
+    },
+    {
+     "article_id": 10442,
+     "page": 2,
+     "value": "FAMILY VIOLENCE AND CHILD"
+    }
+   ]
+  },
+  "first_pdf_page_is_article": {
+   "value": false,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8205,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 8203,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 10273,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 10453,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 2183,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 8204,
+     "page": 2,
+     "value": null
+    }
+   ]
+  }
+ },
+ "table_of_contents": {
+  "value": false,
+  "confidence": 1.0,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 8205,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 8203,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 10273,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 10453,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 2183,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 8204,
+    "page": null,
+    "value": 0
+   }
+  ]
+ },
+ "citations": {
+  "ibid_case": {
+   "value": "Ibid",
+   "counts": {
+    "Ibid": 220,
+    "ibid": 9
+   },
+   "confidence": 0.96
+  },
+  "ibid_punctuation": {
+   "value": "Ibid.",
+   "counts": {
+    "Ibid.": 77,
+    "Ibid,": 21
+   },
+   "confidence": 0.79
+  },
+  "supra_form": {
+   "value": "supra note N",
+   "counts": {
+    "supra note N": 344,
+    "supra, note N": 0
+   },
+   "confidence": 1.0
+  },
+  "paragraph_pinpoint": {
+   "value": "at para N",
+   "counts": {
+    "at para N": 167,
+    "at para. N": 5
+   },
+   "confidence": 0.97
+  },
+  "page_pinpoint_label": {
+   "value": "at N",
+   "counts": {
+    "at N": 327,
+    "at p N": 0
+   },
+   "confidence": 1.0
+  },
+  "range_dash": {
+   "value": "en dash",
+   "counts": {
+    "en dash": 71,
+    "hyphen": 4
+   },
+   "confidence": 0.95
+  },
+  "emphasis_note": {
+   "value": null,
+   "counts": {
+    "[emphasis added]": 0,
+    "(emphasis added)": 0
+   },
+   "confidence": 0.0
+  },
+  "section_abbreviation": {
+   "value": "s N",
+   "counts": {
+    "s N": 129,
+    "s. N": 13
+   },
+   "confidence": 0.91
+  },
+  "et_al": {
+   "value": "et al",
+   "counts": {
+    "et al": 72,
+    "et al.": 4
+   },
+   "confidence": 0.95
+  },
+  "eg": {
+   "value": "e.g.",
+   "counts": {
+    "eg": 2,
+    "e.g.": 35
+   },
+   "confidence": 0.95
+  },
+  "ie": {
+   "value": "i.e.",
+   "counts": {
+    "ie": 0,
+    "i.e.": 3
+   },
+   "confidence": 1.0
+  },
+  "see_signal_case": {
+   "value": "See",
+   "counts": {
+    "See": 127,
+    "see": 44
+   },
+   "confidence": 0.74
+  },
+  "online_angle_brackets": {
+   "value": "online: <url>",
+   "counts": {
+    "online: <url>": 2,
+    "online: url": 2
+   },
+   "confidence": 0.5
+  },
+  "quotes": {
+   "value": "curly",
+   "counts": {
+    "curly": 845,
+    "straight": 24
+   },
+   "confidence": 0.97
+  },
+  "raw_counts": {
+   "ibid_capitalized": 220,
+   "ibid_lower": 9,
+   "ibid_period": 77,
+   "ibid_comma": 21,
+   "ibid_at": 123,
+   "supra_note": 344,
+   "supra_comma_note": 0,
+   "at_para": 167,
+   "at_para_period": 5,
+   "at_pilcrow": 0,
+   "at_page": 327,
+   "at_p": 0,
+   "range_endash": 71,
+   "range_hyphen": 4,
+   "emphasis_brackets": 0,
+   "emphasis_parens": 0,
+   "section_s_period": 13,
+   "section_s_bare": 129,
+   "online_colon": 2,
+   "online_angle": 2,
+   "perma": 1,
+   "et_al_period": 4,
+   "et_al_bare": 72,
+   "neutral_citation": 92,
+   "canlii": 13,
+   "eg_bare": 2,
+   "eg_period": 35,
+   "ie_bare": 0,
+   "ie_period": 3,
+   "curly_double": 845,
+   "straight_double": 24,
+   "see_signal_upper": 127,
+   "see_signal_lower": 44
+  },
+  "footnote_lines": 3514
+ },
+ "status": "ok",
+ "candidates": 12
+}

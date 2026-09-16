@@ -1,0 +1,1569 @@
+{
+ "dataset": "OSGOODE-HALL-LJ",
+ "journal": "Osgoode Hall Law Journal",
+ "abbrev": "Osgoode Hall LJ",
+ "platform": "Digital Commons",
+ "years": [
+  "2025",
+  "2026"
+ ],
+ "articles_measured": [
+  23240,
+  23246,
+  23271,
+  23244,
+  23245,
+  23247,
+  23255,
+  23268,
+  23243,
+  23256
+ ],
+ "units": "points and inches; boxes measured at 144 dpi",
+ "page": {
+  "width_pt": 432,
+  "height_pt": 648,
+  "width_in": 6.0,
+  "height_in": 9.0,
+  "confidence": 1.0,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 23240,
+    "page": 3,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 23246,
+    "page": 3,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 23271,
+    "page": 3,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 23244,
+    "page": 3,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 23245,
+    "page": 3,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 23247,
+    "page": 3,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   }
+  ]
+ },
+ "margins_in": {
+  "mirrored": false,
+  "left_odd_pages": {
+   "value": 0.75,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 23246,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 23271,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 23244,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 23245,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 23247,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    }
+   ]
+  },
+  "left_even_pages": {
+   "value": 0.75,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 23246,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 23271,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 23244,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 23245,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    },
+    {
+     "article_id": 23247,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    }
+   ]
+  },
+  "right_odd_pages": {
+   "value": 0.7,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 23246,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 23271,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 23244,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 23245,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 23247,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    }
+   ]
+  },
+  "right_even_pages": {
+   "value": 0.7,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 23246,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 23271,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 23244,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 23245,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 23247,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    }
+   ]
+  },
+  "top": {
+   "value": 1.15,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": null,
+     "value": 1.15
+    },
+    {
+     "article_id": 23246,
+     "page": null,
+     "value": 1.15
+    },
+    {
+     "article_id": 23271,
+     "page": null,
+     "value": 1.15
+    },
+    {
+     "article_id": 23244,
+     "page": null,
+     "value": 1.15
+    },
+    {
+     "article_id": 23245,
+     "page": null,
+     "value": 1.15
+    },
+    {
+     "article_id": 23247,
+     "page": null,
+     "value": 1.15
+    }
+   ]
+  },
+  "bottom": {
+   "value": null,
+   "confidence": 0.4,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": null,
+     "value": 2.15
+    },
+    {
+     "article_id": 23246,
+     "page": null,
+     "value": 1.7
+    },
+    {
+     "article_id": 23271,
+     "page": null,
+     "value": 2.55
+    },
+    {
+     "article_id": 23244,
+     "page": null,
+     "value": 2.0
+    },
+    {
+     "article_id": 23245,
+     "page": null,
+     "value": 1.85
+    },
+    {
+     "article_id": 23247,
+     "page": null,
+     "value": 2.3
+    }
+   ]
+  }
+ },
+ "body": {
+  "font": {
+   "value": "AGaramondPro-Regular",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 23246,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 23271,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 23244,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 23245,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 23247,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 10.5,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 23246,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 23271,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 23244,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 23245,
+     "page": null,
+     "value": 10.5
+    },
+    {
+     "article_id": 23247,
+     "page": null,
+     "value": 10.5
+    }
+   ]
+  },
+  "line_height_pt": {
+   "value": 13.5,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 23246,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 23271,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 23244,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 23245,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 23247,
+     "page": null,
+     "value": 13.5
+    }
+   ]
+  }
+ },
+ "footnotes": {
+  "font": {
+   "value": "AGaramondPro-Regular",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 23246,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 23271,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 23244,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 23245,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    },
+    {
+     "article_id": 23247,
+     "page": null,
+     "value": "AGaramondPro-Regular"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 8.5,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": null,
+     "value": 8.5
+    },
+    {
+     "article_id": 23246,
+     "page": null,
+     "value": 8.5
+    },
+    {
+     "article_id": 23271,
+     "page": null,
+     "value": 8.5
+    },
+    {
+     "article_id": 23244,
+     "page": null,
+     "value": 8.5
+    },
+    {
+     "article_id": 23245,
+     "page": null,
+     "value": 8.5
+    },
+    {
+     "article_id": 23247,
+     "page": null,
+     "value": 8.5
+    }
+   ]
+  },
+  "present": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": null,
+     "value": 922
+    },
+    {
+     "article_id": 23246,
+     "page": null,
+     "value": 550
+    },
+    {
+     "article_id": 23271,
+     "page": null,
+     "value": 1168
+    },
+    {
+     "article_id": 23244,
+     "page": null,
+     "value": 784
+    },
+    {
+     "article_id": 23245,
+     "page": null,
+     "value": 632
+    },
+    {
+     "article_id": 23247,
+     "page": null,
+     "value": 941
+    }
+   ]
+  },
+  "number_style": {
+   "value": "number_period",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": null,
+     "value": [
+      "1. Assistant Professor, Faculty of Law, Université de Montréal. Thanks to Trudo Lemmens,"
+     ]
+    },
+    {
+     "article_id": 23246,
+     "page": null,
+     "value": [
+      "1. Associate Professor, Osgoode Hall Law School, York University, Toronto. I wish to thank"
+     ]
+    },
+    {
+     "article_id": 23271,
+     "page": null,
+     "value": [
+      "1. Okanga Ogbu Okanga is an Ontario lawyer, tax law and policy researcher"
+     ]
+    },
+    {
+     "article_id": 23244,
+     "page": null,
+     "value": [
+      "1. Assistant Professor and Chair in Law, Gender & Sexual Justice, University of Windsor"
+     ]
+    },
+    {
+     "article_id": 23245,
+     "page": null,
+     "value": [
+      "1. Genevieve Renard Painter, PhD, Associate Professor, Concordia University. Sincere thanks"
+     ]
+    },
+    {
+     "article_id": 23247,
+     "page": null,
+     "value": [
+      "1. Research professor, Sandra Day O’Connor College of Law, Arizona State University (ASU)."
+     ]
+    }
+   ]
+  },
+  "indent_vs_body_in": {
+   "value": 0.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 23246,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 23271,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 23244,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 23245,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 23247,
+     "page": null,
+     "value": 0.0
+    }
+   ]
+  },
+  "first_page_author_note": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": 3,
+     "value": [
+      "Jean-Christophe Bédard-Rubin, and all anonymous reviewers for their thoughtful comments"
+     ]
+    },
+    {
+     "article_id": 23246,
+     "page": 3,
+     "value": [
+      "Sandrine Ampleman-Tremblay, Benjamin Berger, Vincent Chiao, Benjamin Ewing, Stephen"
+     ]
+    },
+    {
+     "article_id": 23271,
+     "page": 3,
+     "value": [
+      "(ogbu.okanga@dal.ca); and Kim Brooks is a Professor of Law and President,"
+     ]
+    },
+    {
+     "article_id": 23244,
+     "page": 3,
+     "value": [
+      "Faculty of Law. I am grateful to Brenda Cossman, Christopher Campbell-Duruflé,"
+     ]
+    },
+    {
+     "article_id": 23245,
+     "page": 3,
+     "value": [
+      "to Liam McHugh-Russell, Ingrid Renard, Tobias Smith, Umut Özsu, Christiane Wilke,"
+     ]
+    },
+    {
+     "article_id": 23247,
+     "page": 3,
+     "value": [
+      "Executive Director of ASU’s Academy for Justice. Associate professor (on leave) at the"
+     ]
+    }
+   ]
+  }
+ },
+ "headings": {
+  "numbering_levels": {
+   "value": [
+    "roman_period",
+    "arabic_period",
+    "alpha_period"
+   ],
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": 6,
+     "value": [
+      "I.\t LEGAL CONTEXT AND METHODOLOGICAL",
+      "CONSIDERATIONS",
+      "A.\t LEGAL CONTEXT: EXPERT EVIDENCE ADMISSIBILITY, "
+     ]
+    },
+    {
+     "article_id": 23246,
+     "page": 6,
+     "value": [
+      "I.\t RACIAL PROFILING AS JUDICIALLY DEFINED",
+      "A.\t THE ATTITUDINAL CONTROVERSY: CONSCIOUS AND UNC",
+      "B.\t HOW DEMANDING A CAUSAL CONNECTION?"
+     ]
+    },
+    {
+     "article_id": 23271,
+     "page": 10,
+     "value": [
+      "I.\t ALLOCATIVE JUSTICE: REIMAGINING INTER-NATION",
+      "EQUITY TO REDUCE FISCAL IMPERIALISM AND",
+      "STRENGTHEN THE GLOBAL FISCAL NET"
+     ]
+    },
+    {
+     "article_id": 23244,
+     "page": 8,
+     "value": [
+      "I.\t A BRIEF HISTORY OF THE LGBT PURGE",
+      "A.\t THE GOVERNMENT’S POLICIES",
+      "B.\t THE IMPACT ON VICTIMS"
+     ]
+    },
+    {
+     "article_id": 23245,
+     "page": 10,
+     "value": [
+      "I.\t CONTEXT",
+      "II.\t THE TRUDEAU LIBERALS AND THE INDIAN ACT",
+      "PROBLEM, 1968−1984"
+     ]
+    },
+    {
+     "article_id": 23247,
+     "page": 9,
+     "value": [
+      "I.\t THE PROBLEM OF RACIAL PROFILING",
+      "A.\t EMPIRICAL RESEARCH ON RACIAL PROFILING",
+      "B.\t THE CONSEQUENCES OF RACIAL PROFILING"
+     ]
+    }
+   ]
+  },
+  "top_level_case": {
+   "value": "upper",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": 6,
+     "value": "I.\t LEGAL CONTEXT AND METHODOLOGICAL"
+    },
+    {
+     "article_id": 23246,
+     "page": 6,
+     "value": "I.\t RACIAL PROFILING AS JUDICIALLY DEFINED"
+    },
+    {
+     "article_id": 23271,
+     "page": 10,
+     "value": "I.\t ALLOCATIVE JUSTICE: REIMAGINING INTER-NATION"
+    },
+    {
+     "article_id": 23244,
+     "page": 8,
+     "value": "I.\t A BRIEF HISTORY OF THE LGBT PURGE"
+    },
+    {
+     "article_id": 23245,
+     "page": 10,
+     "value": "I.\t CONTEXT"
+    },
+    {
+     "article_id": 23247,
+     "page": 9,
+     "value": "I.\t THE PROBLEM OF RACIAL PROFILING"
+    }
+   ]
+  },
+  "top_level_size_pt": {
+   "value": 12.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": 6,
+     "value": "I.\t LEGAL CONTEXT AND METHODOLOGICAL"
+    },
+    {
+     "article_id": 23246,
+     "page": 6,
+     "value": "I.\t RACIAL PROFILING AS JUDICIALLY DEFINED"
+    },
+    {
+     "article_id": 23271,
+     "page": 10,
+     "value": "I.\t ALLOCATIVE JUSTICE: REIMAGINING INTER-NATION"
+    },
+    {
+     "article_id": 23244,
+     "page": 8,
+     "value": "I.\t A BRIEF HISTORY OF THE LGBT PURGE"
+    },
+    {
+     "article_id": 23245,
+     "page": 10,
+     "value": "I.\t CONTEXT"
+    },
+    {
+     "article_id": 23247,
+     "page": 9,
+     "value": "I.\t THE PROBLEM OF RACIAL PROFILING"
+    }
+   ]
+  },
+  "top_level_alignment": {
+   "value": "left",
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": 6,
+     "value": "I.\t LEGAL CONTEXT AND METHODOLOGICAL"
+    },
+    {
+     "article_id": 23246,
+     "page": 6,
+     "value": "I.\t RACIAL PROFILING AS JUDICIALLY DEFINED"
+    },
+    {
+     "article_id": 23271,
+     "page": 10,
+     "value": "I.\t ALLOCATIVE JUSTICE: REIMAGINING INTER-NATION"
+    },
+    {
+     "article_id": 23244,
+     "page": 8,
+     "value": "I.\t A BRIEF HISTORY OF THE LGBT PURGE"
+    },
+    {
+     "article_id": 23245,
+     "page": 10,
+     "value": "I.\t CONTEXT"
+    },
+    {
+     "article_id": 23247,
+     "page": 9,
+     "value": "I.\t THE PROBLEM OF RACIAL PROFILING"
+    }
+   ]
+  },
+  "samples": [
+   "I.\t LEGAL CONTEXT AND METHODOLOGICAL",
+   "CONSIDERATIONS",
+   "A.\t LEGAL CONTEXT: EXPERT EVIDENCE ADMISSIBILITY, MEDICAL",
+   "MALPRACTICE, AND THE RULE",
+   "I.\t RACIAL PROFILING AS JUDICIALLY DEFINED",
+   "A.\t THE ATTITUDINAL CONTROVERSY: CONSCIOUS AND UNCONSCIOUS?",
+   "B.\t HOW DEMANDING A CAUSAL CONNECTION?",
+   "II.\t THE PREVALENT JUDICIAL RESPONSE: RACIAL",
+   "I.\t ALLOCATIVE JUSTICE: REIMAGINING INTER-NATION",
+   "EQUITY TO REDUCE FISCAL IMPERIALISM AND",
+   "STRENGTHEN THE GLOBAL FISCAL NET",
+   "A.\t THE SCOPE OF INTERNATIONAL TAX REDISTRIBUTIVE JUSTICE"
+  ]
+ },
+ "block_quotes": {
+  "indent_in": {
+   "value": 0.5,
+   "confidence": 0.78,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": null,
+     "value": 0.5
+    },
+    {
+     "article_id": 23246,
+     "page": null,
+     "value": 0.5
+    },
+    {
+     "article_id": 23271,
+     "page": null,
+     "value": 0.5
+    },
+    {
+     "article_id": 23244,
+     "page": null,
+     "value": 0.5
+    },
+    {
+     "article_id": 23245,
+     "page": null,
+     "value": 0.5
+    },
+    {
+     "article_id": 23255,
+     "page": null,
+     "value": 0.5
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 9.0,
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 23246,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 23271,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 23244,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 23245,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 23255,
+     "page": null,
+     "value": 9.0
+    }
+   ]
+  },
+  "articles_with_block_quotes": 9
+ },
+ "running_heads": {
+  "odd_pages": {
+   "value": [
+    "article_title",
+    "author"
+   ],
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": null,
+     "value": [
+      "Garon-Sayegh, ﻿Finessing a Medical Expert’s Qualifications"
+     ]
+    },
+    {
+     "article_id": 23246,
+     "page": null,
+     "value": [
+      "Tanguay-Renaud, ﻿Doing Away with Racial Profiling in Policing 311",
+      "Tanguay-Renaud, ﻿Doing Away with Racial Profiling in Policing 313"
+     ]
+    },
+    {
+     "article_id": 23271,
+     "page": null,
+     "value": [
+      "Okanga, Brooks, ﻿Allocative Justice 861",
+      "Okanga, Brooks, ﻿Allocative Justice 863"
+     ]
+    },
+    {
+     "article_id": 23244,
+     "page": null,
+     "value": [
+      "Del Gobbo, ﻿Reckoning with Queer History 203",
+      "Del Gobbo, ﻿Reckoning with Queer History 205"
+     ]
+    },
+    {
+     "article_id": 23245,
+     "page": null,
+     "value": [
+      "Painter, ﻿Sex Discrimination, Assimilation, and Austerity 257",
+      "Painter, ﻿Sex Discrimination, Assimilation, and Austerity 259"
+     ]
+    },
+    {
+     "article_id": 23247,
+     "page": null,
+     "value": [
+      "Skolnik, Mayrand-Thibert, Belton, ﻿The Law of Racial Profiling 367",
+      "Skolnik, Mayrand-Thibert, Belton, ﻿The Law of Racial Profiling 369"
+     ]
+    }
+   ]
+  },
+  "even_pages": {
+   "value": [
+    "journal_name",
+    "volume_or_year"
+   ],
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": null,
+     "value": [
+      "(2025) 62 OSGOODE HALL LAW JOURNAL"
+     ]
+    },
+    {
+     "article_id": 23246,
+     "page": null,
+     "value": [
+      "(2025) 62 OSGOODE HALL LAW JOURNAL"
+     ]
+    },
+    {
+     "article_id": 23271,
+     "page": null,
+     "value": [
+      "(2025) 61 OSGOODE HALL LAW JOURNAL"
+     ]
+    },
+    {
+     "article_id": 23244,
+     "page": null,
+     "value": [
+      "(2025) 62 OSGOODE HALL LAW JOURNAL"
+     ]
+    },
+    {
+     "article_id": 23245,
+     "page": null,
+     "value": [
+      "(2025) 62 OSGOODE HALL LAW JOURNAL"
+     ]
+    },
+    {
+     "article_id": 23247,
+     "page": null,
+     "value": [
+      "(2025) 62 OSGOODE HALL LAW JOURNAL"
+     ]
+    }
+   ]
+  },
+  "page_number": {
+   "value": "top-outer",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 23246,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 23271,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 23244,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 23245,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 23247,
+     "page": null,
+     "value": "top-outer"
+    }
+   ]
+  }
+ },
+ "title_block": {
+  "title_size_pt": {
+   "value": 18.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": 3,
+     "value": "Finessing a Medical Expert’s"
+    },
+    {
+     "article_id": 23246,
+     "page": 3,
+     "value": "Doing Away with Racial Profiling in"
+    },
+    {
+     "article_id": 23271,
+     "page": 3,
+     "value": "Allocative Justice as a Constraint on"
+    },
+    {
+     "article_id": 23244,
+     "page": 3,
+     "value": "Reckoning with Queer History: The"
+    },
+    {
+     "article_id": 23245,
+     "page": 3,
+     "value": "Sex Discrimination, Assimilation, and"
+    },
+    {
+     "article_id": 23247,
+     "page": 3,
+     "value": "The Law of Racial Profiling"
+    }
+   ]
+  },
+  "title_alignment": {
+   "value": "left",
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": 3,
+     "value": "Finessing a Medical Expert’s"
+    },
+    {
+     "article_id": 23246,
+     "page": 3,
+     "value": "Doing Away with Racial Profiling in"
+    },
+    {
+     "article_id": 23271,
+     "page": 3,
+     "value": "Allocative Justice as a Constraint on"
+    },
+    {
+     "article_id": 23244,
+     "page": 3,
+     "value": "Reckoning with Queer History: The"
+    },
+    {
+     "article_id": 23245,
+     "page": 3,
+     "value": "Sex Discrimination, Assimilation, and"
+    },
+    {
+     "article_id": 23247,
+     "page": 3,
+     "value": "The Law of Racial Profiling"
+    }
+   ]
+  },
+  "title_case": {
+   "value": "sentence",
+   "confidence": 0.6,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": 3,
+     "value": "Finessing a Medical Expert’s"
+    },
+    {
+     "article_id": 23246,
+     "page": 3,
+     "value": "Doing Away with Racial Profiling in"
+    },
+    {
+     "article_id": 23271,
+     "page": 3,
+     "value": "Allocative Justice as a Constraint on"
+    },
+    {
+     "article_id": 23244,
+     "page": 3,
+     "value": "Reckoning with Queer History: The"
+    },
+    {
+     "article_id": 23245,
+     "page": 3,
+     "value": "Sex Discrimination, Assimilation, and"
+    },
+    {
+     "article_id": 23247,
+     "page": 3,
+     "value": "The Law of Racial Profiling"
+    }
+   ]
+  },
+  "author_case": {
+   "value": "upper",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": 3,
+     "value": "Finessing a Medical Expert’s"
+    },
+    {
+     "article_id": 23246,
+     "page": 3,
+     "value": "Doing Away with Racial Profiling in"
+    },
+    {
+     "article_id": 23271,
+     "page": 3,
+     "value": "Allocative Justice as a Constraint on"
+    },
+    {
+     "article_id": 23244,
+     "page": 3,
+     "value": "Reckoning with Queer History: The"
+    },
+    {
+     "article_id": 23245,
+     "page": 3,
+     "value": "Sex Discrimination, Assimilation, and"
+    },
+    {
+     "article_id": 23247,
+     "page": 3,
+     "value": "The Law of Racial Profiling"
+    }
+   ]
+  },
+  "author_alignment": {
+   "value": "left",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": 3,
+     "value": "Finessing a Medical Expert’s"
+    },
+    {
+     "article_id": 23246,
+     "page": 3,
+     "value": "Doing Away with Racial Profiling in"
+    },
+    {
+     "article_id": 23271,
+     "page": 3,
+     "value": "Allocative Justice as a Constraint on"
+    },
+    {
+     "article_id": 23244,
+     "page": 3,
+     "value": "Reckoning with Queer History: The"
+    },
+    {
+     "article_id": 23245,
+     "page": 3,
+     "value": "Sex Discrimination, Assimilation, and"
+    },
+    {
+     "article_id": 23247,
+     "page": 3,
+     "value": "The Law of Racial Profiling"
+    }
+   ]
+  },
+  "first_pdf_page_is_article": {
+   "value": false,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 23240,
+     "page": 3,
+     "value": null
+    },
+    {
+     "article_id": 23246,
+     "page": 3,
+     "value": null
+    },
+    {
+     "article_id": 23271,
+     "page": 3,
+     "value": null
+    },
+    {
+     "article_id": 23244,
+     "page": 3,
+     "value": null
+    },
+    {
+     "article_id": 23245,
+     "page": 3,
+     "value": null
+    },
+    {
+     "article_id": 23247,
+     "page": 3,
+     "value": null
+    }
+   ]
+  }
+ },
+ "table_of_contents": {
+  "value": true,
+  "confidence": 0.6,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 23240,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 23246,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 23271,
+    "page": null,
+    "value": 3
+   },
+   {
+    "article_id": 23244,
+    "page": null,
+    "value": 7
+   },
+   {
+    "article_id": 23245,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 23247,
+    "page": null,
+    "value": 11
+   }
+  ]
+ },
+ "citations": {
+  "ibid_case": {
+   "value": "Ibid",
+   "counts": {
+    "Ibid": 454,
+    "ibid": 98
+   },
+   "confidence": 0.82
+  },
+  "ibid_punctuation": {
+   "value": "Ibid.",
+   "counts": {
+    "Ibid.": 122,
+    "Ibid,": 37
+   },
+   "confidence": 0.77
+  },
+  "supra_form": {
+   "value": "supra note N",
+   "counts": {
+    "supra note N": 1030,
+    "supra, note N": 0
+   },
+   "confidence": 1.0
+  },
+  "paragraph_pinpoint": {
+   "value": "at para N",
+   "counts": {
+    "at para N": 799,
+    "at para. N": 0
+   },
+   "confidence": 1.0
+  },
+  "page_pinpoint_label": {
+   "value": "at N",
+   "counts": {
+    "at N": 1187,
+    "at p N": 0
+   },
+   "confidence": 1.0
+  },
+  "range_dash": {
+   "value": "hyphen",
+   "counts": {
+    "en dash": 3,
+    "hyphen": 381
+   },
+   "confidence": 0.99
+  },
+  "emphasis_note": {
+   "value": "[emphasis added]",
+   "counts": {
+    "[emphasis added]": 41,
+    "(emphasis added)": 0
+   },
+   "confidence": 1.0
+  },
+  "section_abbreviation": {
+   "value": "s N",
+   "counts": {
+    "s N": 158,
+    "s. N": 5
+   },
+   "confidence": 0.97
+  },
+  "et_al": {
+   "value": "et al",
+   "counts": {
+    "et al": 92,
+    "et al.": 2
+   },
+   "confidence": 0.98
+  },
+  "eg": {
+   "value": "e.g.",
+   "counts": {
+    "eg": 0,
+    "e.g.": 173
+   },
+   "confidence": 1.0
+  },
+  "ie": {
+   "value": "i.e.",
+   "counts": {
+    "ie": 1,
+    "i.e.": 8
+   },
+   "confidence": 0.89
+  },
+  "see_signal_case": {
+   "value": "See",
+   "counts": {
+    "See": 1235,
+    "see": 171
+   },
+   "confidence": 0.88
+  },
+  "online_angle_brackets": {
+   "value": null,
+   "counts": {
+    "online: <url>": 0,
+    "online: url": 0
+   },
+   "confidence": 0.0
+  },
+  "quotes": {
+   "value": "curly",
+   "counts": {
+    "curly": 3075,
+    "straight": 0
+   },
+   "confidence": 1.0
+  },
+  "raw_counts": {
+   "ibid_capitalized": 454,
+   "ibid_lower": 98,
+   "ibid_period": 122,
+   "ibid_comma": 37,
+   "ibid_at": 340,
+   "supra_note": 1030,
+   "supra_comma_note": 0,
+   "at_para": 799,
+   "at_para_period": 0,
+   "at_pilcrow": 0,
+   "at_page": 1187,
+   "at_p": 0,
+   "range_endash": 3,
+   "range_hyphen": 381,
+   "emphasis_brackets": 41,
+   "emphasis_parens": 0,
+   "section_s_period": 5,
+   "section_s_bare": 158,
+   "online_colon": 0,
+   "online_angle": 0,
+   "perma": 184,
+   "et_al_period": 2,
+   "et_al_bare": 92,
+   "neutral_citation": 202,
+   "canlii": 101,
+   "eg_bare": 0,
+   "eg_period": 173,
+   "ie_bare": 1,
+   "ie_period": 8,
+   "curly_double": 3075,
+   "straight_double": 0,
+   "see_signal_upper": 1235,
+   "see_signal_lower": 171
+  },
+  "footnote_lines": 6962
+ },
+ "status": "ok",
+ "candidates": 28
+}

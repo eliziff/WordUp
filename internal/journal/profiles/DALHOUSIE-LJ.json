@@ -1,0 +1,1433 @@
+{
+ "dataset": "DALHOUSIE-LJ",
+ "journal": "Dalhousie Law Journal",
+ "abbrev": "Dal LJ",
+ "platform": "Digital Commons",
+ "years": [
+  "2025",
+  "2026"
+ ],
+ "articles_measured": [
+  13186,
+  13245,
+  13378,
+  8147,
+  13416,
+  223,
+  13182,
+  13222,
+  13393,
+  28316
+ ],
+ "units": "points and inches; boxes measured at 144 dpi",
+ "page": {
+  "width_pt": 450,
+  "height_pt": 702,
+  "width_in": 6.25,
+  "height_in": 9.75,
+  "confidence": 1.0,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 13186,
+    "page": 2,
+    "value": {
+     "width_pt": 450,
+     "height_pt": 702
+    }
+   },
+   {
+    "article_id": 13245,
+    "page": 2,
+    "value": {
+     "width_pt": 450,
+     "height_pt": 702
+    }
+   },
+   {
+    "article_id": 13378,
+    "page": 2,
+    "value": {
+     "width_pt": 450,
+     "height_pt": 702
+    }
+   },
+   {
+    "article_id": 8147,
+    "page": 2,
+    "value": {
+     "width_pt": 450,
+     "height_pt": 702
+    }
+   },
+   {
+    "article_id": 13416,
+    "page": 2,
+    "value": {
+     "width_pt": 450,
+     "height_pt": 702
+    }
+   },
+   {
+    "article_id": 223,
+    "page": 2,
+    "value": {
+     "width_pt": 450,
+     "height_pt": 702
+    }
+   }
+  ]
+ },
+ "margins_in": {
+  "mirrored": false,
+  "left_odd_pages": {
+   "value": 0.9,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 13186,
+     "page": null,
+     "value": {
+      "odd": 0.9,
+      "even": 0.9
+     }
+    },
+    {
+     "article_id": 13245,
+     "page": null,
+     "value": {
+      "odd": 0.9,
+      "even": 0.9
+     }
+    },
+    {
+     "article_id": 13378,
+     "page": null,
+     "value": {
+      "odd": 0.9,
+      "even": 0.9
+     }
+    },
+    {
+     "article_id": 8147,
+     "page": null,
+     "value": {
+      "odd": 0.9,
+      "even": 0.9
+     }
+    },
+    {
+     "article_id": 13416,
+     "page": null,
+     "value": {
+      "odd": 0.9,
+      "even": 0.9
+     }
+    },
+    {
+     "article_id": 223,
+     "page": null,
+     "value": {
+      "odd": 0.9,
+      "even": 0.9
+     }
+    }
+   ]
+  },
+  "left_even_pages": {
+   "value": 0.9,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 13186,
+     "page": null,
+     "value": {
+      "odd": 0.9,
+      "even": 0.9
+     }
+    },
+    {
+     "article_id": 13245,
+     "page": null,
+     "value": {
+      "odd": 0.9,
+      "even": 0.9
+     }
+    },
+    {
+     "article_id": 13378,
+     "page": null,
+     "value": {
+      "odd": 0.9,
+      "even": 0.9
+     }
+    },
+    {
+     "article_id": 8147,
+     "page": null,
+     "value": {
+      "odd": 0.9,
+      "even": 0.9
+     }
+    },
+    {
+     "article_id": 13416,
+     "page": null,
+     "value": {
+      "odd": 0.9,
+      "even": 0.9
+     }
+    },
+    {
+     "article_id": 223,
+     "page": null,
+     "value": {
+      "odd": 0.9,
+      "even": 0.9
+     }
+    }
+   ]
+  },
+  "right_odd_pages": {
+   "value": 0.85,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 13186,
+     "page": null,
+     "value": {
+      "odd": 0.85,
+      "even": 0.85
+     }
+    },
+    {
+     "article_id": 13245,
+     "page": null,
+     "value": {
+      "odd": 0.85,
+      "even": 0.85
+     }
+    },
+    {
+     "article_id": 13378,
+     "page": null,
+     "value": {
+      "odd": 0.85,
+      "even": 0.85
+     }
+    },
+    {
+     "article_id": 8147,
+     "page": null,
+     "value": {
+      "odd": 0.85,
+      "even": 0.85
+     }
+    },
+    {
+     "article_id": 13416,
+     "page": null,
+     "value": {
+      "odd": 0.85,
+      "even": 0.85
+     }
+    },
+    {
+     "article_id": 223,
+     "page": null,
+     "value": {
+      "odd": 0.85,
+      "even": 0.85
+     }
+    }
+   ]
+  },
+  "right_even_pages": {
+   "value": 0.85,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 13186,
+     "page": null,
+     "value": {
+      "odd": 0.85,
+      "even": 0.85
+     }
+    },
+    {
+     "article_id": 13245,
+     "page": null,
+     "value": {
+      "odd": 0.85,
+      "even": 0.85
+     }
+    },
+    {
+     "article_id": 13378,
+     "page": null,
+     "value": {
+      "odd": 0.85,
+      "even": 0.85
+     }
+    },
+    {
+     "article_id": 8147,
+     "page": null,
+     "value": {
+      "odd": 0.85,
+      "even": 0.85
+     }
+    },
+    {
+     "article_id": 13416,
+     "page": null,
+     "value": {
+      "odd": 0.85,
+      "even": 0.85
+     }
+    },
+    {
+     "article_id": 223,
+     "page": null,
+     "value": {
+      "odd": 0.85,
+      "even": 0.85
+     }
+    }
+   ]
+  },
+  "top": {
+   "value": 1.35,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 13186,
+     "page": null,
+     "value": 1.35
+    },
+    {
+     "article_id": 13245,
+     "page": null,
+     "value": 1.35
+    },
+    {
+     "article_id": 13378,
+     "page": null,
+     "value": 1.35
+    },
+    {
+     "article_id": 8147,
+     "page": null,
+     "value": 1.35
+    },
+    {
+     "article_id": 13416,
+     "page": null,
+     "value": 1.35
+    },
+    {
+     "article_id": 223,
+     "page": null,
+     "value": 1.35
+    }
+   ]
+  },
+  "bottom": {
+   "value": null,
+   "confidence": 0.3,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 13186,
+     "page": null,
+     "value": 1.75
+    },
+    {
+     "article_id": 13245,
+     "page": null,
+     "value": 1.25
+    },
+    {
+     "article_id": 13378,
+     "page": null,
+     "value": 1.5
+    },
+    {
+     "article_id": 8147,
+     "page": null,
+     "value": 1.85
+    },
+    {
+     "article_id": 13416,
+     "page": null,
+     "value": 1.35
+    },
+    {
+     "article_id": 223,
+     "page": null,
+     "value": 1.55
+    }
+   ]
+  }
+ },
+ "body": {
+  "font": {
+   "value": "TimesNewRomanPSMT",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 13186,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 13245,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 13378,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 8147,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 13416,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 223,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 11.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 13186,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 13245,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 13378,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 8147,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 13416,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 223,
+     "page": null,
+     "value": 11.0
+    }
+   ]
+  },
+  "line_height_pt": {
+   "value": 15.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 13186,
+     "page": null,
+     "value": 15.0
+    },
+    {
+     "article_id": 13245,
+     "page": null,
+     "value": 15.0
+    },
+    {
+     "article_id": 13378,
+     "page": null,
+     "value": 15.0
+    },
+    {
+     "article_id": 8147,
+     "page": null,
+     "value": 15.0
+    },
+    {
+     "article_id": 13416,
+     "page": null,
+     "value": 15.0
+    },
+    {
+     "article_id": 223,
+     "page": null,
+     "value": 15.0
+    }
+   ]
+  }
+ },
+ "footnotes": {
+  "font": {
+   "value": "TimesNewRomanPSMT",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 13186,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 13245,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 13378,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 8147,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 13416,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 223,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 8.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 13186,
+     "page": null,
+     "value": 8.0
+    },
+    {
+     "article_id": 13245,
+     "page": null,
+     "value": 8.0
+    },
+    {
+     "article_id": 13378,
+     "page": null,
+     "value": 8.0
+    },
+    {
+     "article_id": 8147,
+     "page": null,
+     "value": 8.0
+    },
+    {
+     "article_id": 13416,
+     "page": null,
+     "value": 8.0
+    },
+    {
+     "article_id": 223,
+     "page": null,
+     "value": 8.0
+    }
+   ]
+  },
+  "present": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 13186,
+     "page": null,
+     "value": 617
+    },
+    {
+     "article_id": 13245,
+     "page": null,
+     "value": 275
+    },
+    {
+     "article_id": 13378,
+     "page": null,
+     "value": 425
+    },
+    {
+     "article_id": 8147,
+     "page": null,
+     "value": 577
+    },
+    {
+     "article_id": 13416,
+     "page": null,
+     "value": 321
+    },
+    {
+     "article_id": 223,
+     "page": null,
+     "value": 368
+    }
+   ]
+  },
+  "number_style": {
+   "value": "number_period",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 13186,
+     "page": null,
+     "value": [
+      "* Mélisande Charbonneau-Gravel holds a Master’s Degree (LLM) as well as a Bachelor of Civil"
+     ]
+    },
+    {
+     "article_id": 13245,
+     "page": null,
+     "value": [
+      "* I am grateful to Christophe Lewis, whose insight and generosity as a thought partner and"
+     ]
+    },
+    {
+     "article_id": 13378,
+     "page": null,
+     "value": [
+      "* University of Toronto, Faculty of Law."
+     ]
+    },
+    {
+     "article_id": 8147,
+     "page": null,
+     "value": [
+      "* The author is an associate professor at the Faculty of Law at the University of Calgary. She owes"
+     ]
+    },
+    {
+     "article_id": 13416,
+     "page": null,
+     "value": [
+      "* Professor of Law, History and Criminology at the University of Toronto, and Editor-in-Chief of"
+     ]
+    },
+    {
+     "article_id": 223,
+     "page": null,
+     "value": [
+      "* Professor of Law, University of British Columbia. The author is grateful for the research"
+     ]
+    }
+   ]
+  },
+  "indent_vs_body_in": {
+   "value": 0.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 13186,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 13245,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 13378,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 8147,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 13416,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 223,
+     "page": null,
+     "value": 0.0
+    }
+   ]
+  },
+  "first_page_author_note": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 13186,
+     "page": 2,
+     "value": [
+      "* Mélisande Charbonneau-Gravel holds a Master’s Degree (LLM) as well as a Bachelor of Civil"
+     ]
+    },
+    {
+     "article_id": 13245,
+     "page": 2,
+     "value": [
+      "* I am grateful to Christophe Lewis, whose insight and generosity as a thought partner and"
+     ]
+    },
+    {
+     "article_id": 13378,
+     "page": 2,
+     "value": [
+      "* University of Toronto, Faculty of Law."
+     ]
+    },
+    {
+     "article_id": 8147,
+     "page": 2,
+     "value": [
+      "* The author is an associate professor at the Faculty of Law at the University of Calgary. She owes"
+     ]
+    },
+    {
+     "article_id": 13416,
+     "page": 2,
+     "value": [
+      "* Professor of Law, History and Criminology at the University of Toronto, and Editor-in-Chief of"
+     ]
+    },
+    {
+     "article_id": 223,
+     "page": 2,
+     "value": [
+      "* Professor of Law, University of British Columbia. The author is grateful for the research"
+     ]
+    }
+   ]
+  }
+ },
+ "headings": {
+  "numbering_levels": {
+   "value": null,
+   "confidence": 1.0,
+   "articles": 1,
+   "evidence": [
+    {
+     "article_id": 13393,
+     "page": 7,
+     "value": [
+      "I.\t Situating the United Nations Declaration on th"
+     ]
+    }
+   ]
+  },
+  "top_level_case": {
+   "value": null,
+   "confidence": 1.0,
+   "articles": 1,
+   "evidence": [
+    {
+     "article_id": 13393,
+     "page": 7,
+     "value": "I.\t Situating the United Nations Declaration on the Right so"
+    }
+   ]
+  },
+  "top_level_size_pt": {
+   "value": null,
+   "confidence": 1.0,
+   "articles": 1,
+   "evidence": [
+    {
+     "article_id": 13393,
+     "page": 7,
+     "value": "I.\t Situating the United Nations Declaration on the Right so"
+    }
+   ]
+  },
+  "top_level_alignment": {
+   "value": null,
+   "confidence": 1.0,
+   "articles": 1,
+   "evidence": [
+    {
+     "article_id": 13393,
+     "page": 7,
+     "value": "I.\t Situating the United Nations Declaration on the Right so"
+    }
+   ]
+  },
+  "samples": []
+ },
+ "block_quotes": {
+  "indent_in": {
+   "value": 0.25,
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 13186,
+     "page": null,
+     "value": 0.25
+    },
+    {
+     "article_id": 13245,
+     "page": null,
+     "value": 0.25
+    },
+    {
+     "article_id": 13378,
+     "page": null,
+     "value": 0.25
+    },
+    {
+     "article_id": 8147,
+     "page": null,
+     "value": 0.4
+    },
+    {
+     "article_id": 13416,
+     "page": null,
+     "value": 0.25
+    },
+    {
+     "article_id": 223,
+     "page": null,
+     "value": 0.25
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 10.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 13186,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 13245,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 13378,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 8147,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 13416,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 223,
+     "page": null,
+     "value": 10.0
+    }
+   ]
+  },
+  "articles_with_block_quotes": 10
+ },
+ "running_heads": {
+  "odd_pages": {
+   "value": [
+    "journal_name"
+   ],
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 13186,
+     "page": null,
+     "value": [
+      "1.\t Healthcare under section 7 of the Charter",
+      "632  The Dalhousie Law Journal"
+     ]
+    },
+    {
+     "article_id": 13245,
+     "page": null,
+     "value": [
+      "856  The Dalhousie Law Journal",
+      "858  The Dalhousie Law Journal"
+     ]
+    },
+    {
+     "article_id": 13378,
+     "page": null,
+     "value": [
+      "292  The Dalhousie Law Journal",
+      "294  The Dalhousie Law Journal"
+     ]
+    },
+    {
+     "article_id": 8147,
+     "page": null,
+     "value": [
+      "136  The Dalhousie Law Journal",
+      "138  The Dalhousie Law Journal"
+     ]
+    },
+    {
+     "article_id": 13416,
+     "page": null,
+     "value": [
+      "436  The Dalhousie Law Journal",
+      "438  The Dalhousie Law Journal"
+     ]
+    },
+    {
+     "article_id": 223,
+     "page": null,
+     "value": [
+      "560  The Dalhousie Law Journal",
+      "562  The Dalhousie Law Journal"
+     ]
+    }
+   ]
+  },
+  "even_pages": {
+   "value": [
+    "article_title"
+   ],
+   "confidence": 0.6,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 13186,
+     "page": null,
+     "value": [
+      "Healthcare Discrimination under the Canadian Charter",
+      "of Rights and Freedoms"
+     ]
+    },
+    {
+     "article_id": 13245,
+     "page": null,
+     "value": [
+      "The  Criminalization of Black Friendship, Kinship and",
+      "Belonging"
+     ]
+    },
+    {
+     "article_id": 13378,
+     "page": null,
+     "value": [
+      "Don’t Mess with Mr. In-Between"
+     ]
+    },
+    {
+     "article_id": 8147,
+     "page": null,
+     "value": [
+      "Re-Reading Power Inside the AML-CTF Regime"
+     ]
+    },
+    {
+     "article_id": 13416,
+     "page": null,
+     "value": [
+      "Property Rights and the Public Interest:  Why",
+      "Annapolis Group v HRM is Wrongly Decided"
+     ]
+    },
+    {
+     "article_id": 223,
+     "page": null,
+     "value": [
+      "Sauce for the Gander:  The False Symmetry of Myths and",
+      "Stereotypes Against the Accused in Sexual Assault Trials"
+     ]
+    }
+   ]
+  },
+  "page_number": {
+   "value": "top-inner",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 13186,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 13245,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 13378,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 8147,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 13416,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 223,
+     "page": null,
+     "value": "top-inner"
+    }
+   ]
+  }
+ },
+ "title_block": {
+  "title_size_pt": {
+   "value": 11.0,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 13245,
+     "page": 2,
+     "value": "The Criminalization of Black Friendship,"
+    },
+    {
+     "article_id": 13378,
+     "page": 2,
+     "value": "Don’t Mess with Mr. In-Between"
+    },
+    {
+     "article_id": 8147,
+     "page": 2,
+     "value": "Re-Reading Power Inside the AML-CTF"
+    },
+    {
+     "article_id": 223,
+     "page": 2,
+     "value": "Sauce for the Gander: The False Symmetry"
+    },
+    {
+     "article_id": 13222,
+     "page": 2,
+     "value": "Seeing is Believing:  Identifying the “Ideal"
+    },
+    {
+     "article_id": 28316,
+     "page": 2,
+     "value": "Mandatory Minimum Sentences After R v Hill:"
+    }
+   ]
+  },
+  "title_alignment": {
+   "value": "left",
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 13245,
+     "page": 2,
+     "value": "The Criminalization of Black Friendship,"
+    },
+    {
+     "article_id": 13378,
+     "page": 2,
+     "value": "Don’t Mess with Mr. In-Between"
+    },
+    {
+     "article_id": 8147,
+     "page": 2,
+     "value": "Re-Reading Power Inside the AML-CTF"
+    },
+    {
+     "article_id": 223,
+     "page": 2,
+     "value": "Sauce for the Gander: The False Symmetry"
+    },
+    {
+     "article_id": 13222,
+     "page": 2,
+     "value": "Seeing is Believing:  Identifying the “Ideal"
+    },
+    {
+     "article_id": 28316,
+     "page": 2,
+     "value": "Mandatory Minimum Sentences After R v Hill:"
+    }
+   ]
+  },
+  "title_case": {
+   "value": "title",
+   "confidence": 0.67,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 13245,
+     "page": 2,
+     "value": "The Criminalization of Black Friendship,"
+    },
+    {
+     "article_id": 13378,
+     "page": 2,
+     "value": "Don’t Mess with Mr. In-Between"
+    },
+    {
+     "article_id": 8147,
+     "page": 2,
+     "value": "Re-Reading Power Inside the AML-CTF"
+    },
+    {
+     "article_id": 223,
+     "page": 2,
+     "value": "Sauce for the Gander: The False Symmetry"
+    },
+    {
+     "article_id": 13222,
+     "page": 2,
+     "value": "Seeing is Believing:  Identifying the “Ideal"
+    },
+    {
+     "article_id": 28316,
+     "page": 2,
+     "value": "Mandatory Minimum Sentences After R v Hill:"
+    }
+   ]
+  },
+  "author_case": {
+   "value": null,
+   "confidence": 0.0,
+   "articles": 0,
+   "evidence": [
+    {
+     "article_id": 13245,
+     "page": 2,
+     "value": "The Criminalization of Black Friendship,"
+    },
+    {
+     "article_id": 13378,
+     "page": 2,
+     "value": "Don’t Mess with Mr. In-Between"
+    },
+    {
+     "article_id": 8147,
+     "page": 2,
+     "value": "Re-Reading Power Inside the AML-CTF"
+    },
+    {
+     "article_id": 223,
+     "page": 2,
+     "value": "Sauce for the Gander: The False Symmetry"
+    },
+    {
+     "article_id": 13222,
+     "page": 2,
+     "value": "Seeing is Believing:  Identifying the “Ideal"
+    },
+    {
+     "article_id": 28316,
+     "page": 2,
+     "value": "Mandatory Minimum Sentences After R v Hill:"
+    }
+   ]
+  },
+  "author_alignment": {
+   "value": null,
+   "confidence": 0.0,
+   "articles": 0,
+   "evidence": [
+    {
+     "article_id": 13245,
+     "page": 2,
+     "value": "The Criminalization of Black Friendship,"
+    },
+    {
+     "article_id": 13378,
+     "page": 2,
+     "value": "Don’t Mess with Mr. In-Between"
+    },
+    {
+     "article_id": 8147,
+     "page": 2,
+     "value": "Re-Reading Power Inside the AML-CTF"
+    },
+    {
+     "article_id": 223,
+     "page": 2,
+     "value": "Sauce for the Gander: The False Symmetry"
+    },
+    {
+     "article_id": 13222,
+     "page": 2,
+     "value": "Seeing is Believing:  Identifying the “Ideal"
+    },
+    {
+     "article_id": 28316,
+     "page": 2,
+     "value": "Mandatory Minimum Sentences After R v Hill:"
+    }
+   ]
+  },
+  "first_pdf_page_is_article": {
+   "value": false,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 13186,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 13245,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 13378,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 8147,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 13416,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 223,
+     "page": 2,
+     "value": null
+    }
+   ]
+  }
+ },
+ "table_of_contents": {
+  "value": false,
+  "confidence": 1.0,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 13186,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 13245,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 13378,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 8147,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 13416,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 223,
+    "page": null,
+    "value": 0
+   }
+  ]
+ },
+ "citations": {
+  "ibid_case": {
+   "value": "Ibid",
+   "counts": {
+    "Ibid": 459,
+    "ibid": 43
+   },
+   "confidence": 0.91
+  },
+  "ibid_punctuation": {
+   "value": "Ibid.",
+   "counts": {
+    "Ibid.": 105,
+    "Ibid,": 24
+   },
+   "confidence": 0.81
+  },
+  "supra_form": {
+   "value": "supra note N",
+   "counts": {
+    "supra note N": 776,
+    "supra, note N": 0
+   },
+   "confidence": 1.0
+  },
+  "paragraph_pinpoint": {
+   "value": "at para N",
+   "counts": {
+    "at para N": 666,
+    "at para. N": 0
+   },
+   "confidence": 1.0
+  },
+  "page_pinpoint_label": {
+   "value": "at N",
+   "counts": {
+    "at N": 682,
+    "at p N": 2
+   },
+   "confidence": 1.0
+  },
+  "range_dash": {
+   "value": "hyphen",
+   "counts": {
+    "en dash": 25,
+    "hyphen": 159
+   },
+   "confidence": 0.86
+  },
+  "emphasis_note": {
+   "value": "[emphasis added]",
+   "counts": {
+    "[emphasis added]": 24,
+    "(emphasis added)": 0
+   },
+   "confidence": 1.0
+  },
+  "section_abbreviation": {
+   "value": "s N",
+   "counts": {
+    "s N": 80,
+    "s. N": 5
+   },
+   "confidence": 0.94
+  },
+  "et_al": {
+   "value": "et al",
+   "counts": {
+    "et al": 103,
+    "et al.": 1
+   },
+   "confidence": 0.99
+  },
+  "eg": {
+   "value": "e.g.",
+   "counts": {
+    "eg": 0,
+    "e.g.": 78
+   },
+   "confidence": 1.0
+  },
+  "ie": {
+   "value": "i.e.",
+   "counts": {
+    "ie": 0,
+    "i.e.": 1
+   },
+   "confidence": 1.0
+  },
+  "see_signal_case": {
+   "value": "See",
+   "counts": {
+    "See": 453,
+    "see": 100
+   },
+   "confidence": 0.82
+  },
+  "online_angle_brackets": {
+   "value": "online: url",
+   "counts": {
+    "online: <url>": 0,
+    "online: url": 1
+   },
+   "confidence": 1.0
+  },
+  "quotes": {
+   "value": "curly",
+   "counts": {
+    "curly": 1621,
+    "straight": 0
+   },
+   "confidence": 1.0
+  },
+  "raw_counts": {
+   "ibid_capitalized": 459,
+   "ibid_lower": 43,
+   "ibid_period": 105,
+   "ibid_comma": 24,
+   "ibid_at": 367,
+   "supra_note": 776,
+   "supra_comma_note": 0,
+   "at_para": 666,
+   "at_para_period": 0,
+   "at_pilcrow": 0,
+   "at_page": 682,
+   "at_p": 2,
+   "range_endash": 25,
+   "range_hyphen": 159,
+   "emphasis_brackets": 24,
+   "emphasis_parens": 0,
+   "section_s_period": 5,
+   "section_s_bare": 80,
+   "online_colon": 1,
+   "online_angle": 0,
+   "perma": 91,
+   "et_al_period": 1,
+   "et_al_bare": 103,
+   "neutral_citation": 304,
+   "canlii": 98,
+   "eg_bare": 0,
+   "eg_period": 78,
+   "ie_bare": 0,
+   "ie_period": 1,
+   "curly_double": 1621,
+   "straight_double": 0,
+   "see_signal_upper": 453,
+   "see_signal_lower": 100
+  },
+  "footnote_lines": 3879
+ },
+ "status": "ok",
+ "candidates": 39
+}

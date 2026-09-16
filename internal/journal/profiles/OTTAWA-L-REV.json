@@ -1,0 +1,1555 @@
+{
+ "dataset": "OTTAWA-L-REV",
+ "journal": "Ottawa Law Review",
+ "abbrev": "Ottawa L Rev",
+ "platform": "olr",
+ "years": [
+  "2025",
+  "2026"
+ ],
+ "articles_measured": [
+  14285,
+  26693,
+  14291,
+  28309,
+  14280,
+  14302,
+  14273,
+  28310,
+  14276,
+  28311
+ ],
+ "units": "points and inches; boxes measured at 144 dpi",
+ "page": {
+  "width_pt": 432,
+  "height_pt": 648,
+  "width_in": 6.0,
+  "height_in": 9.0,
+  "confidence": 1.0,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 14285,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 26693,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 14291,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 28309,
+    "page": 5,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 14280,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 14302,
+    "page": 3,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   }
+  ]
+ },
+ "margins_in": {
+  "mirrored": false,
+  "left_odd_pages": {
+   "value": 0.75,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.65
+     }
+    },
+    {
+     "article_id": 26693,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.65
+     }
+    },
+    {
+     "article_id": 14291,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.65
+     }
+    },
+    {
+     "article_id": 28309,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.65
+     }
+    },
+    {
+     "article_id": 14280,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.65
+     }
+    },
+    {
+     "article_id": 14302,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.65
+     }
+    }
+   ]
+  },
+  "left_even_pages": {
+   "value": 0.65,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.65
+     }
+    },
+    {
+     "article_id": 26693,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.65
+     }
+    },
+    {
+     "article_id": 14291,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.65
+     }
+    },
+    {
+     "article_id": 28309,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.65
+     }
+    },
+    {
+     "article_id": 14280,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.65
+     }
+    },
+    {
+     "article_id": 14302,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.65
+     }
+    }
+   ]
+  },
+  "right_odd_pages": {
+   "value": 0.65,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": null,
+     "value": {
+      "odd": 0.65,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 26693,
+     "page": null,
+     "value": {
+      "odd": 0.65,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 14291,
+     "page": null,
+     "value": {
+      "odd": 0.65,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 28309,
+     "page": null,
+     "value": {
+      "odd": 0.65,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 14280,
+     "page": null,
+     "value": {
+      "odd": 0.65,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 14302,
+     "page": null,
+     "value": {
+      "odd": 0.65,
+      "even": 0.7
+     }
+    }
+   ]
+  },
+  "right_even_pages": {
+   "value": 0.7,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": null,
+     "value": {
+      "odd": 0.65,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 26693,
+     "page": null,
+     "value": {
+      "odd": 0.65,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 14291,
+     "page": null,
+     "value": {
+      "odd": 0.65,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 28309,
+     "page": null,
+     "value": {
+      "odd": 0.65,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 14280,
+     "page": null,
+     "value": {
+      "odd": 0.65,
+      "even": 0.7
+     }
+    },
+    {
+     "article_id": 14302,
+     "page": null,
+     "value": {
+      "odd": 0.65,
+      "even": 0.7
+     }
+    }
+   ]
+  },
+  "top": {
+   "value": 0.8,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": null,
+     "value": 0.8
+    },
+    {
+     "article_id": 26693,
+     "page": null,
+     "value": 0.8
+    },
+    {
+     "article_id": 14291,
+     "page": null,
+     "value": 0.8
+    },
+    {
+     "article_id": 28309,
+     "page": null,
+     "value": 0.8
+    },
+    {
+     "article_id": 14280,
+     "page": null,
+     "value": 0.8
+    },
+    {
+     "article_id": 14302,
+     "page": null,
+     "value": 0.8
+    }
+   ]
+  },
+  "bottom": {
+   "value": null,
+   "confidence": 0.3,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": null,
+     "value": 1.85
+    },
+    {
+     "article_id": 26693,
+     "page": null,
+     "value": 1.7
+    },
+    {
+     "article_id": 14291,
+     "page": null,
+     "value": 1.55
+    },
+    {
+     "article_id": 28309,
+     "page": null,
+     "value": 1.85
+    },
+    {
+     "article_id": 14280,
+     "page": null,
+     "value": 1.85
+    },
+    {
+     "article_id": 14302,
+     "page": null,
+     "value": 1.7
+    }
+   ]
+  }
+ },
+ "body": {
+  "font": {
+   "value": "FreightTextProBook-Regul",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": null,
+     "value": "FreightTextProBook-Regul"
+    },
+    {
+     "article_id": 26693,
+     "page": null,
+     "value": "FreightTextProBook-Regul"
+    },
+    {
+     "article_id": 14291,
+     "page": null,
+     "value": "FreightTextProBook-Regul"
+    },
+    {
+     "article_id": 28309,
+     "page": null,
+     "value": "FreightTextProBook-Regul"
+    },
+    {
+     "article_id": 14280,
+     "page": null,
+     "value": "FreightTextProBook-Regul"
+    },
+    {
+     "article_id": 14302,
+     "page": null,
+     "value": "FreightTextProBook-Regul"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 11.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 26693,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 14291,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 28309,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 14280,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 14302,
+     "page": null,
+     "value": 11.0
+    }
+   ]
+  },
+  "line_height_pt": {
+   "value": 13.5,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 26693,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 14291,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 28309,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 14280,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 14302,
+     "page": null,
+     "value": 13.5
+    }
+   ]
+  }
+ },
+ "footnotes": {
+  "font": {
+   "value": "FreightTextProBook-Regul",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": null,
+     "value": "FreightTextProBook-Regul"
+    },
+    {
+     "article_id": 26693,
+     "page": null,
+     "value": "FreightTextProBook-Regul"
+    },
+    {
+     "article_id": 14291,
+     "page": null,
+     "value": "FreightTextProBook-Regul"
+    },
+    {
+     "article_id": 28309,
+     "page": null,
+     "value": "FreightTextProBook-Regul"
+    },
+    {
+     "article_id": 14280,
+     "page": null,
+     "value": "FreightTextProBook-Regul"
+    },
+    {
+     "article_id": 14302,
+     "page": null,
+     "value": "FreightTextProBook-Regul"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 8.5,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": null,
+     "value": 8.5
+    },
+    {
+     "article_id": 26693,
+     "page": null,
+     "value": 8.5
+    },
+    {
+     "article_id": 14291,
+     "page": null,
+     "value": 8.5
+    },
+    {
+     "article_id": 28309,
+     "page": null,
+     "value": 8.5
+    },
+    {
+     "article_id": 14280,
+     "page": null,
+     "value": 8.5
+    },
+    {
+     "article_id": 14302,
+     "page": null,
+     "value": 8.5
+    }
+   ]
+  },
+  "present": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": null,
+     "value": 866
+    },
+    {
+     "article_id": 26693,
+     "page": null,
+     "value": 795
+    },
+    {
+     "article_id": 14291,
+     "page": null,
+     "value": 515
+    },
+    {
+     "article_id": 28309,
+     "page": null,
+     "value": 779
+    },
+    {
+     "article_id": 14280,
+     "page": null,
+     "value": 635
+    },
+    {
+     "article_id": 14302,
+     "page": null,
+     "value": 491
+    }
+   ]
+  },
+  "number_style": {
+   "value": "number_gap",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": null,
+     "value": [
+      "* Efrat Arbel is an Associate Professor at the University of British Columbia Allard School"
+     ]
+    },
+    {
+     "article_id": 26693,
+     "page": null,
+     "value": [
+      "* Ph.D. student, University of Victoria, Faculty of Law. The author is supported in part by"
+     ]
+    },
+    {
+     "article_id": 14291,
+     "page": null,
+     "value": [
+      "* Adelina Iftene is an Associate Professor of Law and the Criminal Justice Program Coordin­"
+     ]
+    },
+    {
+     "article_id": 28309,
+     "page": null,
+     "value": [
+      "* B.Soc.Sc. (Ottawa), B.C.L./J.D. Candidate (McGill), McCall MacBain Scholar. My gratitude"
+     ]
+    },
+    {
+     "article_id": 14280,
+     "page": null,
+     "value": [
+      "* B.A., LL.B., LL.M. (Ottawa), DEUF (Jean Moulin Lyon III). Me Soublière, membre du Bar­"
+     ]
+    },
+    {
+     "article_id": 14302,
+     "page": null,
+     "value": [
+      "* Natasha Jaczek is a lawyer and PhD candidate at the University of Ottawa Faculty of Law."
+     ]
+    }
+   ]
+  },
+  "indent_vs_body_in": {
+   "value": -0.05,
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": null,
+     "value": -0.05
+    },
+    {
+     "article_id": 26693,
+     "page": null,
+     "value": -0.1
+    },
+    {
+     "article_id": 14291,
+     "page": null,
+     "value": -0.05
+    },
+    {
+     "article_id": 28309,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 14280,
+     "page": null,
+     "value": -0.05
+    },
+    {
+     "article_id": 14302,
+     "page": null,
+     "value": -0.1
+    }
+   ]
+  },
+  "first_page_author_note": {
+   "value": false,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 26693,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 14291,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 28309,
+     "page": 5,
+     "value": []
+    },
+    {
+     "article_id": 14280,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 14302,
+     "page": 3,
+     "value": []
+    }
+   ]
+  }
+ },
+ "headings": {
+  "numbering_levels": {
+   "value": [
+    "roman_period",
+    "alpha_period",
+    "unnumbered"
+   ],
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": 3,
+     "value": [
+      "CONTENTS",
+      "I.\t INTRODUCTION",
+      "II.\t IMMIGRATION DETENTION IN CANADA: AN OVERVIEW"
+     ]
+    },
+    {
+     "article_id": 26693,
+     "page": 2,
+     "value": [
+      "CONTENTS",
+      "I.\t INTRODUCTION",
+      "II.\t THE CLIMATE PROBLEM AND CANADA’S RESPONSE"
+     ]
+    },
+    {
+     "article_id": 14291,
+     "page": 3,
+     "value": [
+      "CONTENTS",
+      "I.\t INTRODUCTION",
+      "II.\t BACKGROUND FOR THE STUDY"
+     ]
+    },
+    {
+     "article_id": 28309,
+     "page": 7,
+     "value": [
+      "CONTENTS",
+      "I.\t INTRODUCTION",
+      "II.\t THE NOTWITHSTANDING CLAUSE’S PAST AND PRESENT"
+     ]
+    },
+    {
+     "article_id": 14280,
+     "page": 2,
+     "value": [
+      "TABLE DES MATIÈRES",
+      "INTRODUCTION1",
+      "I.\t LE CONTEXTE"
+     ]
+    },
+    {
+     "article_id": 14302,
+     "page": 4,
+     "value": [
+      "CONTENTS",
+      "I.\t INTRODUCTION",
+      "II.\t CONTEXT"
+     ]
+    }
+   ]
+  },
+  "top_level_case": {
+   "value": "upper",
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": 5,
+     "value": "I.\t INTRODUCTION"
+    },
+    {
+     "article_id": 26693,
+     "page": 3,
+     "value": "I.\t INTRODUCTION"
+    },
+    {
+     "article_id": 14291,
+     "page": 5,
+     "value": "I.\t INTRODUCTION"
+    },
+    {
+     "article_id": 28309,
+     "page": 10,
+     "value": "I.\t INTRODUCTION"
+    },
+    {
+     "article_id": 14280,
+     "page": 3,
+     "value": "INTRODUCTION1"
+    },
+    {
+     "article_id": 14302,
+     "page": 5,
+     "value": "I.\t INTRODUCTION"
+    }
+   ]
+  },
+  "top_level_size_pt": {
+   "value": 11.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": 5,
+     "value": "I.\t INTRODUCTION"
+    },
+    {
+     "article_id": 26693,
+     "page": 3,
+     "value": "I.\t INTRODUCTION"
+    },
+    {
+     "article_id": 14291,
+     "page": 5,
+     "value": "I.\t INTRODUCTION"
+    },
+    {
+     "article_id": 28309,
+     "page": 10,
+     "value": "I.\t INTRODUCTION"
+    },
+    {
+     "article_id": 14280,
+     "page": 3,
+     "value": "INTRODUCTION1"
+    },
+    {
+     "article_id": 14302,
+     "page": 5,
+     "value": "I.\t INTRODUCTION"
+    }
+   ]
+  },
+  "top_level_alignment": {
+   "value": "left",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": 5,
+     "value": "I.\t INTRODUCTION"
+    },
+    {
+     "article_id": 26693,
+     "page": 3,
+     "value": "I.\t INTRODUCTION"
+    },
+    {
+     "article_id": 14291,
+     "page": 5,
+     "value": "I.\t INTRODUCTION"
+    },
+    {
+     "article_id": 28309,
+     "page": 10,
+     "value": "I.\t INTRODUCTION"
+    },
+    {
+     "article_id": 14280,
+     "page": 3,
+     "value": "INTRODUCTION1"
+    },
+    {
+     "article_id": 14302,
+     "page": 5,
+     "value": "I.\t INTRODUCTION"
+    }
+   ]
+  },
+  "samples": [
+   "CONTENTS",
+   "I.\t INTRODUCTION",
+   "II.\t IMMIGRATION DETENTION IN CANADA: AN OVERVIEW",
+   "III.\tTHE IMPACT OF COVID-19 ON IMMIGRATION DETENTION",
+   "CONTENTS",
+   "I.\t INTRODUCTION",
+   "II.\t THE CLIMATE PROBLEM AND CANADA’S RESPONSE",
+   "III.\tTHE LA ROSE AND MATHUR DECISIONS",
+   "CONTENTS",
+   "I.\t INTRODUCTION",
+   "II.\t BACKGROUND FOR THE STUDY",
+   "A.\t Theoretical and Jurisprudential Background"
+  ]
+ },
+ "block_quotes": {
+  "indent_in": {
+   "value": null,
+   "confidence": 0.44,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": null,
+     "value": 0.15
+    },
+    {
+     "article_id": 26693,
+     "page": null,
+     "value": 0.2
+    },
+    {
+     "article_id": 14291,
+     "page": null,
+     "value": 0.25
+    },
+    {
+     "article_id": 28309,
+     "page": null,
+     "value": 0.3
+    },
+    {
+     "article_id": 14280,
+     "page": null,
+     "value": 0.15
+    },
+    {
+     "article_id": 14302,
+     "page": null,
+     "value": 0.2
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 10.0,
+   "confidence": 0.89,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 26693,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 14291,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 28309,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 14280,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 14302,
+     "page": null,
+     "value": 10.0
+    }
+   ]
+  },
+  "articles_with_block_quotes": 9
+ },
+ "running_heads": {
+  "odd_pages": {
+   "value": [
+    "article_title"
+   ],
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": null,
+     "value": [
+      "Incalculable Harm",
+      "of the COVID-19 Pandemic on Immigration"
+     ]
+    },
+    {
+     "article_id": 26693,
+     "page": null,
+     "value": [
+      "Assessing Gross Disproportionality in Climate Change Litigation",
+      "Article"
+     ]
+    },
+    {
+     "article_id": 14291,
+     "page": null,
+     "value": [
+      "Sentencing Vulnerability",
+      "Article"
+     ]
+    },
+    {
+     "article_id": 28309,
+     "page": null,
+     "value": [
+      "“Something to Declare”",
+      "Article"
+     ]
+    },
+    {
+     "article_id": 14280,
+     "page": null,
+     "value": [
+      "Les modifications de fond à la Loi sur les langues officielles du Canada expliquées"
+     ]
+    },
+    {
+     "article_id": 14302,
+     "page": null,
+     "value": [
+      "Inuusuktunut Maligalirinirmut Ikajuqtiit",
+      "Article"
+     ]
+    }
+   ]
+  },
+  "even_pages": {
+   "value": [
+    "journal_name"
+   ],
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": null,
+     "value": [
+      "Revue de droit d’Ottawa • 56:1 | Ottawa Law Review • 56:1"
+     ]
+    },
+    {
+     "article_id": 26693,
+     "page": null,
+     "value": [
+      "Revue de droit d’Ottawa • 56:2 | Ottawa Law Review • 56:2"
+     ]
+    },
+    {
+     "article_id": 14291,
+     "page": null,
+     "value": [
+      "Revue de droit d’Ottawa • 56:1 | Ottawa Law Review • 56:1"
+     ]
+    },
+    {
+     "article_id": 28309,
+     "page": null,
+     "value": [
+      "Revue de droit d’Ottawa • 57:1 | Ottawa Law Review • 57:1"
+     ]
+    },
+    {
+     "article_id": 14280,
+     "page": null,
+     "value": [
+      "Revue de droit d’Ottawa • 56:2 | Ottawa Law Review • 56:2"
+     ]
+    },
+    {
+     "article_id": 14302,
+     "page": null,
+     "value": [
+      "Revue de droit d’Ottawa • 57:1 | Ottawa Law Review • 57:1"
+     ]
+    }
+   ]
+  },
+  "page_number": {
+   "value": "top-outer",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 26693,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 14291,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 28309,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 14280,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 14302,
+     "page": null,
+     "value": "top-outer"
+    }
+   ]
+  }
+ },
+ "title_block": {
+  "title_size_pt": {
+   "value": 13.0,
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": 1,
+     "value": "Incalculable Harm: Analyzing the Impact of the COVID-19"
+    },
+    {
+     "article_id": 26693,
+     "page": 1,
+     "value": "Assessing Gross Disproportionality in Climate Change"
+    },
+    {
+     "article_id": 14291,
+     "page": 1,
+     "value": "Sentencing Vulnerability: An Empirical Study Into the"
+    },
+    {
+     "article_id": 28309,
+     "page": 5,
+     "value": "“Something to Declare”: Declaratory Relief as a Bulwark"
+    },
+    {
+     "article_id": 14280,
+     "page": 1,
+     "value": "Les modifications de fond à la Loi sur les langues officiell"
+    },
+    {
+     "article_id": 14302,
+     "page": 3,
+     "value": "Inuusuktunut Maligalirinirmut Ikajuqtiit: A Paradigm Shift"
+    }
+   ]
+  },
+  "title_alignment": {
+   "value": "center",
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": 1,
+     "value": "Incalculable Harm: Analyzing the Impact of the COVID-19"
+    },
+    {
+     "article_id": 26693,
+     "page": 1,
+     "value": "Assessing Gross Disproportionality in Climate Change"
+    },
+    {
+     "article_id": 14291,
+     "page": 1,
+     "value": "Sentencing Vulnerability: An Empirical Study Into the"
+    },
+    {
+     "article_id": 28309,
+     "page": 5,
+     "value": "“Something to Declare”: Declaratory Relief as a Bulwark"
+    },
+    {
+     "article_id": 14280,
+     "page": 1,
+     "value": "Les modifications de fond à la Loi sur les langues officiell"
+    },
+    {
+     "article_id": 14302,
+     "page": 3,
+     "value": "Inuusuktunut Maligalirinirmut Ikajuqtiit: A Paradigm Shift"
+    }
+   ]
+  },
+  "title_case": {
+   "value": "sentence",
+   "confidence": 0.78,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": 1,
+     "value": "Incalculable Harm: Analyzing the Impact of the COVID-19"
+    },
+    {
+     "article_id": 26693,
+     "page": 1,
+     "value": "Assessing Gross Disproportionality in Climate Change"
+    },
+    {
+     "article_id": 14291,
+     "page": 1,
+     "value": "Sentencing Vulnerability: An Empirical Study Into the"
+    },
+    {
+     "article_id": 28309,
+     "page": 5,
+     "value": "“Something to Declare”: Declaratory Relief as a Bulwark"
+    },
+    {
+     "article_id": 14280,
+     "page": 1,
+     "value": "Les modifications de fond à la Loi sur les langues officiell"
+    },
+    {
+     "article_id": 14302,
+     "page": 3,
+     "value": "Inuusuktunut Maligalirinirmut Ikajuqtiit: A Paradigm Shift"
+    }
+   ]
+  },
+  "author_case": {
+   "value": "title",
+   "confidence": 1.0,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": 1,
+     "value": "Incalculable Harm: Analyzing the Impact of the COVID-19"
+    },
+    {
+     "article_id": 26693,
+     "page": 1,
+     "value": "Assessing Gross Disproportionality in Climate Change"
+    },
+    {
+     "article_id": 14291,
+     "page": 1,
+     "value": "Sentencing Vulnerability: An Empirical Study Into the"
+    },
+    {
+     "article_id": 28309,
+     "page": 5,
+     "value": "“Something to Declare”: Declaratory Relief as a Bulwark"
+    },
+    {
+     "article_id": 14280,
+     "page": 1,
+     "value": "Les modifications de fond à la Loi sur les langues officiell"
+    },
+    {
+     "article_id": 14302,
+     "page": 3,
+     "value": "Inuusuktunut Maligalirinirmut Ikajuqtiit: A Paradigm Shift"
+    }
+   ]
+  },
+  "author_alignment": {
+   "value": "left",
+   "confidence": 1.0,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": 1,
+     "value": "Incalculable Harm: Analyzing the Impact of the COVID-19"
+    },
+    {
+     "article_id": 26693,
+     "page": 1,
+     "value": "Assessing Gross Disproportionality in Climate Change"
+    },
+    {
+     "article_id": 14291,
+     "page": 1,
+     "value": "Sentencing Vulnerability: An Empirical Study Into the"
+    },
+    {
+     "article_id": 28309,
+     "page": 5,
+     "value": "“Something to Declare”: Declaratory Relief as a Bulwark"
+    },
+    {
+     "article_id": 14280,
+     "page": 1,
+     "value": "Les modifications de fond à la Loi sur les langues officiell"
+    },
+    {
+     "article_id": 14302,
+     "page": 3,
+     "value": "Inuusuktunut Maligalirinirmut Ikajuqtiit: A Paradigm Shift"
+    }
+   ]
+  },
+  "first_pdf_page_is_article": {
+   "value": true,
+   "confidence": 0.6,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 14285,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 26693,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 14291,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 28309,
+     "page": 5,
+     "value": null
+    },
+    {
+     "article_id": 14280,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 14302,
+     "page": 3,
+     "value": null
+    }
+   ]
+  }
+ },
+ "table_of_contents": {
+  "value": false,
+  "confidence": 1.0,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 14285,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 26693,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 14291,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 28309,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 14280,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 14302,
+    "page": null,
+    "value": 0
+   }
+  ]
+ },
+ "citations": {
+  "ibid_case": {
+   "value": "Ibid",
+   "counts": {
+    "Ibid": 387,
+    "ibid": 40
+   },
+   "confidence": 0.91
+  },
+  "ibid_punctuation": {
+   "value": "Ibid.",
+   "counts": {
+    "Ibid.": 83,
+    "Ibid,": 71
+   },
+   "confidence": 0.54
+  },
+  "supra_form": {
+   "value": "supra note N",
+   "counts": {
+    "supra note N": 1303,
+    "supra, note N": 0
+   },
+   "confidence": 1.0
+  },
+  "paragraph_pinpoint": {
+   "value": "at para N",
+   "counts": {
+    "at para N": 613,
+    "at para. N": 0
+   },
+   "confidence": 1.0
+  },
+  "page_pinpoint_label": {
+   "value": "at N",
+   "counts": {
+    "at N": 994,
+    "at p N": 0
+   },
+   "confidence": 1.0
+  },
+  "range_dash": {
+   "value": "en dash",
+   "counts": {
+    "en dash": 511,
+    "hyphen": 0
+   },
+   "confidence": 1.0
+  },
+  "emphasis_note": {
+   "value": "[emphasis added]",
+   "counts": {
+    "[emphasis added]": 20,
+    "(emphasis added)": 0
+   },
+   "confidence": 1.0
+  },
+  "section_abbreviation": {
+   "value": "s N",
+   "counts": {
+    "s N": 79,
+    "s. N": 1
+   },
+   "confidence": 0.99
+  },
+  "et_al": {
+   "value": "et al",
+   "counts": {
+    "et al": 166,
+    "et al.": 0
+   },
+   "confidence": 1.0
+  },
+  "eg": {
+   "value": "e.g.",
+   "counts": {
+    "eg": 0,
+    "e.g.": 129
+   },
+   "confidence": 1.0
+  },
+  "ie": {
+   "value": "i.e.",
+   "counts": {
+    "ie": 0,
+    "i.e.": 3
+   },
+   "confidence": 1.0
+  },
+  "see_signal_case": {
+   "value": "See",
+   "counts": {
+    "See": 246,
+    "see": 229
+   },
+   "confidence": 0.52
+  },
+  "online_angle_brackets": {
+   "value": null,
+   "counts": {
+    "online: <url>": 0,
+    "online: url": 0
+   },
+   "confidence": 0.0
+  },
+  "quotes": {
+   "value": "curly",
+   "counts": {
+    "curly": 1924,
+    "straight": 0
+   },
+   "confidence": 1.0
+  },
+  "raw_counts": {
+   "ibid_capitalized": 387,
+   "ibid_lower": 40,
+   "ibid_period": 83,
+   "ibid_comma": 71,
+   "ibid_at": 236,
+   "supra_note": 1303,
+   "supra_comma_note": 0,
+   "at_para": 613,
+   "at_para_period": 0,
+   "at_pilcrow": 0,
+   "at_page": 994,
+   "at_p": 0,
+   "range_endash": 511,
+   "range_hyphen": 0,
+   "emphasis_brackets": 20,
+   "emphasis_parens": 0,
+   "section_s_period": 1,
+   "section_s_bare": 79,
+   "online_colon": 0,
+   "online_angle": 0,
+   "perma": 0,
+   "et_al_period": 0,
+   "et_al_bare": 166,
+   "neutral_citation": 221,
+   "canlii": 38,
+   "eg_bare": 0,
+   "eg_period": 129,
+   "ie_bare": 0,
+   "ie_period": 3,
+   "curly_double": 1924,
+   "straight_double": 0,
+   "see_signal_upper": 246,
+   "see_signal_lower": 229
+  },
+  "footnote_lines": 4907
+ },
+ "status": "ok",
+ "candidates": 12
+}

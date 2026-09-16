@@ -1,0 +1,1568 @@
+{
+ "dataset": "ALTA-L-REV",
+ "journal": "Alberta Law Review",
+ "abbrev": "Alta L Rev",
+ "platform": "OJS",
+ "years": [
+  "2025",
+  "2026"
+ ],
+ "articles_measured": [
+  8117,
+  8118,
+  8960,
+  8866,
+  8934,
+  8836,
+  8941,
+  8851,
+  8863,
+  8854
+ ],
+ "units": "points and inches; boxes measured at 144 dpi",
+ "page": {
+  "width_pt": 432,
+  "height_pt": 670,
+  "width_in": 6.0,
+  "height_in": 9.31,
+  "confidence": 1.0,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 8117,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 670
+    }
+   },
+   {
+    "article_id": 8118,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 670
+    }
+   },
+   {
+    "article_id": 8960,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 670
+    }
+   },
+   {
+    "article_id": 8866,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 670
+    }
+   },
+   {
+    "article_id": 8934,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 670
+    }
+   },
+   {
+    "article_id": 8836,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 670
+    }
+   }
+  ]
+ },
+ "margins_in": {
+  "mirrored": false,
+  "left_odd_pages": {
+   "value": 0.5,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": null,
+     "value": {
+      "odd": 0.5,
+      "even": 0.5
+     }
+    },
+    {
+     "article_id": 8118,
+     "page": null,
+     "value": {
+      "odd": 0.5,
+      "even": 0.5
+     }
+    },
+    {
+     "article_id": 8960,
+     "page": null,
+     "value": {
+      "odd": 0.5,
+      "even": 0.5
+     }
+    },
+    {
+     "article_id": 8866,
+     "page": null,
+     "value": {
+      "odd": 0.5,
+      "even": 0.5
+     }
+    },
+    {
+     "article_id": 8934,
+     "page": null,
+     "value": {
+      "odd": 0.5,
+      "even": 0.5
+     }
+    },
+    {
+     "article_id": 8836,
+     "page": null,
+     "value": {
+      "odd": 0.5,
+      "even": 0.5
+     }
+    }
+   ]
+  },
+  "left_even_pages": {
+   "value": 0.5,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": null,
+     "value": {
+      "odd": 0.5,
+      "even": 0.5
+     }
+    },
+    {
+     "article_id": 8118,
+     "page": null,
+     "value": {
+      "odd": 0.5,
+      "even": 0.5
+     }
+    },
+    {
+     "article_id": 8960,
+     "page": null,
+     "value": {
+      "odd": 0.5,
+      "even": 0.5
+     }
+    },
+    {
+     "article_id": 8866,
+     "page": null,
+     "value": {
+      "odd": 0.5,
+      "even": 0.5
+     }
+    },
+    {
+     "article_id": 8934,
+     "page": null,
+     "value": {
+      "odd": 0.5,
+      "even": 0.5
+     }
+    },
+    {
+     "article_id": 8836,
+     "page": null,
+     "value": {
+      "odd": 0.5,
+      "even": 0.5
+     }
+    }
+   ]
+  },
+  "right_odd_pages": {
+   "value": 0.45,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": null,
+     "value": {
+      "odd": 0.45,
+      "even": 0.45
+     }
+    },
+    {
+     "article_id": 8118,
+     "page": null,
+     "value": {
+      "odd": 0.45,
+      "even": 0.45
+     }
+    },
+    {
+     "article_id": 8960,
+     "page": null,
+     "value": {
+      "odd": 0.45,
+      "even": 0.45
+     }
+    },
+    {
+     "article_id": 8866,
+     "page": null,
+     "value": {
+      "odd": 0.45,
+      "even": 0.45
+     }
+    },
+    {
+     "article_id": 8934,
+     "page": null,
+     "value": {
+      "odd": 0.45,
+      "even": 0.45
+     }
+    },
+    {
+     "article_id": 8836,
+     "page": null,
+     "value": {
+      "odd": 0.45,
+      "even": 0.45
+     }
+    }
+   ]
+  },
+  "right_even_pages": {
+   "value": 0.45,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": null,
+     "value": {
+      "odd": 0.45,
+      "even": 0.45
+     }
+    },
+    {
+     "article_id": 8118,
+     "page": null,
+     "value": {
+      "odd": 0.45,
+      "even": 0.45
+     }
+    },
+    {
+     "article_id": 8960,
+     "page": null,
+     "value": {
+      "odd": 0.45,
+      "even": 0.45
+     }
+    },
+    {
+     "article_id": 8866,
+     "page": null,
+     "value": {
+      "odd": 0.45,
+      "even": 0.45
+     }
+    },
+    {
+     "article_id": 8934,
+     "page": null,
+     "value": {
+      "odd": 0.45,
+      "even": 0.45
+     }
+    },
+    {
+     "article_id": 8836,
+     "page": null,
+     "value": {
+      "odd": 0.45,
+      "even": 0.45
+     }
+    }
+   ]
+  },
+  "top": {
+   "value": 0.85,
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": null,
+     "value": 0.8
+    },
+    {
+     "article_id": 8118,
+     "page": null,
+     "value": 0.85
+    },
+    {
+     "article_id": 8960,
+     "page": null,
+     "value": 0.65
+    },
+    {
+     "article_id": 8866,
+     "page": null,
+     "value": 0.8
+    },
+    {
+     "article_id": 8934,
+     "page": null,
+     "value": 0.7
+    },
+    {
+     "article_id": 8836,
+     "page": null,
+     "value": 0.85
+    }
+   ]
+  },
+  "bottom": {
+   "value": 1.25,
+   "confidence": 0.6,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": null,
+     "value": 1.0
+    },
+    {
+     "article_id": 8118,
+     "page": null,
+     "value": 1.25
+    },
+    {
+     "article_id": 8960,
+     "page": null,
+     "value": 1.25
+    },
+    {
+     "article_id": 8866,
+     "page": null,
+     "value": 1.4
+    },
+    {
+     "article_id": 8934,
+     "page": null,
+     "value": 1.4
+    },
+    {
+     "article_id": 8836,
+     "page": null,
+     "value": 1.25
+    }
+   ]
+  }
+ },
+ "body": {
+  "font": {
+   "value": "TimesNewRomanPSMT",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 8118,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 8960,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 8866,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 8934,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 8836,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 10.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 8118,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 8960,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 8866,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 8934,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 8836,
+     "page": null,
+     "value": 10.0
+    }
+   ]
+  },
+  "line_height_pt": {
+   "value": 11.0,
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 8118,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 8960,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 8866,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 8934,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 8836,
+     "page": null,
+     "value": 11.0
+    }
+   ]
+  }
+ },
+ "footnotes": {
+  "font": {
+   "value": "TimesNewRomanPSMT",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 8118,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 8960,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 8866,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 8934,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 8836,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 8.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": null,
+     "value": 8.0
+    },
+    {
+     "article_id": 8118,
+     "page": null,
+     "value": 8.0
+    },
+    {
+     "article_id": 8960,
+     "page": null,
+     "value": 8.0
+    },
+    {
+     "article_id": 8866,
+     "page": null,
+     "value": 8.0
+    },
+    {
+     "article_id": 8934,
+     "page": null,
+     "value": 8.0
+    },
+    {
+     "article_id": 8836,
+     "page": null,
+     "value": 8.0
+    }
+   ]
+  },
+  "present": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": null,
+     "value": 592
+    },
+    {
+     "article_id": 8118,
+     "page": null,
+     "value": 582
+    },
+    {
+     "article_id": 8960,
+     "page": null,
+     "value": 489
+    },
+    {
+     "article_id": 8866,
+     "page": null,
+     "value": 586
+    },
+    {
+     "article_id": 8934,
+     "page": null,
+     "value": 592
+    },
+    {
+     "article_id": 8836,
+     "page": null,
+     "value": 520
+    }
+   ]
+  },
+  "number_style": {
+   "value": "number_gap",
+   "confidence": 0.6,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": null,
+     "value": [
+      "* Paul Chiswell is a litigation and dispute resolution partner at Burnet Duckworth and Palmer LLP."
+     ]
+    },
+    {
+     "article_id": 8118,
+     "page": null,
+     "value": [
+      "* Nick Ettinger is an associate in the Regulatory and Dispute Resolution Group at Torys LLP in Calgary."
+     ]
+    },
+    {
+     "article_id": 8960,
+     "page": null,
+     "value": [
+      "* Donald J Netolitzky (PhD Microbiology, University of Alberta, 1995; LLB, University of Alberta,"
+     ]
+    },
+    {
+     "article_id": 8866,
+     "page": null,
+     "value": [
+      "* Josh Jantzi is a Partner in the Calgary, Vancouver, and Toronto offices of DLA Piper (Canada) LLP."
+     ]
+    },
+    {
+     "article_id": 8934,
+     "page": null,
+     "value": [
+      "* LLM, LLB (Canada), JD (United States), BA (Hons), Associate Professor, Bora Laskin Faculty of Law,"
+     ]
+    },
+    {
+     "article_id": 8836,
+     "page": null,
+     "value": [
+      "* Lawyer, Borden Ladner Gervais LLP, Calgary."
+     ]
+    }
+   ]
+  },
+  "indent_vs_body_in": {
+   "value": 0.25,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": null,
+     "value": 0.25
+    },
+    {
+     "article_id": 8118,
+     "page": null,
+     "value": 0.25
+    },
+    {
+     "article_id": 8960,
+     "page": null,
+     "value": 0.25
+    },
+    {
+     "article_id": 8866,
+     "page": null,
+     "value": 0.25
+    },
+    {
+     "article_id": 8934,
+     "page": null,
+     "value": 0.25
+    },
+    {
+     "article_id": 8836,
+     "page": null,
+     "value": 0.25
+    }
+   ]
+  },
+  "first_page_author_note": {
+   "value": true,
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": 1,
+     "value": [
+      "* Paul Chiswell is a litigation and dispute resolution partner at Burnet Duckworth and Palmer LLP."
+     ]
+    },
+    {
+     "article_id": 8118,
+     "page": 1,
+     "value": [
+      "* Nick Ettinger is an associate in the Regulatory and Dispute Resolution Group at Torys LLP in Calgary."
+     ]
+    },
+    {
+     "article_id": 8960,
+     "page": 1,
+     "value": [
+      "* Donald J Netolitzky (PhD Microbiology, University of Alberta, 1995; LLB, University of Alberta,"
+     ]
+    },
+    {
+     "article_id": 8866,
+     "page": 1,
+     "value": [
+      "* Josh Jantzi is a Partner in the Calgary, Vancouver, and Toronto offices of DLA Piper (Canada) LLP."
+     ]
+    },
+    {
+     "article_id": 8934,
+     "page": 1,
+     "value": [
+      "* LLM, LLB (Canada), JD (United States), BA (Hons), Associate Professor, Bora Laskin Faculty of Law,"
+     ]
+    },
+    {
+     "article_id": 8836,
+     "page": 1,
+     "value": [
+      "* Lawyer, Borden Ladner Gervais LLP, Calgary."
+     ]
+    }
+   ]
+  }
+ },
+ "headings": {
+  "numbering_levels": {
+   "value": [
+    "roman_period",
+    "unnumbered"
+   ],
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": 2,
+     "value": [
+      "I. DUTY TO CONSULT",
+      "DECISION",
+      "COMMENTARY"
+     ]
+    },
+    {
+     "article_id": 8118,
+     "page": 2,
+     "value": [
+      "INTRODUCTION",
+      "I. PORE SPACE OWNERSHIP",
+      "DEFINING PORE SPACE"
+     ]
+    },
+    {
+     "article_id": 8960,
+     "page": 2,
+     "value": [
+      "I. INTRODUCTION",
+      "II. WHAT IS PSEUDOLAW?",
+      "NOMENCLATURE"
+     ]
+    },
+    {
+     "article_id": 8866,
+     "page": 4,
+     "value": [
+      "I. INTERNATIONAL TARIFFS",
+      "UNITED STATES OF AMERICA",
+      "LEGAL BASIS FOR AMERICAN EXECUTIVE ORDERS"
+     ]
+    },
+    {
+     "article_id": 8934,
+     "page": 2,
+     "value": [
+      "I. INTRODUCTION",
+      "II. LEGAL AND THEORETICAL FRAMEWORK",
+      "III. DOG OWNER LIABILITY IN ONTARIO"
+     ]
+    },
+    {
+     "article_id": 8836,
+     "page": 2,
+     "value": [
+      "INTRODUCTION",
+      "I. DATA CENTRES, AI, AND POWER ISSUES",
+      "WHAT ARE DATA CENTRES?"
+     ]
+    }
+   ]
+  },
+  "top_level_case": {
+   "value": "upper",
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": 61,
+     "value": "X. TAX"
+    },
+    {
+     "article_id": 8118,
+     "page": 2,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 8960,
+     "page": 24,
+     "value": "A."
+    },
+    {
+     "article_id": 8866,
+     "page": 12,
+     "value": "WTO"
+    },
+    {
+     "article_id": 8934,
+     "page": 2,
+     "value": "I. INTRODUCTION"
+    },
+    {
+     "article_id": 8836,
+     "page": 2,
+     "value": "INTRODUCTION"
+    }
+   ]
+  },
+  "top_level_size_pt": {
+   "value": 8.0,
+   "confidence": 0.6,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": 61,
+     "value": "X. TAX"
+    },
+    {
+     "article_id": 8118,
+     "page": 2,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 8960,
+     "page": 24,
+     "value": "A."
+    },
+    {
+     "article_id": 8866,
+     "page": 12,
+     "value": "WTO"
+    },
+    {
+     "article_id": 8934,
+     "page": 2,
+     "value": "I. INTRODUCTION"
+    },
+    {
+     "article_id": 8836,
+     "page": 2,
+     "value": "INTRODUCTION"
+    }
+   ]
+  },
+  "top_level_alignment": {
+   "value": "left",
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": 61,
+     "value": "X. TAX"
+    },
+    {
+     "article_id": 8118,
+     "page": 2,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 8960,
+     "page": 24,
+     "value": "A."
+    },
+    {
+     "article_id": 8866,
+     "page": 12,
+     "value": "WTO"
+    },
+    {
+     "article_id": 8934,
+     "page": 2,
+     "value": "I. INTRODUCTION"
+    },
+    {
+     "article_id": 8836,
+     "page": 2,
+     "value": "INTRODUCTION"
+    }
+   ]
+  },
+  "samples": [
+   "I. DUTY TO CONSULT",
+   "DECISION",
+   "COMMENTARY",
+   "BACKGROUND",
+   "INTRODUCTION",
+   "I. PORE SPACE OWNERSHIP",
+   "DEFINING PORE SPACE",
+   "PORE SPACE OWNERSHIP AT COMMON LAW",
+   "I. INTRODUCTION",
+   "II. WHAT IS PSEUDOLAW?",
+   "NOMENCLATURE",
+   "PSEUDOLAW IS A LEGAL SYSTEM"
+  ]
+ },
+ "block_quotes": {
+  "indent_in": {
+   "value": 0.2,
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": null,
+     "value": 0.2
+    },
+    {
+     "article_id": 8118,
+     "page": null,
+     "value": 0.2
+    },
+    {
+     "article_id": 8960,
+     "page": null,
+     "value": 0.2
+    },
+    {
+     "article_id": 8866,
+     "page": null,
+     "value": 0.2
+    },
+    {
+     "article_id": 8934,
+     "page": null,
+     "value": 0.2
+    },
+    {
+     "article_id": 8836,
+     "page": null,
+     "value": 0.55
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 8.0,
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": null,
+     "value": 7.98
+    },
+    {
+     "article_id": 8118,
+     "page": null,
+     "value": 10.02
+    },
+    {
+     "article_id": 8960,
+     "page": null,
+     "value": 9.96
+    },
+    {
+     "article_id": 8866,
+     "page": null,
+     "value": 10.02
+    },
+    {
+     "article_id": 8934,
+     "page": null,
+     "value": 8.04
+    },
+    {
+     "article_id": 8836,
+     "page": null,
+     "value": 10.02
+    }
+   ]
+  },
+  "articles_with_block_quotes": 10
+ },
+ "running_heads": {
+  "odd_pages": {
+   "value": [
+    "article_title"
+   ],
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": null,
+     "value": [
+      "DECISIONS OF INTEREST TO ENERGY LAWYERS"
+     ]
+    },
+    {
+     "article_id": 8118,
+     "page": null,
+     "value": [
+      "THE PORE SPACE RACE"
+     ]
+    },
+    {
+     "article_id": 8960,
+     "page": null,
+     "value": [
+      "A LEGION OF MISSHAPEN COGS"
+     ]
+    },
+    {
+     "article_id": 8866,
+     "page": null,
+     "value": [
+      "THE EFFECT OF TARIFFS ON THE ENERGY TRADE"
+     ]
+    },
+    {
+     "article_id": 8934,
+     "page": null,
+     "value": [
+      "POSTHUMANIST RETHINKING OF CANINE CAPITAL PUNISHMENT"
+     ]
+    },
+    {
+     "article_id": 8836,
+     "page": null,
+     "value": [
+      "DATA CENTRES, AI, AND ELECTRIFICATION"
+     ]
+    }
+   ]
+  },
+  "even_pages": {
+   "value": [
+    "journal_name",
+    "volume_or_year"
+   ],
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": null,
+     "value": [
+      "ALBERTA LAW REVIEW",
+      "(2025) 63:2"
+     ]
+    },
+    {
+     "article_id": 8118,
+     "page": null,
+     "value": [
+      "ALBERTA LAW REVIEW",
+      "(2025) 63:2"
+     ]
+    },
+    {
+     "article_id": 8960,
+     "page": null,
+     "value": [
+      "ALBERTA LAW REVIEW",
+      "(2025) 62:3"
+     ]
+    },
+    {
+     "article_id": 8866,
+     "page": null,
+     "value": [
+      "ALBERTA LAW REVIEW",
+      "(2025) 63:2"
+     ]
+    },
+    {
+     "article_id": 8934,
+     "page": null,
+     "value": [
+      "ALBERTA LAW REVIEW",
+      "(2025) 62:4"
+     ]
+    },
+    {
+     "article_id": 8836,
+     "page": null,
+     "value": [
+      "ALBERTA LAW REVIEW",
+      "(2025) 63:2"
+     ]
+    }
+   ]
+  },
+  "page_number": {
+   "value": "top-outer",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 8118,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 8960,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 8866,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 8934,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 8836,
+     "page": null,
+     "value": "top-outer"
+    }
+   ]
+  }
+ },
+ "title_block": {
+  "title_size_pt": {
+   "value": 9.5,
+   "confidence": 1.0,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": 1,
+     "value": "RECENT JUDICIAL DECISIONS OF INTEREST"
+    },
+    {
+     "article_id": 8118,
+     "page": 1,
+     "value": "THE PORE SPACE RACE: CONFLICTS OF SUBSURFACE"
+    },
+    {
+     "article_id": 8960,
+     "page": 1,
+     "value": "A LEGION OF MISSHAPEN COGS: PSEUDOLAW IN"
+    },
+    {
+     "article_id": 8866,
+     "page": 1,
+     "value": "THE EFFECT OF TARIFFS ON LOCAL AND"
+    },
+    {
+     "article_id": 8836,
+     "page": 1,
+     "value": "DATA CENTRES, AI, AND ELECTRIFICATION — LEGAL"
+    },
+    {
+     "article_id": 8941,
+     "page": 1,
+     "value": "THE COHERENCE OF CONSTRUCTIVE TAKINGS: A"
+    }
+   ]
+  },
+  "title_alignment": {
+   "value": "center",
+   "confidence": 1.0,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": 1,
+     "value": "RECENT JUDICIAL DECISIONS OF INTEREST"
+    },
+    {
+     "article_id": 8118,
+     "page": 1,
+     "value": "THE PORE SPACE RACE: CONFLICTS OF SUBSURFACE"
+    },
+    {
+     "article_id": 8960,
+     "page": 1,
+     "value": "A LEGION OF MISSHAPEN COGS: PSEUDOLAW IN"
+    },
+    {
+     "article_id": 8866,
+     "page": 1,
+     "value": "THE EFFECT OF TARIFFS ON LOCAL AND"
+    },
+    {
+     "article_id": 8836,
+     "page": 1,
+     "value": "DATA CENTRES, AI, AND ELECTRIFICATION — LEGAL"
+    },
+    {
+     "article_id": 8941,
+     "page": 1,
+     "value": "THE COHERENCE OF CONSTRUCTIVE TAKINGS: A"
+    }
+   ]
+  },
+  "title_case": {
+   "value": "upper",
+   "confidence": 1.0,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": 1,
+     "value": "RECENT JUDICIAL DECISIONS OF INTEREST"
+    },
+    {
+     "article_id": 8118,
+     "page": 1,
+     "value": "THE PORE SPACE RACE: CONFLICTS OF SUBSURFACE"
+    },
+    {
+     "article_id": 8960,
+     "page": 1,
+     "value": "A LEGION OF MISSHAPEN COGS: PSEUDOLAW IN"
+    },
+    {
+     "article_id": 8866,
+     "page": 1,
+     "value": "THE EFFECT OF TARIFFS ON LOCAL AND"
+    },
+    {
+     "article_id": 8836,
+     "page": 1,
+     "value": "DATA CENTRES, AI, AND ELECTRIFICATION — LEGAL"
+    },
+    {
+     "article_id": 8941,
+     "page": 1,
+     "value": "THE COHERENCE OF CONSTRUCTIVE TAKINGS: A"
+    }
+   ]
+  },
+  "author_case": {
+   "value": "upper",
+   "confidence": 1.0,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": 1,
+     "value": "RECENT JUDICIAL DECISIONS OF INTEREST"
+    },
+    {
+     "article_id": 8118,
+     "page": 1,
+     "value": "THE PORE SPACE RACE: CONFLICTS OF SUBSURFACE"
+    },
+    {
+     "article_id": 8960,
+     "page": 1,
+     "value": "A LEGION OF MISSHAPEN COGS: PSEUDOLAW IN"
+    },
+    {
+     "article_id": 8866,
+     "page": 1,
+     "value": "THE EFFECT OF TARIFFS ON LOCAL AND"
+    },
+    {
+     "article_id": 8836,
+     "page": 1,
+     "value": "DATA CENTRES, AI, AND ELECTRIFICATION — LEGAL"
+    },
+    {
+     "article_id": 8941,
+     "page": 1,
+     "value": "THE COHERENCE OF CONSTRUCTIVE TAKINGS: A"
+    }
+   ]
+  },
+  "author_alignment": {
+   "value": "center",
+   "confidence": 1.0,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": 1,
+     "value": "RECENT JUDICIAL DECISIONS OF INTEREST"
+    },
+    {
+     "article_id": 8118,
+     "page": 1,
+     "value": "THE PORE SPACE RACE: CONFLICTS OF SUBSURFACE"
+    },
+    {
+     "article_id": 8960,
+     "page": 1,
+     "value": "A LEGION OF MISSHAPEN COGS: PSEUDOLAW IN"
+    },
+    {
+     "article_id": 8866,
+     "page": 1,
+     "value": "THE EFFECT OF TARIFFS ON LOCAL AND"
+    },
+    {
+     "article_id": 8836,
+     "page": 1,
+     "value": "DATA CENTRES, AI, AND ELECTRIFICATION — LEGAL"
+    },
+    {
+     "article_id": 8941,
+     "page": 1,
+     "value": "THE COHERENCE OF CONSTRUCTIVE TAKINGS: A"
+    }
+   ]
+  },
+  "first_pdf_page_is_article": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 8117,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 8118,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 8960,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 8866,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 8934,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 8836,
+     "page": 1,
+     "value": null
+    }
+   ]
+  }
+ },
+ "table_of_contents": {
+  "value": true,
+  "confidence": 0.9,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 8117,
+    "page": null,
+    "value": 11
+   },
+   {
+    "article_id": 8118,
+    "page": null,
+    "value": 6
+   },
+   {
+    "article_id": 8960,
+    "page": null,
+    "value": 5
+   },
+   {
+    "article_id": 8866,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 8934,
+    "page": null,
+    "value": 4
+   },
+   {
+    "article_id": 8836,
+    "page": null,
+    "value": 1
+   }
+  ]
+ },
+ "citations": {
+  "ibid_case": {
+   "value": "Ibid",
+   "counts": {
+    "Ibid": 832,
+    "ibid": 128
+   },
+   "confidence": 0.87
+  },
+  "ibid_punctuation": {
+   "value": "Ibid.",
+   "counts": {
+    "Ibid.": 145,
+    "Ibid,": 96
+   },
+   "confidence": 0.6
+  },
+  "supra_form": {
+   "value": "supra note N",
+   "counts": {
+    "supra note N": 1093,
+    "supra, note N": 0
+   },
+   "confidence": 1.0
+  },
+  "paragraph_pinpoint": {
+   "value": "at para N",
+   "counts": {
+    "at para N": 913,
+    "at para. N": 0
+   },
+   "confidence": 1.0
+  },
+  "page_pinpoint_label": {
+   "value": "at N",
+   "counts": {
+    "at N": 969,
+    "at p N": 0
+   },
+   "confidence": 1.0
+  },
+  "range_dash": {
+   "value": "en dash",
+   "counts": {
+    "en dash": 573,
+    "hyphen": 2
+   },
+   "confidence": 1.0
+  },
+  "emphasis_note": {
+   "value": "[emphasis added]",
+   "counts": {
+    "[emphasis added]": 53,
+    "(emphasis added)": 0
+   },
+   "confidence": 1.0
+  },
+  "section_abbreviation": {
+   "value": "s N",
+   "counts": {
+    "s N": 317,
+    "s. N": 1
+   },
+   "confidence": 1.0
+  },
+  "et_al": {
+   "value": "et al",
+   "counts": {
+    "et al": 66,
+    "et al.": 3
+   },
+   "confidence": 0.96
+  },
+  "eg": {
+   "value": "e.g.",
+   "counts": {
+    "eg": 0,
+    "e.g.": 127
+   },
+   "confidence": 1.0
+  },
+  "ie": {
+   "value": "i.e.",
+   "counts": {
+    "ie": 0,
+    "i.e.": 4
+   },
+   "confidence": 1.0
+  },
+  "see_signal_case": {
+   "value": "See",
+   "counts": {
+    "See": 338,
+    "see": 87
+   },
+   "confidence": 0.8
+  },
+  "online_angle_brackets": {
+   "value": null,
+   "counts": {
+    "online: <url>": 0,
+    "online: url": 0
+   },
+   "confidence": 0.0
+  },
+  "quotes": {
+   "value": "curly",
+   "counts": {
+    "curly": 1991,
+    "straight": 1
+   },
+   "confidence": 1.0
+  },
+  "raw_counts": {
+   "ibid_capitalized": 832,
+   "ibid_lower": 128,
+   "ibid_period": 145,
+   "ibid_comma": 96,
+   "ibid_at": 679,
+   "supra_note": 1093,
+   "supra_comma_note": 0,
+   "at_para": 913,
+   "at_para_period": 0,
+   "at_pilcrow": 0,
+   "at_page": 969,
+   "at_p": 0,
+   "range_endash": 573,
+   "range_hyphen": 2,
+   "emphasis_brackets": 53,
+   "emphasis_parens": 0,
+   "section_s_period": 1,
+   "section_s_bare": 317,
+   "online_colon": 0,
+   "online_angle": 0,
+   "perma": 621,
+   "et_al_period": 3,
+   "et_al_bare": 66,
+   "neutral_citation": 275,
+   "canlii": 70,
+   "eg_bare": 0,
+   "eg_period": 127,
+   "ie_bare": 0,
+   "ie_period": 4,
+   "curly_double": 1991,
+   "straight_double": 1,
+   "see_signal_upper": 338,
+   "see_signal_lower": 87
+  },
+  "footnote_lines": 5356
+ },
+ "status": "ok",
+ "candidates": 46
+}

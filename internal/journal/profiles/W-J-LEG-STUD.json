@@ -1,0 +1,1484 @@
+{
+ "dataset": "W-J-LEG-STUD",
+ "journal": "Western Journal of Legal Studies",
+ "abbrev": "W J Leg Stud",
+ "platform": "OJS",
+ "years": [
+  "2025",
+  "2026"
+ ],
+ "articles_measured": [
+  10314,
+  10409,
+  576,
+  8222,
+  574,
+  10300,
+  10468,
+  10337,
+  575,
+  8220
+ ],
+ "units": "points and inches; boxes measured at 144 dpi",
+ "page": {
+  "width_pt": 612,
+  "height_pt": 792,
+  "width_in": 8.5,
+  "height_in": 11.0,
+  "confidence": 1.0,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 10314,
+    "page": 1,
+    "value": {
+     "width_pt": 612,
+     "height_pt": 792
+    }
+   },
+   {
+    "article_id": 10409,
+    "page": 1,
+    "value": {
+     "width_pt": 612,
+     "height_pt": 792
+    }
+   },
+   {
+    "article_id": 576,
+    "page": 1,
+    "value": {
+     "width_pt": 612,
+     "height_pt": 792
+    }
+   },
+   {
+    "article_id": 8222,
+    "page": 1,
+    "value": {
+     "width_pt": 612,
+     "height_pt": 792
+    }
+   },
+   {
+    "article_id": 574,
+    "page": 1,
+    "value": {
+     "width_pt": 612,
+     "height_pt": 792
+    }
+   },
+   {
+    "article_id": 10300,
+    "page": 1,
+    "value": {
+     "width_pt": 612,
+     "height_pt": 792
+    }
+   }
+  ]
+ },
+ "margins_in": {
+  "mirrored": false,
+  "left_odd_pages": {
+   "value": 1.8,
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": null,
+     "value": {
+      "odd": 1.8,
+      "even": 1.8
+     }
+    },
+    {
+     "article_id": 10409,
+     "page": null,
+     "value": {
+      "odd": 1.8,
+      "even": 1.8
+     }
+    },
+    {
+     "article_id": 576,
+     "page": null,
+     "value": {
+      "odd": 1.8,
+      "even": 1.8
+     }
+    },
+    {
+     "article_id": 8222,
+     "page": null,
+     "value": {
+      "odd": 1.8,
+      "even": 1.8
+     }
+    },
+    {
+     "article_id": 574,
+     "page": null,
+     "value": {
+      "odd": 1.8,
+      "even": 1.8
+     }
+    },
+    {
+     "article_id": 10300,
+     "page": null,
+     "value": {
+      "odd": 1.8,
+      "even": 1.8
+     }
+    }
+   ]
+  },
+  "left_even_pages": {
+   "value": 1.8,
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": null,
+     "value": {
+      "odd": 1.8,
+      "even": 1.8
+     }
+    },
+    {
+     "article_id": 10409,
+     "page": null,
+     "value": {
+      "odd": 1.8,
+      "even": 1.8
+     }
+    },
+    {
+     "article_id": 576,
+     "page": null,
+     "value": {
+      "odd": 1.8,
+      "even": 1.8
+     }
+    },
+    {
+     "article_id": 8222,
+     "page": null,
+     "value": {
+      "odd": 1.8,
+      "even": 1.8
+     }
+    },
+    {
+     "article_id": 574,
+     "page": null,
+     "value": {
+      "odd": 1.8,
+      "even": 1.8
+     }
+    },
+    {
+     "article_id": 10300,
+     "page": null,
+     "value": {
+      "odd": 1.8,
+      "even": 1.8
+     }
+    }
+   ]
+  },
+  "right_odd_pages": {
+   "value": 1.75,
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": null,
+     "value": {
+      "odd": 1.75,
+      "even": 1.75
+     }
+    },
+    {
+     "article_id": 10409,
+     "page": null,
+     "value": {
+      "odd": 1.75,
+      "even": 1.75
+     }
+    },
+    {
+     "article_id": 576,
+     "page": null,
+     "value": {
+      "odd": 1.75,
+      "even": 1.75
+     }
+    },
+    {
+     "article_id": 8222,
+     "page": null,
+     "value": {
+      "odd": 1.75,
+      "even": 1.75
+     }
+    },
+    {
+     "article_id": 574,
+     "page": null,
+     "value": {
+      "odd": 1.75,
+      "even": 1.75
+     }
+    },
+    {
+     "article_id": 10300,
+     "page": null,
+     "value": {
+      "odd": 1.75,
+      "even": 1.75
+     }
+    }
+   ]
+  },
+  "right_even_pages": {
+   "value": 1.75,
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": null,
+     "value": {
+      "odd": 1.75,
+      "even": 1.75
+     }
+    },
+    {
+     "article_id": 10409,
+     "page": null,
+     "value": {
+      "odd": 1.75,
+      "even": 1.75
+     }
+    },
+    {
+     "article_id": 576,
+     "page": null,
+     "value": {
+      "odd": 1.75,
+      "even": 1.75
+     }
+    },
+    {
+     "article_id": 8222,
+     "page": null,
+     "value": {
+      "odd": 1.75,
+      "even": 1.75
+     }
+    },
+    {
+     "article_id": 574,
+     "page": null,
+     "value": {
+      "odd": 1.75,
+      "even": 1.75
+     }
+    },
+    {
+     "article_id": 10300,
+     "page": null,
+     "value": {
+      "odd": 1.75,
+      "even": 1.75
+     }
+    }
+   ]
+  },
+  "top": {
+   "value": 1.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": null,
+     "value": 1.0
+    },
+    {
+     "article_id": 10409,
+     "page": null,
+     "value": 1.0
+    },
+    {
+     "article_id": 576,
+     "page": null,
+     "value": 1.0
+    },
+    {
+     "article_id": 8222,
+     "page": null,
+     "value": 1.0
+    },
+    {
+     "article_id": 574,
+     "page": null,
+     "value": 1.0
+    },
+    {
+     "article_id": 10300,
+     "page": null,
+     "value": 1.0
+    }
+   ]
+  },
+  "bottom": {
+   "value": null,
+   "confidence": 0.3,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": null,
+     "value": 1.75
+    },
+    {
+     "article_id": 10409,
+     "page": null,
+     "value": 1.75
+    },
+    {
+     "article_id": 576,
+     "page": null,
+     "value": 1.95
+    },
+    {
+     "article_id": 8222,
+     "page": null,
+     "value": 1.85
+    },
+    {
+     "article_id": 574,
+     "page": null,
+     "value": 1.75
+    },
+    {
+     "article_id": 10300,
+     "page": null,
+     "value": 1.6
+    }
+   ]
+  }
+ },
+ "body": {
+  "font": {
+   "value": "Book Antiqua",
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": null,
+     "value": "Book Antiqua"
+    },
+    {
+     "article_id": 10409,
+     "page": null,
+     "value": "Book Antiqua"
+    },
+    {
+     "article_id": 576,
+     "page": null,
+     "value": "Book Antiqua"
+    },
+    {
+     "article_id": 8222,
+     "page": null,
+     "value": "Book Antiqua"
+    },
+    {
+     "article_id": 574,
+     "page": null,
+     "value": "Book Antiqua"
+    },
+    {
+     "article_id": 10300,
+     "page": null,
+     "value": "Book Antiqua"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 11.0,
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 10409,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 576,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 8222,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 574,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 10300,
+     "page": null,
+     "value": 11.0
+    }
+   ]
+  },
+  "line_height_pt": {
+   "value": 13.5,
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 10409,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 576,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 8222,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 574,
+     "page": null,
+     "value": 13.5
+    },
+    {
+     "article_id": 10300,
+     "page": null,
+     "value": 13.5
+    }
+   ]
+  }
+ },
+ "footnotes": {
+  "font": {
+   "value": "Book Antiqua",
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": null,
+     "value": "Book Antiqua"
+    },
+    {
+     "article_id": 10409,
+     "page": null,
+     "value": "Book Antiqua"
+    },
+    {
+     "article_id": 576,
+     "page": null,
+     "value": "Book Antiqua"
+    },
+    {
+     "article_id": 8222,
+     "page": null,
+     "value": "Book Antiqua"
+    },
+    {
+     "article_id": 574,
+     "page": null,
+     "value": "Book Antiqua"
+    },
+    {
+     "article_id": 10300,
+     "page": null,
+     "value": "Book Antiqua"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 9.0,
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": null,
+     "value": 9.1
+    },
+    {
+     "article_id": 10409,
+     "page": null,
+     "value": 9.1
+    },
+    {
+     "article_id": 576,
+     "page": null,
+     "value": 9.1
+    },
+    {
+     "article_id": 8222,
+     "page": null,
+     "value": 9.1
+    },
+    {
+     "article_id": 574,
+     "page": null,
+     "value": 9.1
+    },
+    {
+     "article_id": 10300,
+     "page": null,
+     "value": 9.1
+    }
+   ]
+  },
+  "present": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": null,
+     "value": 429
+    },
+    {
+     "article_id": 10409,
+     "page": null,
+     "value": 299
+    },
+    {
+     "article_id": 576,
+     "page": null,
+     "value": 232
+    },
+    {
+     "article_id": 8222,
+     "page": null,
+     "value": 240
+    },
+    {
+     "article_id": 574,
+     "page": null,
+     "value": 197
+    },
+    {
+     "article_id": 10300,
+     "page": null,
+     "value": 153
+    }
+   ]
+  },
+  "number_style": {
+   "value": "number_space",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": null,
+     "value": [
+      "1 Dussault René & Erasmus Georges, Report of the Royal Commission on Aboriginal Peoples:"
+     ]
+    },
+    {
+     "article_id": 10409,
+     "page": null,
+     "value": [
+      "* Christopher Hill was called to the Alberta Bar in 2025. He completed his JD at the"
+     ]
+    },
+    {
+     "article_id": 576,
+     "page": null,
+     "value": [
+      "1 Climate Change 2023: Synthesis Report. Contribution of Working Groups I, II and III to the"
+     ]
+    },
+    {
+     "article_id": 8222,
+     "page": null,
+     "value": [
+      "* The author wishes to thank Professor Adam Dodek at the University of Ottawa for his"
+     ]
+    },
+    {
+     "article_id": 574,
+     "page": null,
+     "value": [
+      "1 See e.g. Employee v Life Labs (No. 2), 2018 BCHRT 202; XY v Ontario (Government and"
+     ]
+    },
+    {
+     "article_id": 10300,
+     "page": null,
+     "value": [
+      "1 Kevin D Bradford & Debra M Desrochers, “The Use of Scents to Influence Consumers:"
+     ]
+    }
+   ]
+  },
+  "indent_vs_body_in": {
+   "value": 0.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 10409,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 576,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 8222,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 574,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 10300,
+     "page": null,
+     "value": 0.0
+    }
+   ]
+  },
+  "first_page_author_note": {
+   "value": false,
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 10409,
+     "page": 1,
+     "value": [
+      "* Christopher Hill was called to the Alberta Bar in 2025. He completed his JD at the"
+     ]
+    },
+    {
+     "article_id": 576,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 8222,
+     "page": 1,
+     "value": [
+      "* The author wishes to thank Professor Adam Dodek at the University of Ottawa for his"
+     ]
+    },
+    {
+     "article_id": 574,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 10300,
+     "page": 1,
+     "value": []
+    }
+   ]
+  }
+ },
+ "headings": {
+  "numbering_levels": {
+   "value": [
+    "arabic_period",
+    "unnumbered"
+   ],
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": 2,
+     "value": [
+      "22                                                ",
+      "INTERVIEWEE*",
+      "DATE"
+     ]
+    },
+    {
+     "article_id": 10409,
+     "page": 2,
+     "value": [
+      "2                                                 ",
+      "1. INTRODUCTION",
+      "2. THE CRA’S UNDERSTANDING OF “RELIGION”"
+     ]
+    },
+    {
+     "article_id": 576,
+     "page": 2,
+     "value": [
+      "92                                                ",
+      "1. INTRODUCTION",
+      "94                                                "
+     ]
+    },
+    {
+     "article_id": 8222,
+     "page": 2,
+     "value": [
+      "32                                                ",
+      "1. INTRODUCTION",
+      "34                                                "
+     ]
+    },
+    {
+     "article_id": 574,
+     "page": 2,
+     "value": [
+      "72                                                ",
+      "NOTE ON LANGUAGE",
+      "1. INTRODUCTION"
+     ]
+    },
+    {
+     "article_id": 10300,
+     "page": 2,
+     "value": [
+      "2                                                 ",
+      "1. AN INTRODUCTION TO A SCENTED EXPLORATION OF",
+      "TRADEMARK LAW"
+     ]
+    }
+   ]
+  },
+  "top_level_case": {
+   "value": "upper",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": 2,
+     "value": "22                                                          "
+    },
+    {
+     "article_id": 10409,
+     "page": 2,
+     "value": "2                                                           "
+    },
+    {
+     "article_id": 576,
+     "page": 2,
+     "value": "92                                                          "
+    },
+    {
+     "article_id": 8222,
+     "page": 19,
+     "value": "UNDRIP."
+    },
+    {
+     "article_id": 574,
+     "page": 2,
+     "value": "72                                                          "
+    },
+    {
+     "article_id": 10300,
+     "page": 2,
+     "value": "2                                                           "
+    }
+   ]
+  },
+  "top_level_size_pt": {
+   "value": 10.0,
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": 2,
+     "value": "22                                                          "
+    },
+    {
+     "article_id": 10409,
+     "page": 2,
+     "value": "2                                                           "
+    },
+    {
+     "article_id": 576,
+     "page": 2,
+     "value": "92                                                          "
+    },
+    {
+     "article_id": 8222,
+     "page": 19,
+     "value": "UNDRIP."
+    },
+    {
+     "article_id": 574,
+     "page": 2,
+     "value": "72                                                          "
+    },
+    {
+     "article_id": 10300,
+     "page": 2,
+     "value": "2                                                           "
+    }
+   ]
+  },
+  "top_level_alignment": {
+   "value": "center",
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": 2,
+     "value": "22                                                          "
+    },
+    {
+     "article_id": 10409,
+     "page": 2,
+     "value": "2                                                           "
+    },
+    {
+     "article_id": 576,
+     "page": 2,
+     "value": "92                                                          "
+    },
+    {
+     "article_id": 8222,
+     "page": 19,
+     "value": "UNDRIP."
+    },
+    {
+     "article_id": 574,
+     "page": 2,
+     "value": "72                                                          "
+    },
+    {
+     "article_id": 10300,
+     "page": 2,
+     "value": "2                                                           "
+    }
+   ]
+  },
+  "samples": [
+   "22                                                                              ",
+   "INTERVIEWEE*",
+   "DATE",
+   "(2026) UWO LJ 17:2                                                              ",
+   "2                                                                               ",
+   "1. INTRODUCTION",
+   "2. THE CRA’S UNDERSTANDING OF “RELIGION”",
+   "4                                                                               ",
+   "92                                                                              ",
+   "1. INTRODUCTION",
+   "94                                                                              ",
+   "2026 UWO LJ 17:2                                                                "
+  ]
+ },
+ "block_quotes": {
+  "indent_in": {
+   "value": 0.8,
+   "confidence": 0.57,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": null,
+     "value": 0.8
+    },
+    {
+     "article_id": 10409,
+     "page": null,
+     "value": 0.8
+    },
+    {
+     "article_id": 8222,
+     "page": null,
+     "value": 0.8
+    },
+    {
+     "article_id": 10300,
+     "page": null,
+     "value": 0.8
+    },
+    {
+     "article_id": 10468,
+     "page": null,
+     "value": 0.6
+    },
+    {
+     "article_id": 575,
+     "page": null,
+     "value": 0.6
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 10.0,
+   "confidence": 1.0,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": null,
+     "value": 10.08
+    },
+    {
+     "article_id": 10409,
+     "page": null,
+     "value": 10.08
+    },
+    {
+     "article_id": 8222,
+     "page": null,
+     "value": 10.08
+    },
+    {
+     "article_id": 10300,
+     "page": null,
+     "value": 10.08
+    },
+    {
+     "article_id": 10468,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 575,
+     "page": null,
+     "value": 10.0
+    }
+   ]
+  },
+  "articles_with_block_quotes": 7
+ },
+ "running_heads": {
+  "odd_pages": {
+   "value": [
+    "article_title"
+   ],
+   "confidence": 1.0,
+   "articles": 2,
+   "evidence": [
+    {
+     "article_id": 10468,
+     "page": null,
+     "value": [
+      "CHIODO: TAKING PROPORTIONALITY SERIOUSLY"
+     ]
+    },
+    {
+     "article_id": 575,
+     "page": null,
+     "value": [
+      "BERNICCHIA-FREEMAN: GENDERED CREDIBILITY ON TRIAL"
+     ]
+    }
+   ]
+  },
+  "even_pages": {
+   "value": [
+    "article_title"
+   ],
+   "confidence": 0.67,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 10468,
+     "page": null,
+     "value": [
+      "CHIODO: TAKING PROPORTIONALITY SERIOUSLY"
+     ]
+    },
+    {
+     "article_id": 575,
+     "page": null,
+     "value": [
+      "BERNICCHIA-FREEMAN: GENDERED CREDIBILITY ON TRIAL"
+     ]
+    },
+    {
+     "article_id": 8220,
+     "page": null,
+     "value": [
+      "(2026) WJLS 17:1"
+     ]
+    }
+   ]
+  },
+  "page_number": {
+   "value": "top-inner",
+   "confidence": 1.0,
+   "articles": 2,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 8220,
+     "page": null,
+     "value": "top-inner"
+    }
+   ]
+  }
+ },
+ "title_block": {
+  "title_size_pt": {
+   "value": 16.0,
+   "confidence": 0.75,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": 1,
+     "value": "INDIGENOUS COMMUNITY COURTS:"
+    },
+    {
+     "article_id": 576,
+     "page": 1,
+     "value": "UNUSED STATE CAPACITY: A"
+    },
+    {
+     "article_id": 8222,
+     "page": 1,
+     "value": "RECONCILIATION THROUGH EDUCATION:"
+    },
+    {
+     "article_id": 10300,
+     "page": 1,
+     "value": "COCONUTS, CRAYONS, AND"
+    },
+    {
+     "article_id": 10468,
+     "page": 1,
+     "value": "Taking Proportionality Seriously: A Countercultural Approach"
+    },
+    {
+     "article_id": 10337,
+     "page": 1,
+     "value": "GEOGRAPHICAL INDICATIONS IN"
+    }
+   ]
+  },
+  "title_alignment": {
+   "value": "center",
+   "confidence": 0.88,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": 1,
+     "value": "INDIGENOUS COMMUNITY COURTS:"
+    },
+    {
+     "article_id": 576,
+     "page": 1,
+     "value": "UNUSED STATE CAPACITY: A"
+    },
+    {
+     "article_id": 8222,
+     "page": 1,
+     "value": "RECONCILIATION THROUGH EDUCATION:"
+    },
+    {
+     "article_id": 10300,
+     "page": 1,
+     "value": "COCONUTS, CRAYONS, AND"
+    },
+    {
+     "article_id": 10468,
+     "page": 1,
+     "value": "Taking Proportionality Seriously: A Countercultural Approach"
+    },
+    {
+     "article_id": 10337,
+     "page": 1,
+     "value": "GEOGRAPHICAL INDICATIONS IN"
+    }
+   ]
+  },
+  "title_case": {
+   "value": "upper",
+   "confidence": 0.75,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": 1,
+     "value": "INDIGENOUS COMMUNITY COURTS:"
+    },
+    {
+     "article_id": 576,
+     "page": 1,
+     "value": "UNUSED STATE CAPACITY: A"
+    },
+    {
+     "article_id": 8222,
+     "page": 1,
+     "value": "RECONCILIATION THROUGH EDUCATION:"
+    },
+    {
+     "article_id": 10300,
+     "page": 1,
+     "value": "COCONUTS, CRAYONS, AND"
+    },
+    {
+     "article_id": 10468,
+     "page": 1,
+     "value": "Taking Proportionality Seriously: A Countercultural Approach"
+    },
+    {
+     "article_id": 10337,
+     "page": 1,
+     "value": "GEOGRAPHICAL INDICATIONS IN"
+    }
+   ]
+  },
+  "author_case": {
+   "value": "title",
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": 1,
+     "value": "INDIGENOUS COMMUNITY COURTS:"
+    },
+    {
+     "article_id": 576,
+     "page": 1,
+     "value": "UNUSED STATE CAPACITY: A"
+    },
+    {
+     "article_id": 8222,
+     "page": 1,
+     "value": "RECONCILIATION THROUGH EDUCATION:"
+    },
+    {
+     "article_id": 10300,
+     "page": 1,
+     "value": "COCONUTS, CRAYONS, AND"
+    },
+    {
+     "article_id": 10468,
+     "page": 1,
+     "value": "Taking Proportionality Seriously: A Countercultural Approach"
+    },
+    {
+     "article_id": 10337,
+     "page": 1,
+     "value": "GEOGRAPHICAL INDICATIONS IN"
+    }
+   ]
+  },
+  "author_alignment": {
+   "value": "center",
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": 1,
+     "value": "INDIGENOUS COMMUNITY COURTS:"
+    },
+    {
+     "article_id": 576,
+     "page": 1,
+     "value": "UNUSED STATE CAPACITY: A"
+    },
+    {
+     "article_id": 8222,
+     "page": 1,
+     "value": "RECONCILIATION THROUGH EDUCATION:"
+    },
+    {
+     "article_id": 10300,
+     "page": 1,
+     "value": "COCONUTS, CRAYONS, AND"
+    },
+    {
+     "article_id": 10468,
+     "page": 1,
+     "value": "Taking Proportionality Seriously: A Countercultural Approach"
+    },
+    {
+     "article_id": 10337,
+     "page": 1,
+     "value": "GEOGRAPHICAL INDICATIONS IN"
+    }
+   ]
+  },
+  "first_pdf_page_is_article": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 10314,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 10409,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 576,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 8222,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 574,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 10300,
+     "page": 1,
+     "value": null
+    }
+   ]
+  }
+ },
+ "table_of_contents": {
+  "value": false,
+  "confidence": 1.0,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 10314,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 10409,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 576,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 8222,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 574,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 10300,
+    "page": null,
+    "value": 0
+   }
+  ]
+ },
+ "citations": {
+  "ibid_case": {
+   "value": "Ibid",
+   "counts": {
+    "Ibid": 470,
+    "ibid": 7
+   },
+   "confidence": 0.99
+  },
+  "ibid_punctuation": {
+   "value": "Ibid.",
+   "counts": {
+    "Ibid.": 177,
+    "Ibid,": 36
+   },
+   "confidence": 0.83
+  },
+  "supra_form": {
+   "value": "supra note N",
+   "counts": {
+    "supra note N": 499,
+    "supra, note N": 2
+   },
+   "confidence": 1.0
+  },
+  "paragraph_pinpoint": {
+   "value": "at para N",
+   "counts": {
+    "at para N": 369,
+    "at para. N": 0
+   },
+   "confidence": 1.0
+  },
+  "page_pinpoint_label": {
+   "value": "at N",
+   "counts": {
+    "at N": 471,
+    "at p N": 0
+   },
+   "confidence": 1.0
+  },
+  "range_dash": {
+   "value": "en dash",
+   "counts": {
+    "en dash": 178,
+    "hyphen": 3
+   },
+   "confidence": 0.98
+  },
+  "emphasis_note": {
+   "value": "[emphasis added]",
+   "counts": {
+    "[emphasis added]": 3,
+    "(emphasis added)": 0
+   },
+   "confidence": 1.0
+  },
+  "section_abbreviation": {
+   "value": "s N",
+   "counts": {
+    "s N": 149,
+    "s. N": 14
+   },
+   "confidence": 0.91
+  },
+  "et_al": {
+   "value": "et al",
+   "counts": {
+    "et al": 40,
+    "et al.": 2
+   },
+   "confidence": 0.95
+  },
+  "eg": {
+   "value": "e.g.",
+   "counts": {
+    "eg": 0,
+    "e.g.": 15
+   },
+   "confidence": 1.0
+  },
+  "ie": {
+   "value": null,
+   "counts": {
+    "ie": 0,
+    "i.e.": 0
+   },
+   "confidence": 0.0
+  },
+  "see_signal_case": {
+   "value": "See",
+   "counts": {
+    "See": 69,
+    "see": 34
+   },
+   "confidence": 0.67
+  },
+  "online_angle_brackets": {
+   "value": "online: <url>",
+   "counts": {
+    "online: <url>": 1,
+    "online: url": 1
+   },
+   "confidence": 0.5
+  },
+  "quotes": {
+   "value": "curly",
+   "counts": {
+    "curly": 747,
+    "straight": 3
+   },
+   "confidence": 1.0
+  },
+  "raw_counts": {
+   "ibid_capitalized": 470,
+   "ibid_lower": 7,
+   "ibid_period": 177,
+   "ibid_comma": 36,
+   "ibid_at": 250,
+   "supra_note": 499,
+   "supra_comma_note": 2,
+   "at_para": 369,
+   "at_para_period": 0,
+   "at_pilcrow": 0,
+   "at_page": 471,
+   "at_p": 0,
+   "range_endash": 178,
+   "range_hyphen": 3,
+   "emphasis_brackets": 3,
+   "emphasis_parens": 0,
+   "section_s_period": 14,
+   "section_s_bare": 149,
+   "online_colon": 1,
+   "online_angle": 1,
+   "perma": 121,
+   "et_al_period": 2,
+   "et_al_bare": 40,
+   "neutral_citation": 142,
+   "canlii": 29,
+   "eg_bare": 0,
+   "eg_period": 15,
+   "ie_bare": 0,
+   "ie_period": 0,
+   "curly_double": 747,
+   "straight_double": 3,
+   "see_signal_upper": 69,
+   "see_signal_lower": 34
+  },
+  "footnote_lines": 2419
+ },
+ "status": "ok",
+ "candidates": 10
+}

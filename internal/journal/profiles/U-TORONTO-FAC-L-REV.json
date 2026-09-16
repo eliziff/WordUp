@@ -1,0 +1,1520 @@
+{
+ "dataset": "U-TORONTO-FAC-L-REV",
+ "journal": "University of Toronto Faculty of Law Review",
+ "abbrev": "UT Fac L Rev",
+ "platform": "utflr",
+ "years": [
+  "2025",
+  "2026"
+ ],
+ "articles_measured": [
+  8217,
+  234,
+  10247,
+  10249,
+  10250,
+  233
+ ],
+ "units": "points and inches; boxes measured at 144 dpi",
+ "page": {
+  "width_pt": 486,
+  "height_pt": 702,
+  "width_in": 6.75,
+  "height_in": 9.75,
+  "confidence": 1.0,
+  "articles": 6,
+  "evidence": [
+   {
+    "article_id": 8217,
+    "page": 1,
+    "value": {
+     "width_pt": 486,
+     "height_pt": 702
+    }
+   },
+   {
+    "article_id": 234,
+    "page": 1,
+    "value": {
+     "width_pt": 486,
+     "height_pt": 702
+    }
+   },
+   {
+    "article_id": 10247,
+    "page": 1,
+    "value": {
+     "width_pt": 486,
+     "height_pt": 702
+    }
+   },
+   {
+    "article_id": 10249,
+    "page": 1,
+    "value": {
+     "width_pt": 486,
+     "height_pt": 702
+    }
+   },
+   {
+    "article_id": 10250,
+    "page": 1,
+    "value": {
+     "width_pt": 486,
+     "height_pt": 702
+    }
+   },
+   {
+    "article_id": 233,
+    "page": 1,
+    "value": {
+     "width_pt": 486,
+     "height_pt": 702
+    }
+   }
+  ]
+ },
+ "margins_in": {
+  "mirrored": true,
+  "left_odd_pages": {
+   "value": 1.15,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 234,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 10247,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 10249,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 10250,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 233,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 0.95
+     }
+    }
+   ]
+  },
+  "left_even_pages": {
+   "value": 0.95,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 234,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 10247,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 10249,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 10250,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 233,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 0.95
+     }
+    }
+   ]
+  },
+  "right_odd_pages": {
+   "value": 0.9,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": null,
+     "value": {
+      "odd": 0.9,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 234,
+     "page": null,
+     "value": {
+      "odd": 0.9,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 10247,
+     "page": null,
+     "value": {
+      "odd": 0.9,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 10249,
+     "page": null,
+     "value": {
+      "odd": 0.9,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 10250,
+     "page": null,
+     "value": {
+      "odd": 0.9,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 233,
+     "page": null,
+     "value": {
+      "odd": 0.9,
+      "even": 1.15
+     }
+    }
+   ]
+  },
+  "right_even_pages": {
+   "value": 1.15,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": null,
+     "value": {
+      "odd": 0.9,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 234,
+     "page": null,
+     "value": {
+      "odd": 0.9,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 10247,
+     "page": null,
+     "value": {
+      "odd": 0.9,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 10249,
+     "page": null,
+     "value": {
+      "odd": 0.9,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 10250,
+     "page": null,
+     "value": {
+      "odd": 0.9,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 233,
+     "page": null,
+     "value": {
+      "odd": 0.9,
+      "even": 1.15
+     }
+    }
+   ]
+  },
+  "top": {
+   "value": 0.95,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": null,
+     "value": 0.95
+    },
+    {
+     "article_id": 234,
+     "page": null,
+     "value": 0.95
+    },
+    {
+     "article_id": 10247,
+     "page": null,
+     "value": 0.95
+    },
+    {
+     "article_id": 10249,
+     "page": null,
+     "value": 0.95
+    },
+    {
+     "article_id": 10250,
+     "page": null,
+     "value": 0.95
+    },
+    {
+     "article_id": 233,
+     "page": null,
+     "value": 0.95
+    }
+   ]
+  },
+  "bottom": {
+   "value": null,
+   "confidence": 0.17,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": null,
+     "value": 2.2
+    },
+    {
+     "article_id": 234,
+     "page": null,
+     "value": 1.55
+    },
+    {
+     "article_id": 10247,
+     "page": null,
+     "value": 1.85
+    },
+    {
+     "article_id": 10249,
+     "page": null,
+     "value": 1.7
+    },
+    {
+     "article_id": 10250,
+     "page": null,
+     "value": 1.35
+    },
+    {
+     "article_id": 233,
+     "page": null,
+     "value": 1.8
+    }
+   ]
+  }
+ },
+ "body": {
+  "font": {
+   "value": "PlantinMTPro-Light",
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": null,
+     "value": "PlantinMTPro-Light"
+    },
+    {
+     "article_id": 234,
+     "page": null,
+     "value": "PlantinMTPro-Light"
+    },
+    {
+     "article_id": 10247,
+     "page": null,
+     "value": "PlantinMTPro-Light"
+    },
+    {
+     "article_id": 10249,
+     "page": null,
+     "value": "PlantinMTPro-Light"
+    },
+    {
+     "article_id": 10250,
+     "page": null,
+     "value": "PlantinMTPro-Light"
+    },
+    {
+     "article_id": 233,
+     "page": null,
+     "value": "PlantinMTPro-Light"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 10.0,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 234,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 10247,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 10249,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 10250,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 233,
+     "page": null,
+     "value": 10.0
+    }
+   ]
+  },
+  "line_height_pt": {
+   "value": 11.5,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": null,
+     "value": 11.5
+    },
+    {
+     "article_id": 234,
+     "page": null,
+     "value": 11.5
+    },
+    {
+     "article_id": 10247,
+     "page": null,
+     "value": 11.5
+    },
+    {
+     "article_id": 10249,
+     "page": null,
+     "value": 11.5
+    },
+    {
+     "article_id": 10250,
+     "page": null,
+     "value": 11.5
+    },
+    {
+     "article_id": 233,
+     "page": null,
+     "value": 11.5
+    }
+   ]
+  }
+ },
+ "footnotes": {
+  "font": {
+   "value": "PlantinMTPro-Light",
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": null,
+     "value": "PlantinMTPro-Light"
+    },
+    {
+     "article_id": 234,
+     "page": null,
+     "value": "PlantinMTPro-Light"
+    },
+    {
+     "article_id": 10247,
+     "page": null,
+     "value": "PlantinMTPro-Light"
+    },
+    {
+     "article_id": 10249,
+     "page": null,
+     "value": "PlantinMTPro-Light"
+    },
+    {
+     "article_id": 10250,
+     "page": null,
+     "value": "PlantinMTPro-Light"
+    },
+    {
+     "article_id": 233,
+     "page": null,
+     "value": "PlantinMTPro-Light"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 8.0,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": null,
+     "value": 8.0
+    },
+    {
+     "article_id": 234,
+     "page": null,
+     "value": 8.0
+    },
+    {
+     "article_id": 10247,
+     "page": null,
+     "value": 8.0
+    },
+    {
+     "article_id": 10249,
+     "page": null,
+     "value": 8.0
+    },
+    {
+     "article_id": 10250,
+     "page": null,
+     "value": 8.0
+    },
+    {
+     "article_id": 233,
+     "page": null,
+     "value": 8.0
+    }
+   ]
+  },
+  "present": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": null,
+     "value": 625
+    },
+    {
+     "article_id": 234,
+     "page": null,
+     "value": 211
+    },
+    {
+     "article_id": 10247,
+     "page": null,
+     "value": 303
+    },
+    {
+     "article_id": 10249,
+     "page": null,
+     "value": 177
+    },
+    {
+     "article_id": 10250,
+     "page": null,
+     "value": 119
+    },
+    {
+     "article_id": 233,
+     "page": null,
+     "value": 223
+    }
+   ]
+  },
+  "number_style": {
+   "value": "number_space",
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": null,
+     "value": [
+      "1 2024 CSC 22 [York CSC]."
+     ]
+    },
+    {
+     "article_id": 234,
+     "page": null,
+     "value": [
+      "1 Romulus’ reign is speculated to have begun in the mid-eighth century BCE (see Mary"
+     ]
+    },
+    {
+     "article_id": 10247,
+     "page": null,
+     "value": [
+      "* JD (Dalhousie University); HBA (University of Western Ontario). I would like to thank"
+     ]
+    },
+    {
+     "article_id": 10249,
+     "page": null,
+     "value": [
+      "1 Lon Fuller & William Perdue Jr, “The Reliance Interest in Contract Damages: 1” (1936)"
+     ]
+    },
+    {
+     "article_id": 10250,
+     "page": null,
+     "value": [
+      "* JD/MBA (University of Toronto, 2024). I would like to acknowledge my Economic Torts"
+     ]
+    },
+    {
+     "article_id": 233,
+     "page": null,
+     "value": [
+      "* JD (University of Toronto, Faculty of Law); BASc (Queen’s University, Faculty of"
+     ]
+    }
+   ]
+  },
+  "indent_vs_body_in": {
+   "value": 0.0,
+   "confidence": 0.5,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 234,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 10247,
+     "page": null,
+     "value": -0.1
+    },
+    {
+     "article_id": 10249,
+     "page": null,
+     "value": -0.2
+    },
+    {
+     "article_id": 10250,
+     "page": null,
+     "value": -0.2
+    },
+    {
+     "article_id": 233,
+     "page": null,
+     "value": 0.0
+    }
+   ]
+  },
+  "first_page_author_note": {
+   "value": false,
+   "confidence": 0.5,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 234,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 10247,
+     "page": 1,
+     "value": [
+      "* JD (Dalhousie University); HBA (University of Western Ontario). I would like to thank"
+     ]
+    },
+    {
+     "article_id": 10249,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 10250,
+     "page": 1,
+     "value": [
+      "* JD/MBA (University of Toronto, 2024). I would like to acknowledge my Economic Torts"
+     ]
+    },
+    {
+     "article_id": 233,
+     "page": 1,
+     "value": [
+      "* JD (University of Toronto, Faculty of Law); BASc (Queen’s University, Faculty of"
+     ]
+    }
+   ]
+  }
+ },
+ "headings": {
+  "numbering_levels": {
+   "value": [
+    "roman_period",
+    "alpha_period",
+    "unnumbered"
+   ],
+   "confidence": 0.83,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": 1,
+     "value": [
+      "III",
+      "LA RESPONSABILITÉ IMPOSÉE AUX DÉCIDEURS ADMINISTRA",
+      "RECONNAÎTRE QUE LES FAITS SOULÈVENT UN DROIT PROTÉ"
+     ]
+    },
+    {
+     "article_id": 234,
+     "page": 1,
+     "value": [
+      "V",
+      "ABSTRACT",
+      "KEYWORDS"
+     ]
+    },
+    {
+     "article_id": 10247,
+     "page": 2,
+     "value": [
+      "KEY WORDS",
+      "INTRODUCTION",
+      "I"
+     ]
+    },
+    {
+     "article_id": 10249,
+     "page": 1,
+     "value": [
+      "II",
+      "THE HISTORY OF SPECIFIC PERFORMANCE IN REAL ESTATE",
+      "TRANSACTIONS\b"
+     ]
+    },
+    {
+     "article_id": 10250,
+     "page": 1,
+     "value": [
+      "I",
+      "III",
+      "IV"
+     ]
+    },
+    {
+     "article_id": 233,
+     "page": 1,
+     "value": [
+      "VI",
+      "CONCLUSION\b",
+      "INTRODUCTION"
+     ]
+    }
+   ]
+  },
+  "top_level_case": {
+   "value": "upper",
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": 3,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 234,
+     "page": 2,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 10247,
+     "page": 2,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 10249,
+     "page": 2,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 10250,
+     "page": 2,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 233,
+     "page": 2,
+     "value": "INTRODUCTION"
+    }
+   ]
+  },
+  "top_level_size_pt": {
+   "value": 10.0,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": 3,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 234,
+     "page": 2,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 10247,
+     "page": 2,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 10249,
+     "page": 2,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 10250,
+     "page": 2,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 233,
+     "page": 2,
+     "value": "INTRODUCTION"
+    }
+   ]
+  },
+  "top_level_alignment": {
+   "value": "left",
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": 3,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 234,
+     "page": 2,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 10247,
+     "page": 2,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 10249,
+     "page": 2,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 10250,
+     "page": 2,
+     "value": "INTRODUCTION"
+    },
+    {
+     "article_id": 233,
+     "page": 2,
+     "value": "INTRODUCTION"
+    }
+   ]
+  },
+  "samples": [
+   "III",
+   "LA RESPONSABILITÉ IMPOSÉE AUX DÉCIDEURS ADMINISTRATIFS DE",
+   "RECONNAÎTRE QUE LES FAITS SOULÈVENT UN DROIT PROTÉGÉ PAR",
+   "LA CHARTE",
+   "V",
+   "ABSTRACT",
+   "KEYWORDS",
+   "INTRODUCTION",
+   "KEY WORDS",
+   "INTRODUCTION",
+   "I",
+   "THE CURRENT STATE OF AI SYSTEMS IN"
+  ]
+ },
+ "block_quotes": {
+  "indent_in": {
+   "value": 0.5,
+   "confidence": 0.5,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": null,
+     "value": 0.5
+    },
+    {
+     "article_id": 234,
+     "page": null,
+     "value": 0.5
+    },
+    {
+     "article_id": 10249,
+     "page": null,
+     "value": 0.3
+    },
+    {
+     "article_id": 10250,
+     "page": null,
+     "value": 0.3
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 9.0,
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 234,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 10249,
+     "page": null,
+     "value": 9.0
+    },
+    {
+     "article_id": 10250,
+     "page": null,
+     "value": 9.0
+    }
+   ]
+  },
+  "articles_with_block_quotes": 4
+ },
+ "running_heads": {
+  "odd_pages": {
+   "value": [
+    "volume_or_year"
+   ],
+   "confidence": 0.67,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": null,
+     "value": [
+      "WINTER 2025",
+      "ATTENTES RAISONNABLES, EXIGENCES DÉRAISONNABLES"
+     ]
+    },
+    {
+     "article_id": 234,
+     "page": null,
+     "value": [
+      "WINTER 2025",
+      "GOOD ENOUGH ISN’T GOOD ENOUGH"
+     ]
+    },
+    {
+     "article_id": 10247,
+     "page": null,
+     "value": [
+      "WINTER 2025",
+      "“NO TAKESIES BACKSIES”"
+     ]
+    },
+    {
+     "article_id": 10249,
+     "page": null,
+     "value": [
+      "SPRING 2025",
+      "ABORTIVE REAL ESTATE TRANSACTIONS"
+     ]
+    },
+    {
+     "article_id": 10250,
+     "page": null,
+     "value": [
+      "SPRING 2025",
+      "ENRICHMENT, EXPLOITATION, AND THE EVASION OF RESPONSIBILITY"
+     ]
+    },
+    {
+     "article_id": 233,
+     "page": null,
+     "value": [
+      "SPRING 2025",
+      "ACCUMULATING JUSTIFIED EFFECTS"
+     ]
+    }
+   ]
+  },
+  "even_pages": {
+   "value": [
+    "journal_name",
+    "volume_or_year"
+   ],
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": null,
+     "value": [
+      "UNIVERSITY OF TORONTO FACULTY OF LAW REVIEW",
+      "VOL 83"
+     ]
+    },
+    {
+     "article_id": 234,
+     "page": null,
+     "value": [
+      "UNIVERSITY OF TORONTO FACULTY OF LAW REVIEW",
+      "VOL 83"
+     ]
+    },
+    {
+     "article_id": 10247,
+     "page": null,
+     "value": [
+      "UNIVERSITY OF TORONTO FACULTY OF LAW REVIEW",
+      "VOL 83"
+     ]
+    },
+    {
+     "article_id": 10249,
+     "page": null,
+     "value": [
+      "UNIVERSITY OF TORONTO FACULTY OF LAW REVIEW",
+      "VOL 83"
+     ]
+    },
+    {
+     "article_id": 10250,
+     "page": null,
+     "value": [
+      "UNIVERSITY OF TORONTO FACULTY OF LAW REVIEW",
+      "VOL 83"
+     ]
+    },
+    {
+     "article_id": 233,
+     "page": null,
+     "value": [
+      "UNIVERSITY OF TORONTO FACULTY OF LAW REVIEW",
+      "VOL 83"
+     ]
+    }
+   ]
+  },
+  "page_number": {
+   "value": "top-outer",
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 234,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 10247,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 10249,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 10250,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 233,
+     "page": null,
+     "value": "top-outer"
+    }
+   ]
+  }
+ },
+ "title_block": {
+  "title_size_pt": {
+   "value": 10.0,
+   "confidence": 1.0,
+   "articles": 5,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": 1,
+     "value": "ATTENTES RAISONNABLES, EXIGENCES DÉRAISONNABLES :"
+    },
+    {
+     "article_id": 234,
+     "page": 1,
+     "value": "GOOD ENOUGH ISN’T GOOD ENOUGH: HOW THE COURT OF"
+    },
+    {
+     "article_id": 10249,
+     "page": 1,
+     "value": "A DOCTRINAL CRITIQUE OF SPECIFIC PERFORMANCE IN"
+    },
+    {
+     "article_id": 10250,
+     "page": 1,
+     "value": "ENRICHMENT, EXPLOITATION, AND THE EVASION OF"
+    },
+    {
+     "article_id": 233,
+     "page": 1,
+     "value": "ACCUMULATING JUSTIFIED EFFECTS: EXTENDING YAHEY"
+    }
+   ]
+  },
+  "title_alignment": {
+   "value": "center",
+   "confidence": 1.0,
+   "articles": 5,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": 1,
+     "value": "ATTENTES RAISONNABLES, EXIGENCES DÉRAISONNABLES :"
+    },
+    {
+     "article_id": 234,
+     "page": 1,
+     "value": "GOOD ENOUGH ISN’T GOOD ENOUGH: HOW THE COURT OF"
+    },
+    {
+     "article_id": 10249,
+     "page": 1,
+     "value": "A DOCTRINAL CRITIQUE OF SPECIFIC PERFORMANCE IN"
+    },
+    {
+     "article_id": 10250,
+     "page": 1,
+     "value": "ENRICHMENT, EXPLOITATION, AND THE EVASION OF"
+    },
+    {
+     "article_id": 233,
+     "page": 1,
+     "value": "ACCUMULATING JUSTIFIED EFFECTS: EXTENDING YAHEY"
+    }
+   ]
+  },
+  "title_case": {
+   "value": "upper",
+   "confidence": 1.0,
+   "articles": 5,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": 1,
+     "value": "ATTENTES RAISONNABLES, EXIGENCES DÉRAISONNABLES :"
+    },
+    {
+     "article_id": 234,
+     "page": 1,
+     "value": "GOOD ENOUGH ISN’T GOOD ENOUGH: HOW THE COURT OF"
+    },
+    {
+     "article_id": 10249,
+     "page": 1,
+     "value": "A DOCTRINAL CRITIQUE OF SPECIFIC PERFORMANCE IN"
+    },
+    {
+     "article_id": 10250,
+     "page": 1,
+     "value": "ENRICHMENT, EXPLOITATION, AND THE EVASION OF"
+    },
+    {
+     "article_id": 233,
+     "page": 1,
+     "value": "ACCUMULATING JUSTIFIED EFFECTS: EXTENDING YAHEY"
+    }
+   ]
+  },
+  "author_case": {
+   "value": "upper",
+   "confidence": 1.0,
+   "articles": 5,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": 1,
+     "value": "ATTENTES RAISONNABLES, EXIGENCES DÉRAISONNABLES :"
+    },
+    {
+     "article_id": 234,
+     "page": 1,
+     "value": "GOOD ENOUGH ISN’T GOOD ENOUGH: HOW THE COURT OF"
+    },
+    {
+     "article_id": 10249,
+     "page": 1,
+     "value": "A DOCTRINAL CRITIQUE OF SPECIFIC PERFORMANCE IN"
+    },
+    {
+     "article_id": 10250,
+     "page": 1,
+     "value": "ENRICHMENT, EXPLOITATION, AND THE EVASION OF"
+    },
+    {
+     "article_id": 233,
+     "page": 1,
+     "value": "ACCUMULATING JUSTIFIED EFFECTS: EXTENDING YAHEY"
+    }
+   ]
+  },
+  "author_alignment": {
+   "value": "left",
+   "confidence": 1.0,
+   "articles": 5,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": 1,
+     "value": "ATTENTES RAISONNABLES, EXIGENCES DÉRAISONNABLES :"
+    },
+    {
+     "article_id": 234,
+     "page": 1,
+     "value": "GOOD ENOUGH ISN’T GOOD ENOUGH: HOW THE COURT OF"
+    },
+    {
+     "article_id": 10249,
+     "page": 1,
+     "value": "A DOCTRINAL CRITIQUE OF SPECIFIC PERFORMANCE IN"
+    },
+    {
+     "article_id": 10250,
+     "page": 1,
+     "value": "ENRICHMENT, EXPLOITATION, AND THE EVASION OF"
+    },
+    {
+     "article_id": 233,
+     "page": 1,
+     "value": "ACCUMULATING JUSTIFIED EFFECTS: EXTENDING YAHEY"
+    }
+   ]
+  },
+  "first_pdf_page_is_article": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 8217,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 234,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 10247,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 10249,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 10250,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 233,
+     "page": 1,
+     "value": null
+    }
+   ]
+  }
+ },
+ "table_of_contents": {
+  "value": true,
+  "confidence": 0.83,
+  "articles": 6,
+  "evidence": [
+   {
+    "article_id": 8217,
+    "page": null,
+    "value": 3
+   },
+   {
+    "article_id": 234,
+    "page": null,
+    "value": 18
+   },
+   {
+    "article_id": 10247,
+    "page": null,
+    "value": 12
+   },
+   {
+    "article_id": 10249,
+    "page": null,
+    "value": 4
+   },
+   {
+    "article_id": 10250,
+    "page": null,
+    "value": 7
+   },
+   {
+    "article_id": 233,
+    "page": null,
+    "value": 0
+   }
+  ]
+ },
+ "citations": {
+  "ibid_case": {
+   "value": "Ibid",
+   "counts": {
+    "Ibid": 217,
+    "ibid": 18
+   },
+   "confidence": 0.92
+  },
+  "ibid_punctuation": {
+   "value": "Ibid.",
+   "counts": {
+    "Ibid.": 56,
+    "Ibid,": 5
+   },
+   "confidence": 0.92
+  },
+  "supra_form": {
+   "value": "supra note N",
+   "counts": {
+    "supra note N": 319,
+    "supra, note N": 0
+   },
+   "confidence": 1.0
+  },
+  "paragraph_pinpoint": {
+   "value": "at para N",
+   "counts": {
+    "at para N": 265,
+    "at para. N": 0
+   },
+   "confidence": 1.0
+  },
+  "page_pinpoint_label": {
+   "value": "at N",
+   "counts": {
+    "at N": 245,
+    "at p N": 0
+   },
+   "confidence": 1.0
+  },
+  "range_dash": {
+   "value": "en dash",
+   "counts": {
+    "en dash": 128,
+    "hyphen": 0
+   },
+   "confidence": 1.0
+  },
+  "emphasis_note": {
+   "value": "[emphasis added]",
+   "counts": {
+    "[emphasis added]": 12,
+    "(emphasis added)": 0
+   },
+   "confidence": 1.0
+  },
+  "section_abbreviation": {
+   "value": "s N",
+   "counts": {
+    "s N": 17,
+    "s. N": 2
+   },
+   "confidence": 0.89
+  },
+  "et_al": {
+   "value": "et al",
+   "counts": {
+    "et al": 7,
+    "et al.": 0
+   },
+   "confidence": 1.0
+  },
+  "eg": {
+   "value": "e.g.",
+   "counts": {
+    "eg": 0,
+    "e.g.": 7
+   },
+   "confidence": 1.0
+  },
+  "ie": {
+   "value": "i.e.",
+   "counts": {
+    "ie": 0,
+    "i.e.": 1
+   },
+   "confidence": 1.0
+  },
+  "see_signal_case": {
+   "value": "See",
+   "counts": {
+    "See": 53,
+    "see": 41
+   },
+   "confidence": 0.56
+  },
+  "online_angle_brackets": {
+   "value": null,
+   "counts": {
+    "online: <url>": 0,
+    "online: url": 0
+   },
+   "confidence": 0.0
+  },
+  "quotes": {
+   "value": "curly",
+   "counts": {
+    "curly": 320,
+    "straight": 0
+   },
+   "confidence": 1.0
+  },
+  "raw_counts": {
+   "ibid_capitalized": 217,
+   "ibid_lower": 18,
+   "ibid_period": 56,
+   "ibid_comma": 5,
+   "ibid_at": 126,
+   "supra_note": 319,
+   "supra_comma_note": 0,
+   "at_para": 265,
+   "at_para_period": 0,
+   "at_pilcrow": 0,
+   "at_page": 245,
+   "at_p": 0,
+   "range_endash": 128,
+   "range_hyphen": 0,
+   "emphasis_brackets": 12,
+   "emphasis_parens": 0,
+   "section_s_period": 2,
+   "section_s_bare": 17,
+   "online_colon": 0,
+   "online_angle": 0,
+   "perma": 21,
+   "et_al_period": 0,
+   "et_al_bare": 7,
+   "neutral_citation": 106,
+   "canlii": 36,
+   "eg_bare": 0,
+   "eg_period": 7,
+   "ie_bare": 0,
+   "ie_period": 1,
+   "curly_double": 320,
+   "straight_double": 0,
+   "see_signal_upper": 53,
+   "see_signal_lower": 41
+  },
+  "footnote_lines": 1658
+ },
+ "status": "ok",
+ "candidates": 6
+}

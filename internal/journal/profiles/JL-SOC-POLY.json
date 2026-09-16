@@ -1,0 +1,1381 @@
+{
+ "dataset": "JL-SOC-POLY",
+ "journal": "Journal of Law and Social Policy",
+ "abbrev": "JL & Soc Pol'y",
+ "platform": "Digital Commons",
+ "years": [
+  "2025",
+  "2026"
+ ],
+ "articles_measured": [
+  224,
+  8155,
+  13955,
+  13959,
+  8152,
+  225
+ ],
+ "units": "points and inches; boxes measured at 144 dpi",
+ "page": {
+  "width_pt": 612,
+  "height_pt": 792,
+  "width_in": 8.5,
+  "height_in": 11.0,
+  "confidence": 1.0,
+  "articles": 6,
+  "evidence": [
+   {
+    "article_id": 224,
+    "page": 2,
+    "value": {
+     "width_pt": 612,
+     "height_pt": 792
+    }
+   },
+   {
+    "article_id": 8155,
+    "page": 2,
+    "value": {
+     "width_pt": 612,
+     "height_pt": 792
+    }
+   },
+   {
+    "article_id": 13955,
+    "page": 2,
+    "value": {
+     "width_pt": 612,
+     "height_pt": 792
+    }
+   },
+   {
+    "article_id": 13959,
+    "page": 2,
+    "value": {
+     "width_pt": 612,
+     "height_pt": 792
+    }
+   },
+   {
+    "article_id": 8152,
+    "page": 2,
+    "value": {
+     "width_pt": 612,
+     "height_pt": 792
+    }
+   },
+   {
+    "article_id": 225,
+    "page": 2,
+    "value": {
+     "width_pt": 612,
+     "height_pt": 792
+    }
+   }
+  ]
+ },
+ "margins_in": {
+  "mirrored": false,
+  "left_odd_pages": {
+   "value": 1.0,
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 13959,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 8152,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    }
+   ]
+  },
+  "left_even_pages": {
+   "value": 1.0,
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 13959,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 8152,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    }
+   ]
+  },
+  "right_odd_pages": {
+   "value": 0.95,
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 13959,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 8152,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    }
+   ]
+  },
+  "right_even_pages": {
+   "value": 0.95,
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 13959,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 8152,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    }
+   ]
+  },
+  "top": {
+   "value": 1.0,
+   "confidence": 0.67,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": null,
+     "value": 1.15
+    },
+    {
+     "article_id": 13959,
+     "page": null,
+     "value": 1.0
+    },
+    {
+     "article_id": 8152,
+     "page": null,
+     "value": 1.0
+    }
+   ]
+  },
+  "bottom": {
+   "value": 1.95,
+   "confidence": 0.5,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": null,
+     "value": 2.3
+    },
+    {
+     "article_id": 8155,
+     "page": null,
+     "value": 2.25
+    },
+    {
+     "article_id": 13955,
+     "page": null,
+     "value": 1.95
+    },
+    {
+     "article_id": 13959,
+     "page": null,
+     "value": 1.95
+    },
+    {
+     "article_id": 8152,
+     "page": null,
+     "value": 2.4
+    },
+    {
+     "article_id": 225,
+     "page": null,
+     "value": 1.95
+    }
+   ]
+  }
+ },
+ "body": {
+  "font": {
+   "value": "TimesNewRomanPSMT",
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 8155,
+     "page": null,
+     "value": null
+    },
+    {
+     "article_id": 13955,
+     "page": null,
+     "value": null
+    },
+    {
+     "article_id": 13959,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 8152,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 225,
+     "page": null,
+     "value": null
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 12.0,
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 8155,
+     "page": null,
+     "value": null
+    },
+    {
+     "article_id": 13955,
+     "page": null,
+     "value": null
+    },
+    {
+     "article_id": 13959,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 8152,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 225,
+     "page": null,
+     "value": null
+    }
+   ]
+  },
+  "line_height_pt": {
+   "value": 16.0,
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": null,
+     "value": 16.0
+    },
+    {
+     "article_id": 13959,
+     "page": null,
+     "value": 16.0
+    },
+    {
+     "article_id": 8152,
+     "page": null,
+     "value": 16.0
+    }
+   ]
+  }
+ },
+ "footnotes": {
+  "font": {
+   "value": "TimesNewRomanPSMT",
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 8155,
+     "page": null,
+     "value": null
+    },
+    {
+     "article_id": 13955,
+     "page": null,
+     "value": null
+    },
+    {
+     "article_id": 13959,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 8152,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 225,
+     "page": null,
+     "value": null
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 10.0,
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 8155,
+     "page": null,
+     "value": null
+    },
+    {
+     "article_id": 13955,
+     "page": null,
+     "value": null
+    },
+    {
+     "article_id": 13959,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 8152,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 225,
+     "page": null,
+     "value": null
+    }
+   ]
+  },
+  "present": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": null,
+     "value": 205
+    },
+    {
+     "article_id": 8155,
+     "page": null,
+     "value": 409
+    },
+    {
+     "article_id": 13955,
+     "page": null,
+     "value": 271
+    },
+    {
+     "article_id": 13959,
+     "page": null,
+     "value": 264
+    },
+    {
+     "article_id": 8152,
+     "page": null,
+     "value": 303
+    },
+    {
+     "article_id": 225,
+     "page": null,
+     "value": 281
+    }
+   ]
+  },
+  "number_style": {
+   "value": "number_space",
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": null,
+     "value": [
+      "* Hilary Evans Cameron is an Associate Professor at Toronto Metropolitan University’s Lincoln Alexander School"
+     ]
+    },
+    {
+     "article_id": 8155,
+     "page": null,
+     "value": [
+      "∗ Associate Professor, University of Windsor, Faculty of Law. Foremost, I am deeply indebted to J4MW and the"
+     ]
+    },
+    {
+     "article_id": 13955,
+     "page": null,
+     "value": [
+      "∗ J.D. Class of 2023, University of Toronto Faculty of Law. An earlier version of this paper was the product of a"
+     ]
+    },
+    {
+     "article_id": 13959,
+     "page": null,
+     "value": [
+      "*Associate Professor, Thompson Rivers University Faculty of Law. This paper is derived from the author’s PhD"
+     ]
+    },
+    {
+     "article_id": 8152,
+     "page": null,
+     "value": [
+      "*JSD Student, New York University School of Law. I wrote this article in the 2020-21 academic year as a JD student"
+     ]
+    },
+    {
+     "article_id": 225,
+     "page": null,
+     "value": [
+      "* Barrister and Solicitor, Martinez Law; Adjunct Professor and LLM Candidate, York University, Osgoode Hall Law"
+     ]
+    }
+   ]
+  },
+  "indent_vs_body_in": {
+   "value": 0.0,
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 13959,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 8152,
+     "page": null,
+     "value": 0.0
+    }
+   ]
+  },
+  "first_page_author_note": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": 2,
+     "value": [
+      "* Hilary Evans Cameron is an Associate Professor at Toronto Metropolitan University’s Lincoln Alexander School"
+     ]
+    },
+    {
+     "article_id": 8155,
+     "page": 2,
+     "value": [
+      "∗ Associate Professor, University of Windsor, Faculty of Law. Foremost, I am deeply indebted to J4MW and the"
+     ]
+    },
+    {
+     "article_id": 13955,
+     "page": 2,
+     "value": [
+      "∗ J.D. Class of 2023, University of Toronto Faculty of Law. An earlier version of this paper was the product of a"
+     ]
+    },
+    {
+     "article_id": 13959,
+     "page": 2,
+     "value": [
+      "*Associate Professor, Thompson Rivers University Faculty of Law. This paper is derived from the author’s PhD"
+     ]
+    },
+    {
+     "article_id": 8152,
+     "page": 2,
+     "value": [
+      "*JSD Student, New York University School of Law. I wrote this article in the 2020-21 academic year as a JD student"
+     ]
+    },
+    {
+     "article_id": 225,
+     "page": 2,
+     "value": [
+      "* Barrister and Solicitor, Martinez Law; Adjunct Professor and LLM Candidate, York University, Osgoode Hall Law"
+     ]
+    }
+   ]
+  }
+ },
+ "headings": {
+  "numbering_levels": {
+   "value": [
+    "roman_period",
+    "alpha_period",
+    "unnumbered"
+   ],
+   "confidence": 0.67,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": 2,
+     "value": [
+      "HILARY EVANS CAMERON, SEAN REHAAG & KATRINA",
+      "FRIESEN*",
+      "I. CONCEPTUAL FRAMEWORK"
+     ]
+    },
+    {
+     "article_id": 8155,
+     "page": 7,
+     "value": [
+      "I. FUGITIVITY AND LEGAL MOBILIZATION",
+      "II. CANADA’S RACIAL CAPITALIST LAW AND THE",
+      "IMPOSSIBILITY OF REDRESS"
+     ]
+    },
+    {
+     "article_id": 13955,
+     "page": 5,
+     "value": [
+      "I. THE EXISTING LEGAL RIGHT TO INTERPRETER",
+      "ASSISTANCE",
+      "A. LINGUISTIC PREJUDICE AND THE INCOMPLETE SOLUTIO"
+     ]
+    },
+    {
+     "article_id": 13959,
+     "page": 3,
+     "value": [
+      "I. UNMET LEGAL NEEDS, LEGAL CONSCIOUSNESS, AND",
+      "ADVICE-SEEKING BEHAVIOUR",
+      "II. STUDY"
+     ]
+    },
+    {
+     "article_id": 8152,
+     "page": 3,
+     "value": [
+      "I. THE DIFFERENCE BETWEEN PUBLIC AND PRIVATE",
+      "PROPERTY?",
+      "II. THE PRECARITY OF PROPERTY FOR"
+     ]
+    },
+    {
+     "article_id": 225,
+     "page": 3,
+     "value": [
+      "I. CHALLENGES OF OVERSIGHT AND ENFORCEMENT OF",
+      "PRISONERS’ RIGHTS",
+      "A. (DIS)EMPOWERMENT BY DESIGN"
+     ]
+    }
+   ]
+  },
+  "top_level_case": {
+   "value": "upper",
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": 2,
+     "value": "HILARY EVANS CAMERON, SEAN REHAAG & KATRINA"
+    },
+    {
+     "article_id": 8155,
+     "page": 7,
+     "value": "I. FUGITIVITY AND LEGAL MOBILIZATION"
+    },
+    {
+     "article_id": 13955,
+     "page": 5,
+     "value": "I. THE EXISTING LEGAL RIGHT TO INTERPRETER"
+    },
+    {
+     "article_id": 13959,
+     "page": 3,
+     "value": "I. UNMET LEGAL NEEDS, LEGAL CONSCIOUSNESS, AND"
+    },
+    {
+     "article_id": 8152,
+     "page": 3,
+     "value": "I. THE DIFFERENCE BETWEEN PUBLIC AND PRIVATE"
+    },
+    {
+     "article_id": 225,
+     "page": 3,
+     "value": "I. CHALLENGES OF OVERSIGHT AND ENFORCEMENT OF"
+    }
+   ]
+  },
+  "top_level_size_pt": {
+   "value": 16.0,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": 2,
+     "value": "HILARY EVANS CAMERON, SEAN REHAAG & KATRINA"
+    },
+    {
+     "article_id": 8155,
+     "page": 7,
+     "value": "I. FUGITIVITY AND LEGAL MOBILIZATION"
+    },
+    {
+     "article_id": 13955,
+     "page": 5,
+     "value": "I. THE EXISTING LEGAL RIGHT TO INTERPRETER"
+    },
+    {
+     "article_id": 13959,
+     "page": 3,
+     "value": "I. UNMET LEGAL NEEDS, LEGAL CONSCIOUSNESS, AND"
+    },
+    {
+     "article_id": 8152,
+     "page": 3,
+     "value": "I. THE DIFFERENCE BETWEEN PUBLIC AND PRIVATE"
+    },
+    {
+     "article_id": 225,
+     "page": 3,
+     "value": "I. CHALLENGES OF OVERSIGHT AND ENFORCEMENT OF"
+    }
+   ]
+  },
+  "top_level_alignment": {
+   "value": "left",
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": 2,
+     "value": "HILARY EVANS CAMERON, SEAN REHAAG & KATRINA"
+    },
+    {
+     "article_id": 8155,
+     "page": 7,
+     "value": "I. FUGITIVITY AND LEGAL MOBILIZATION"
+    },
+    {
+     "article_id": 13955,
+     "page": 5,
+     "value": "I. THE EXISTING LEGAL RIGHT TO INTERPRETER"
+    },
+    {
+     "article_id": 13959,
+     "page": 3,
+     "value": "I. UNMET LEGAL NEEDS, LEGAL CONSCIOUSNESS, AND"
+    },
+    {
+     "article_id": 8152,
+     "page": 3,
+     "value": "I. THE DIFFERENCE BETWEEN PUBLIC AND PRIVATE"
+    },
+    {
+     "article_id": 225,
+     "page": 3,
+     "value": "I. CHALLENGES OF OVERSIGHT AND ENFORCEMENT OF"
+    }
+   ]
+  },
+  "samples": [
+   "HILARY EVANS CAMERON, SEAN REHAAG & KATRINA",
+   "FRIESEN*",
+   "I. CONCEPTUAL FRAMEWORK",
+   "II. RESEARCH DESIGN",
+   "I. FUGITIVITY AND LEGAL MOBILIZATION",
+   "II. CANADA’S RACIAL CAPITALIST LAW AND THE",
+   "IMPOSSIBILITY OF REDRESS",
+   "III. REFUSING THE SCRIPTS",
+   "I. THE EXISTING LEGAL RIGHT TO INTERPRETER",
+   "ASSISTANCE",
+   "A. LINGUISTIC PREJUDICE AND THE INCOMPLETE SOLUTION OF A",
+   "LEGAL RIGHT"
+  ]
+ },
+ "block_quotes": {
+  "indent_in": {
+   "value": 0.4,
+   "confidence": 0.67,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": null,
+     "value": 0.25
+    },
+    {
+     "article_id": 13959,
+     "page": null,
+     "value": 0.4
+    },
+    {
+     "article_id": 8152,
+     "page": null,
+     "value": 0.4
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 12.0,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 8155,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 13955,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 13959,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 8152,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 225,
+     "page": null,
+     "value": 12.0
+    }
+   ]
+  },
+  "articles_with_block_quotes": 6
+ },
+ "running_heads": {
+  "odd_pages": {
+   "value": [
+    "journal_name",
+    "volume_or_year"
+   ],
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": null,
+     "value": [
+      "Journal of Law and Social Policy, Vol. 37 [2025], Art. 6",
+      "C. APD FACTORS"
+     ]
+    },
+    {
+     "article_id": 8155,
+     "page": null,
+     "value": [
+      "Journal of Law and Social Policy, Vol. 37 [2025], Art. 3"
+     ]
+    },
+    {
+     "article_id": 13955,
+     "page": null,
+     "value": [
+      "Journal of Law and Social Policy, Vol. 37 [2025], Art. 5"
+     ]
+    },
+    {
+     "article_id": 13959,
+     "page": null,
+     "value": [
+      "Journal of Law and Social Policy, Vol. 37 [2025], Art. 7"
+     ]
+    },
+    {
+     "article_id": 8152,
+     "page": null,
+     "value": [
+      "Journal of Law and Social Policy, Vol. 37 [2025], Art. 2"
+     ]
+    },
+    {
+     "article_id": 225,
+     "page": null,
+     "value": [
+      "Journal of Law and Social Policy, Vol. 37 [2025], Art. 4"
+     ]
+    }
+   ]
+  },
+  "even_pages": {
+   "value": [
+    "article_title",
+    "author"
+   ],
+   "confidence": 0.83,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": null,
+     "value": [
+      "Evans Cameron et al.: The Effect of an ‘Appearance, Presentation and Demeanour’ Instruc",
+      "D. TEXT-BASED OBSERVATIONS"
+     ]
+    },
+    {
+     "article_id": 8155,
+     "page": null,
+     "value": [
+      "Venkatesh: Radical Resistance in the Penumbra of the Law: Legal Mobilization"
+     ]
+    },
+    {
+     "article_id": 13955,
+     "page": null,
+     "value": [
+      "Tengge Xu: The Case for Expanding the Right to an Interpreter Beyond the Cou"
+     ]
+    },
+    {
+     "article_id": 13959,
+     "page": null,
+     "value": [
+      "Pilliar: Navigating the Paths to Justice: A Study on the Role of Social Su"
+     ]
+    },
+    {
+     "article_id": 8152,
+     "page": null,
+     "value": [
+      "Potamianos: Precarity, Property, and Homelessness in Toronto"
+     ]
+    },
+    {
+     "article_id": 225,
+     "page": null,
+     "value": [
+      "Martinez: Probative of Prejudice: Procedural Unfairness Underlying Security"
+     ]
+    }
+   ]
+  },
+  "page_number": {
+   "value": "bottom-outer",
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": null,
+     "value": "bottom-outer"
+    },
+    {
+     "article_id": 8155,
+     "page": null,
+     "value": "bottom-outer"
+    },
+    {
+     "article_id": 13955,
+     "page": null,
+     "value": "bottom-outer"
+    },
+    {
+     "article_id": 13959,
+     "page": null,
+     "value": "bottom-outer"
+    },
+    {
+     "article_id": 8152,
+     "page": null,
+     "value": "bottom-outer"
+    },
+    {
+     "article_id": 225,
+     "page": null,
+     "value": "bottom-outer"
+    }
+   ]
+  }
+ },
+ "title_block": {
+  "title_size_pt": {
+   "value": 16.0,
+   "confidence": 1.0,
+   "articles": 5,
+   "evidence": [
+    {
+     "article_id": 8155,
+     "page": 2,
+     "value": "Radical Resistance in the Penumbra of the Law: Legal Mobiliz"
+    },
+    {
+     "article_id": 13955,
+     "page": 2,
+     "value": "The Case for Expanding the Right to an Interpreter Beyond th"
+    },
+    {
+     "article_id": 13959,
+     "page": 2,
+     "value": "Navigating the Paths to Justice: A Study on the Role of Soci"
+    },
+    {
+     "article_id": 8152,
+     "page": 2,
+     "value": "Precarity, Property, and Homelessness in Toronto"
+    },
+    {
+     "article_id": 225,
+     "page": 2,
+     "value": "Probative of Prejudice: Procedural Unfairness Underlying Sec"
+    }
+   ]
+  },
+  "title_alignment": {
+   "value": "center",
+   "confidence": 0.8,
+   "articles": 5,
+   "evidence": [
+    {
+     "article_id": 8155,
+     "page": 2,
+     "value": "Radical Resistance in the Penumbra of the Law: Legal Mobiliz"
+    },
+    {
+     "article_id": 13955,
+     "page": 2,
+     "value": "The Case for Expanding the Right to an Interpreter Beyond th"
+    },
+    {
+     "article_id": 13959,
+     "page": 2,
+     "value": "Navigating the Paths to Justice: A Study on the Role of Soci"
+    },
+    {
+     "article_id": 8152,
+     "page": 2,
+     "value": "Precarity, Property, and Homelessness in Toronto"
+    },
+    {
+     "article_id": 225,
+     "page": 2,
+     "value": "Probative of Prejudice: Procedural Unfairness Underlying Sec"
+    }
+   ]
+  },
+  "title_case": {
+   "value": "sentence",
+   "confidence": 0.8,
+   "articles": 5,
+   "evidence": [
+    {
+     "article_id": 8155,
+     "page": 2,
+     "value": "Radical Resistance in the Penumbra of the Law: Legal Mobiliz"
+    },
+    {
+     "article_id": 13955,
+     "page": 2,
+     "value": "The Case for Expanding the Right to an Interpreter Beyond th"
+    },
+    {
+     "article_id": 13959,
+     "page": 2,
+     "value": "Navigating the Paths to Justice: A Study on the Role of Soci"
+    },
+    {
+     "article_id": 8152,
+     "page": 2,
+     "value": "Precarity, Property, and Homelessness in Toronto"
+    },
+    {
+     "article_id": 225,
+     "page": 2,
+     "value": "Probative of Prejudice: Procedural Unfairness Underlying Sec"
+    }
+   ]
+  },
+  "author_case": {
+   "value": "upper",
+   "confidence": 1.0,
+   "articles": 5,
+   "evidence": [
+    {
+     "article_id": 8155,
+     "page": 2,
+     "value": "Radical Resistance in the Penumbra of the Law: Legal Mobiliz"
+    },
+    {
+     "article_id": 13955,
+     "page": 2,
+     "value": "The Case for Expanding the Right to an Interpreter Beyond th"
+    },
+    {
+     "article_id": 13959,
+     "page": 2,
+     "value": "Navigating the Paths to Justice: A Study on the Role of Soci"
+    },
+    {
+     "article_id": 8152,
+     "page": 2,
+     "value": "Precarity, Property, and Homelessness in Toronto"
+    },
+    {
+     "article_id": 225,
+     "page": 2,
+     "value": "Probative of Prejudice: Procedural Unfairness Underlying Sec"
+    }
+   ]
+  },
+  "author_alignment": {
+   "value": "left",
+   "confidence": 1.0,
+   "articles": 5,
+   "evidence": [
+    {
+     "article_id": 8155,
+     "page": 2,
+     "value": "Radical Resistance in the Penumbra of the Law: Legal Mobiliz"
+    },
+    {
+     "article_id": 13955,
+     "page": 2,
+     "value": "The Case for Expanding the Right to an Interpreter Beyond th"
+    },
+    {
+     "article_id": 13959,
+     "page": 2,
+     "value": "Navigating the Paths to Justice: A Study on the Role of Soci"
+    },
+    {
+     "article_id": 8152,
+     "page": 2,
+     "value": "Precarity, Property, and Homelessness in Toronto"
+    },
+    {
+     "article_id": 225,
+     "page": 2,
+     "value": "Probative of Prejudice: Procedural Unfairness Underlying Sec"
+    }
+   ]
+  },
+  "first_pdf_page_is_article": {
+   "value": false,
+   "confidence": 1.0,
+   "articles": 6,
+   "evidence": [
+    {
+     "article_id": 224,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 8155,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 13955,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 13959,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 8152,
+     "page": 2,
+     "value": null
+    },
+    {
+     "article_id": 225,
+     "page": 2,
+     "value": null
+    }
+   ]
+  }
+ },
+ "table_of_contents": {
+  "value": false,
+  "confidence": 1.0,
+  "articles": 6,
+  "evidence": [
+   {
+    "article_id": 224,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 8155,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 13955,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 13959,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 8152,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 225,
+    "page": null,
+    "value": 0
+   }
+  ]
+ },
+ "citations": {
+  "ibid_case": {
+   "value": "Ibid",
+   "counts": {
+    "Ibid": 176,
+    "ibid": 4
+   },
+   "confidence": 0.98
+  },
+  "ibid_punctuation": {
+   "value": "Ibid.",
+   "counts": {
+    "Ibid.": 67,
+    "Ibid,": 4
+   },
+   "confidence": 0.94
+  },
+  "supra_form": {
+   "value": "supra note N",
+   "counts": {
+    "supra note N": 258,
+    "supra, note N": 1
+   },
+   "confidence": 1.0
+  },
+  "paragraph_pinpoint": {
+   "value": "at para N",
+   "counts": {
+    "at para N": 131,
+    "at para. N": 1
+   },
+   "confidence": 0.99
+  },
+  "page_pinpoint_label": {
+   "value": "at N",
+   "counts": {
+    "at N": 244,
+    "at p N": 3
+   },
+   "confidence": 0.99
+  },
+  "range_dash": {
+   "value": "en dash",
+   "counts": {
+    "en dash": 78,
+    "hyphen": 19
+   },
+   "confidence": 0.8
+  },
+  "emphasis_note": {
+   "value": "[emphasis added]",
+   "counts": {
+    "[emphasis added]": 9,
+    "(emphasis added)": 0
+   },
+   "confidence": 1.0
+  },
+  "section_abbreviation": {
+   "value": "s N",
+   "counts": {
+    "s N": 20,
+    "s. N": 0
+   },
+   "confidence": 1.0
+  },
+  "et_al": {
+   "value": "et al",
+   "counts": {
+    "et al": 30,
+    "et al.": 0
+   },
+   "confidence": 1.0
+  },
+  "eg": {
+   "value": "e.g.",
+   "counts": {
+    "eg": 0,
+    "e.g.": 26
+   },
+   "confidence": 1.0
+  },
+  "ie": {
+   "value": "i.e.",
+   "counts": {
+    "ie": 0,
+    "i.e.": 2
+   },
+   "confidence": 1.0
+  },
+  "see_signal_case": {
+   "value": "See",
+   "counts": {
+    "See": 103,
+    "see": 37
+   },
+   "confidence": 0.74
+  },
+  "online_angle_brackets": {
+   "value": "online: <url>",
+   "counts": {
+    "online: <url>": 3,
+    "online: url": 3
+   },
+   "confidence": 0.5
+  },
+  "quotes": {
+   "value": "curly",
+   "counts": {
+    "curly": 885,
+    "straight": 26
+   },
+   "confidence": 0.97
+  },
+  "raw_counts": {
+   "ibid_capitalized": 176,
+   "ibid_lower": 4,
+   "ibid_period": 67,
+   "ibid_comma": 4,
+   "ibid_at": 102,
+   "supra_note": 258,
+   "supra_comma_note": 1,
+   "at_para": 131,
+   "at_para_period": 1,
+   "at_pilcrow": 0,
+   "at_page": 244,
+   "at_p": 3,
+   "range_endash": 78,
+   "range_hyphen": 19,
+   "emphasis_brackets": 9,
+   "emphasis_parens": 0,
+   "section_s_period": 0,
+   "section_s_bare": 20,
+   "online_colon": 3,
+   "online_angle": 3,
+   "perma": 98,
+   "et_al_period": 0,
+   "et_al_bare": 30,
+   "neutral_citation": 56,
+   "canlii": 6,
+   "eg_bare": 0,
+   "eg_period": 26,
+   "ie_bare": 0,
+   "ie_period": 2,
+   "curly_double": 885,
+   "straight_double": 26,
+   "see_signal_upper": 103,
+   "see_signal_lower": 37
+  },
+  "footnote_lines": 1733
+ },
+ "status": "ok",
+ "candidates": 8
+}

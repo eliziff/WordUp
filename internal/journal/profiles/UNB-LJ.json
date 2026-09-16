@@ -1,0 +1,1567 @@
+{
+ "dataset": "UNB-LJ",
+ "journal": "University of New Brunswick Law Journal",
+ "abbrev": "UNBLJ",
+ "platform": "OJS",
+ "years": [
+  "2025",
+  "2026"
+ ],
+ "articles_measured": [
+  22774,
+  22779,
+  22775,
+  22778,
+  22780,
+  22781,
+  22782,
+  22777,
+  22772,
+  22771
+ ],
+ "units": "points and inches; boxes measured at 144 dpi",
+ "page": {
+  "width_pt": 432,
+  "height_pt": 648,
+  "width_in": 6.0,
+  "height_in": 9.0,
+  "confidence": 1.0,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 22774,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 22779,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 22775,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 22778,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 22780,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   },
+   {
+    "article_id": 22781,
+    "page": 1,
+    "value": {
+     "width_pt": 432,
+     "height_pt": 648
+    }
+   }
+  ]
+ },
+ "margins_in": {
+  "mirrored": false,
+  "left_odd_pages": {
+   "value": 0.65,
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": null,
+     "value": {
+      "odd": 0.65,
+      "even": 0.6
+     }
+    },
+    {
+     "article_id": 22779,
+     "page": null,
+     "value": {
+      "odd": 0.65,
+      "even": 0.6
+     }
+    },
+    {
+     "article_id": 22775,
+     "page": null,
+     "value": {
+      "odd": 0.6,
+      "even": 0.65
+     }
+    },
+    {
+     "article_id": 22778,
+     "page": null,
+     "value": {
+      "odd": 0.6,
+      "even": 0.65
+     }
+    },
+    {
+     "article_id": 22780,
+     "page": null,
+     "value": {
+      "odd": 0.6,
+      "even": 0.65
+     }
+    },
+    {
+     "article_id": 22781,
+     "page": null,
+     "value": {
+      "odd": 0.65,
+      "even": 0.6
+     }
+    }
+   ]
+  },
+  "left_even_pages": {
+   "value": 0.6,
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": null,
+     "value": {
+      "odd": 0.65,
+      "even": 0.6
+     }
+    },
+    {
+     "article_id": 22779,
+     "page": null,
+     "value": {
+      "odd": 0.65,
+      "even": 0.6
+     }
+    },
+    {
+     "article_id": 22775,
+     "page": null,
+     "value": {
+      "odd": 0.6,
+      "even": 0.65
+     }
+    },
+    {
+     "article_id": 22778,
+     "page": null,
+     "value": {
+      "odd": 0.6,
+      "even": 0.65
+     }
+    },
+    {
+     "article_id": 22780,
+     "page": null,
+     "value": {
+      "odd": 0.6,
+      "even": 0.65
+     }
+    },
+    {
+     "article_id": 22781,
+     "page": null,
+     "value": {
+      "odd": 0.65,
+      "even": 0.6
+     }
+    }
+   ]
+  },
+  "right_odd_pages": {
+   "value": 0.55,
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": null,
+     "value": {
+      "odd": 0.55,
+      "even": 0.6
+     }
+    },
+    {
+     "article_id": 22779,
+     "page": null,
+     "value": {
+      "odd": 0.55,
+      "even": 0.6
+     }
+    },
+    {
+     "article_id": 22775,
+     "page": null,
+     "value": {
+      "odd": 0.6,
+      "even": 0.55
+     }
+    },
+    {
+     "article_id": 22778,
+     "page": null,
+     "value": {
+      "odd": 0.6,
+      "even": 0.55
+     }
+    },
+    {
+     "article_id": 22780,
+     "page": null,
+     "value": {
+      "odd": 0.6,
+      "even": 0.55
+     }
+    },
+    {
+     "article_id": 22781,
+     "page": null,
+     "value": {
+      "odd": 0.55,
+      "even": 0.6
+     }
+    }
+   ]
+  },
+  "right_even_pages": {
+   "value": 0.6,
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": null,
+     "value": {
+      "odd": 0.55,
+      "even": 0.6
+     }
+    },
+    {
+     "article_id": 22779,
+     "page": null,
+     "value": {
+      "odd": 0.55,
+      "even": 0.6
+     }
+    },
+    {
+     "article_id": 22775,
+     "page": null,
+     "value": {
+      "odd": 0.6,
+      "even": 0.55
+     }
+    },
+    {
+     "article_id": 22778,
+     "page": null,
+     "value": {
+      "odd": 0.6,
+      "even": 0.55
+     }
+    },
+    {
+     "article_id": 22780,
+     "page": null,
+     "value": {
+      "odd": 0.6,
+      "even": 0.55
+     }
+    },
+    {
+     "article_id": 22781,
+     "page": null,
+     "value": {
+      "odd": 0.55,
+      "even": 0.6
+     }
+    }
+   ]
+  },
+  "top": {
+   "value": 1.0,
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": null,
+     "value": 1.0
+    },
+    {
+     "article_id": 22779,
+     "page": null,
+     "value": 1.0
+    },
+    {
+     "article_id": 22775,
+     "page": null,
+     "value": 0.5
+    },
+    {
+     "article_id": 22778,
+     "page": null,
+     "value": 1.0
+    },
+    {
+     "article_id": 22780,
+     "page": null,
+     "value": 1.0
+    },
+    {
+     "article_id": 22781,
+     "page": null,
+     "value": 1.0
+    }
+   ]
+  },
+  "bottom": {
+   "value": null,
+   "confidence": 0.3,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": null,
+     "value": 2.0
+    },
+    {
+     "article_id": 22779,
+     "page": null,
+     "value": 1.6
+    },
+    {
+     "article_id": 22775,
+     "page": null,
+     "value": 1.5
+    },
+    {
+     "article_id": 22778,
+     "page": null,
+     "value": 2.0
+    },
+    {
+     "article_id": 22780,
+     "page": null,
+     "value": 1.6
+    },
+    {
+     "article_id": 22781,
+     "page": null,
+     "value": 1.7
+    }
+   ]
+  }
+ },
+ "body": {
+  "font": {
+   "value": "TimesNewRomanPSMT",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 22779,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 22775,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 22778,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 22780,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 22781,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 10.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": null,
+     "value": 10.1
+    },
+    {
+     "article_id": 22779,
+     "page": null,
+     "value": 10.1
+    },
+    {
+     "article_id": 22775,
+     "page": null,
+     "value": 10.1
+    },
+    {
+     "article_id": 22778,
+     "page": null,
+     "value": 10.1
+    },
+    {
+     "article_id": 22780,
+     "page": null,
+     "value": 10.1
+    },
+    {
+     "article_id": 22781,
+     "page": null,
+     "value": 10.1
+    }
+   ]
+  },
+  "line_height_pt": {
+   "value": 11.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 22779,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 22775,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 22778,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 22780,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 22781,
+     "page": null,
+     "value": 11.0
+    }
+   ]
+  }
+ },
+ "footnotes": {
+  "font": {
+   "value": "TimesNewRomanPSMT",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 22779,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 22775,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 22778,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 22780,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 22781,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 8.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": null,
+     "value": 7.9
+    },
+    {
+     "article_id": 22779,
+     "page": null,
+     "value": 7.9
+    },
+    {
+     "article_id": 22775,
+     "page": null,
+     "value": 7.9
+    },
+    {
+     "article_id": 22778,
+     "page": null,
+     "value": 7.9
+    },
+    {
+     "article_id": 22780,
+     "page": null,
+     "value": 7.9
+    },
+    {
+     "article_id": 22781,
+     "page": null,
+     "value": 7.9
+    }
+   ]
+  },
+  "present": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": null,
+     "value": 500
+    },
+    {
+     "article_id": 22779,
+     "page": null,
+     "value": 264
+    },
+    {
+     "article_id": 22775,
+     "page": null,
+     "value": 273
+    },
+    {
+     "article_id": 22778,
+     "page": null,
+     "value": 372
+    },
+    {
+     "article_id": 22780,
+     "page": null,
+     "value": 159
+    },
+    {
+     "article_id": 22781,
+     "page": null,
+     "value": 232
+    }
+   ]
+  },
+  "number_style": {
+   "value": "number_space",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": null,
+     "value": [
+      "1 Trevor CW Farrow, \"What is access to justice?” (2013) 51:3 Osgoode Hall LJ 51 957; Trevor CW Farrow"
+     ]
+    },
+    {
+     "article_id": 22779,
+     "page": null,
+     "value": [
+      "1 Associate Professor, Faculty of Law, Western University.  I am grateful for the funding and community"
+     ]
+    },
+    {
+     "article_id": 22775,
+     "page": null,
+     "value": [
+      "1 Howard Kislowicz is an Associate Professor at the University of Calgary’s Faculty of Law with expertise"
+     ]
+    },
+    {
+     "article_id": 22778,
+     "page": null,
+     "value": [
+      "* Assistant Professor, University of Ottawa Faculty of Law, Common Law Section; Academic Director,"
+     ]
+    },
+    {
+     "article_id": 22780,
+     "page": null,
+     "value": [
+      "* Crows’ Commons Co-Operative."
+     ]
+    },
+    {
+     "article_id": 22781,
+     "page": null,
+     "value": [
+      "* Samuel Y. LeBlanc est professeur chargé d’enseignement à la Faculté de droit de l’Université de Moncton"
+     ]
+    }
+   ]
+  },
+  "indent_vs_body_in": {
+   "value": 0.0,
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 22779,
+     "page": null,
+     "value": -0.05
+    },
+    {
+     "article_id": 22775,
+     "page": null,
+     "value": -0.05
+    },
+    {
+     "article_id": 22778,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 22780,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 22781,
+     "page": null,
+     "value": 0.0
+    }
+   ]
+  },
+  "first_page_author_note": {
+   "value": true,
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 22779,
+     "page": 1,
+     "value": [
+      "support I have received from the Centre for Teaching and Learning at Western University through its"
+     ]
+    },
+    {
+     "article_id": 22775,
+     "page": 1,
+     "value": [
+      "in Constitutional Law, Law and Religion, Administrative Law, and Multiculturalism. He holds common law"
+     ]
+    },
+    {
+     "article_id": 22778,
+     "page": 1,
+     "value": [
+      "* Assistant Professor, University of Ottawa Faculty of Law, Common Law Section; Academic Director,"
+     ]
+    },
+    {
+     "article_id": 22780,
+     "page": 1,
+     "value": [
+      "* Crows’ Commons Co-Operative."
+     ]
+    },
+    {
+     "article_id": 22781,
+     "page": 1,
+     "value": [
+      "* Samuel Y. LeBlanc est professeur chargé d’enseignement à la Faculté de droit de l’Université de Moncton"
+     ]
+    }
+   ]
+  }
+ },
+ "headings": {
+  "numbering_levels": {
+   "value": null,
+   "confidence": 0.29,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": 2,
+     "value": [
+      "Introduction",
+      "Access to knowledge and data as requirements for a",
+      "1. How does access to knowledge relate to access t"
+     ]
+    },
+    {
+     "article_id": 22779,
+     "page": 2,
+     "value": [
+      "Introduction",
+      "Integrating Theory and Practice",
+      "(a) Finding Co-Teachers"
+     ]
+    },
+    {
+     "article_id": 22775,
+     "page": 1,
+     "value": [
+      "Introduction",
+      "Charter Purposes and Religious Freedom Purposes",
+      "Pluralist Factual Characterization"
+     ]
+    },
+    {
+     "article_id": 22778,
+     "page": 1,
+     "value": [
+      "Introduction",
+      "Background",
+      "Relating Transactional Legal Clinics to the Public"
+     ]
+    },
+    {
+     "article_id": 22780,
+     "page": 3,
+     "value": [
+      "1. Rural Landscapes on the Edge",
+      "2. Property at the Edge (a Dialogue)"
+     ]
+    },
+    {
+     "article_id": 22781,
+     "page": 3,
+     "value": [
+      "SYNTHÈSE DES TRAVAUX RÉCENTS",
+      "ANALYSE COMPARATIVE DES DONNÉES ACTUELLES",
+      "PERSPECTIVES ET RECOMMANDATIONS"
+     ]
+    }
+   ]
+  },
+  "top_level_case": {
+   "value": null,
+   "confidence": 0.43,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": 2,
+     "value": "Introduction"
+    },
+    {
+     "article_id": 22779,
+     "page": 2,
+     "value": "Introduction"
+    },
+    {
+     "article_id": 22775,
+     "page": 1,
+     "value": "Introduction"
+    },
+    {
+     "article_id": 22778,
+     "page": 1,
+     "value": "Introduction"
+    },
+    {
+     "article_id": 22780,
+     "page": 3,
+     "value": "1. Rural Landscapes on the Edge"
+    },
+    {
+     "article_id": 22781,
+     "page": 3,
+     "value": "SYNTHÈSE DES TRAVAUX RÉCENTS"
+    }
+   ]
+  },
+  "top_level_size_pt": {
+   "value": 10.0,
+   "confidence": 0.86,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": 2,
+     "value": "Introduction"
+    },
+    {
+     "article_id": 22779,
+     "page": 2,
+     "value": "Introduction"
+    },
+    {
+     "article_id": 22775,
+     "page": 1,
+     "value": "Introduction"
+    },
+    {
+     "article_id": 22778,
+     "page": 1,
+     "value": "Introduction"
+    },
+    {
+     "article_id": 22780,
+     "page": 3,
+     "value": "1. Rural Landscapes on the Edge"
+    },
+    {
+     "article_id": 22781,
+     "page": 3,
+     "value": "SYNTHÈSE DES TRAVAUX RÉCENTS"
+    }
+   ]
+  },
+  "top_level_alignment": {
+   "value": "left",
+   "confidence": 1.0,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": 2,
+     "value": "Introduction"
+    },
+    {
+     "article_id": 22779,
+     "page": 2,
+     "value": "Introduction"
+    },
+    {
+     "article_id": 22775,
+     "page": 1,
+     "value": "Introduction"
+    },
+    {
+     "article_id": 22778,
+     "page": 1,
+     "value": "Introduction"
+    },
+    {
+     "article_id": 22780,
+     "page": 3,
+     "value": "1. Rural Landscapes on the Edge"
+    },
+    {
+     "article_id": 22781,
+     "page": 3,
+     "value": "SYNTHÈSE DES TRAVAUX RÉCENTS"
+    }
+   ]
+  },
+  "samples": [
+   "Introduction",
+   "Access to knowledge and data as requirements for access to justice",
+   "1. How does access to knowledge relate to access to justice?",
+   "2. Calls for court-driven innovation",
+   "Introduction",
+   "Integrating Theory and Practice",
+   "(a) Finding Co-Teachers",
+   "(b) Preliminary Conversations",
+   "Introduction",
+   "Charter Purposes and Religious Freedom Purposes",
+   "Pluralist Factual Characterization",
+   "Engaged Factual Characterization"
+  ]
+ },
+ "block_quotes": {
+  "indent_in": {
+   "value": 0.45,
+   "confidence": 0.71,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": null,
+     "value": 0.45
+    },
+    {
+     "article_id": 22779,
+     "page": null,
+     "value": 0.45
+    },
+    {
+     "article_id": 22775,
+     "page": null,
+     "value": 0.45
+    },
+    {
+     "article_id": 22780,
+     "page": null,
+     "value": 0.5
+    },
+    {
+     "article_id": 22777,
+     "page": null,
+     "value": 0.45
+    },
+    {
+     "article_id": 22772,
+     "page": null,
+     "value": 0.5
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 9.0,
+   "confidence": 1.0,
+   "articles": 7,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": null,
+     "value": 9.12
+    },
+    {
+     "article_id": 22779,
+     "page": null,
+     "value": 9.12
+    },
+    {
+     "article_id": 22775,
+     "page": null,
+     "value": 9.12
+    },
+    {
+     "article_id": 22780,
+     "page": null,
+     "value": 9.12
+    },
+    {
+     "article_id": 22777,
+     "page": null,
+     "value": 9.12
+    },
+    {
+     "article_id": 22772,
+     "page": null,
+     "value": 9.12
+    }
+   ]
+  },
+  "articles_with_block_quotes": 7
+ },
+ "running_heads": {
+  "odd_pages": {
+   "value": [
+    "journal_abbrev"
+   ],
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": null,
+     "value": [
+      "2025]                          FROM DATA TO UNDERSTANDING                                  57",
+      "2025]                          FROM DATA TO UNDERSTANDING                                  59"
+     ]
+    },
+    {
+     "article_id": 22779,
+     "page": null,
+     "value": [
+      "2025]                                 CO-TEACHING IN CONTRACTS                                 189",
+      "2025]                                 CO-TEACHING IN CONTRACTS                                 191"
+     ]
+    },
+    {
+     "article_id": 22775,
+     "page": null,
+     "value": [
+      "UNBLJ   RD UN-B",
+      "[VOL/TOME 76"
+     ]
+    },
+    {
+     "article_id": 22778,
+     "page": null,
+     "value": [
+      "UNBLJ   RD UN-B",
+      "[VOL/TOME 76"
+     ]
+    },
+    {
+     "article_id": 22780,
+     "page": null,
+     "value": [
+      "UNBLJ   RD UN-B",
+      "[VOL/TOME 76"
+     ]
+    },
+    {
+     "article_id": 22781,
+     "page": null,
+     "value": [
+      "2025]                                  L’ÉGALITÉ DES GENRES                                   247",
+      "2025]                                  L’ÉGALITÉ DES GENRES                                   249"
+     ]
+    }
+   ]
+  },
+  "even_pages": {
+   "value": [
+    "journal_abbrev"
+   ],
+   "confidence": 0.56,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": null,
+     "value": [
+      "UNBLJ   RD UN-B",
+      "[VOL/TOME 76"
+     ]
+    },
+    {
+     "article_id": 22779,
+     "page": null,
+     "value": [
+      "UNBLJ   RD UN-B",
+      "[VOL/TOME 76"
+     ]
+    },
+    {
+     "article_id": 22778,
+     "page": null,
+     "value": [
+      "2025]                             TRANSACTIONAL LEGAL CLINICS                               161",
+      "2025]                             TRANSACTIONAL LEGAL CLINICS                               163"
+     ]
+    },
+    {
+     "article_id": 22780,
+     "page": null,
+     "value": [
+      "2025]                          RURAL LANDSCAPES AT THE EDGE                               219",
+      "2025]                          RURAL LANDSCAPES AT THE EDGE                               221"
+     ]
+    },
+    {
+     "article_id": 22781,
+     "page": null,
+     "value": [
+      "UNBLJ   RD UN-B",
+      "[VOL/TOME 76"
+     ]
+    },
+    {
+     "article_id": 22782,
+     "page": null,
+     "value": [
+      "2025]                   MAiD, MENTAL ILLNESS, AND DISCRIMINATION                 273",
+      "2025]                   MAiD, MENTAL ILLNESS, AND DISCRIMINATION                 275"
+     ]
+    }
+   ]
+  },
+  "page_number": {
+   "value": "top-outer",
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 22779,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 22775,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 22778,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 22780,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 22781,
+     "page": null,
+     "value": "top-outer"
+    }
+   ]
+  }
+ },
+ "title_block": {
+  "title_size_pt": {
+   "value": 11.0,
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": 1,
+     "value": "FROM DATA TO UNDERSTANDING: ACCESS TO"
+    },
+    {
+     "article_id": 22779,
+     "page": 1,
+     "value": "CO-TEACHING IN CONTRACTS: INTEGRATING THEORY AND"
+    },
+    {
+     "article_id": 22775,
+     "page": 1,
+     "value": "MAKING MEANINGS: THE PURPOSIVE INTERPRETATION OF"
+    },
+    {
+     "article_id": 22778,
+     "page": 1,
+     "value": "TRANSACTIONAL LEGAL CLINICS AND THE PUBLIC"
+    },
+    {
+     "article_id": 22780,
+     "page": 1,
+     "value": "RURAL LANDSCAPES AT THE EDGE: PROPERTY’S PROMISE"
+    },
+    {
+     "article_id": 22782,
+     "page": 1,
+     "value": "MEDICAL ASSISTANCE IN DYING FOR THE SOLE"
+    }
+   ]
+  },
+  "title_alignment": {
+   "value": "center",
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": 1,
+     "value": "FROM DATA TO UNDERSTANDING: ACCESS TO"
+    },
+    {
+     "article_id": 22779,
+     "page": 1,
+     "value": "CO-TEACHING IN CONTRACTS: INTEGRATING THEORY AND"
+    },
+    {
+     "article_id": 22775,
+     "page": 1,
+     "value": "MAKING MEANINGS: THE PURPOSIVE INTERPRETATION OF"
+    },
+    {
+     "article_id": 22778,
+     "page": 1,
+     "value": "TRANSACTIONAL LEGAL CLINICS AND THE PUBLIC"
+    },
+    {
+     "article_id": 22780,
+     "page": 1,
+     "value": "RURAL LANDSCAPES AT THE EDGE: PROPERTY’S PROMISE"
+    },
+    {
+     "article_id": 22782,
+     "page": 1,
+     "value": "MEDICAL ASSISTANCE IN DYING FOR THE SOLE"
+    }
+   ]
+  },
+  "title_case": {
+   "value": "upper",
+   "confidence": 1.0,
+   "articles": 9,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": 1,
+     "value": "FROM DATA TO UNDERSTANDING: ACCESS TO"
+    },
+    {
+     "article_id": 22779,
+     "page": 1,
+     "value": "CO-TEACHING IN CONTRACTS: INTEGRATING THEORY AND"
+    },
+    {
+     "article_id": 22775,
+     "page": 1,
+     "value": "MAKING MEANINGS: THE PURPOSIVE INTERPRETATION OF"
+    },
+    {
+     "article_id": 22778,
+     "page": 1,
+     "value": "TRANSACTIONAL LEGAL CLINICS AND THE PUBLIC"
+    },
+    {
+     "article_id": 22780,
+     "page": 1,
+     "value": "RURAL LANDSCAPES AT THE EDGE: PROPERTY’S PROMISE"
+    },
+    {
+     "article_id": 22782,
+     "page": 1,
+     "value": "MEDICAL ASSISTANCE IN DYING FOR THE SOLE"
+    }
+   ]
+  },
+  "author_case": {
+   "value": "title",
+   "confidence": 1.0,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": 1,
+     "value": "FROM DATA TO UNDERSTANDING: ACCESS TO"
+    },
+    {
+     "article_id": 22779,
+     "page": 1,
+     "value": "CO-TEACHING IN CONTRACTS: INTEGRATING THEORY AND"
+    },
+    {
+     "article_id": 22775,
+     "page": 1,
+     "value": "MAKING MEANINGS: THE PURPOSIVE INTERPRETATION OF"
+    },
+    {
+     "article_id": 22778,
+     "page": 1,
+     "value": "TRANSACTIONAL LEGAL CLINICS AND THE PUBLIC"
+    },
+    {
+     "article_id": 22780,
+     "page": 1,
+     "value": "RURAL LANDSCAPES AT THE EDGE: PROPERTY’S PROMISE"
+    },
+    {
+     "article_id": 22782,
+     "page": 1,
+     "value": "MEDICAL ASSISTANCE IN DYING FOR THE SOLE"
+    }
+   ]
+  },
+  "author_alignment": {
+   "value": "center",
+   "confidence": 1.0,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": 1,
+     "value": "FROM DATA TO UNDERSTANDING: ACCESS TO"
+    },
+    {
+     "article_id": 22779,
+     "page": 1,
+     "value": "CO-TEACHING IN CONTRACTS: INTEGRATING THEORY AND"
+    },
+    {
+     "article_id": 22775,
+     "page": 1,
+     "value": "MAKING MEANINGS: THE PURPOSIVE INTERPRETATION OF"
+    },
+    {
+     "article_id": 22778,
+     "page": 1,
+     "value": "TRANSACTIONAL LEGAL CLINICS AND THE PUBLIC"
+    },
+    {
+     "article_id": 22780,
+     "page": 1,
+     "value": "RURAL LANDSCAPES AT THE EDGE: PROPERTY’S PROMISE"
+    },
+    {
+     "article_id": 22782,
+     "page": 1,
+     "value": "MEDICAL ASSISTANCE IN DYING FOR THE SOLE"
+    }
+   ]
+  },
+  "first_pdf_page_is_article": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 22774,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 22779,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 22775,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 22778,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 22780,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 22781,
+     "page": 1,
+     "value": null
+    }
+   ]
+  }
+ },
+ "table_of_contents": {
+  "value": false,
+  "confidence": 0.7,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 22774,
+    "page": null,
+    "value": 4
+   },
+   {
+    "article_id": 22779,
+    "page": null,
+    "value": 3
+   },
+   {
+    "article_id": 22775,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 22778,
+    "page": null,
+    "value": 1
+   },
+   {
+    "article_id": 22780,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 22781,
+    "page": null,
+    "value": 0
+   }
+  ]
+ },
+ "citations": {
+  "ibid_case": {
+   "value": "Ibid",
+   "counts": {
+    "Ibid": 378,
+    "ibid": 21
+   },
+   "confidence": 0.95
+  },
+  "ibid_punctuation": {
+   "value": "Ibid.",
+   "counts": {
+    "Ibid.": 115,
+    "Ibid,": 21
+   },
+   "confidence": 0.85
+  },
+  "supra_form": {
+   "value": "supra note N",
+   "counts": {
+    "supra note N": 288,
+    "supra, note N": 58
+   },
+   "confidence": 0.83
+  },
+  "paragraph_pinpoint": {
+   "value": "at para N",
+   "counts": {
+    "at para N": 284,
+    "at para. N": 1
+   },
+   "confidence": 1.0
+  },
+  "page_pinpoint_label": {
+   "value": "at N",
+   "counts": {
+    "at N": 389,
+    "at p N": 2
+   },
+   "confidence": 0.99
+  },
+  "range_dash": {
+   "value": "en dash",
+   "counts": {
+    "en dash": 81,
+    "hyphen": 44
+   },
+   "confidence": 0.65
+  },
+  "emphasis_note": {
+   "value": "[emphasis added]",
+   "counts": {
+    "[emphasis added]": 4,
+    "(emphasis added)": 3
+   },
+   "confidence": 0.57
+  },
+  "section_abbreviation": {
+   "value": "s N",
+   "counts": {
+    "s N": 53,
+    "s. N": 6
+   },
+   "confidence": 0.9
+  },
+  "et_al": {
+   "value": "et al",
+   "counts": {
+    "et al": 44,
+    "et al.": 5
+   },
+   "confidence": 0.9
+  },
+  "eg": {
+   "value": "e.g.",
+   "counts": {
+    "eg": 2,
+    "e.g.": 54
+   },
+   "confidence": 0.96
+  },
+  "ie": {
+   "value": "i.e.",
+   "counts": {
+    "ie": 0,
+    "i.e.": 1
+   },
+   "confidence": 1.0
+  },
+  "see_signal_case": {
+   "value": "See",
+   "counts": {
+    "See": 207,
+    "see": 93
+   },
+   "confidence": 0.69
+  },
+  "online_angle_brackets": {
+   "value": null,
+   "counts": {
+    "online: <url>": 0,
+    "online: url": 0
+   },
+   "confidence": 0.0
+  },
+  "quotes": {
+   "value": "curly",
+   "counts": {
+    "curly": 901,
+    "straight": 104
+   },
+   "confidence": 0.9
+  },
+  "raw_counts": {
+   "ibid_capitalized": 378,
+   "ibid_lower": 21,
+   "ibid_period": 115,
+   "ibid_comma": 21,
+   "ibid_at": 204,
+   "supra_note": 288,
+   "supra_comma_note": 58,
+   "at_para": 284,
+   "at_para_period": 1,
+   "at_pilcrow": 0,
+   "at_page": 389,
+   "at_p": 2,
+   "range_endash": 81,
+   "range_hyphen": 44,
+   "emphasis_brackets": 4,
+   "emphasis_parens": 3,
+   "section_s_period": 6,
+   "section_s_bare": 53,
+   "online_colon": 0,
+   "online_angle": 0,
+   "perma": 30,
+   "et_al_period": 5,
+   "et_al_bare": 44,
+   "neutral_citation": 57,
+   "canlii": 25,
+   "eg_bare": 2,
+   "eg_period": 54,
+   "ie_bare": 0,
+   "ie_period": 1,
+   "curly_double": 901,
+   "straight_double": 104,
+   "see_signal_upper": 207,
+   "see_signal_lower": 93
+  },
+  "footnote_lines": 2761
+ },
+ "status": "ok",
+ "candidates": 14
+}

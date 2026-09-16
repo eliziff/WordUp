@@ -1,0 +1,1565 @@
+{
+ "dataset": "U-TORONTO-J-L-EQUALITY",
+ "journal": "University of Toronto Journal of Law and Equality",
+ "abbrev": "JL & Equality",
+ "platform": "OJS",
+ "years": [
+  "2025",
+  "2026"
+ ],
+ "articles_measured": [
+  11654,
+  11665,
+  11659,
+  11661,
+  11667,
+  8174,
+  11557,
+  8173,
+  8172,
+  8175
+ ],
+ "units": "points and inches; boxes measured at 144 dpi",
+ "page": {
+  "width_pt": 612,
+  "height_pt": 792,
+  "width_in": 8.5,
+  "height_in": 11.0,
+  "confidence": 0.9,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 11654,
+    "page": 1,
+    "value": {
+     "width_pt": 612,
+     "height_pt": 792
+    }
+   },
+   {
+    "article_id": 11665,
+    "page": 1,
+    "value": {
+     "width_pt": 612,
+     "height_pt": 792
+    }
+   },
+   {
+    "article_id": 11659,
+    "page": 1,
+    "value": {
+     "width_pt": 612,
+     "height_pt": 792
+    }
+   },
+   {
+    "article_id": 11661,
+    "page": 1,
+    "value": {
+     "width_pt": 612,
+     "height_pt": 792
+    }
+   },
+   {
+    "article_id": 11667,
+    "page": 1,
+    "value": {
+     "width_pt": 612,
+     "height_pt": 792
+    }
+   },
+   {
+    "article_id": 8174,
+    "page": 1,
+    "value": {
+     "width_pt": 595,
+     "height_pt": 842
+    }
+   }
+  ]
+ },
+ "margins_in": {
+  "mirrored": false,
+  "left_odd_pages": {
+   "value": 1.0,
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 11665,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 11659,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 11661,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 11667,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 8174,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    }
+   ]
+  },
+  "left_even_pages": {
+   "value": 1.0,
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 11665,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 11659,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 11661,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 11667,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    },
+    {
+     "article_id": 8174,
+     "page": null,
+     "value": {
+      "odd": 1.0,
+      "even": 1.0
+     }
+    }
+   ]
+  },
+  "right_odd_pages": {
+   "value": 0.95,
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 11665,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 11659,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 11661,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 11667,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 8174,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    }
+   ]
+  },
+  "right_even_pages": {
+   "value": 0.95,
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 11665,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 11659,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 11661,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 11667,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    },
+    {
+     "article_id": 8174,
+     "page": null,
+     "value": {
+      "odd": 0.95,
+      "even": 0.95
+     }
+    }
+   ]
+  },
+  "top": {
+   "value": 1.0,
+   "confidence": 0.6,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": null,
+     "value": 1.2
+    },
+    {
+     "article_id": 11665,
+     "page": null,
+     "value": 1.0
+    },
+    {
+     "article_id": 11659,
+     "page": null,
+     "value": 1.0
+    },
+    {
+     "article_id": 11661,
+     "page": null,
+     "value": 1.0
+    },
+    {
+     "article_id": 11667,
+     "page": null,
+     "value": 1.0
+    },
+    {
+     "article_id": 8174,
+     "page": null,
+     "value": 1.0
+    }
+   ]
+  },
+  "bottom": {
+   "value": null,
+   "confidence": 0.4,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": null,
+     "value": 1.75
+    },
+    {
+     "article_id": 11665,
+     "page": null,
+     "value": 2.1
+    },
+    {
+     "article_id": 11659,
+     "page": null,
+     "value": 1.95
+    },
+    {
+     "article_id": 11661,
+     "page": null,
+     "value": 2.3
+    },
+    {
+     "article_id": 11667,
+     "page": null,
+     "value": 1.75
+    },
+    {
+     "article_id": 8174,
+     "page": null,
+     "value": 2.5
+    }
+   ]
+  }
+ },
+ "body": {
+  "font": {
+   "value": "Garamond",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": null,
+     "value": "Garamond"
+    },
+    {
+     "article_id": 11665,
+     "page": null,
+     "value": "Garamond"
+    },
+    {
+     "article_id": 11659,
+     "page": null,
+     "value": "Garamond"
+    },
+    {
+     "article_id": 11661,
+     "page": null,
+     "value": "Garamond"
+    },
+    {
+     "article_id": 11667,
+     "page": null,
+     "value": "Garamond"
+    },
+    {
+     "article_id": 8174,
+     "page": null,
+     "value": "Garamond"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": null,
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": null,
+     "value": 15.8
+    },
+    {
+     "article_id": 11665,
+     "page": null,
+     "value": 15.8
+    },
+    {
+     "article_id": 11659,
+     "page": null,
+     "value": 15.8
+    },
+    {
+     "article_id": 11661,
+     "page": null,
+     "value": 15.5
+    },
+    {
+     "article_id": 11667,
+     "page": null,
+     "value": 15.6
+    },
+    {
+     "article_id": 8174,
+     "page": null,
+     "value": 15.8
+    }
+   ]
+  },
+  "line_height_pt": {
+   "value": 17.5,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": null,
+     "value": 17.5
+    },
+    {
+     "article_id": 11665,
+     "page": null,
+     "value": 17.5
+    },
+    {
+     "article_id": 11659,
+     "page": null,
+     "value": 17.5
+    },
+    {
+     "article_id": 11661,
+     "page": null,
+     "value": 17.5
+    },
+    {
+     "article_id": 11667,
+     "page": null,
+     "value": 17.5
+    },
+    {
+     "article_id": 8174,
+     "page": null,
+     "value": 17.5
+    }
+   ]
+  }
+ },
+ "footnotes": {
+  "font": {
+   "value": "Garamond",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": null,
+     "value": "Garamond"
+    },
+    {
+     "article_id": 11665,
+     "page": null,
+     "value": "Garamond"
+    },
+    {
+     "article_id": 11659,
+     "page": null,
+     "value": "Garamond"
+    },
+    {
+     "article_id": 11661,
+     "page": null,
+     "value": "Garamond"
+    },
+    {
+     "article_id": 11667,
+     "page": null,
+     "value": "Garamond"
+    },
+    {
+     "article_id": 8174,
+     "page": null,
+     "value": "Garamond"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 12.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 11665,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 11659,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 11661,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 11667,
+     "page": null,
+     "value": 12.0
+    },
+    {
+     "article_id": 8174,
+     "page": null,
+     "value": 12.0
+    }
+   ]
+  },
+  "present": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": null,
+     "value": 408
+    },
+    {
+     "article_id": 11665,
+     "page": null,
+     "value": 428
+    },
+    {
+     "article_id": 11659,
+     "page": null,
+     "value": 351
+    },
+    {
+     "article_id": 11661,
+     "page": null,
+     "value": 507
+    },
+    {
+     "article_id": 11667,
+     "page": null,
+     "value": 228
+    },
+    {
+     "article_id": 8174,
+     "page": null,
+     "value": 553
+    }
+   ]
+  },
+  "number_style": {
+   "value": "number_space",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": null,
+     "value": [
+      "1 bell hooks, Feminist Theory: From Margin to Center (Cambridge, MA: South End Press, 1984) at 5."
+     ]
+    },
+    {
+     "article_id": 11665,
+     "page": null,
+     "value": [
+      "1 Janet E Halley, “Preface” in Janet Halley et al, eds, Governance Feminism: An Introduction"
+     ]
+    },
+    {
+     "article_id": 11659,
+     "page": null,
+     "value": [
+      "1 Bill C-64, An Act Respecting Pharmacare, 44th Parl, 1st Sess (2024) [Bill C-64]."
+     ]
+    },
+    {
+     "article_id": 11661,
+     "page": null,
+     "value": [
+      "1 Rebecca J Cook, “Introduction: Many Paths to Gender Equality” in Rebecca J Cook, ed, Frontiers of"
+     ]
+    },
+    {
+     "article_id": 11667,
+     "page": null,
+     "value": [
+      "* Abdi Aidid is an Assistant Professor in the Faculty of Law at the University of Toronto and"
+     ]
+    },
+    {
+     "article_id": 8174,
+     "page": null,
+     "value": [
+      "* Bernard Duhaime is a Full Professor of International Law at the Faculty of Law and Political"
+     ]
+    }
+   ]
+  },
+  "indent_vs_body_in": {
+   "value": 0.0,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 11665,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 11659,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 11661,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 11667,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 8174,
+     "page": null,
+     "value": 0.0
+    }
+   ]
+  },
+  "first_page_author_note": {
+   "value": true,
+   "confidence": 0.6,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 11665,
+     "page": 1,
+     "value": [
+      "(Minneapolis: University of Minnesota Press, 2018) ix, at xi."
+     ]
+    },
+    {
+     "article_id": 11659,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 11661,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 11667,
+     "page": 1,
+     "value": [
+      "* Abdi Aidid is an Assistant Professor in the Faculty of Law at the University of Toronto and"
+     ]
+    },
+    {
+     "article_id": 8174,
+     "page": 1,
+     "value": [
+      "* Bernard Duhaime is a Full Professor of International Law at the Faculty of Law and Political"
+     ]
+    }
+   ]
+  }
+ },
+ "headings": {
+  "numbering_levels": {
+   "value": null,
+   "confidence": 0.4,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": 2,
+     "value": [
+      "I. INTRODUCTION: THE NEED FOR A FEMINIST APPROACH ",
+      "ALTERNATIVE DISPUTE RESOLUTION",
+      "A. Women Talking as a Framework for a Feminist App"
+     ]
+    },
+    {
+     "article_id": 11665,
+     "page": 2,
+     "value": [
+      "I. INTRODUCTION",
+      "II. A BRIEF NOTE ON METHODOLOGY",
+      "III. GBVAW: THE GLOBAL PANDEMIC"
+     ]
+    },
+    {
+     "article_id": 11659,
+     "page": 2,
+     "value": [
+      "I. INTRODUCTION",
+      "II. THE PHARMACARE REPORT AND ITS EXCLUSION OF WOM",
+      "DISABILITIES"
+     ]
+    },
+    {
+     "article_id": 11661,
+     "page": 1,
+     "value": [
+      "I. INTRODUCTION",
+      "II. THE POLITICS OF FEMINIST JUDGMENT PROJECTS",
+      "A. The Conventional Methodology"
+     ]
+    },
+    {
+     "article_id": 11667,
+     "page": 1,
+     "value": [
+      "I. INTRODUCTION",
+      "II. ACCESS TO JUSTICE IN CONTEXT",
+      "III. DISPUTE RESOLUTION’S OVERLAPPING OBJECTIVES"
+     ]
+    },
+    {
+     "article_id": 8174,
+     "page": 3,
+     "value": [
+      "I. INTER-AMERICAN SYSTEM NORMATIVE AND INSTITUTION",
+      "STANDARDS REGARDING THE HUMAN RIGHTS OF WOMEN",
+      "II. JURISPRUDENTIAL DEVELOPMENTS ON THE RIGHT TO E"
+     ]
+    }
+   ]
+  },
+  "top_level_case": {
+   "value": "title",
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": 2,
+     "value": "A. Women Talking as a Framework for a Feminist Approach to"
+    },
+    {
+     "article_id": 11665,
+     "page": 13,
+     "value": "A. MMIWG2S and Indigenous Women’s Leadership"
+    },
+    {
+     "article_id": 11659,
+     "page": 4,
+     "value": "A. Drug Coverage in Canada and the Pharmacare Report"
+    },
+    {
+     "article_id": 11661,
+     "page": 4,
+     "value": "A. The Conventional Methodology"
+    },
+    {
+     "article_id": 11667,
+     "page": 14,
+     "value": "A. The Interpretive-Productive Function"
+    },
+    {
+     "article_id": 8174,
+     "page": 3,
+     "value": "I. INTER-AMERICAN SYSTEM NORMATIVE AND INSTITUTIONAL"
+    }
+   ]
+  },
+  "top_level_size_pt": {
+   "value": null,
+   "confidence": 0.4,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": 2,
+     "value": "A. Women Talking as a Framework for a Feminist Approach to"
+    },
+    {
+     "article_id": 11665,
+     "page": 13,
+     "value": "A. MMIWG2S and Indigenous Women’s Leadership"
+    },
+    {
+     "article_id": 11659,
+     "page": 4,
+     "value": "A. Drug Coverage in Canada and the Pharmacare Report"
+    },
+    {
+     "article_id": 11661,
+     "page": 4,
+     "value": "A. The Conventional Methodology"
+    },
+    {
+     "article_id": 11667,
+     "page": 14,
+     "value": "A. The Interpretive-Productive Function"
+    },
+    {
+     "article_id": 8174,
+     "page": 3,
+     "value": "I. INTER-AMERICAN SYSTEM NORMATIVE AND INSTITUTIONAL"
+    }
+   ]
+  },
+  "top_level_alignment": {
+   "value": "left",
+   "confidence": 0.8,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": 2,
+     "value": "A. Women Talking as a Framework for a Feminist Approach to"
+    },
+    {
+     "article_id": 11665,
+     "page": 13,
+     "value": "A. MMIWG2S and Indigenous Women’s Leadership"
+    },
+    {
+     "article_id": 11659,
+     "page": 4,
+     "value": "A. Drug Coverage in Canada and the Pharmacare Report"
+    },
+    {
+     "article_id": 11661,
+     "page": 4,
+     "value": "A. The Conventional Methodology"
+    },
+    {
+     "article_id": 11667,
+     "page": 14,
+     "value": "A. The Interpretive-Productive Function"
+    },
+    {
+     "article_id": 8174,
+     "page": 3,
+     "value": "I. INTER-AMERICAN SYSTEM NORMATIVE AND INSTITUTIONAL"
+    }
+   ]
+  },
+  "samples": [
+   "I. INTRODUCTION: THE NEED FOR A FEMINIST APPROACH TO",
+   "ALTERNATIVE DISPUTE RESOLUTION",
+   "A. Women Talking as a Framework for a Feminist Approach to",
+   "B. Survivors/Victims of Sexual Violence Are Turning towards ADR",
+   "I. INTRODUCTION",
+   "II. A BRIEF NOTE ON METHODOLOGY",
+   "III. GBVAW: THE GLOBAL PANDEMIC",
+   "A. MMIWG2S and Indigenous Women’s Leadership",
+   "I. INTRODUCTION",
+   "II. THE PHARMACARE REPORT AND ITS EXCLUSION OF WOMEN WITH",
+   "DISABILITIES",
+   "A. Drug Coverage in Canada and the Pharmacare Report"
+  ]
+ },
+ "block_quotes": {
+  "indent_in": {
+   "value": 0.4,
+   "confidence": 0.88,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": null,
+     "value": 0.4
+    },
+    {
+     "article_id": 11665,
+     "page": null,
+     "value": 0.4
+    },
+    {
+     "article_id": 11661,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 11667,
+     "page": null,
+     "value": 0.4
+    },
+    {
+     "article_id": 8174,
+     "page": null,
+     "value": 0.4
+    },
+    {
+     "article_id": 8173,
+     "page": null,
+     "value": 0.4
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 16.0,
+   "confidence": 0.5,
+   "articles": 8,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": null,
+     "value": 15.775
+    },
+    {
+     "article_id": 11665,
+     "page": null,
+     "value": 15.775
+    },
+    {
+     "article_id": 11661,
+     "page": null,
+     "value": 15.48
+    },
+    {
+     "article_id": 11667,
+     "page": null,
+     "value": 15.6
+    },
+    {
+     "article_id": 8174,
+     "page": null,
+     "value": 15.775
+    },
+    {
+     "article_id": 8173,
+     "page": null,
+     "value": 15.775
+    }
+   ]
+  },
+  "articles_with_block_quotes": 8
+ },
+ "running_heads": {
+  "odd_pages": {
+   "value": [
+    "article_title",
+    "volume_or_year"
+   ],
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": null,
+     "value": [
+      "VOL. 20",
+      "WOMEN TALKING"
+     ]
+    },
+    {
+     "article_id": 11665,
+     "page": null,
+     "value": [
+      "VOL. 20",
+      "IHRL AND CANADA’S NATIONAL ACTION PLAN"
+     ]
+    },
+    {
+     "article_id": 11659,
+     "page": null,
+     "value": [
+      "VOL. 20",
+      "“PHARMACARE FOR ALL”"
+     ]
+    },
+    {
+     "article_id": 11661,
+     "page": null,
+     "value": [
+      "VOL. 20",
+      "FINDING EQUALITY"
+     ]
+    },
+    {
+     "article_id": 11667,
+     "page": null,
+     "value": [
+      "VOL. 20",
+      "ACCESSING GENDER JUSTICE"
+     ]
+    },
+    {
+     "article_id": 8174,
+     "page": null,
+     "value": [
+      "VOL. 20",
+      "INTER-AMERICAN JURISPRUDENCE"
+     ]
+    }
+   ]
+  },
+  "even_pages": {
+   "value": [
+    "volume_or_year"
+   ],
+   "confidence": 0.9,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": null,
+     "value": [
+      "VOL. 20",
+      "JOURNAL OF LAW & EQUALITY"
+     ]
+    },
+    {
+     "article_id": 11665,
+     "page": null,
+     "value": [
+      "VOL. 20",
+      "JOURNAL OF LAW & EQUALITY"
+     ]
+    },
+    {
+     "article_id": 11659,
+     "page": null,
+     "value": [
+      "VOL. 20",
+      "JOURNAL OF LAW & EQUALITY"
+     ]
+    },
+    {
+     "article_id": 11661,
+     "page": null,
+     "value": [
+      "VOL. 20",
+      "JOURNAL OF LAW & EQUALITY"
+     ]
+    },
+    {
+     "article_id": 11667,
+     "page": null,
+     "value": [
+      "VOL. 20",
+      "JOURNAL OF LAW & EQUALITY"
+     ]
+    },
+    {
+     "article_id": 8174,
+     "page": null,
+     "value": [
+      "VOL. 20",
+      "JOURNAL OF LAW & EQUALITY"
+     ]
+    }
+   ]
+  },
+  "page_number": {
+   "value": "top-inner",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 11665,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 11659,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 11661,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 11667,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 8174,
+     "page": null,
+     "value": "top-inner"
+    }
+   ]
+  }
+ },
+ "title_block": {
+  "title_size_pt": {
+   "value": 16.0,
+   "confidence": 0.5,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": 1,
+     "value": "Women Talking: An Alchemy for Feminist Alternative Dispute"
+    },
+    {
+     "article_id": 11665,
+     "page": 1,
+     "value": "Frontiers of a Gender Equality Paradox: IHRL and Canada’s Na"
+    },
+    {
+     "article_id": 11659,
+     "page": 1,
+     "value": "“Pharmacare for All” except Women with Disabilities: Identif"
+    },
+    {
+     "article_id": 11661,
+     "page": 1,
+     "value": "Finding Equality: A Creative Take on Feminist Judgment Proje"
+    },
+    {
+     "article_id": 11667,
+     "page": 1,
+     "value": "Accessing Gender Justice: Beyond Technocratic Interventions"
+    },
+    {
+     "article_id": 8174,
+     "page": 1,
+     "value": "Contributions of the Inter-American Jurisprudence to the Pro"
+    }
+   ]
+  },
+  "title_alignment": {
+   "value": "center",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": 1,
+     "value": "Women Talking: An Alchemy for Feminist Alternative Dispute"
+    },
+    {
+     "article_id": 11665,
+     "page": 1,
+     "value": "Frontiers of a Gender Equality Paradox: IHRL and Canada’s Na"
+    },
+    {
+     "article_id": 11659,
+     "page": 1,
+     "value": "“Pharmacare for All” except Women with Disabilities: Identif"
+    },
+    {
+     "article_id": 11661,
+     "page": 1,
+     "value": "Finding Equality: A Creative Take on Feminist Judgment Proje"
+    },
+    {
+     "article_id": 11667,
+     "page": 1,
+     "value": "Accessing Gender Justice: Beyond Technocratic Interventions"
+    },
+    {
+     "article_id": 8174,
+     "page": 1,
+     "value": "Contributions of the Inter-American Jurisprudence to the Pro"
+    }
+   ]
+  },
+  "title_case": {
+   "value": "sentence",
+   "confidence": 0.7,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": 1,
+     "value": "Women Talking: An Alchemy for Feminist Alternative Dispute"
+    },
+    {
+     "article_id": 11665,
+     "page": 1,
+     "value": "Frontiers of a Gender Equality Paradox: IHRL and Canada’s Na"
+    },
+    {
+     "article_id": 11659,
+     "page": 1,
+     "value": "“Pharmacare for All” except Women with Disabilities: Identif"
+    },
+    {
+     "article_id": 11661,
+     "page": 1,
+     "value": "Finding Equality: A Creative Take on Feminist Judgment Proje"
+    },
+    {
+     "article_id": 11667,
+     "page": 1,
+     "value": "Accessing Gender Justice: Beyond Technocratic Interventions"
+    },
+    {
+     "article_id": 8174,
+     "page": 1,
+     "value": "Contributions of the Inter-American Jurisprudence to the Pro"
+    }
+   ]
+  },
+  "author_case": {
+   "value": "title",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": 1,
+     "value": "Women Talking: An Alchemy for Feminist Alternative Dispute"
+    },
+    {
+     "article_id": 11665,
+     "page": 1,
+     "value": "Frontiers of a Gender Equality Paradox: IHRL and Canada’s Na"
+    },
+    {
+     "article_id": 11659,
+     "page": 1,
+     "value": "“Pharmacare for All” except Women with Disabilities: Identif"
+    },
+    {
+     "article_id": 11661,
+     "page": 1,
+     "value": "Finding Equality: A Creative Take on Feminist Judgment Proje"
+    },
+    {
+     "article_id": 11667,
+     "page": 1,
+     "value": "Accessing Gender Justice: Beyond Technocratic Interventions"
+    },
+    {
+     "article_id": 8174,
+     "page": 1,
+     "value": "Contributions of the Inter-American Jurisprudence to the Pro"
+    }
+   ]
+  },
+  "author_alignment": {
+   "value": "center",
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": 1,
+     "value": "Women Talking: An Alchemy for Feminist Alternative Dispute"
+    },
+    {
+     "article_id": 11665,
+     "page": 1,
+     "value": "Frontiers of a Gender Equality Paradox: IHRL and Canada’s Na"
+    },
+    {
+     "article_id": 11659,
+     "page": 1,
+     "value": "“Pharmacare for All” except Women with Disabilities: Identif"
+    },
+    {
+     "article_id": 11661,
+     "page": 1,
+     "value": "Finding Equality: A Creative Take on Feminist Judgment Proje"
+    },
+    {
+     "article_id": 11667,
+     "page": 1,
+     "value": "Accessing Gender Justice: Beyond Technocratic Interventions"
+    },
+    {
+     "article_id": 8174,
+     "page": 1,
+     "value": "Contributions of the Inter-American Jurisprudence to the Pro"
+    }
+   ]
+  },
+  "first_pdf_page_is_article": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 10,
+   "evidence": [
+    {
+     "article_id": 11654,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 11665,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 11659,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 11661,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 11667,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 8174,
+     "page": 1,
+     "value": null
+    }
+   ]
+  }
+ },
+ "table_of_contents": {
+  "value": false,
+  "confidence": 1.0,
+  "articles": 10,
+  "evidence": [
+   {
+    "article_id": 11654,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 11665,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 11659,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 11661,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 11667,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 8174,
+    "page": null,
+    "value": 0
+   }
+  ]
+ },
+ "citations": {
+  "ibid_case": {
+   "value": "Ibid",
+   "counts": {
+    "Ibid": 360,
+    "ibid": 10
+   },
+   "confidence": 0.97
+  },
+  "ibid_punctuation": {
+   "value": "Ibid.",
+   "counts": {
+    "Ibid.": 113,
+    "Ibid,": 12
+   },
+   "confidence": 0.9
+  },
+  "supra_form": {
+   "value": "supra note N",
+   "counts": {
+    "supra note N": 509,
+    "supra, note N": 0
+   },
+   "confidence": 1.0
+  },
+  "paragraph_pinpoint": {
+   "value": "at para N",
+   "counts": {
+    "at para N": 225,
+    "at para. N": 0
+   },
+   "confidence": 1.0
+  },
+  "page_pinpoint_label": {
+   "value": "at N",
+   "counts": {
+    "at N": 627,
+    "at p N": 0
+   },
+   "confidence": 1.0
+  },
+  "range_dash": {
+   "value": "en dash",
+   "counts": {
+    "en dash": 147,
+    "hyphen": 0
+   },
+   "confidence": 1.0
+  },
+  "emphasis_note": {
+   "value": "[emphasis added]",
+   "counts": {
+    "[emphasis added]": 22,
+    "(emphasis added)": 0
+   },
+   "confidence": 1.0
+  },
+  "section_abbreviation": {
+   "value": "s N",
+   "counts": {
+    "s N": 13,
+    "s. N": 5
+   },
+   "confidence": 0.72
+  },
+  "et_al": {
+   "value": "et al",
+   "counts": {
+    "et al": 115,
+    "et al.": 2
+   },
+   "confidence": 0.98
+  },
+  "eg": {
+   "value": "e.g.",
+   "counts": {
+    "eg": 0,
+    "e.g.": 40
+   },
+   "confidence": 1.0
+  },
+  "ie": {
+   "value": "ie",
+   "counts": {
+    "ie": 1,
+    "i.e.": 1
+   },
+   "confidence": 0.5
+  },
+  "see_signal_case": {
+   "value": "See",
+   "counts": {
+    "See": 254,
+    "see": 78
+   },
+   "confidence": 0.77
+  },
+  "online_angle_brackets": {
+   "value": null,
+   "counts": {
+    "online: <url>": 0,
+    "online: url": 0
+   },
+   "confidence": 0.0
+  },
+  "quotes": {
+   "value": "curly",
+   "counts": {
+    "curly": 1654,
+    "straight": 0
+   },
+   "confidence": 1.0
+  },
+  "raw_counts": {
+   "ibid_capitalized": 360,
+   "ibid_lower": 10,
+   "ibid_period": 113,
+   "ibid_comma": 12,
+   "ibid_at": 236,
+   "supra_note": 509,
+   "supra_comma_note": 0,
+   "at_para": 225,
+   "at_para_period": 0,
+   "at_pilcrow": 0,
+   "at_page": 627,
+   "at_p": 0,
+   "range_endash": 147,
+   "range_hyphen": 0,
+   "emphasis_brackets": 22,
+   "emphasis_parens": 0,
+   "section_s_period": 5,
+   "section_s_bare": 13,
+   "online_colon": 0,
+   "online_angle": 0,
+   "perma": 53,
+   "et_al_period": 2,
+   "et_al_bare": 115,
+   "neutral_citation": 61,
+   "canlii": 4,
+   "eg_bare": 0,
+   "eg_period": 40,
+   "ie_bare": 1,
+   "ie_period": 1,
+   "curly_double": 1654,
+   "straight_double": 0,
+   "see_signal_upper": 254,
+   "see_signal_lower": 78
+  },
+  "footnote_lines": 3560
+ },
+ "status": "ok",
+ "candidates": 15
+}

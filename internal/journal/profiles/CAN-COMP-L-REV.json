@@ -1,0 +1,937 @@
+{
+ "dataset": "CAN-COMP-L-REV",
+ "journal": "Canadian Competition Law Review",
+ "abbrev": "Can Competition L Rev",
+ "platform": "OJS",
+ "years": [
+  "2025",
+  "2026"
+ ],
+ "articles_measured": [
+  28300,
+  28299,
+  22889,
+  22894
+ ],
+ "units": "points and inches; boxes measured at 144 dpi",
+ "page": {
+  "width_pt": 423,
+  "height_pt": 630,
+  "width_in": 5.88,
+  "height_in": 8.75,
+  "confidence": 1.0,
+  "articles": 4,
+  "evidence": [
+   {
+    "article_id": 28300,
+    "page": 1,
+    "value": {
+     "width_pt": 423,
+     "height_pt": 630
+    }
+   },
+   {
+    "article_id": 28299,
+    "page": 1,
+    "value": {
+     "width_pt": 423,
+     "height_pt": 630
+    }
+   },
+   {
+    "article_id": 22889,
+    "page": 1,
+    "value": {
+     "width_pt": 423,
+     "height_pt": 630
+    }
+   },
+   {
+    "article_id": 22894,
+    "page": 1,
+    "value": {
+     "width_pt": 423,
+     "height_pt": 630
+    }
+   }
+  ]
+ },
+ "margins_in": {
+  "mirrored": null,
+  "left_odd_pages": {
+   "value": null,
+   "confidence": 1.0,
+   "articles": 1,
+   "evidence": [
+    {
+     "article_id": 22889,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    }
+   ]
+  },
+  "left_even_pages": {
+   "value": null,
+   "confidence": 1.0,
+   "articles": 1,
+   "evidence": [
+    {
+     "article_id": 22889,
+     "page": null,
+     "value": {
+      "odd": 0.75,
+      "even": 0.75
+     }
+    }
+   ]
+  },
+  "right_odd_pages": {
+   "value": null,
+   "confidence": 1.0,
+   "articles": 1,
+   "evidence": [
+    {
+     "article_id": 22889,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    }
+   ]
+  },
+  "right_even_pages": {
+   "value": null,
+   "confidence": 1.0,
+   "articles": 1,
+   "evidence": [
+    {
+     "article_id": 22889,
+     "page": null,
+     "value": {
+      "odd": 0.7,
+      "even": 0.7
+     }
+    }
+   ]
+  },
+  "top": {
+   "value": null,
+   "confidence": 1.0,
+   "articles": 1,
+   "evidence": [
+    {
+     "article_id": 22889,
+     "page": null,
+     "value": 0.75
+    }
+   ]
+  },
+  "bottom": {
+   "value": null,
+   "confidence": 1.0,
+   "articles": 1,
+   "evidence": [
+    {
+     "article_id": 22889,
+     "page": null,
+     "value": 0.95
+    }
+   ]
+  }
+ },
+ "body": {
+  "font": {
+   "value": null,
+   "confidence": 1.0,
+   "articles": 1,
+   "evidence": [
+    {
+     "article_id": 28300,
+     "page": null,
+     "value": null
+    },
+    {
+     "article_id": 28299,
+     "page": null,
+     "value": null
+    },
+    {
+     "article_id": 22889,
+     "page": null,
+     "value": "MinionPro-Regular"
+    },
+    {
+     "article_id": 22894,
+     "page": null,
+     "value": null
+    }
+   ]
+  },
+  "size_pt": {
+   "value": null,
+   "confidence": 1.0,
+   "articles": 1,
+   "evidence": [
+    {
+     "article_id": 28300,
+     "page": null,
+     "value": null
+    },
+    {
+     "article_id": 28299,
+     "page": null,
+     "value": null
+    },
+    {
+     "article_id": 22889,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 22894,
+     "page": null,
+     "value": null
+    }
+   ]
+  },
+  "line_height_pt": {
+   "value": null,
+   "confidence": 1.0,
+   "articles": 1,
+   "evidence": [
+    {
+     "article_id": 22889,
+     "page": null,
+     "value": 15.0
+    }
+   ]
+  }
+ },
+ "footnotes": {
+  "font": {
+   "value": null,
+   "confidence": 1.0,
+   "articles": 1,
+   "evidence": [
+    {
+     "article_id": 28300,
+     "page": null,
+     "value": null
+    },
+    {
+     "article_id": 28299,
+     "page": null,
+     "value": null
+    },
+    {
+     "article_id": 22889,
+     "page": null,
+     "value": "Ubuntu"
+    },
+    {
+     "article_id": 22894,
+     "page": null,
+     "value": null
+    }
+   ]
+  },
+  "size_pt": {
+   "value": null,
+   "confidence": 1.0,
+   "articles": 1,
+   "evidence": [
+    {
+     "article_id": 28300,
+     "page": null,
+     "value": null
+    },
+    {
+     "article_id": 28299,
+     "page": null,
+     "value": null
+    },
+    {
+     "article_id": 22889,
+     "page": null,
+     "value": 8.0
+    },
+    {
+     "article_id": 22894,
+     "page": null,
+     "value": null
+    }
+   ]
+  },
+  "present": {
+   "value": false,
+   "confidence": 0.75,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 28300,
+     "page": null,
+     "value": 0
+    },
+    {
+     "article_id": 28299,
+     "page": null,
+     "value": 0
+    },
+    {
+     "article_id": 22889,
+     "page": null,
+     "value": 13
+    },
+    {
+     "article_id": 22894,
+     "page": null,
+     "value": 0
+    }
+   ]
+  },
+  "number_style": {
+   "value": null,
+   "confidence": 1.0,
+   "articles": 1,
+   "evidence": [
+    {
+     "article_id": 22889,
+     "page": null,
+     "value": [
+      "1\t This accords with the remedy recently taken by the Bureau, where it only"
+     ]
+    }
+   ]
+  },
+  "indent_vs_body_in": {
+   "value": null,
+   "confidence": 1.0,
+   "articles": 1,
+   "evidence": [
+    {
+     "article_id": 22889,
+     "page": null,
+     "value": 0.0
+    }
+   ]
+  },
+  "first_page_author_note": {
+   "value": false,
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 28300,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 28299,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 22889,
+     "page": 1,
+     "value": []
+    },
+    {
+     "article_id": 22894,
+     "page": 1,
+     "value": []
+    }
+   ]
+  }
+ },
+ "headings": {
+  "numbering_levels": {
+   "value": null,
+   "confidence": 0.25,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 28300,
+     "page": 2,
+     "value": [
+      "1. Introduction",
+      "2. What is greenwashing? A conceptual definition",
+      "3. The legal framework for greenwashing before the"
+     ]
+    },
+    {
+     "article_id": 28299,
+     "page": 2,
+     "value": [
+      "I. Introduction",
+      "II. The Problem Contextualized",
+      "B) Pricing Algorithms for Dummies"
+     ]
+    },
+    {
+     "article_id": 22889,
+     "page": 2,
+     "value": [
+      "Part I: Statement of Facts",
+      "Part II: Statement of Points In Issue",
+      "Part III: Statement of Submissions"
+     ]
+    },
+    {
+     "article_id": 22894,
+     "page": 2,
+     "value": [
+      "I. Introduction",
+      "II. History and Path to Amendment",
+      "III. Challenges Posed By The “Benefit Derived” Reg"
+     ]
+    }
+   ]
+  },
+  "top_level_case": {
+   "value": "title",
+   "confidence": 0.75,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 28300,
+     "page": 2,
+     "value": "1. Introduction"
+    },
+    {
+     "article_id": 28299,
+     "page": 2,
+     "value": "I. Introduction"
+    },
+    {
+     "article_id": 22889,
+     "page": 2,
+     "value": "Part I: Statement of Facts"
+    },
+    {
+     "article_id": 22894,
+     "page": 2,
+     "value": "I. Introduction"
+    }
+   ]
+  },
+  "top_level_size_pt": {
+   "value": 11.0,
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 28300,
+     "page": 2,
+     "value": "1. Introduction"
+    },
+    {
+     "article_id": 28299,
+     "page": 2,
+     "value": "I. Introduction"
+    },
+    {
+     "article_id": 22889,
+     "page": 2,
+     "value": "Part I: Statement of Facts"
+    },
+    {
+     "article_id": 22894,
+     "page": 2,
+     "value": "I. Introduction"
+    }
+   ]
+  },
+  "top_level_alignment": {
+   "value": "center",
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 28300,
+     "page": 2,
+     "value": "1. Introduction"
+    },
+    {
+     "article_id": 28299,
+     "page": 2,
+     "value": "I. Introduction"
+    },
+    {
+     "article_id": 22889,
+     "page": 2,
+     "value": "Part I: Statement of Facts"
+    },
+    {
+     "article_id": 22894,
+     "page": 2,
+     "value": "I. Introduction"
+    }
+   ]
+  },
+  "samples": [
+   "1. Introduction",
+   "2. What is greenwashing? A conceptual definition",
+   "3. The legal framework for greenwashing before the C-59",
+   "4. Context of Bill C-59 and Bill C-15",
+   "I. Introduction",
+   "II. The Problem Contextualized",
+   "B) Pricing Algorithms for Dummies",
+   "C) The Reluctance to Prosecute Against Algorithmic Collusion",
+   "Part I: Statement of Facts",
+   "Part II: Statement of Points In Issue",
+   "Part III: Statement of Submissions",
+   "films to all theatres and streaming services in Canada"
+  ]
+ },
+ "block_quotes": {
+  "indent_in": {
+   "value": null,
+   "confidence": 1.0,
+   "articles": 1,
+   "evidence": [
+    {
+     "article_id": 22889,
+     "page": null,
+     "value": 0.4
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 10.0,
+   "confidence": 0.75,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 28300,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 28299,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 22889,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 22894,
+     "page": null,
+     "value": 11.0
+    }
+   ]
+  },
+  "articles_with_block_quotes": 4
+ },
+ "running_heads": {
+  "odd_pages": {
+   "value": [
+    "journal_name",
+    "volume_or_year"
+   ],
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 28300,
+     "page": null,
+     "value": [
+      "2025",
+      "CANADIAN COMPETITION LAW REVIEW"
+     ]
+    },
+    {
+     "article_id": 28299,
+     "page": null,
+     "value": [
+      "2025",
+      "CANADIAN COMPETITION LAW REVIEW"
+     ]
+    },
+    {
+     "article_id": 22889,
+     "page": null,
+     "value": [
+      "2025",
+      "CANADIAN COMPETITION LAW REVIEW"
+     ]
+    },
+    {
+     "article_id": 22894,
+     "page": null,
+     "value": [
+      "2025",
+      "CANADIAN COMPETITION LAW REVIEW"
+     ]
+    }
+   ]
+  },
+  "even_pages": {
+   "value": [
+    "volume_or_year"
+   ],
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 28300,
+     "page": null,
+     "value": [
+      "REVUE CANADIENNE DU DROIT DE LA CONCURRENCE",
+      "VOL. 38, NO. 2"
+     ]
+    },
+    {
+     "article_id": 28299,
+     "page": null,
+     "value": [
+      "REVUE CANADIENNE DU DROIT DE LA CONCURRENCE",
+      "VOL. 38, NO. 2"
+     ]
+    },
+    {
+     "article_id": 22889,
+     "page": null,
+     "value": [
+      "REVUE CANADIENNE DU DROIT DE LA CONCURRENCE",
+      "VOL. 38, NO. 1"
+     ]
+    },
+    {
+     "article_id": 22894,
+     "page": null,
+     "value": [
+      "REVUE CANADIENNE DU DROIT DE LA CONCURRENCE",
+      "VOL. 37, NO. 2"
+     ]
+    }
+   ]
+  },
+  "page_number": {
+   "value": "top-outer",
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 28300,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 28299,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 22889,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 22894,
+     "page": null,
+     "value": "top-outer"
+    }
+   ]
+  }
+ },
+ "title_block": {
+  "title_size_pt": {
+   "value": 11.0,
+   "confidence": 1.0,
+   "articles": 2,
+   "evidence": [
+    {
+     "article_id": 28300,
+     "page": 1,
+     "value": "GREEN TRUST OR GREEN HUSH? A CRITICAL ANALYSIS OF"
+    },
+    {
+     "article_id": 28299,
+     "page": 1,
+     "value": "TACKLING ALGORITHMIC COLLUSION WITHOUT"
+    }
+   ]
+  },
+  "title_alignment": {
+   "value": "center",
+   "confidence": 1.0,
+   "articles": 2,
+   "evidence": [
+    {
+     "article_id": 28300,
+     "page": 1,
+     "value": "GREEN TRUST OR GREEN HUSH? A CRITICAL ANALYSIS OF"
+    },
+    {
+     "article_id": 28299,
+     "page": 1,
+     "value": "TACKLING ALGORITHMIC COLLUSION WITHOUT"
+    }
+   ]
+  },
+  "title_case": {
+   "value": "upper",
+   "confidence": 1.0,
+   "articles": 2,
+   "evidence": [
+    {
+     "article_id": 28300,
+     "page": 1,
+     "value": "GREEN TRUST OR GREEN HUSH? A CRITICAL ANALYSIS OF"
+    },
+    {
+     "article_id": 28299,
+     "page": 1,
+     "value": "TACKLING ALGORITHMIC COLLUSION WITHOUT"
+    }
+   ]
+  },
+  "author_case": {
+   "value": null,
+   "confidence": 1.0,
+   "articles": 1,
+   "evidence": [
+    {
+     "article_id": 28300,
+     "page": 1,
+     "value": "GREEN TRUST OR GREEN HUSH? A CRITICAL ANALYSIS OF"
+    },
+    {
+     "article_id": 28299,
+     "page": 1,
+     "value": "TACKLING ALGORITHMIC COLLUSION WITHOUT"
+    }
+   ]
+  },
+  "author_alignment": {
+   "value": null,
+   "confidence": 1.0,
+   "articles": 1,
+   "evidence": [
+    {
+     "article_id": 28300,
+     "page": 1,
+     "value": "GREEN TRUST OR GREEN HUSH? A CRITICAL ANALYSIS OF"
+    },
+    {
+     "article_id": 28299,
+     "page": 1,
+     "value": "TACKLING ALGORITHMIC COLLUSION WITHOUT"
+    }
+   ]
+  },
+  "first_pdf_page_is_article": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 28300,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 28299,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 22889,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 22894,
+     "page": 1,
+     "value": null
+    }
+   ]
+  }
+ },
+ "table_of_contents": {
+  "value": false,
+  "confidence": 1.0,
+  "articles": 4,
+  "evidence": [
+   {
+    "article_id": 28300,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 28299,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 22889,
+    "page": null,
+    "value": 0
+   },
+   {
+    "article_id": 22894,
+    "page": null,
+    "value": 0
+   }
+  ]
+ },
+ "citations": {
+  "ibid_case": {
+   "value": null,
+   "counts": {
+    "Ibid": 0,
+    "ibid": 0
+   },
+   "confidence": 0.0
+  },
+  "ibid_punctuation": {
+   "value": null,
+   "counts": {
+    "Ibid.": 0,
+    "Ibid,": 0
+   },
+   "confidence": 0.0
+  },
+  "supra_form": {
+   "value": null,
+   "counts": {
+    "supra note N": 0,
+    "supra, note N": 0
+   },
+   "confidence": 0.0
+  },
+  "paragraph_pinpoint": {
+   "value": null,
+   "counts": {
+    "at para N": 0,
+    "at para. N": 0
+   },
+   "confidence": 0.0
+  },
+  "page_pinpoint_label": {
+   "value": null,
+   "counts": {
+    "at N": 0,
+    "at p N": 0
+   },
+   "confidence": 0.0
+  },
+  "range_dash": {
+   "value": null,
+   "counts": {
+    "en dash": 0,
+    "hyphen": 0
+   },
+   "confidence": 0.0
+  },
+  "emphasis_note": {
+   "value": null,
+   "counts": {
+    "[emphasis added]": 0,
+    "(emphasis added)": 0
+   },
+   "confidence": 0.0
+  },
+  "section_abbreviation": {
+   "value": null,
+   "counts": {
+    "s N": 0,
+    "s. N": 0
+   },
+   "confidence": 0.0
+  },
+  "et_al": {
+   "value": null,
+   "counts": {
+    "et al": 0,
+    "et al.": 0
+   },
+   "confidence": 0.0
+  },
+  "eg": {
+   "value": null,
+   "counts": {
+    "eg": 0,
+    "e.g.": 0
+   },
+   "confidence": 0.0
+  },
+  "ie": {
+   "value": null,
+   "counts": {
+    "ie": 0,
+    "i.e.": 0
+   },
+   "confidence": 0.0
+  },
+  "see_signal_case": {
+   "value": null,
+   "counts": {
+    "See": 0,
+    "see": 0
+   },
+   "confidence": 0.0
+  },
+  "online_angle_brackets": {
+   "value": null,
+   "counts": {
+    "online: <url>": 0,
+    "online: url": 0
+   },
+   "confidence": 0.0
+  },
+  "quotes": {
+   "value": "curly",
+   "counts": {
+    "curly": 4,
+    "straight": 0
+   },
+   "confidence": 1.0
+  },
+  "raw_counts": {
+   "ibid_capitalized": 0,
+   "ibid_lower": 0,
+   "ibid_period": 0,
+   "ibid_comma": 0,
+   "ibid_at": 0,
+   "supra_note": 0,
+   "supra_comma_note": 0,
+   "at_para": 0,
+   "at_para_period": 0,
+   "at_pilcrow": 0,
+   "at_page": 0,
+   "at_p": 0,
+   "range_endash": 0,
+   "range_hyphen": 0,
+   "emphasis_brackets": 0,
+   "emphasis_parens": 0,
+   "section_s_period": 0,
+   "section_s_bare": 0,
+   "online_colon": 0,
+   "online_angle": 0,
+   "perma": 0,
+   "et_al_period": 0,
+   "et_al_bare": 0,
+   "neutral_citation": 0,
+   "canlii": 0,
+   "eg_bare": 0,
+   "eg_period": 0,
+   "ie_bare": 0,
+   "ie_period": 0,
+   "curly_double": 4,
+   "straight_double": 0,
+   "see_signal_upper": 0,
+   "see_signal_lower": 0
+  },
+  "footnote_lines": 13
+ },
+ "status": "ok",
+ "candidates": 5
+}

@@ -1,0 +1,1147 @@
+{
+ "dataset": "MCGILL-LJ-HEALTH",
+ "journal": "McGill Journal of Law and Health",
+ "abbrev": "McGill JL & Health",
+ "platform": "mjlh",
+ "years": [
+  "2025",
+  "2026"
+ ],
+ "articles_measured": [
+  3,
+  4,
+  1,
+  2
+ ],
+ "units": "points and inches; boxes measured at 144 dpi",
+ "page": {
+  "width_pt": 499,
+  "height_pt": 708,
+  "width_in": 6.93,
+  "height_in": 9.83,
+  "confidence": 1.0,
+  "articles": 4,
+  "evidence": [
+   {
+    "article_id": 3,
+    "page": 1,
+    "value": {
+     "width_pt": 499,
+     "height_pt": 708
+    }
+   },
+   {
+    "article_id": 4,
+    "page": 1,
+    "value": {
+     "width_pt": 499,
+     "height_pt": 708
+    }
+   },
+   {
+    "article_id": 1,
+    "page": 1,
+    "value": {
+     "width_pt": 499,
+     "height_pt": 708
+    }
+   },
+   {
+    "article_id": 2,
+    "page": 1,
+    "value": {
+     "width_pt": 499,
+     "height_pt": 708
+    }
+   }
+  ]
+ },
+ "margins_in": {
+  "mirrored": false,
+  "left_odd_pages": {
+   "value": 1.15,
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 4,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 1,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 2,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 1.15
+     }
+    }
+   ]
+  },
+  "left_even_pages": {
+   "value": 1.15,
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 4,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 1,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 2,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 1.15
+     }
+    }
+   ]
+  },
+  "right_odd_pages": {
+   "value": 1.15,
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 4,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 1,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 2,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 1.15
+     }
+    }
+   ]
+  },
+  "right_even_pages": {
+   "value": 1.15,
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 4,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 1,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 1.15
+     }
+    },
+    {
+     "article_id": 2,
+     "page": null,
+     "value": {
+      "odd": 1.15,
+      "even": 1.15
+     }
+    }
+   ]
+  },
+  "top": {
+   "value": 1.3,
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": null,
+     "value": 1.3
+    },
+    {
+     "article_id": 4,
+     "page": null,
+     "value": 1.3
+    },
+    {
+     "article_id": 1,
+     "page": null,
+     "value": 1.3
+    },
+    {
+     "article_id": 2,
+     "page": null,
+     "value": 1.3
+    }
+   ]
+  },
+  "bottom": {
+   "value": 1.75,
+   "confidence": 0.5,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": null,
+     "value": 1.75
+    },
+    {
+     "article_id": 4,
+     "page": null,
+     "value": 2.1
+    },
+    {
+     "article_id": 1,
+     "page": null,
+     "value": 1.75
+    },
+    {
+     "article_id": 2,
+     "page": null,
+     "value": 2.5
+    }
+   ]
+  }
+ },
+ "body": {
+  "font": {
+   "value": "TimesNewRomanPSMT",
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 4,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 1,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 2,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 11.0,
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 4,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 1,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 2,
+     "page": null,
+     "value": 11.0
+    }
+   ]
+  },
+  "line_height_pt": {
+   "value": 14.5,
+   "confidence": 0.75,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": null,
+     "value": 14.5
+    },
+    {
+     "article_id": 4,
+     "page": null,
+     "value": 15.0
+    },
+    {
+     "article_id": 1,
+     "page": null,
+     "value": 14.5
+    },
+    {
+     "article_id": 2,
+     "page": null,
+     "value": 14.5
+    }
+   ]
+  }
+ },
+ "footnotes": {
+  "font": {
+   "value": "TimesNewRomanPSMT",
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 4,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 1,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    },
+    {
+     "article_id": 2,
+     "page": null,
+     "value": "TimesNewRomanPSMT"
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 10.0,
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 4,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 1,
+     "page": null,
+     "value": 10.0
+    },
+    {
+     "article_id": 2,
+     "page": null,
+     "value": 10.0
+    }
+   ]
+  },
+  "present": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": null,
+     "value": 557
+    },
+    {
+     "article_id": 4,
+     "page": null,
+     "value": 686
+    },
+    {
+     "article_id": 1,
+     "page": null,
+     "value": 467
+    },
+    {
+     "article_id": 2,
+     "page": null,
+     "value": 708
+    }
+   ]
+  },
+  "number_style": {
+   "value": "number_space",
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": null,
+     "value": [
+      "* Bradley Henderson is a recent JD graduate of the University of Ottawa"
+     ]
+    },
+    {
+     "article_id": 4,
+     "page": null,
+     "value": [
+      "* Maria Sjöholm, LL.M, LL.D, is an associate professor in internation­"
+     ]
+    },
+    {
+     "article_id": 1,
+     "page": null,
+     "value": [
+      "* Emmanuel Ihuoma Nwatu, LL.B, LLM, is a PhD candidate at the Uni­"
+     ]
+    },
+    {
+     "article_id": 2,
+     "page": null,
+     "value": [
+      "* Robert Solomon, Distinguished University Professor Emeritus, Faculty"
+     ]
+    }
+   ]
+  },
+  "indent_vs_body_in": {
+   "value": 0.0,
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 4,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 1,
+     "page": null,
+     "value": 0.0
+    },
+    {
+     "article_id": 2,
+     "page": null,
+     "value": 0.0
+    }
+   ]
+  },
+  "first_page_author_note": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": 1,
+     "value": [
+      "* Bradley Henderson is a recent JD graduate of the University of Ottawa"
+     ]
+    },
+    {
+     "article_id": 4,
+     "page": 1,
+     "value": [
+      "* Maria Sjöholm, LL.M, LL.D, is an associate professor in internation­"
+     ]
+    },
+    {
+     "article_id": 1,
+     "page": 1,
+     "value": [
+      "* Emmanuel Ihuoma Nwatu, LL.B, LLM, is a PhD candidate at the Uni­"
+     ]
+    },
+    {
+     "article_id": 2,
+     "page": 1,
+     "value": [
+      "* Robert Solomon, Distinguished University Professor Emeritus, Faculty"
+     ]
+    }
+   ]
+  }
+ },
+ "headings": {
+  "numbering_levels": {
+   "value": [
+    "roman_period",
+    "alpha_period",
+    "unnumbered"
+   ],
+   "confidence": 0.5,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": 5,
+     "value": [
+      "I.\t Introduction",
+      "II.\t Developing Safe, Effective, and Equitable Hea",
+      "III.\tHealth care AI Exacerbates Informational Priv"
+     ]
+    },
+    {
+     "article_id": 4,
+     "page": 4,
+     "value": [
+      "I.\t Introduction",
+      "II.\t Maternal mortality – an overview",
+      "A.\t Causes of maternal mortality"
+     ]
+    },
+    {
+     "article_id": 1,
+     "page": 4,
+     "value": [
+      "I.\t INTRODUCTION",
+      "A.\t Background and Context",
+      "B.\t Research Problem and Justification"
+     ]
+    },
+    {
+     "article_id": 2,
+     "page": 4,
+     "value": [
+      "I.\t Introduction",
+      "1.\t Duty of Care: The plaintiff must establish, as",
+      "2.\t The Standard of Care and its Breach: The plain"
+     ]
+    }
+   ]
+  },
+  "top_level_case": {
+   "value": "title",
+   "confidence": 0.5,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": 16,
+     "value": "A.\t Re-identifying Individuals Using De-identified or Anonym"
+    },
+    {
+     "article_id": 4,
+     "page": 4,
+     "value": "I.\t Introduction"
+    },
+    {
+     "article_id": 1,
+     "page": 4,
+     "value": "I.\t INTRODUCTION"
+    },
+    {
+     "article_id": 2,
+     "page": 9,
+     "value": "1.\t Duty of Care: The plaintiff must establish, as a matter "
+    }
+   ]
+  },
+  "top_level_size_pt": {
+   "value": 11.0,
+   "confidence": 0.75,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": 16,
+     "value": "A.\t Re-identifying Individuals Using De-identified or Anonym"
+    },
+    {
+     "article_id": 4,
+     "page": 4,
+     "value": "I.\t Introduction"
+    },
+    {
+     "article_id": 1,
+     "page": 4,
+     "value": "I.\t INTRODUCTION"
+    },
+    {
+     "article_id": 2,
+     "page": 9,
+     "value": "1.\t Duty of Care: The plaintiff must establish, as a matter "
+    }
+   ]
+  },
+  "top_level_alignment": {
+   "value": "center",
+   "confidence": 0.5,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": 16,
+     "value": "A.\t Re-identifying Individuals Using De-identified or Anonym"
+    },
+    {
+     "article_id": 4,
+     "page": 4,
+     "value": "I.\t Introduction"
+    },
+    {
+     "article_id": 1,
+     "page": 4,
+     "value": "I.\t INTRODUCTION"
+    },
+    {
+     "article_id": 2,
+     "page": 9,
+     "value": "1.\t Duty of Care: The plaintiff must establish, as a matter "
+    }
+   ]
+  },
+  "samples": [
+   "I.\t Introduction",
+   "II.\t Developing Safe, Effective, and Equitable Health Care AI",
+   "III.\tHealth care AI Exacerbates Informational Privacy Risks",
+   "A.\t Re-identifying Individuals Using De-identified or Anonymized Data",
+   "I.\t Introduction",
+   "II.\t Maternal mortality – an overview",
+   "A.\t Causes of maternal mortality",
+   "B.\t Armed conflict as an exacerbating factor",
+   "I.\t INTRODUCTION",
+   "A.\t Background and Context",
+   "B.\t Research Problem and Justification",
+   "C.\t Research Questions"
+  ]
+ },
+ "block_quotes": {
+  "indent_in": {
+   "value": 0.25,
+   "confidence": 0.5,
+   "articles": 2,
+   "evidence": [
+    {
+     "article_id": 1,
+     "page": null,
+     "value": 0.25
+    },
+    {
+     "article_id": 2,
+     "page": null,
+     "value": 0.5
+    }
+   ]
+  },
+  "size_pt": {
+   "value": 11.0,
+   "confidence": 0.5,
+   "articles": 2,
+   "evidence": [
+    {
+     "article_id": 1,
+     "page": null,
+     "value": 11.0
+    },
+    {
+     "article_id": 2,
+     "page": null,
+     "value": 10.5
+    }
+   ]
+  },
+  "articles_with_block_quotes": 2
+ },
+ "running_heads": {
+  "odd_pages": {
+   "value": [
+    "journal_name",
+    "volume_or_year"
+   ],
+   "confidence": 0.5,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": null,
+     "value": [
+      "McGill Journal of Law and Health",
+      "Vol. 17"
+     ]
+    },
+    {
+     "article_id": 4,
+     "page": null,
+     "value": [
+      "No. 1",
+      "McGill Journal of Law and Health"
+     ]
+    },
+    {
+     "article_id": 1,
+     "page": null,
+     "value": [
+      "2026",
+      "Delivering Culturally Competent Mental Health Care:"
+     ]
+    },
+    {
+     "article_id": 2,
+     "page": null,
+     "value": [
+      "2025",
+      "Alcohol Manufacturers and Suppliers, Fetal Alcohol"
+     ]
+    }
+   ]
+  },
+  "even_pages": {
+   "value": [
+    "article_title",
+    "volume_or_year"
+   ],
+   "confidence": 0.5,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": null,
+     "value": [
+      "2025",
+      "Health Care AI and the Governance of De-identified and"
+     ]
+    },
+    {
+     "article_id": 4,
+     "page": null,
+     "value": [
+      "2025",
+      "Developing the International Law Framework on"
+     ]
+    },
+    {
+     "article_id": 1,
+     "page": null,
+     "value": [
+      "McGill Journal of Law and Health",
+      "Vol. 18"
+     ]
+    },
+    {
+     "article_id": 2,
+     "page": null,
+     "value": [
+      "McGill Journal of Law and Health",
+      "Vol. 17"
+     ]
+    }
+   ]
+  },
+  "page_number": {
+   "value": "top-inner",
+   "confidence": 0.5,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 4,
+     "page": null,
+     "value": "top-inner"
+    },
+    {
+     "article_id": 1,
+     "page": null,
+     "value": "top-outer"
+    },
+    {
+     "article_id": 2,
+     "page": null,
+     "value": "top-outer"
+    }
+   ]
+  }
+ },
+ "title_block": {
+  "title_size_pt": {
+   "value": 12.5,
+   "confidence": 0.67,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": 1,
+     "value": "Health Care AI and the Governance"
+    },
+    {
+     "article_id": 4,
+     "page": 1,
+     "value": "Developing the International Law"
+    },
+    {
+     "article_id": 2,
+     "page": 1,
+     "value": "Alcohol Manufacturers and Suppliers,"
+    }
+   ]
+  },
+  "title_alignment": {
+   "value": "center",
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": 1,
+     "value": "Health Care AI and the Governance"
+    },
+    {
+     "article_id": 4,
+     "page": 1,
+     "value": "Developing the International Law"
+    },
+    {
+     "article_id": 2,
+     "page": 1,
+     "value": "Alcohol Manufacturers and Suppliers,"
+    }
+   ]
+  },
+  "title_case": {
+   "value": "sentence",
+   "confidence": 1.0,
+   "articles": 3,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": 1,
+     "value": "Health Care AI and the Governance"
+    },
+    {
+     "article_id": 4,
+     "page": 1,
+     "value": "Developing the International Law"
+    },
+    {
+     "article_id": 2,
+     "page": 1,
+     "value": "Alcohol Manufacturers and Suppliers,"
+    }
+   ]
+  },
+  "author_case": {
+   "value": null,
+   "confidence": 0.0,
+   "articles": 0,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": 1,
+     "value": "Health Care AI and the Governance"
+    },
+    {
+     "article_id": 4,
+     "page": 1,
+     "value": "Developing the International Law"
+    },
+    {
+     "article_id": 2,
+     "page": 1,
+     "value": "Alcohol Manufacturers and Suppliers,"
+    }
+   ]
+  },
+  "author_alignment": {
+   "value": null,
+   "confidence": 0.0,
+   "articles": 0,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": 1,
+     "value": "Health Care AI and the Governance"
+    },
+    {
+     "article_id": 4,
+     "page": 1,
+     "value": "Developing the International Law"
+    },
+    {
+     "article_id": 2,
+     "page": 1,
+     "value": "Alcohol Manufacturers and Suppliers,"
+    }
+   ]
+  },
+  "first_pdf_page_is_article": {
+   "value": true,
+   "confidence": 1.0,
+   "articles": 4,
+   "evidence": [
+    {
+     "article_id": 3,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 4,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 1,
+     "page": 1,
+     "value": null
+    },
+    {
+     "article_id": 2,
+     "page": 1,
+     "value": null
+    }
+   ]
+  }
+ },
+ "table_of_contents": {
+  "value": true,
+  "confidence": 1.0,
+  "articles": 4,
+  "evidence": [
+   {
+    "article_id": 3,
+    "page": null,
+    "value": 10
+   },
+   {
+    "article_id": 4,
+    "page": null,
+    "value": 25
+   },
+   {
+    "article_id": 1,
+    "page": null,
+    "value": 11
+   },
+   {
+    "article_id": 2,
+    "page": null,
+    "value": 8
+   }
+  ]
+ },
+ "citations": {
+  "ibid_case": {
+   "value": "Ibid",
+   "counts": {
+    "Ibid": 148,
+    "ibid": 15
+   },
+   "confidence": 0.91
+  },
+  "ibid_punctuation": {
+   "value": "Ibid,",
+   "counts": {
+    "Ibid.": 18,
+    "Ibid,": 59
+   },
+   "confidence": 0.77
+  },
+  "supra_form": {
+   "value": "supra note N",
+   "counts": {
+    "supra note N": 445,
+    "supra, note N": 0
+   },
+   "confidence": 1.0
+  },
+  "paragraph_pinpoint": {
+   "value": "at para N",
+   "counts": {
+    "at para N": 282,
+    "at para. N": 1
+   },
+   "confidence": 1.0
+  },
+  "page_pinpoint_label": {
+   "value": "at N",
+   "counts": {
+    "at N": 438,
+    "at p N": 0
+   },
+   "confidence": 1.0
+  },
+  "range_dash": {
+   "value": "en dash",
+   "counts": {
+    "en dash": 155,
+    "hyphen": 19
+   },
+   "confidence": 0.89
+  },
+  "emphasis_note": {
+   "value": null,
+   "counts": {
+    "[emphasis added]": 0,
+    "(emphasis added)": 0
+   },
+   "confidence": 0.0
+  },
+  "section_abbreviation": {
+   "value": "s N",
+   "counts": {
+    "s N": 126,
+    "s. N": 1
+   },
+   "confidence": 0.99
+  },
+  "et_al": {
+   "value": "et al",
+   "counts": {
+    "et al": 148,
+    "et al.": 0
+   },
+   "confidence": 1.0
+  },
+  "eg": {
+   "value": "e.g.",
+   "counts": {
+    "eg": 0,
+    "e.g.": 39
+   },
+   "confidence": 1.0
+  },
+  "ie": {
+   "value": "i.e.",
+   "counts": {
+    "ie": 0,
+    "i.e.": 5
+   },
+   "confidence": 1.0
+  },
+  "see_signal_case": {
+   "value": "See",
+   "counts": {
+    "See": 281,
+    "see": 49
+   },
+   "confidence": 0.85
+  },
+  "online_angle_brackets": {
+   "value": null,
+   "counts": {
+    "online: <url>": 0,
+    "online: url": 0
+   },
+   "confidence": 0.0
+  },
+  "quotes": {
+   "value": "curly",
+   "counts": {
+    "curly": 748,
+    "straight": 0
+   },
+   "confidence": 1.0
+  },
+  "raw_counts": {
+   "ibid_capitalized": 148,
+   "ibid_lower": 15,
+   "ibid_period": 18,
+   "ibid_comma": 59,
+   "ibid_at": 82,
+   "supra_note": 445,
+   "supra_comma_note": 0,
+   "at_para": 282,
+   "at_para_period": 1,
+   "at_pilcrow": 0,
+   "at_page": 438,
+   "at_p": 0,
+   "range_endash": 155,
+   "range_hyphen": 19,
+   "emphasis_brackets": 0,
+   "emphasis_parens": 0,
+   "section_s_period": 1,
+   "section_s_bare": 126,
+   "online_colon": 0,
+   "online_angle": 0,
+   "perma": 70,
+   "et_al_period": 0,
+   "et_al_bare": 148,
+   "neutral_citation": 38,
+   "canlii": 48,
+   "eg_bare": 0,
+   "eg_period": 39,
+   "ie_bare": 0,
+   "ie_period": 5,
+   "curly_double": 748,
+   "straight_double": 0,
+   "see_signal_upper": 281,
+   "see_signal_lower": 49
+  },
+  "footnote_lines": 2418
+ },
+ "status": "ok",
+ "candidates": 4
+}
