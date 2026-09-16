@@ -219,9 +219,18 @@ func load(data []byte) (story, []string, error) {
 	return s, parts, nil
 }
 
+// overlaps reports whether generated or opaque structure (field results and
+// their instructions, hidden field text, content controls) lies inside the
+// span. Other hard atoms the scanner records (note marks, tabs, bookmarks,
+// comment ranges, hyperlink results) are ordinary text for grading: a Setup
+// pass may legitimately rewrite the prose around them.
 func overlaps(spans []kernels.Span, lo, hi int) bool {
 	for _, sp := range spans {
-		if sp.Start < hi && sp.End > lo {
+		if sp.Start >= hi || sp.End <= lo {
+			continue
+		}
+		switch {
+		case strings.HasPrefix(sp.Reason, "complex-field"), strings.HasPrefix(sp.Reason, "instruction"), strings.HasPrefix(sp.Reason, "hidden"), strings.HasPrefix(sp.Reason, "opaque:sdt"), strings.HasPrefix(sp.Reason, "malformed"):
 			return true
 		}
 	}
@@ -360,7 +369,15 @@ func canonical(text string) string {
 		}
 		return r
 	}, text)
-	t = punctuationInsideQuotes.ReplaceAllString(t, "$2$1")
+	// Nested quotes move punctuation across several quote marks; repeat
+	// until stable so both orders reach the same form.
+	for i := 0; i < 5; i++ {
+		next := punctuationInsideQuotes.ReplaceAllString(t, "$2$1")
+		if next == t {
+			break
+		}
+		t = next
+	}
 	t = spaceRuns.ReplaceAllString(t, " ")
 	t = strings.TrimSpace(t)
 	t = headingPrefix.ReplaceAllString(t, "")
