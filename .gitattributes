@@ -12,3 +12,8 @@
 
 # Preserve upstream schema formatting.
 internal/native/schemas/*.xsd -whitespace
+
+# VBA sources are embedded and hashed; keep LF everywhere.
+*.bas text eol=lf
+*.cls text eol=lf
+*.vba text eol=lf
