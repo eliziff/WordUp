@@ -589,7 +589,6 @@ End Sub
 Public Sub WU_JournalApplyStyles()
     Dim updating As Boolean, undoStarted As Boolean, captured As Boolean
     Dim failure As Long, failureSource As String, failureText As String
-    Dim priorStatus As Variant
     Dim doc As Document, bodyStyle As Style, noteStyle As Style
     Dim heading1 As Style, heading2 As Style, heading3 As Style
     Dim heading4 As Style, heading5 As Style, heading6 As Style
@@ -598,7 +597,6 @@ Public Sub WU_JournalApplyStyles()
     Dim quotationStyle As Style, tocStyle As Style, bibliographyStyle As Style, citationStyle As Style
     On Error GoTo Failed
     Set doc = ActiveDocument
-    priorStatus = Application.StatusBar
     WU_BeginSafeEdit updating, undoStarted, captured, "Apply %s styles"
     WU_ResetProgress
     Set bodyStyle = WU_EnsureStyle(doc, WU_JOURNAL_STYLE_BODY, WU_JOURNAL_BODY_FONT, WU_JOURNAL_BODY_SIZE, False, False)
@@ -665,7 +663,9 @@ Cleanup:
     On Error Resume Next
     WU_EndSafeEdit updating, undoStarted, captured
     If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
-    Application.StatusBar = priorStatus
+    ' Word exposes StatusBar as a write-only property. False returns control
+    ' to Word without attempting an invalid read/restore during compilation.
+    Application.StatusBar = False
     Err.Clear
     On Error GoTo 0
     If failure <> 0 Then Err.Raise failure, failureSource, failureText
@@ -1005,16 +1005,15 @@ Private Sub WU_ApplyNoteStoryStyle(ByVal story As Range, ByVal noteStyle As Styl
 End Sub
 
 Public Sub WU_JournalRefreshFields()
-    Dim failures As Long, failure As Long, failureSource As String, failureText As String, priorStatus As Variant
+    Dim failures As Long, failure As Long, failureSource As String, failureText As String
     On Error GoTo Failed
-    priorStatus = Application.StatusBar
     ' StoryRanges already contains every header/footer story; the shared
     ' component walks that collection once and reports any failed update.
     failures = WU_RefreshFields(ActiveDocument, "all", True)
     If failures > 0 Then Err.Raise 5, "WU_JournalRefreshFields", "could not refresh fields in " & CStr(failures) & " story/table(s)"
 Cleanup:
     On Error Resume Next
-    Application.StatusBar = priorStatus
+    Application.StatusBar = False
     If failure = 0 And Err.Number <> 0 Then failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
     Err.Clear
     On Error GoTo 0
