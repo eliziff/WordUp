@@ -1,0 +1,6 @@
+.generate/
+generated/*.g4
+generated/*.interp
+generated/*.tokens
+conditional/*.interp
+conditional/*.tokens

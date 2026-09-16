@@ -1,0 +1,36 @@
+goos: linux
+goarch: amd64
+pkg: github.com/eliziff/WordUp/internal/office
+cpu: Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz
+BenchmarkStyleBatch/10-5         	      26	   9962904 ns/op	 2551335 B/op	   32855 allocs/op
+BenchmarkStyleBatch/10-5         	      30	  10676398 ns/op	 2551580 B/op	   32855 allocs/op
+BenchmarkStyleBatch/10-5         	      33	   8892472 ns/op	 2551822 B/op	   32857 allocs/op
+BenchmarkStyleBatch/10-5         	      28	   8972437 ns/op	 2551114 B/op	   32853 allocs/op
+BenchmarkStyleBatch/10-5         	      32	   9009904 ns/op	 2550772 B/op	   32852 allocs/op
+BenchmarkStyleBatch/100-5        	       1	 558333124 ns/op	139636128 B/op	 2042864 allocs/op
+BenchmarkStyleBatch/100-5        	       1	 496989281 ns/op	139633168 B/op	 2042821 allocs/op
+BenchmarkStyleBatch/100-5        	       1	 490491836 ns/op	139632016 B/op	 2042847 allocs/op
+BenchmarkStyleBatch/100-5        	       1	 501723515 ns/op	139629912 B/op	 2042826 allocs/op
+BenchmarkStyleBatch/100-5        	       1	 579684863 ns/op	139624792 B/op	 2042815 allocs/op
+PASS
+ok  	github.com/eliziff/WordUp/internal/office	4.626s
+goos: linux
+goarch: amd64
+pkg: github.com/eliziff/WordUp/internal/agent
+cpu: Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz
+BenchmarkToolManifest-5   	      49	   4756031 ns/op	  996776 B/op	   15834 allocs/op
+BenchmarkToolManifest-5   	      70	   4739281 ns/op	  951030 B/op	   15833 allocs/op
+BenchmarkToolManifest-5   	      64	   4009572 ns/op	  894185 B/op	   15831 allocs/op
+BenchmarkToolManifest-5   	      80	   4260427 ns/op	  924238 B/op	   15832 allocs/op
+BenchmarkToolManifest-5   	      84	   4597931 ns/op	  882308 B/op	   15830 allocs/op
+PASS
+ok  	github.com/eliziff/WordUp/internal/agent	1.992s
+
+Manifest size check:
+goos: linux
+goarch: amd64
+pkg: github.com/eliziff/WordUp/internal/agent
+cpu: Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz
+BenchmarkToolManifest-5   	      38	   3999759 ns/op	    309238 manifest-bytes	  843974 B/op	   15829 allocs/op
+PASS
+ok  	github.com/eliziff/WordUp/internal/agent	0.351s

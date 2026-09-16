@@ -429,6 +429,7 @@ func Esc(s string) string { var b bytes.Buffer; xml.EscapeText(&b, []byte(s)); r
 // XMLSpan provides edit boundaries without round-tripping namespace prefixes,
 // compatibility declarations, unknown extensions, whitespace, or opaque XML.
 type XMLSpan struct {
+	namespaces                             map[string]string
 	Name                                   xml.Name
 	Attr                                   []xml.Attr
 	Start, OpenEnd, CloseStart, End, Depth int
@@ -443,11 +444,19 @@ func (s XMLSpan) Attribute(ns, local string) string {
 	return ""
 }
 func XMLSpans(b []byte) ([]XMLSpan, error) {
+	return xmlSpans(b, nil)
+}
+
+// Namespace scopes are shared until a declaration changes them. Retaining the
+// scope lets byte-preserving editors parse extracted fragments without losing
+// inherited prefixes or default namespaces.
+func xmlSpans(b []byte, inherited map[string]string) ([]XMLSpan, error) {
 	if len(b) > Limit {
 		return nil, fmt.Errorf("XML budget exceeded")
 	}
 	d := xml.NewDecoder(bytes.NewReader(b))
 	d.Strict = true
+	d.DefaultSpace = inherited[""]
 	spans := []XMLSpan{}
 	stack := []int{}
 	roots := 0
@@ -474,7 +483,40 @@ func XMLSpans(b []byte) ([]XMLSpan, error) {
 			if roots > 1 {
 				return nil, fmt.Errorf("multiple XML roots")
 			}
-			spans = append(spans, XMLSpan{Name: v.Name, Attr: v.Attr, Start: start, OpenEnd: end, Depth: len(stack)})
+			scope := inherited
+			if len(stack) > 0 {
+				scope = spans[stack[len(stack)-1]].namespaces
+			}
+			var declared map[string]string
+			for _, a := range v.Attr {
+				if a.Name.Space != "xmlns" && a.Name != (xml.Name{Local: "xmlns"}) {
+					continue
+				}
+				if declared == nil {
+					declared = map[string]string{}
+					for k, value := range scope {
+						declared[k] = value
+					}
+				}
+				prefix := a.Name.Local
+				if a.Name.Space == "" {
+					prefix = ""
+				}
+				declared[prefix] = a.Value
+			}
+			if declared != nil {
+				scope = declared
+			}
+			if uri, ok := scope[v.Name.Space]; ok && v.Name.Space != "" {
+				v.Name.Space = uri
+			}
+			for i := range v.Attr {
+				name := &v.Attr[i].Name
+				if uri, ok := scope[name.Space]; ok && name.Space != "" && name.Space != "xmlns" {
+					name.Space = uri
+				}
+			}
+			spans = append(spans, XMLSpan{Name: v.Name, Attr: v.Attr, Start: start, OpenEnd: end, Depth: len(stack), namespaces: scope})
 			stack = append(stack, len(spans)-1)
 		case xml.EndElement:
 			if len(stack) == 0 {
@@ -519,33 +561,23 @@ func EnsureNamespace(b []byte, prefix, uri string) ([]byte, error) {
 	return bytes.Join([][]byte{b[:i], []byte(` xmlns:` + prefix + `="` + Esc(uri) + `"`), b[i:]}, nil), nil
 }
 func InsertXML(b []byte, fragment string) ([]byte, error) {
-	spans, e := XMLSpans(b)
-	if e != nil {
-		return nil, e
+	spans, err := XMLSpans(b)
+	if err != nil {
+		return nil, err
 	}
-	r := spans[0]
-	if r.OpenEnd >= 2 && bytes.Equal(b[r.OpenEnd-2:r.OpenEnd], []byte("/>")) {
-		// Preserve the root QName verbatim when expanding a self-closing root.
-		nameStart := r.Start + 1
-		nameEnd := nameStart
-		for nameEnd < len(b) && !strings.ContainsRune(" \t\r\n/>", rune(b[nameEnd])) {
-			nameEnd++
-		}
-		return []byte(string(b[:r.OpenEnd-2]) + ">" + fragment + "</" + string(b[nameStart:nameEnd]) + ">" + string(b[r.End:])), nil
-	}
-	return bytes.Join([][]byte{b[:r.CloseStart], []byte(fragment), b[r.CloseStart:]}, nil), nil
+	return spliceXML(b, []XMLPatch{insertAtRoot(b, spans[0], fragment)})
 }
 func UpsertXML(b []byte, ns, local, attrNS, attr, value, fragment string) ([]byte, error) {
-	spans, e := XMLSpans(b)
-	if e != nil {
-		return nil, e
+	spans, err := XMLSpans(b)
+	if err != nil {
+		return nil, err
 	}
 	for _, s := range spans {
 		if s.Depth == 1 && s.Name.Space == ns && s.Name.Local == local && s.Attribute(attrNS, attr) == value {
-			return bytes.Join([][]byte{b[:s.Start], []byte(fragment), b[s.End:]}, nil), nil
+			return spliceXML(b, []XMLPatch{{s.Start, s.End - s.Start, fragment}})
 		}
 	}
-	return InsertXML(b, fragment)
+	return spliceXML(b, []XMLPatch{insertAtRoot(b, spans[0], fragment)})
 }
 func (p *Package) ContentType(part, kind string) error {
 	b := p.Files["[Content_Types].xml"]

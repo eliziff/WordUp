@@ -753,11 +753,11 @@ var processIdToSession = kernel.NewProc("ProcessIdToSessionId")
 var isProcessInJob = kernel.NewProc("IsProcessInJob")
 
 const (
-	tokenElevationType   = 18
-	tokenIntegrityLevel  = 25
-	tokenUIAccess        = 26
-	tokenQuery           = 0x0008
-	userObjectNameInfo   = 2
+	tokenElevationType  = 18
+	tokenIntegrityLevel = 25
+	tokenUIAccess       = 26
+	tokenQuery          = 0x0008
+	userObjectNameInfo  = 2
 )
 
 // workerState summarizes the identity and desktop binding of the __host

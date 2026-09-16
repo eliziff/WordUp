@@ -78,6 +78,22 @@ func TestFreezeRelocationAndTamper(t *testing.T) {
 	if err != nil || string(actual) != string(xml) {
 		t.Fatal("frozen XML changed", err)
 	}
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	relative, err := filepath.Rel(cwd, filepath.Join(moved, "bundle.json"))
+	if err == nil { // A Windows temp directory can be on a different volume.
+		if _, _, err := LoadReport(relative); err != nil {
+			t.Fatalf("relative bundle: %v", err)
+		}
+	}
+	alias := filepath.Join(root, "alias")
+	if err := os.Symlink(moved, alias); err == nil {
+		if _, _, err := LoadReport(filepath.Join(alias, "bundle.json")); err != nil {
+			t.Fatalf("symlink-root bundle: %v", err)
+		}
+	}
 	if err := os.WriteFile(loaded.ArtifactSnapshot, []byte("tampered"), 0600); err != nil {
 		t.Fatal(err)
 	}

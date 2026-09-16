@@ -115,3 +115,46 @@ language or cutover conclusions.
 The same warm session measured a second `check` request at 23.3 ms after a first
 request that included session startup (520.8 ms). A direct process check took
 704.6 ms, which is startup overhead rather than the warm agent loop.
+
+## Shared XML core and agent manifest (2026-09-15)
+
+Go-only measurements on Linux amd64, Go 1.23.2, Intel Xeon Platinum 8370C,
+GOMAXPROCS=5. Baseline is production source at
+`6a9d431d43275b4b1118e9fc3d4a7c76759f6743`; the same benchmark functions and
+portable wrapper were copied into its checkout without changing production
+code. Five 200 ms benchmark samples per lane; values below are medians.
+The 100-style baseline needs about 500 ms for one operation, so each sample
+contains one iteration. These are local observations, not latency guarantees
+or Word/VBA compile, UI, render, signing, or end-to-end workflow measurements.
+
+| Workload | Baseline | Shared core | Speedup |
+|---|---:|---:|---:|
+| Create 10 styles, 5 run + 5 paragraph properties per style | 9.010 ms | 0.903 ms | 9.98x |
+| Create 100 styles, same properties | 501.724 ms | 10.484 ms | 47.85x |
+| Build and JSON-encode the complete tool manifest | 4.598 ms | 0.418 ms | 11.01x |
+
+For the 100-style workload, allocated bytes per operation fell from
+139,632,016 to 3,619,768 (97.4% less), and allocations from 2,042,826 to 31,592.
+The encoded tool manifest fell from 309,238 bytes for 50 tools to 26,692 bytes
+for 51 tools (91.4% less), including the new `styles.apply` operation. Neither
+measurement depends on response caching or skipping the requested edits.
+
+`xml_edit.go` provides the shared original-offset splice plan. `properties.go`
+defines typed property mappings once; styles, numbering and composition reuse
+them. Styles and numbering are indexed once per batch instead of reparsing
+and copying the growing whole part per style and per property. Only changed
+fragments are rebuilt, with retained namespace scopes and bounded edit plans.
+
+Reproduce with the repository wrapper (use `tools/go.ps1` on Windows):
+
+```sh
+WORDUP_GO=/path/to/go ./tools/go.sh test -run '^$' -bench 'Benchmark(StyleBatch|ToolManifest)$' -benchtime=200ms -count=5 -benchmem ./internal/office ./internal/agent
+```
+
+Benchmarks run only with `-bench`; normal tests do not execute benchmark loops.
+CI retains bounded observations rather than enforcing noisy time thresholds.
+Its offline suite and race checks are separate from native Word acceptance.
+Static checks retain all analyzers except ANTLR's known generated unreachable
+gotos, while the unreachable analyzer remains enabled on handwritten code.
+Raw local samples are retained in `docs/evidence/shared-core-before.txt` and
+`docs/evidence/shared-core-after.txt`.

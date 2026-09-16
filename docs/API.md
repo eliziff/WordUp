@@ -38,13 +38,78 @@ total byte count, returned range, and `next_offset` when more bytes remain;
 offsets are raw bytes (a chunk that is not valid UTF-8 is returned as base64),
 and the default with neither field remains a complete read.
 
-`xml.patch` applies a small direct byte-range edit to an XML source already in
-the workspace (for example `package/word/styles.xml`). Use the exact offsets
-and `source_sha256` returned by `xml.query` as `offset`, `length`, and
-`expected_sha256`; provide replacement `text` or `base64`. The result is
-checked as UTF-8 and strict XML before an atomic guarded write. It preserves
-all bytes outside the range and intentionally does not rewrite a DOCX/DOTM
-ZIP; import the artifact first and edit its ordinary package source.
+`xml.patch` atomically applies a nonempty `patches` array to a workspace XML
+source, not a ZIP package. Every `offset` and `length` addresses the **original**
+UTF-8 bytes; use `element_start`, `element_end` and `source_sha256` from one
+`xml.query` response. The whole plan requires `expected_sha256`.
+
+```json
+{"path":"package/custom.xml","expected_sha256":"FULL_HASH_FROM_READ_OR_QUERY","patches":[{"offset":6,"length":8,"text":"<title>Revised</title>"},{"offset":30,"length":0,"text":"<!--reviewed-->"}]}
+```
+
+Offsets above are illustrative, not positions to reuse in another file.
+Unsorted edits are accepted. Insertions at the same offset retain request order
+and precede replacement there. Overlaps, out-of-range edits, split UTF-8
+characters, DTDs and malformed result XML fail before persistence. The limit is
+65,536 patches and 256 MiB source/result. Untouched bytes are copied directly.
+The old top-level `offset`/`length`/`text`/`base64` patch shape is removed rather
+than maintained as a second editing path. An empty replacement `text` deletes
+a range. Queries and edits do not establish schema validity or rendered layout.
+
+## Deterministic style and numbering batches
+
+`call styles.apply @styles.json` uses the same reusable batch editor as package
+authoring and composition. It edits **one workspace XML source part** at a time,
+with a required full-file hash and an atomic write only after the complete
+recipe succeeds. It does not start Word, enable macros, or rewrite an artifact.
+Import a document first, then edit `package/word/styles.xml` or
+`package/word/numbering.xml` and build normally.
+
+```json
+{"path":"package/word/styles.xml","expected_sha256":"FULL_HASH_FROM_READ","recipe":{"styles":[{"id":"Body","name":"Body text","based_on":"Normal","run":{"font":"Times New Roman","size_pt":11,"kerning_pt":8,"no_proof":false},"paragraph":{"after_pt":6,"contextual_spacing":true}},{"id":"Heading1","paragraph":{"keep_next":true,"outline_level":0}}]}}
+```
+
+A style entry accepts `id`, `name`, `type`, `based_on`, `next`, `linked`, `quick`,
+`run`, `paragraph`, or complete replacement `xml`. Existing types cannot be
+changed under the same ID. Repeated IDs apply in recipe order. Unspecified
+properties remain untouched, including unknown children and extension values.
+Inherited namespace aliases and default namespaces retain their meaning.
+Only explicitly edited opening tags may have attributes serialized afresh;
+other XML bytes are preserved. New known properties use schema order.
+
+For a numbering source use only `recipe.numbering`, for example
+`{"numbering":[{"id":3,"levels":[{"level":0,"format":"decimal","text":"%1.","paragraph":{"hanging_pt":18},"run":{"bold":true}}]}]}`.
+Level indices are 0 through 8, numbering IDs must be positive 32-bit integers,
+and duplicate recipe IDs or level indices are rejected. Existing abstract
+numbering definitions are retained because other lists can reference them.
+A mixed styles/numbering recipe is rejected for a single-part edit; this is not
+a cross-file transaction.
+
+The shared property catalog applies to styles, numbering levels, composed
+paragraphs/runs and saved content. Existing run keys are `style`, `font`,
+`size_pt`, `bold`, `italic`, `small_caps`, `all_caps`, `strike`, `hidden`, `color`,
+`highlight`, `language`, `underline`, `superscript`, and `subscript`. Additional
+run switches are `double_strike`, `outline`, `shadow`, `emboss`, `imprint`,
+`no_proof`, `rtl`, `complex_script`, `bold_complex_script`,
+`italic_complex_script`, and `snap_to_grid`; `character_spacing_pt`,
+`position_pt`, and `kerning_pt` add numeric control. Character spacing is
+converted to twentieths of a point; position and kerning to half-points.
+
+Existing paragraph keys are `style`, `alignment`, `keep_next`, `keep_lines`,
+`page_break_before`, `widow_control`, `before_pt`, `after_pt`, `line_pt`,
+`line_multiple`, `left_pt`, `right_pt`, `first_line_pt`, `hanging_pt`,
+`outline_level`, `list_id`, `list_level`, and `tabs`. Additional switches are
+`contextual_spacing`, `mirror_indents`, `suppress_line_numbers`,
+`suppress_auto_hyphens`, `bidi`, and `snap_to_grid`. Boolean `false` writes an
+explicit off value rather than removing a possibly inherited setting.
+Measurements must be finite. `line_pt`/`line_multiple`,
+`first_line_pt`/`hanging_pt`, and `superscript`/`subscript` are mutually exclusive
+within a recipe. `list_level` requires `list_id`. Unknown keys fail explicitly;
+raw XML remains the escape hatch, not a guessed approximation.
+
+MCP `tools/list` now advertises only each operation's relevant fields and
+required inputs; native-operation help appears only on `native.call`. CLI,
+JSON-lines and MCP continue to use the same engine and core.
 
 ## Direct native object access (Windows)
 

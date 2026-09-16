@@ -14,4 +14,9 @@ removes C# base classes, and requires newline-terminated input to avoid an EOF
 closure rejected by ANTLR 4.13. Original source coordinates are retained.
 
 `vba.parse` is a syntax diagnostic, not Rubberduck's full semantic analysis,
-native VBA compilation, reference resolution, or conditional preprocessor.
+native VBA compilation or reference resolution. The shared conditional preprocessor
+selects branches using supplied constants before syntax and declaration checks.
+
+`grammar/` is the sole grammar source. Regeneration uses a disposable `.generate/`
+directory and retains only executable Go outputs; `.interp`, `.tokens` and
+translated grammar copies are generator intermediates, not runtime assets.

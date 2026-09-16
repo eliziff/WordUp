@@ -1,0 +1,84 @@
+name: Offline core
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: core-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Select the installed toolchain and platform wrapper
+        run: |
+          "WORDUP_GO=$((Get-Command go).Source)" >> $env:GITHUB_ENV
+          $wrapper = if ($IsWindows) { './tools/go.ps1' } else { './tools/go.sh' }
+          "WORDUP_WRAPPER=$wrapper" >> $env:GITHUB_ENV
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ../.tools/gocache
+            ../.tools/gomodcache
+          key: core-${{ runner.os }}-${{ hashFiles('go.mod', 'go.sum') }}-${{ github.sha }}
+          restore-keys: core-${{ runner.os }}-${{ hashFiles('go.mod', 'go.sum') }}-
+      - name: Download declared dependencies
+        run: '& $env:WORDUP_WRAPPER -Online mod download'
+      - name: Offline regressions (not native Word acceptance)
+        run: |
+          & $env:WORDUP_WRAPPER test -count=1 ./internal/... ./cmd/... 2>&1 | Tee-Object tests.txt
+          exit $LASTEXITCODE
+      - name: Static checks
+        run: |
+          # ANTLR emits known unreachable gotos. Keep every other analyzer on
+          # generated code, and unreachable analysis on all handwritten code.
+          & $env:WORDUP_WRAPPER vet -unreachable=false ./internal/... ./cmd/...
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $packages = & $env:WORDUP_WRAPPER list ./internal/... ./cmd/...
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $handwritten = @($packages | Where-Object { $_ -notmatch '/vbaparse/(generated|conditional)$' })
+          & $env:WORDUP_WRAPPER vet -unreachable=true @handwritten
+      - name: Shared-core race checks
+        if: runner.os == 'Linux'
+        run: '& $env:WORDUP_WRAPPER test -race -count=1 ./internal/office ./internal/agent ./internal/verify'
+      - name: Reproducible parser generation
+        if: runner.os == 'Windows'
+        run: |
+          $jar = Join-Path $env:RUNNER_TEMP 'antlr-4.13.1-complete.jar'
+          Invoke-WebRequest 'https://www.antlr.org/download/antlr-4.13.1-complete.jar' -OutFile $jar
+          if ((Get-FileHash $jar -Algorithm SHA256).Hash -ne 'bc13a9c57a8dd7d5196888211e5ede657cb64a3ce968608697e4f668251a8487') { throw 'ANTLR checksum mismatch' }
+          ./internal/vbaparse/generate.ps1 -AntlrJar $jar
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          git diff --exit-code -- internal/vbaparse/generated internal/vbaparse/conditional
+      - name: Bounded core benchmark observations (not a latency gate)
+        run: |
+          & $env:WORDUP_WRAPPER test -run '^$' -bench 'Benchmark(StyleBatch|ToolManifest)$' -benchtime=100ms -count=1 -benchmem ./internal/office ./internal/agent 2>&1 | Tee-Object benchmarks.txt
+          exit $LASTEXITCODE
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: core-results-${{ runner.os }}
+          path: |
+            tests.txt
+            benchmarks.txt
+          retention-days: 14

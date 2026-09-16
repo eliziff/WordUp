@@ -29,40 +29,42 @@ func KnownKeys(m map[string]any, allowed string) error {
 	return nil
 }
 func numeric(v any) (float64, error) {
-	switch n := v.(type) {
+	var n float64
+	var err error
+	switch value := v.(type) {
 	case float64:
-		if !math.IsNaN(n) && !math.IsInf(n, 0) {
-			return n, nil
-		}
+		n = value
 	case float32:
-		return numeric(float64(n))
+		n = float64(value)
 	case int:
-		return float64(n), nil
+		n = float64(value)
 	case int8:
-		return float64(n), nil
+		n = float64(value)
 	case int16:
-		return float64(n), nil
+		n = float64(value)
 	case int32:
-		return float64(n), nil
+		n = float64(value)
 	case int64:
-		return float64(n), nil
+		n = float64(value)
 	case uint:
-		return float64(n), nil
+		n = float64(value)
 	case uint8:
-		return float64(n), nil
+		n = float64(value)
 	case uint16:
-		return float64(n), nil
+		n = float64(value)
 	case uint32:
-		return float64(n), nil
+		n = float64(value)
 	case uint64:
-		return float64(n), nil
+		n = float64(value)
 	case json.Number:
-		value, err := n.Float64()
-		if err == nil && !math.IsNaN(value) && !math.IsInf(value, 0) {
-			return value, nil
-		}
+		n, err = value.Float64()
+	default:
+		err = fmt.Errorf("finite numeric measurement required")
 	}
-	return 0, fmt.Errorf("finite numeric measurement required")
+	if err != nil || !finiteFloat(n) {
+		return 0, fmt.Errorf("finite numeric measurement required")
+	}
+	return n, nil
 }
 
 func finiteFloat(v float64) bool {
@@ -127,7 +129,7 @@ func attrsXML(tag string, attrs map[string]string) string {
 	b.WriteString("/>")
 	return b.String()
 }
-func patchAttrs(b []byte, patch map[string]string) ([]byte, error) {
+func patchAttrs(b []byte, patch map[string]string, namespaces map[string]string) ([]byte, error) {
 	d := xml.NewDecoder(bytes.NewReader(b))
 	t, e := d.RawToken()
 	if e != nil {
@@ -142,6 +144,14 @@ func patchAttrs(b []byte, patch map[string]string) ([]byte, error) {
 		attrs[qname(a.Name)] = a.Value
 	}
 	for k, v := range patch {
+		// Match expanded Word names, not the spelling of an inherited prefix.
+		if strings.HasPrefix(k, "w:") {
+			for _, a := range s.Attr {
+				if a.Name.Local == k[2:] && (namespaces[a.Name.Space] == W || a.Name.Space == "w" && namespaces["w"] == "") {
+					delete(attrs, qname(a.Name))
+				}
+			}
+		}
 		if v == "\x00" {
 			delete(attrs, k)
 		} else {
@@ -154,280 +164,6 @@ func patchAttrs(b []byte, patch map[string]string) ([]byte, error) {
 		return append([]byte(open), b[end:]...), nil
 	}
 	return append([]byte(strings.TrimSuffix(open, "/>")+">"), b[end:]...), nil
-}
-func mergeChild(parent []byte, local, fragment, order string, mergeAttributes bool) ([]byte, error) {
-	spans, e := XMLSpans(parent)
-	if e != nil {
-		return nil, e
-	}
-	for _, s := range spans {
-		if s.Depth == 1 && s.Name.Local == local && (s.Name.Space == W || s.Name.Space == "w") {
-			node := []byte(fragment)
-			if mergeAttributes {
-				d := xml.NewDecoder(strings.NewReader(fragment))
-				t, e := d.RawToken()
-				if e != nil {
-					return nil, e
-				}
-				attrs := map[string]string{}
-				for _, a := range t.(xml.StartElement).Attr {
-					attrs[qname(a.Name)] = a.Value
-				}
-				if local == "rFonts" {
-					if _, set := attrs["w:ascii"]; set {
-						for _, k := range []string{"asciiTheme", "hAnsiTheme", "eastAsiaTheme", "cstheme", "csTheme"} {
-							attrs["w:"+k] = "\x00"
-						}
-					}
-				}
-				if local == "ind" {
-					if _, ok := attrs["w:firstLine"]; ok {
-						attrs["w:hanging"] = "\x00"
-						attrs["w:hangingChars"] = "\x00"
-					}
-					if _, ok := attrs["w:hanging"]; ok && attrs["w:hanging"] != "\x00" {
-						attrs["w:firstLine"] = "\x00"
-						attrs["w:firstLineChars"] = "\x00"
-					}
-				}
-				node, e = patchAttrs(parent[s.Start:s.End], attrs)
-				if e != nil {
-					return nil, e
-				}
-			}
-			return bytes.Join([][]byte{parent[:s.Start], node, parent[s.End:]}, nil), nil
-		}
-	}
-	ranks := map[string]int{}
-	for i, s := range strings.Fields(order) {
-		ranks[s] = i
-	}
-	rank, ordered := ranks[local]
-	if ordered {
-		for _, s := range spans {
-			if s.Depth == 1 {
-				if n, ok := ranks[s.Name.Local]; ok && n > rank {
-					return bytes.Join([][]byte{parent[:s.Start], []byte(fragment), parent[s.Start:]}, nil), nil
-				}
-			}
-		}
-	}
-	return InsertXML(parent, fragment)
-}
-func props(raw []byte, kind string, spec map[string]any) ([]byte, error) {
-	tag, order := "rPr", runOrder
-	if kind == "paragraph" {
-		tag, order = "pPr", paraOrder
-	}
-	if len(raw) == 0 {
-		raw = []byte("<w:" + tag + " xmlns:w=\"" + W + "\"/>")
-	}
-	patches := map[string]map[string]string{}
-	full := map[string]string{}
-	attr := func(t, a, v string) {
-		if patches[t] == nil {
-			patches[t] = map[string]string{}
-		}
-		patches[t]["w:"+a] = v
-	}
-	val := func(t string, v any) { attr(t, "val", fmt.Sprint(v)) }
-	if kind == "run" {
-		if e := KnownKeys(spec, "style font size_pt bold italic small_caps all_caps strike color underline superscript subscript highlight language hidden"); e != nil {
-			return nil, e
-		}
-		if v, ok := spec["style"]; ok {
-			val("rStyle", v)
-		}
-		if v, ok := spec["font"]; ok {
-			for _, a := range []string{"ascii", "hAnsi", "eastAsia", "cs"} {
-				attr("rFonts", a, fmt.Sprint(v))
-			}
-		}
-		if v, ok := spec["size_pt"]; ok {
-			n, e := scaled(v, 2)
-			if e != nil {
-				return nil, e
-			}
-			val("sz", n)
-			val("szCs", n)
-		}
-		for k, t := range map[string]string{"bold": "b", "italic": "i", "small_caps": "smallCaps", "all_caps": "caps", "strike": "strike", "hidden": "vanish"} {
-			if v, ok := spec[k]; ok {
-				n, e := boolVal(v)
-				if e != nil {
-					return nil, e
-				}
-				val(t, n)
-			}
-		}
-		for k, t := range map[string]string{"color": "color", "highlight": "highlight"} {
-			if v, ok := spec[k]; ok {
-				val(t, v)
-			}
-		}
-		if v, ok := spec["language"]; ok {
-			attr("lang", "val", fmt.Sprint(v))
-		}
-		if v, ok := spec["underline"]; ok {
-			if b, ok := v.(bool); ok {
-				if b {
-					val("u", "single")
-				} else {
-					val("u", "none")
-				}
-			} else {
-				val("u", v)
-			}
-		}
-		if v, ok := spec["superscript"]; ok {
-			b, ok := v.(bool)
-			if !ok {
-				return nil, fmt.Errorf("superscript boolean required")
-			}
-			if b {
-				val("vertAlign", "superscript")
-			} else {
-				val("vertAlign", "baseline")
-			}
-		}
-		if v, ok := spec["subscript"]; ok {
-			b, ok := v.(bool)
-			if !ok {
-				return nil, fmt.Errorf("subscript boolean required")
-			}
-			if b {
-				val("vertAlign", "subscript")
-			} else {
-				val("vertAlign", "baseline")
-			}
-		}
-	} else {
-		if e := KnownKeys(spec, "style alignment before_pt after_pt line_pt line_multiple left_pt right_pt first_line_pt hanging_pt keep_next keep_lines page_break_before widow_control outline_level list_id list_level tabs"); e != nil {
-			return nil, e
-		}
-		if _, ok := spec["line_pt"]; ok {
-			if _, ok := spec["line_multiple"]; ok {
-				return nil, fmt.Errorf("choose exact line spacing or a multiple")
-			}
-		}
-		if _, ok := spec["first_line_pt"]; ok {
-			if _, ok := spec["hanging_pt"]; ok {
-				return nil, fmt.Errorf("first line and hanging indents are mutually exclusive")
-			}
-		}
-		if v, ok := spec["style"]; ok {
-			val("pStyle", v)
-		}
-		if v, ok := spec["alignment"]; ok {
-			if !strings.Contains("|left|right|center|both|distribute|start|end|", "|"+fmt.Sprint(v)+"|") {
-				return nil, fmt.Errorf("invalid paragraph alignment")
-			}
-			val("jc", v)
-		}
-		for k, t := range map[string]string{"keep_next": "keepNext", "keep_lines": "keepLines", "page_break_before": "pageBreakBefore", "widow_control": "widowControl"} {
-			if v, ok := spec[k]; ok {
-				n, e := boolVal(v)
-				if e != nil {
-					return nil, e
-				}
-				val(t, n)
-			}
-		}
-		for k, a := range map[string]string{"before_pt": "before", "after_pt": "after", "line_pt": "line"} {
-			if v, ok := spec[k]; ok {
-				n, e := scaled(v, 20)
-				if e != nil {
-					return nil, e
-				}
-				attr("spacing", a, n)
-				if k == "line_pt" {
-					attr("spacing", "lineRule", "exact")
-				}
-			}
-		}
-		if v, ok := spec["line_multiple"]; ok {
-			n, e := scaled(v, 240)
-			if e != nil {
-				return nil, e
-			}
-			attr("spacing", "line", n)
-			attr("spacing", "lineRule", "auto")
-		}
-		for k, a := range map[string]string{"left_pt": "left", "right_pt": "right", "first_line_pt": "firstLine", "hanging_pt": "hanging"} {
-			if v, ok := spec[k]; ok {
-				n, e := scaled(v, 20)
-				if e != nil {
-					return nil, e
-				}
-				attr("ind", a, n)
-			}
-		}
-		if v, ok := spec["outline_level"]; ok {
-			n, e := integer(v)
-			if e != nil || n < 0 || n > 9 {
-				return nil, fmt.Errorf("invalid outline level")
-			}
-			val("outlineLvl", n)
-		}
-		if v, ok := spec["list_id"]; ok {
-			n, e := integer(v)
-			if e != nil || n < 1 {
-				return nil, fmt.Errorf("invalid list id")
-			}
-			level := 0
-			if x, ok := spec["list_level"]; ok {
-				level, e = integer(x)
-				if e != nil || level < 0 || level > 8 {
-					return nil, fmt.Errorf("invalid list level")
-				}
-			}
-			full["numPr"] = fmt.Sprintf(`<w:numPr><w:ilvl w:val="%d"/><w:numId w:val="%d"/></w:numPr>`, level, n)
-		}
-		if v, ok := spec["tabs"]; ok {
-			tabs, ok := v.([]any)
-			if !ok {
-				return nil, fmt.Errorf("tabs must be array")
-			}
-			var b strings.Builder
-			b.WriteString("<w:tabs>")
-			for _, t := range tabs {
-				m, ok := t.(map[string]any)
-				if !ok {
-					return nil, fmt.Errorf("invalid tab")
-				}
-				if e := KnownKeys(m, "position_pt alignment leader"); e != nil {
-					return nil, e
-				}
-				pos, e := scaled(m["position_pt"], 20)
-				if e != nil {
-					return nil, e
-				}
-				a := map[string]string{"w:pos": pos, "w:val": "left"}
-				if x, ok := m["alignment"]; ok {
-					a["w:val"] = fmt.Sprint(x)
-				}
-				if x, ok := m["leader"]; ok {
-					a["w:leader"] = fmt.Sprint(x)
-				}
-				b.WriteString(attrsXML("w:tab", a))
-			}
-			b.WriteString("</w:tabs>")
-			full["tabs"] = b.String()
-		}
-	}
-	for _, t := range strings.Fields(order) {
-		var e error
-		if a, ok := patches[t]; ok {
-			raw, e = mergeChild(raw, t, attrsXML("w:"+t, a), order, true)
-		}
-		if f, ok := full[t]; ok {
-			raw, e = mergeChild(raw, t, f, order, false)
-		}
-		if e != nil {
-			return nil, e
-		}
-	}
-	return raw, nil
 }
 
 type StyleSpec struct {
@@ -460,6 +196,44 @@ type StyleRecipe struct {
 	Numbering []NumberingSpec `json:"numbering,omitempty"`
 }
 
+// ApplyStyleXML edits one native styles or numbering source part. It shares
+// the package author's batch editor and returns no candidate on invalid input.
+// The caller owns persistence and optimistic concurrency.
+func ApplyStyleXML(source []byte, recipe StyleRecipe) ([]byte, error) {
+	nodes, err := XMLSpans(source)
+	if err != nil {
+		return nil, err
+	}
+	if nodes[0].Name.Space != W {
+		return nil, fmt.Errorf("Word styles or numbering XML required")
+	}
+	source, err = EnsureNamespace(source, "w", W)
+	if err != nil {
+		return nil, err
+	}
+	switch nodes[0].Name.Local {
+	case "styles":
+		if len(recipe.Styles) == 0 || len(recipe.Numbering) != 0 {
+			return nil, fmt.Errorf("styles source requires only a nonempty styles recipe")
+		}
+		source, err = editStyles(source, recipe.Styles)
+	case "numbering":
+		if len(recipe.Numbering) == 0 || len(recipe.Styles) != 0 {
+			return nil, fmt.Errorf("numbering source requires only a nonempty numbering recipe")
+		}
+		source, err = editNumbering(source, recipe.Numbering)
+	default:
+		return nil, fmt.Errorf("Word styles or numbering XML required")
+	}
+	if err == nil {
+		_, err = XMLSpans(source)
+	}
+	if err != nil {
+		return nil, err
+	}
+	return source, nil
+}
+
 func ApplyStyles(p *Package, r StyleRecipe) error {
 	work := p.Clone()
 	if err := applyStyles(work, r); err != nil {
@@ -470,232 +244,259 @@ func ApplyStyles(p *Package, r StyleRecipe) error {
 }
 
 func applyStyles(p *Package, r StyleRecipe) error {
-	if len(r.Styles) > 0 {
-		part := "word/styles.xml"
-		b := p.Files[part]
+	for _, part := range []struct {
+		name  string
+		count int
+		edit  func([]byte) ([]byte, error)
+	}{
+		{"styles", len(r.Styles), func(b []byte) ([]byte, error) { return editStyles(b, r.Styles) }},
+		{"numbering", len(r.Numbering), func(b []byte) ([]byte, error) { return editNumbering(b, r.Numbering) }},
+	} {
+		if part.count == 0 {
+			continue
+		}
+		name := "word/" + part.name + ".xml"
+		b := p.Files[name]
 		if b == nil {
-			b = []byte(`<w:styles xmlns:w="` + W + `"/>`)
+			b = []byte(`<w:` + part.name + ` xmlns:w="` + W + `"/>`)
 		}
-		var e error
-		b, e = EnsureNamespace(b, "w", W)
-		if e != nil {
-			return e
+		b, err := EnsureNamespace(b, "w", W)
+		if err != nil {
+			return err
 		}
-		for _, s := range r.Styles {
-			if s.ID == "" {
-				return fmt.Errorf("style id required")
-			}
-			spans, e := XMLSpans(b)
-			if e != nil {
-				return e
-			}
-			var node []byte
-			for _, n := range spans {
-				if n.Depth == 1 && n.Name.Local == "style" && n.Attribute(W, "styleId") == s.ID {
-					node = b[n.Start:n.End]
-					if s.Type != "" && n.Attribute(W, "type") != s.Type {
-						return fmt.Errorf("style type conversion requires a new ID")
-					}
-					break
-				}
-			}
-			existing := len(node) > 0
-			if len(node) == 0 {
-				kind := s.Type
-				if kind == "" {
-					kind = "paragraph"
-				}
-				node = []byte(`<w:style xmlns:w="` + W + `" w:type="` + Esc(kind) + `" w:styleId="` + Esc(s.ID) + `" w:customStyle="1"/>`)
-			}
-			if s.XML != "" {
-				node = []byte(s.XML)
-				nodes, e := XMLSpans(node)
-				if e != nil {
-					return e
-				}
-				if nodes[0].Name.Local != "style" || nodes[0].Attribute("*", "styleId") != s.ID {
-					return fmt.Errorf("raw style identity mismatch")
-				}
-			} else {
-				name := s.Name
-				if name == "" && !existing {
-					name = s.ID
-				}
-				for _, kv := range [][2]string{{"name", name}, {"basedOn", s.BasedOn}, {"next", s.Next}, {"link", s.Linked}} {
-					if kv[1] != "" {
-						node, e = mergeChild(node, kv[0], attrsXML("w:"+kv[0], map[string]string{"w:val": kv[1]}), styleOrder, true)
-						if e != nil {
-							return e
-						}
-					}
-				}
-				if s.Quick != nil {
-					v := "0"
-					if *s.Quick {
-						v = "1"
-					}
-					node, e = mergeChild(node, "qFormat", `<w:qFormat w:val="`+v+`"/>`, styleOrder, true)
-					if e != nil {
-						return e
-					}
-				}
-				for _, it := range []struct {
-					tag, kind string
-					spec      map[string]any
-				}{{"pPr", "paragraph", s.Paragraph}, {"rPr", "run", s.Run}} {
-					if it.spec == nil {
-						continue
-					}
-					var raw []byte
-					nodes, e := XMLSpans(node)
-					if e != nil {
-						return e
-					}
-					for _, n := range nodes {
-						if n.Depth == 1 && n.Name.Local == it.tag {
-							raw = node[n.Start:n.End]
-							break
-						}
-					}
-					raw, e = props(raw, it.kind, it.spec)
-					if e != nil {
-						return e
-					}
-					node, e = mergeChild(node, it.tag, string(raw), styleOrder, false)
-					if e != nil {
-						return e
-					}
-				}
-			}
-			b, e = UpsertXML(b, W, "style", W, "styleId", s.ID, string(node))
-			if e != nil {
-				return e
-			}
+		b, err = part.edit(b)
+		if err != nil {
+			return err
 		}
-		p.Files[part] = b
-		if e = p.ContentType(part, "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"); e != nil {
-			return e
+		p.Files[name] = b
+		if err = p.ContentType(name, "application/vnd.openxmlformats-officedocument.wordprocessingml."+part.name+"+xml"); err != nil {
+			return err
 		}
-		if e = p.Relationship("word/document.xml", "rIdStyles", R+"/styles", "styles.xml", ""); e != nil {
-			return e
-		}
-	}
-	if len(r.Numbering) > 0 {
-		b := p.Files["word/numbering.xml"]
-		if b == nil {
-			b = []byte(`<w:numbering xmlns:w="` + W + `"/>`)
-		}
-		var e error
-		b, e = EnsureNamespace(b, "w", W)
-		if e != nil {
-			return e
-		}
-		spans, e := XMLSpans(b)
-		if e != nil {
-			return e
-		}
-		next := 0
-		for _, n := range spans {
-			if n.Name.Local == "abstractNum" {
-				id, _ := strconv.Atoi(n.Attribute(W, "abstractNumId"))
-				next = max(next, id+1)
-			}
-		}
-		seen := map[int]bool{}
-		for _, n := range r.Numbering {
-			if n.ID < 1 || len(n.Levels) == 0 || len(n.Levels) > 9 || seen[n.ID] {
-				return fmt.Errorf("invalid numbering recipe")
-			}
-			seen[n.ID] = true
-			aid := next
-			next++
-			var x strings.Builder
-			x.WriteString(`<w:abstractNum w:abstractNumId="` + strconv.Itoa(aid) + `"><w:multiLevelType w:val="multilevel"/>`)
-			levels := map[int]bool{}
-			for _, l := range n.Levels {
-				if l.Level < 0 || l.Level > 8 || levels[l.Level] {
-					return fmt.Errorf("invalid numbering level")
-				}
-				levels[l.Level] = true
-				start := l.Start
-				if start == 0 {
-					start = 1
-				}
-				if start < 1 || l.Format == "" || l.Text == "" {
-					return fmt.Errorf("numbering level needs a positive start, format, and text")
-				}
-				x.WriteString(fmt.Sprintf(`<w:lvl w:ilvl="%d"><w:start w:val="%d"/><w:numFmt w:val="%s"/><w:lvlText w:val="%s"/>`, l.Level, start, Esc(l.Format), Esc(l.Text)))
-				if l.Suffix != "" {
-					x.WriteString(`<w:suff w:val="` + Esc(l.Suffix) + `"/>`)
-				}
-				pp, e := props(nil, "paragraph", l.Paragraph)
-				if e != nil {
-					return e
-				}
-				rp, e := props(nil, "run", l.Run)
-				if e != nil {
-					return e
-				}
-				x.Write(pp)
-				x.Write(rp)
-				x.WriteString(`</w:lvl>`)
-			}
-			x.WriteString(`</w:abstractNum>`)
-			// Abstract definitions precede concrete numbering instances.
-			b, e = mergeChildAtEndOfKind(b, "abstractNum", x.String())
-			if e != nil {
-				return e
-			}
-			// A concrete numbering ID may already carry Word-authored level
-			// overrides (for example a restart or a per-level start value). Update
-			// only its abstract definition link; replacing the whole <w:num> node
-			// would silently discard those unrelated children.
-			fragment := fmt.Sprintf(`<w:abstractNumId w:val="%d"/>`, aid)
-			updated := false
-			spans, e = XMLSpans(b)
-			if e != nil {
-				return e
-			}
-			for _, s := range spans {
-				if s.Depth != 1 || s.Name.Space != W || s.Name.Local != "num" || s.Attribute(W, "numId") != strconv.Itoa(n.ID) {
-					continue
-				}
-				node, mergeErr := mergeChild(b[s.Start:s.End], "abstractNumId", fragment, "abstractNumId lvlOverride", true)
-				if mergeErr != nil {
-					return mergeErr
-				}
-				b = bytes.Join([][]byte{b[:s.Start], node, b[s.End:]}, nil)
-				updated = true
-				break
-			}
-			if !updated {
-				b, e = UpsertXML(b, W, "num", W, "numId", strconv.Itoa(n.ID), fmt.Sprintf(`<w:num w:numId="%d"><w:abstractNumId w:val="%d"/></w:num>`, n.ID, aid))
-				if e != nil {
-					return e
-				}
-			}
-		}
-		p.Files["word/numbering.xml"] = b
-		if e := p.ContentType("word/numbering.xml", "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"); e != nil {
-			return e
-		}
-		if e := p.Relationship("word/document.xml", "rIdNumbering", R+"/numbering", "numbering.xml", ""); e != nil {
-			return e
+		id := "rId" + strings.ToUpper(part.name[:1]) + part.name[1:]
+		if err = p.Relationship("word/document.xml", id, R+"/"+part.name, part.name+".xml", ""); err != nil {
+			return err
 		}
 	}
 	return nil
 }
-func mergeChildAtEndOfKind(b []byte, kind, fragment string) ([]byte, error) {
-	spans, e := XMLSpans(b)
-	if e != nil {
-		return nil, e
+
+func editStyles(b []byte, styles []StyleSpec) ([]byte, error) {
+	spans, err := XMLSpans(b)
+	if err != nil {
+		return nil, err
 	}
-	for _, s := range spans {
-		if s.Depth == 1 && s.Name.Local == "num" {
-			return bytes.Join([][]byte{b[:s.Start], []byte(fragment), b[s.Start:]}, nil), nil
+	existing := map[string]XMLSpan{}
+	for _, n := range spans {
+		if n.Depth == 1 && n.Name.Space == W && n.Name.Local == "style" {
+			id := n.Attribute(W, "styleId")
+			if _, ok := existing[id]; ok {
+				return nil, fmt.Errorf("duplicate style id %q", id)
+			}
+			existing[id] = n
 		}
 	}
-	return InsertXML(b, fragment)
+	// A repeated recipe ID sees its preceding edit, but the package part is
+	// parsed and copied only once regardless of the number of style updates.
+	updated, order := map[string][]byte{}, []string{}
+	for _, s := range styles {
+		raw, seen := updated[s.ID]
+		if !seen {
+			if n, ok := existing[s.ID]; ok {
+				raw = b[n.Start:n.End]
+			}
+			order = append(order, s.ID)
+		}
+		scope := spans[0].namespaces
+		if n, ok := existing[s.ID]; ok {
+			scope = n.namespaces
+		}
+		updated[s.ID], err = editStyle(raw, s, scope)
+		if err != nil {
+			return nil, fmt.Errorf("style %q: %w", s.ID, err)
+		}
+	}
+	patches := []XMLPatch{}
+	var added strings.Builder
+	for _, id := range order {
+		if n, ok := existing[id]; ok {
+			patches = append(patches, XMLPatch{n.Start, n.End - n.Start, string(updated[id])})
+		} else {
+			added.Write(updated[id])
+		}
+	}
+	if added.Len() > 0 {
+		patches = append(patches, insertAtRoot(b, spans[0], added.String()))
+	}
+	return spliceXML(b, patches)
+}
+
+func editStyle(raw []byte, s StyleSpec, scope map[string]string) ([]byte, error) {
+	if s.ID == "" {
+		return nil, fmt.Errorf("style id required")
+	}
+	existing := len(raw) > 0
+	if !existing {
+		kind := s.Type
+		if kind == "" {
+			kind = "paragraph"
+		}
+		raw = []byte(`<w:style xmlns:w="` + W + `" w:type="` + Esc(kind) + `" w:styleId="` + Esc(s.ID) + `" w:customStyle="1"/>`)
+	}
+	nodes, err := xmlSpans(raw, scope)
+	if err != nil {
+		return nil, err
+	}
+	if s.Type != "" && nodes[0].Attribute(W, "type") != s.Type {
+		return nil, fmt.Errorf("style type conversion requires a new ID")
+	}
+	if s.XML != "" {
+		node := []byte(s.XML)
+		spans, err := xmlSpans(node, scope)
+		if err != nil {
+			return nil, err
+		}
+		if spans[0].Name.Local != "style" || (spans[0].Name.Space != W && spans[0].Name.Space != "w") || spans[0].Attribute(W, "styleId") != s.ID {
+			return nil, fmt.Errorf("raw style identity mismatch")
+		}
+		return node, nil
+	}
+	changes := map[string]childChange{}
+	name := s.Name
+	if name == "" && !existing {
+		name = s.ID
+	}
+	for _, kv := range [][2]string{{"name", name}, {"basedOn", s.BasedOn}, {"next", s.Next}, {"link", s.Linked}} {
+		if kv[1] != "" {
+			changes[kv[0]] = childChange{attrs: map[string]string{"w:val": kv[1]}}
+		}
+	}
+	if s.Quick != nil {
+		value, _ := boolVal(*s.Quick)
+		changes["qFormat"] = childChange{attrs: map[string]string{"w:val": value}}
+	}
+	for _, it := range []struct {
+		tag, kind string
+		spec      map[string]any
+	}{{"pPr", "paragraph", s.Paragraph}, {"rPr", "run", s.Run}} {
+		if it.spec == nil {
+			continue
+		}
+		var child []byte
+		for _, n := range nodes {
+			if n.Depth == 1 && n.Name.Local == it.tag && (n.Name.Space == W || n.Name.Space == "w") {
+				child = raw[n.Start:n.End]
+				break
+			}
+		}
+		childScope := nodes[0].namespaces
+		for _, n := range nodes {
+			if n.Depth == 1 && n.Name.Local == it.tag && n.Name.Space == W {
+				childScope = n.namespaces
+				break
+			}
+		}
+		child, err = props(child, it.kind, it.spec, childScope)
+		if err != nil {
+			return nil, err
+		}
+		changes[it.tag] = childChange{xml: string(child)}
+	}
+	return mergeChildren(raw, styleOrder, changes, scope)
+}
+
+func editNumbering(b []byte, numbering []NumberingSpec) ([]byte, error) {
+	spans, err := XMLSpans(b)
+	if err != nil {
+		return nil, err
+	}
+	next, at := 0, spans[0].CloseStart
+	existing := map[int]XMLSpan{}
+	for _, n := range spans {
+		if n.Depth != 1 || n.Name.Space != W {
+			continue
+		}
+		switch n.Name.Local {
+		case "abstractNum":
+			id, err := strconv.Atoi(n.Attribute(W, "abstractNumId"))
+			if err != nil || id < 0 || id >= math.MaxInt32 {
+				return nil, fmt.Errorf("invalid abstract numbering id")
+			}
+			next = max(next, id+1)
+		case "num":
+			id, err := strconv.Atoi(n.Attribute(W, "numId"))
+			if err != nil {
+				return nil, err
+			}
+			if _, ok := existing[id]; ok {
+				return nil, fmt.Errorf("duplicate numbering id %d", id)
+			}
+			existing[id] = n
+			at = min(at, n.Start)
+		}
+	}
+	var abstracts, added strings.Builder
+	patches, seen := []XMLPatch{}, map[int]bool{}
+	for _, n := range numbering {
+		if n.ID < 1 || n.ID > math.MaxInt32 || len(n.Levels) == 0 || len(n.Levels) > 9 || seen[n.ID] || next >= math.MaxInt32 {
+			return nil, fmt.Errorf("invalid numbering recipe")
+		}
+		seen[n.ID] = true
+		abstracts.WriteString(fmt.Sprintf(`<w:abstractNum w:abstractNumId="%d"><w:multiLevelType w:val="multilevel"/>`, next))
+		levels := map[int]bool{}
+		for _, l := range n.Levels {
+			if l.Level < 0 || l.Level > 8 || levels[l.Level] {
+				return nil, fmt.Errorf("invalid numbering level")
+			}
+			levels[l.Level] = true
+			start := l.Start
+			if start == 0 {
+				start = 1
+			}
+			if start < 1 || l.Format == "" || l.Text == "" {
+				return nil, fmt.Errorf("numbering level needs a positive start, format, and text")
+			}
+			abstracts.WriteString(fmt.Sprintf(`<w:lvl w:ilvl="%d"><w:start w:val="%d"/><w:numFmt w:val="%s"/><w:lvlText w:val="%s"/>`, l.Level, start, Esc(l.Format), Esc(l.Text)))
+			if l.Suffix != "" {
+				abstracts.WriteString(`<w:suff w:val="` + Esc(l.Suffix) + `"/>`)
+			}
+			for _, it := range []struct {
+				kind string
+				spec map[string]any
+			}{{"paragraph", l.Paragraph}, {"run", l.Run}} {
+				x, err := props(nil, it.kind, it.spec)
+				if err != nil {
+					return nil, err
+				}
+				abstracts.Write(x)
+			}
+			abstracts.WriteString(`</w:lvl>`)
+		}
+		abstracts.WriteString(`</w:abstractNum>`)
+		num := fmt.Sprintf(`<w:num w:numId="%d"><w:abstractNumId w:val="%d"/></w:num>`, n.ID, next)
+		if old, ok := existing[n.ID]; ok {
+			// A concrete numbering ID may already carry Word-authored level
+			// overrides (a restart or per-level start). Update only its abstract
+			// definition link; replacing the whole <w:num> node would silently
+			// discard those unrelated children.
+			node, err := mergeChildren(b[old.Start:old.End], "abstractNumId lvlOverride", map[string]childChange{"abstractNumId": {attrs: map[string]string{"w:val": strconv.Itoa(next)}}}, old.namespaces)
+			if err != nil {
+				return nil, err
+			}
+			patches = append(patches, XMLPatch{old.Start, old.End - old.Start, string(node)})
+		} else {
+			added.WriteString(num)
+		}
+		next++
+	}
+	if at == spans[0].CloseStart {
+		patches = append(patches, insertAtRoot(b, spans[0], abstracts.String()+added.String()))
+	} else {
+		patches = append(patches, XMLPatch{Offset: at, Text: abstracts.String()})
+		if added.Len() > 0 {
+			patches = append(patches, insertAtRoot(b, spans[0], added.String()))
+		}
+	}
+	return spliceXML(b, patches)
 }
 
 // The recipe is an authoring convenience, not a substitute Word object model.

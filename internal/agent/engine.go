@@ -30,6 +30,7 @@ import (
 )
 
 type Parameters struct {
+	Recipe               *office.StyleRecipe     `json:"recipe,omitempty"`
 	Paths                []string                `json:"paths,omitempty"`
 	Comparison           string                  `json:"comparison,omitempty"`
 	Part                 string                  `json:"part,omitempty"`
@@ -59,7 +60,7 @@ type Parameters struct {
 	Fresh                bool                    `json:"fresh,omitempty"`
 	Offset               int                     `json:"offset,omitempty"`
 	Limit                int                     `json:"limit,omitempty"`
-	Length               int                     `json:"length,omitempty"`
+	Patches              []office.XMLPatch       `json:"patches,omitempty"`
 	NativeOptions        *native.Options         `json:"native_options,omitempty"`
 }
 type Engine struct {
@@ -106,6 +107,25 @@ func (e *Engine) path(s string) (string, error) {
 	}
 	return project.Under(e.Root, filepath.ToSlash(s))
 }
+func (e *Engine) read(path string) ([]byte, error) {
+	full, err := e.path(path)
+	if err != nil {
+		return nil, err
+	}
+	return project.Read(filepath.Dir(full), filepath.Base(full))
+}
+
+func (e *Engine) resolve(paths ...*string) error {
+	for _, path := range paths {
+		resolved, err := e.path(*path)
+		if err != nil {
+			return err
+		}
+		*path = resolved
+	}
+	return nil
+}
+
 func (e *Engine) bundlePath(path string) (string, error) {
 	if filepath.IsAbs(path) {
 		return filepath.Clean(path), nil
@@ -206,23 +226,17 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		}
 		return component.DiffWith(e.Root, p.Component, p.Parameters)
 	case "binary.inspect":
-		full, err := e.path(p.Path)
-		if err != nil {
+		if err := e.resolve(&p.Path); err != nil {
 			return nil, err
 		}
-		return native.OfficeTools(ctx, "ole.inspect", full)
+		return native.OfficeTools(ctx, "ole.inspect", p.Path)
 	case "openxml.validate":
-		full, err := e.path(p.Path)
-		if err != nil {
+		if err := e.resolve(&p.Path); err != nil {
 			return nil, err
 		}
-		return native.OfficeTools(ctx, "validate", full)
+		return native.OfficeTools(ctx, "validate", p.Path)
 	case "ribbon.callbacks":
-		full, err := e.path(p.Path)
-		if err != nil {
-			return nil, err
-		}
-		data, err := project.Read(filepath.Dir(full), filepath.Base(full))
+		data, err := e.read(p.Path)
 		if err != nil {
 			return nil, err
 		}
@@ -230,11 +244,7 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 	case "vba.parse":
 		source := p.Text
 		if p.Path != "" {
-			full, err := e.path(p.Path)
-			if err != nil {
-				return nil, err
-			}
-			data, err := project.Read(filepath.Dir(full), filepath.Base(full))
+			data, err := e.read(p.Path)
 			if err != nil {
 				return nil, err
 			}
@@ -248,22 +258,14 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		}
 		return native.OfficeTools(ctx, "vba.analyze", request)
 	case "xml.query":
-		full, err := e.path(p.Path)
-		if err != nil {
-			return nil, err
-		}
-		data, err := project.Read(filepath.Dir(full), filepath.Base(full))
+		data, err := e.read(p.Path)
 		if err != nil {
 			return nil, err
 		}
 		return office.QueryXMLInput(ctx, data, p.Part, p.Query, p.Namespaces, p.Limit)
 	case "xml.compare", "xml.verify":
 		read := func(path string) ([]byte, error) {
-			full, err := e.path(path)
-			if err != nil {
-				return nil, err
-			}
-			data, err := project.Read(filepath.Dir(full), filepath.Base(full))
+			data, err := e.read(path)
 			if err != nil {
 				return nil, err
 			}
@@ -324,32 +326,23 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		if !e.Execute {
 			return nil, fmt.Errorf("preview requires --execute authority")
 		}
-		artifact, err := e.path(p.Path)
-		if err != nil {
-			return nil, err
-		}
-		proof, err := e.path(p.Reference)
-		if err != nil {
+		if err := e.resolve(&p.Path, &p.Reference); err != nil {
 			return nil, err
 		}
 		document := ""
 		if p.Document != "" {
+			var err error
 			document, err = e.path(p.Document)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return preview(ctx, e.Root, artifact, proof, document)
+		return preview(ctx, e.Root, p.Path, p.Reference, document)
 	case "test.freeze":
-		reference, err := e.path(p.Reference)
-		if err != nil {
+		if err := e.resolve(&p.Reference, &p.Output); err != nil {
 			return nil, err
 		}
-		output, err := e.path(p.Output)
-		if err != nil {
-			return nil, err
-		}
-		return verify.Freeze(reference, output)
+		return verify.Freeze(p.Reference, p.Output)
 	case "test.compare":
 		readReport := func(path string) (*verify.Report, error) {
 			file, err := e.path(path)
@@ -369,41 +362,30 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		}
 		return verify.CompareWithPolicy(baseline, candidate, p.XMLPolicy)
 	case "sign", "signature.verify":
-		file, err := e.path(p.Path)
-		if err != nil {
+		if err := e.resolve(&p.Path); err != nil {
 			return nil, err
 		}
 		if method == "signature.verify" {
-			return signing.Verify(ctx, file, p.Signing)
+			return signing.Verify(ctx, p.Path, p.Signing)
 		}
 		if !e.Execute {
 			return nil, fmt.Errorf("signing requires --execute authority")
 		}
-		output, err := e.path(p.Output)
-		if err != nil {
+		if err := e.resolve(&p.Output); err != nil {
 			return nil, err
 		}
-		return signing.Sign(ctx, file, output, p.Signing)
+		return signing.Sign(ctx, p.Path, p.Output, p.Signing)
 	case "deploy":
 		if !e.Execute {
 			return nil, fmt.Errorf("deployment requires --execute authority")
 		}
-		artifact, err := e.path(p.Path)
-		if err != nil {
+		if err := e.resolve(&p.Path, &p.Reference, &p.Output); err != nil {
 			return nil, err
 		}
-		proof, err := e.path(p.Reference)
-		if err != nil {
+		if err := e.Close(); err != nil {
 			return nil, err
 		}
-		target, err := e.path(p.Output)
-		if err != nil {
-			return nil, err
-		}
-		if err = e.Close(); err != nil {
-			return nil, err
-		}
-		planFile, plan, err := deploy.Prepare(e.Root, artifact, proof, target)
+		planFile, plan, err := deploy.Prepare(e.Root, p.Path, p.Reference, p.Output)
 		if err != nil {
 			return nil, err
 		}
@@ -423,20 +405,18 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		if !e.Execute {
 			return nil, fmt.Errorf("activation requires --execute authority")
 		}
-		file, err := e.path(p.Path)
-		if err != nil {
+		if err := e.resolve(&p.Path); err != nil {
 			return nil, err
 		}
 		if method == "restore" {
-			return deploy.Restore(file)
+			return deploy.Restore(p.Path)
 		}
-		return deploy.Activate(file)
+		return deploy.Activate(p.Path)
 	case "example":
-		out, err := e.path(p.Output)
-		if err != nil {
+		if err := e.resolve(&p.Output); err != nil {
 			return nil, err
 		}
-		return example.Studio(out)
+		return example.Studio(p.Output)
 	case "selftest":
 		// Known source generated locally, but still requires explicit execution authority.
 		if !e.Execute {
@@ -479,45 +459,35 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 	case "help":
 		return map[string]any{"instructions": project.AgentInstructions, "tools": Tools(), "native_operation_help": NativeHelp}, nil
 	case "new":
-		out, err := e.path(p.Output)
-		if err != nil {
+		if err := e.resolve(&p.Output); err != nil {
 			return nil, err
 		}
-		return project.New(p.Name, out)
+		return project.New(p.Name, p.Output)
 	case "import":
-		source, err := e.path(p.Path)
-		if err != nil {
+		if err := e.resolve(&p.Path, &p.Output); err != nil {
 			return nil, err
 		}
-		out, err := e.path(p.Output)
-		if err != nil {
-			return nil, err
-		}
-		return project.Import(source, out)
+		return project.Import(p.Path, p.Output)
 	case "inspect":
-		path, err := e.path(p.Path)
-		if err != nil {
+		if err := e.resolve(&p.Path); err != nil {
 			return nil, err
 		}
-		return inspect.Artifact(path)
+		return inspect.Artifact(p.Path)
 	case "structure.inspect":
-		path, err := e.path(p.Path)
-		if err != nil {
+		if err := e.resolve(&p.Path); err != nil {
 			return nil, err
 		}
-		return inspect.StructureReference(path)
+		return inspect.StructureReference(p.Path)
 	case "structure.resolve":
-		path, err := e.path(p.Path)
-		if err != nil {
+		if err := e.resolve(&p.Path); err != nil {
 			return nil, err
 		}
-		return inspect.StructureResolved(path)
+		return inspect.StructureResolved(p.Path)
 	case "structure.compare":
-		reference, err := e.path(p.Reference)
-		if err != nil {
+		if err := e.resolve(&p.Reference); err != nil {
 			return nil, err
 		}
-		return inspect.CompareStructureSilver(e.Root, reference, p.Limit)
+		return inspect.CompareStructureSilver(e.Root, p.Reference, p.Limit)
 	case "structure.source":
 		m, err := component.Get("structure.detect")
 		if err != nil {
@@ -525,17 +495,15 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		}
 		return map[string]any{"module": "WordUpStructure", "version": m.Version, "source": structure.Source, "license": m.License, "contract": "editable standalone detector; Word UTF-16 source positions; evidence, hierarchy and ambiguity remain distinct"}, nil
 	case "reference.document":
-		path, err := e.path(p.Path)
-		if err != nil {
+		if err := e.resolve(&p.Path); err != nil {
 			return nil, err
 		}
-		return inspect.StyleReference(path)
+		return inspect.StyleReference(p.Path)
 	case "reference.image":
-		path, err := e.path(p.Path)
-		if err != nil {
+		if err := e.resolve(&p.Path); err != nil {
 			return nil, err
 		}
-		im, b, typ, err := inspect.Image(path)
+		im, b, typ, err := inspect.Image(p.Path)
 		if err != nil {
 			return nil, err
 		}
@@ -543,24 +511,20 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		if typ == "jpeg" {
 			mime = "image/jpeg"
 		}
-		return map[string]any{"type": "image", "path": path, "mimeType": mime, "width": im.Bounds().Dx(), "height": im.Bounds().Dy(), "sha256": office.Hash(b), "data": base64.StdEncoding.EncodeToString(b), "interpretation": "Native image bytes; the connected agent supplies visual reasoning. No styles were inferred by this command."}, nil
+		return map[string]any{"type": "image", "path": p.Path, "mimeType": mime, "width": im.Bounds().Dx(), "height": im.Bounds().Dy(), "sha256": office.Hash(b), "data": base64.StdEncoding.EncodeToString(b), "interpretation": "Native image bytes; the connected agent supplies visual reasoning. No styles were inferred by this command."}, nil
 	case "image.compare":
-		a, err := e.path(p.Reference)
-		if err != nil {
-			return nil, err
-		}
-		b, err := e.path(p.Path)
-		if err != nil {
+		if err := e.resolve(&p.Reference, &p.Path); err != nil {
 			return nil, err
 		}
 		out := ""
 		if p.Output != "" {
+			var err error
 			out, err = e.path(p.Output)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return inspect.Compare(a, b, out, p.Tolerance)
+		return inspect.Compare(p.Reference, p.Path, out, p.Tolerance)
 	case "read":
 		b, err := project.Read(e.Root, p.Path)
 		if err != nil {
@@ -605,24 +569,23 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 			return nil, err
 		}
 		return map[string]any{"path": p.Path, "sha256": office.Hash(b), "bytes": len(b)}, nil
-	case "xml.patch":
-		if p.Part != "" {
-			return nil, fmt.Errorf("xml.patch edits an XML source path; materialize the workspace package part instead of rewriting a ZIP")
-		}
-		if filepath.IsAbs(p.Path) {
-			return nil, fmt.Errorf("xml.patch path must be workspace-relative")
+	case "xml.patch", "styles.apply":
+		if p.Part != "" || filepath.IsAbs(p.Path) {
+			return nil, fmt.Errorf("%s requires a workspace-relative XML source path, not a ZIP part", method)
 		}
 		if p.ExpectedSHA256 == "" {
-			return nil, fmt.Errorf("xml.patch requires expected_sha256")
+			return nil, fmt.Errorf("%s requires expected_sha256", method)
 		}
-		if p.Offset < 0 || p.Length < 0 {
-			return nil, fmt.Errorf("xml.patch offset and length must be non-negative")
+		if method == "xml.patch" && (len(p.Patches) == 0 || p.Recipe != nil) {
+			return nil, fmt.Errorf("xml.patch requires only a nonempty patches array")
 		}
-		full, err := e.path(p.Path)
-		if err != nil {
-			return nil, err
+		if method == "styles.apply" && (p.Recipe == nil || len(p.Patches) != 0) {
+			return nil, fmt.Errorf("styles.apply requires only a recipe")
 		}
-		before, err := project.Read(filepath.Dir(full), filepath.Base(full))
+		if p.Offset != 0 || p.Text != "" || p.Base64 != "" {
+			return nil, fmt.Errorf("%s uses a recipe or patches, not top-level offset/text/base64", method)
+		}
+		before, err := project.Read(e.Root, p.Path)
 		if err != nil {
 			return nil, err
 		}
@@ -630,33 +593,25 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		if oldHash != p.ExpectedSHA256 {
 			return nil, fmt.Errorf("stale source hash: reread before editing")
 		}
-		if p.Offset > len(before) || p.Length > len(before)-p.Offset {
-			return nil, fmt.Errorf("xml.patch range outside file: offset=%d length=%d bytes=%d", p.Offset, p.Length, len(before))
+		var after []byte
+		if method == "styles.apply" {
+			after, err = office.ApplyStyleXML(before, *p.Recipe)
+		} else {
+			after, err = office.PatchXML(before, p.Patches)
 		}
-		replacement := []byte(p.Text)
-		if p.Base64 != "" {
-			if p.Text != "" {
-				return nil, fmt.Errorf("choose text or base64")
-			}
-			replacement, err = base64.StdEncoding.DecodeString(p.Base64)
-			if err != nil {
-				return nil, err
-			}
-		}
-		after := make([]byte, 0, len(before)-p.Length+len(replacement))
-		after = append(after, before[:p.Offset]...)
-		after = append(after, replacement...)
-		after = append(after, before[p.Offset+p.Length:]...)
-		if !utf8.Valid(after) {
-			return nil, fmt.Errorf("xml.patch result is not valid UTF-8")
-		}
-		if _, err := office.XMLSpans(after); err != nil {
-			return nil, fmt.Errorf("xml.patch result is not valid XML: %w", err)
+		if err != nil {
+			return nil, err
 		}
 		if err := project.Write(e.Root, p.Path, after, p.ExpectedSHA256); err != nil {
 			return nil, err
 		}
-		return map[string]any{"path": p.Path, "old_sha256": oldHash, "sha256": office.Hash(after), "bytes": len(after), "offset": p.Offset, "length": p.Length, "replacement_bytes": len(replacement)}, nil
+		result := map[string]any{"path": p.Path, "old_sha256": oldHash, "sha256": office.Hash(after), "bytes": len(after)}
+		if method == "xml.patch" {
+			result["patches_applied"] = len(p.Patches)
+		} else {
+			result["styles_applied"], result["numbering_applied"] = len(p.Recipe.Styles), len(p.Recipe.Numbering)
+		}
+		return result, nil
 	case "files", "search":
 		w, err := e.openWorkspace()
 		if err != nil {
@@ -679,6 +634,10 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		if limit > 10000 {
 			return nil, fmt.Errorf("result limit exceeds 10000")
 		}
+		query := strings.ToLower(p.Query)
+		if method == "search" && query == "" {
+			return nil, fmt.Errorf("nonempty search query required")
+		}
 		total := 0
 		for _, n := range names {
 			// The component lock is an implementation record used by build and
@@ -695,14 +654,11 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 				}
 				continue
 			}
-			if p.Query == "" {
-				return nil, fmt.Errorf("nonempty search query required")
-			}
 			if !utf8.Valid(b) {
 				continue
 			}
 			for i, line := range strings.Split(string(b), "\n") {
-				if strings.Contains(strings.ToLower(line), strings.ToLower(p.Query)) {
+				if strings.Contains(strings.ToLower(line), query) {
 					total++
 					if len(out) < limit {
 						out = append(out, map[string]any{"path": n, "line": i + 1, "text": line})
@@ -712,13 +668,7 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		}
 		return map[string]any{"results": out, "total": total, "truncated": total > len(out)}, nil
 	case "build", "compile", "check", "compat":
-		var w *project.Workspace
-		var err error
-		if method == "build" || method == "compile" || method == "check" || method == "compat" {
-			w, err = e.openWorkspace()
-		} else {
-			w, err = project.Open(e.Root)
-		}
+		w, err := e.openWorkspace()
 		if err != nil {
 			return nil, err
 		}
@@ -730,6 +680,7 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		}
 		out := ""
 		if p.Output != "" {
+			var err error
 			out, err = e.path(p.Output)
 			if err != nil {
 				return nil, err

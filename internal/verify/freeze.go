@@ -181,7 +181,11 @@ func LoadReport(path string) (*Report, string, error) {
 	if bundle.Schema != 1 || len(bundle.Files) > 4096 {
 		return nil, "", fmt.Errorf("invalid parity bundle")
 	}
-	root := filepath.Dir(path)
+	resolved, err := project.Under(filepath.Dir(path), filepath.Base(path))
+	if err != nil {
+		return nil, "", err
+	}
+	root := filepath.Dir(resolved)
 	reportBytes, err := project.Read(root, "report.json")
 	if err != nil {
 		return nil, "", err

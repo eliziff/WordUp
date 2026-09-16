@@ -2,7 +2,7 @@
 
 THIS PROJECT HAS ZERO USERS: NEVER PRESERVE A LEGACY SHIM, EXISTING WORKSPACE FORMAT, OR BACKWARD-COMPATIBILITY PATH.
 
-ALWAYS RUN GO THROUGH `tools/go.ps1`; NEVER USE `go`, `go run`, OR DEFAULT GO CACHE/TEMP PATHS DIRECTLY.
+ALWAYS RUN GO THROUGH `tools/go.ps1` (Windows) OR `tools/go.sh` (Unix); NEVER USE `go`, `go run`, OR DEFAULT GO CACHE/TEMP PATHS DIRECTLY. `WORDUP_GO` may explicitly select an installed toolchain; both wrappers retain isolated caches and offline-by-default execution.
 
 THE INNER EDIT/BUILD/CHECK LOOP MUST STAY FAST. Reuse a warm Word session and run the narrowest relevant check while iterating; reserve fresh Word startup, rendering, signing, and broad corpus/acceptance runs for explicit outer-loop verification. Measure named operations separately. If routine work takes seconds or any command is unexpectedly slow, stop narrating or merely increasing its timeout: identify the blocking boundary, profile it, and fix or remove it. A deadline contains a runaway; it does not excuse latency or replace diagnosis.
 
