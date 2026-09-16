@@ -110,6 +110,9 @@ func Create(root string, profile Profile) (CreateReport, error) {
 		"vba/WUJournalCore.bas":           []byte(coreSource(profile, module)),
 		"vba/WUJournalSetup.vba":          []byte(formSource(profile)),
 		"forms/WUJournalSetup.json":       project.JSON(formDesign(profile)),
+		"vba/WUJournalTypesetting.bas":    []byte(typesetSource(profile)),
+		"vba/WUJournalTypeset.vba":        []byte(typesetFormSource(profile)),
+		"forms/WUJournalTypeset.json":     project.JSON(typesetFormDesign(profile)),
 		"package/customUI/customUI14.xml": []byte(ribbonSource(profile, module)),
 	}
 	for path, data := range writes {
@@ -452,7 +455,10 @@ func ribbonSource(profile Profile, module string) string {
 	tracking := profileHasFeature(profile, "tracked changes")
 	quality := profileHasFeature(profile, "quality report")
 	preflight := profileHasFeature(profile, "preflight")
-	buttons := []string{fmt.Sprintf(`          <button id="%s_Setup" label="Journal setup" size="large" onAction="WU_JournalOpenSetupFromRibbon"/>`, prefix)}
+	buttons := []string{
+		fmt.Sprintf(`          <button id="%s_Setup" label="Journal setup" size="large" onAction="WU_JournalOpenSetupFromRibbon"/>`, prefix),
+		fmt.Sprintf(`          <button id="%s_Typeset" label="Typeset" size="large" onAction="WU_JournalTypesetFromRibbon"/>`, prefix),
+	}
 	if styles {
 		buttons = append(buttons, button("Styles", "Apply house styles", "WU_JournalApplyStylesFromRibbon"))
 	}

@@ -191,7 +191,7 @@ func TestCreateBuildsIndependentJournalWorkspace(t *testing.T) {
 	if report.Build.Artifact != report.Artifact {
 		t.Fatalf("build report retained staging artifact path: build=%q report=%q", report.Build.Artifact, report.Artifact)
 	}
-	if report.Build.Modules != 14 || report.Build.Forms != 1 {
+	if report.Build.Modules != 16 || report.Build.Forms != 2 {
 		t.Fatalf("generated workspace did not vendor the expected source surface: modules=%d forms=%d", report.Build.Modules, report.Build.Forms)
 	}
 	if _, err := os.Stat(report.Artifact); err != nil {

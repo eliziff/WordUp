@@ -27,8 +27,8 @@ startup unless noted.
 |---|---|---:|---:|---|
 | `UBC.FormatManuscript` on Dyson | 61,775 characters; 156 footnotes; 82,335-byte DOCX | 3.297 s | 3.773 s | Passed; body, notes, fields/bookmarks and exact source content preserved |
 | `UBC.FormatManuscript` on Rizzuto | 43,151 characters; 146 footnotes; 84,485-byte DOCX | 3.969 s | 4.456 s | Passed; table, two sections, notes and exact source content preserved |
-| ALR full Setup on Dyson | 190 paragraphs; 156 footnotes; 684,955-byte Word XML | 12.504 s | 12.504 s job timer | Passed; 20 selected tasks, output XML captured |
-| ALR full Setup on Rizzuto | 169 paragraphs; 146 footnotes; one table; 692,344-byte Word XML | 22.183 s | 22.183 s job timer | Passed; 20 selected tasks, output XML captured and state/undo check passed |
+| ALR full Setup on Dyson | 190 paragraphs; 156 footnotes; 684,955-byte Word XML | 4.49 s (median of 3, quiet machine) | 10.4 s native step | Passed; 20 selected tasks; full XML equal to the original under the explicit policy |
+| ALR full Setup on Rizzuto | 169 paragraphs; 146 footnotes; one table; 692,344-byte Word XML | 7.66 s (median of 3, quiet machine) | 16.3 s native step | Passed; 20 selected tasks; text identical to the original, XML equal except one duplicate review comment the original adds |
 
 The complete fresh Word runs were 8.274 s and 8.370 s for the two UBC rows,
 including startup, compilation, document open, XML snapshots and cleanup. The
@@ -37,12 +37,7 @@ ALR Dyson quiet run was 18.602 s end to end; the ALR Rizzuto state/undo run was
 restoration check. Those wall times are harness workflows, not the macro
 throughput numbers.
 
-The ALR rows are useful performance evidence but not a 5x claim against the
-older approximately 40-second implementation: Dyson is about 3.2x faster and
-Rizzuto about 1.8x faster on this machine. The slowest current Rizzuto stages
-are fixing indents (6.031 s), quote/punctuation normalization (3.102 s), page
-setup (2.852 s), and style normalization (2.781 s); those are the next profiling
-targets rather than something to hide behind test-suite timing.
+The ALR rows are macro stage time from `ALR_BatchReport` on the 2026-09-16 build, measured three times each on a quiet machine (scratch script `parity_and_timing.py`; Dyson 4.43-4.96 s, Rizzuto 7.65-10.14 s with one outlier). The original July 22 macro takes 53.96 s on Dyson and 22.18 s on Rizzuto on the same machine, so the refactor is about 12x and 2.9x faster. The gains came from a one-shot paragraph index shared by the style, indent, review and emphasis stages, run-level instead of per-character formatting writes, gating the quote passes on a one-time text read per story, visiting only bold paragraphs when removing bold inside brackets, and writing page setup values only when they differ. Every stage was re-checked against the original's output with the stage-by-stage XML snapshot suite (`make_bisect.py`): the paragraph-offset regression that deleted characters from the middle of words (empty-paragraph removal by string offsets) was found and removed that way, and the remaining run-boundary differences were traced to writes the original never made. The slowest current stages are the curly-quote passes (about 0.3 s Dyson, 0.45 s Rizzuto), style normalization (0.75 s / 1.3 s, kept per paragraph for parity), TOC refresh (0.8 s / 1.2 s, Word's own) and page setup on the two-section Rizzuto paper (1.1 s).
 
 | Run | Wall time | Owned-job CPU time |
 |---|---:|---:|

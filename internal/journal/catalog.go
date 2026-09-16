@@ -70,6 +70,11 @@ type Profile struct {
 	StyleEvidence   StyleEvidence    `json:"style_evidence,omitempty"`
 	Observed        ObservedEvidence `json:"observed,omitempty"`
 	EvidenceStatus  string           `json:"evidence_status,omitempty"`
+	// Layout and Conventions come from the bundled inferred profile (see
+	// inferred.go); nil means no published-article evidence was available.
+	Layout       *Layout      `json:"layout,omitempty"`
+	Conventions  *Conventions `json:"conventions,omitempty"`
+	EvidenceGaps []string     `json:"evidence_gaps,omitempty"`
 }
 
 type Catalog struct {
@@ -256,7 +261,7 @@ func seedProfile(s profileSeed) Profile {
 func Profiles() []Profile {
 	out := make([]Profile, 0, len(seeds))
 	for _, seed := range seeds {
-		out = append(out, seedProfile(seed))
+		out = append(out, WithInferred(seedProfile(seed)))
 	}
 	return out
 }
