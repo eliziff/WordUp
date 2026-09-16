@@ -46,3 +46,5 @@ Wordwright-*-ALR-*
 
 # Agent benchmark runs (large event logs, disposable workspaces)
 /tools/bench/results/
+# Private frozen benchmark fixtures (copies of gitignored workspaces)
+/tools/bench/fixtures/

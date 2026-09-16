@@ -234,13 +234,15 @@ def run_agent(codex: str, run_root: pathlib.Path, prompt: str, args, profile: st
     events = run_root / "events.jsonl"
     last = run_root / "last.md"
     cmd = [codex, "exec", "--color", "never", "--json", "-o", str(last), "-C", str(run_root),
-           "--sandbox", args.sandbox, "--skip-git-repo-check", "--ephemeral",
-           "--ignore-user-config", "--ignore-rules",
+           "--skip-git-repo-check", "--ephemeral", "--ignore-user-config", "--ignore-rules",
            "-m", args.model, "-c", f'model_reasoning_effort="{args.effort}"',
-           "-c", 'approval_policy="never"',
            "--output-schema", str(HERE / "schemas" / "result.json")]
     if args.sandbox == "danger-full-access":
+        # Word must write its own profile directories, so the OS sandbox is off;
+        # the run directory is disposable and fixtures are copies.
         cmd.append("--dangerously-bypass-approvals-and-sandbox")
+    else:
+        cmd += ["--sandbox", args.sandbox, "-c", 'approval_policy="never"', "--add-dir", str(run_root / "tmp")]
     cmd.append("-")
     env = dict(os.environ)
     env["WORDUP_TOOL_PROFILE"] = profile

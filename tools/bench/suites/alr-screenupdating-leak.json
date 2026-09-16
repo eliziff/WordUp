@@ -3,24 +3,107 @@
   "name": "Bench: DetectAndStyleAbstract preserves a caller's ScreenUpdating state",
   "require_compile": true,
   "steps": [
-    { "name": "Open exact template", "operation": { "op": "open", "file": "$artifact", "as": "template" } },
-    { "name": "Compile template", "operation": { "op": "compile", "target": "template", "member": "$project" },
-      "assert": [ { "path": "/vba_compiled", "kind": "equals", "expected": true } ] },
-    { "name": "Hide VBE", "operation": { "op": "put", "target": "app", "member": "ShowVisualBasicEditor", "value": false } },
-    { "name": "Create document", "operation": { "op": "new", "file": "$artifact", "as": "document" } },
-    { "name": "Abstract detected: caller state kept",
-      "operation": { "op": "eval", "value": "Dim d As Document\nSet d = ActiveDocument\nd.TrackRevisions = False\nd.Content.Text = \"Introduction heading\" & vbCr & \"This paragraph is the abstract of the article. It is written entirely in italics so that the detector recognizes it as the abstract of the submission and applies the abstract style to it without any manual review being needed by the editors of the journal.\" & vbCr & \"Body text follows here.\"\nd.Paragraphs(2).Range.Font.Italic = True\nApplication.Run \"ProgressBar_Start\", 1\nApplication.ScreenUpdating = False\nApplication.Run \"DetectAndStyleAbstract\"\nDim after As Boolean\nafter = Application.ScreenUpdating\nApplication.Run \"ProgressBar_End\"\nApplication.ScreenUpdating = True\nEvaluate = Array(after, d.Paragraphs(2).Style.NameLocal)" },
+    {
+      "name": "Open exact template",
+      "operation": {
+        "op": "open",
+        "file": "$artifact",
+        "as": "template"
+      }
+    },
+    {
+      "name": "Compile template",
+      "operation": {
+        "op": "compile",
+        "target": "template",
+        "member": "$project"
+      },
       "assert": [
-        { "path": "/result/0", "kind": "equals", "expected": false },
-        { "path": "/result/1", "kind": "equals", "expected": "lawrev Abstract" }
-      ] },
-    { "name": "No abstract: caller state kept",
-      "operation": { "op": "eval", "value": "Dim d As Document\nSet d = ActiveDocument\nd.Content.Text = \"Short one.\" & vbCr & \"Short two.\" & vbCr & \"Short three.\"\nApplication.Run \"ProgressBar_Start\", 1\nApplication.ScreenUpdating = False\nApplication.Run \"DetectAndStyleAbstract\"\nDim after As Boolean\nafter = Application.ScreenUpdating\nApplication.Run \"ProgressBar_End\"\nApplication.ScreenUpdating = True\nEvaluate = after" },
-      "assert": [ { "path": "/result", "kind": "equals", "expected": false } ] },
-    { "name": "Caller with redraw on is left on",
-      "operation": { "op": "eval", "value": "Dim d As Document\nSet d = ActiveDocument\nd.Content.Text = \"Short one.\" & vbCr & \"Short two.\"\nApplication.Run \"ProgressBar_Start\", 1\nApplication.ScreenUpdating = True\nApplication.Run \"DetectAndStyleAbstract\"\nDim after As Boolean\nafter = Application.ScreenUpdating\nApplication.Run \"ProgressBar_End\"\nEvaluate = after" },
-      "assert": [ { "path": "/result", "kind": "equals", "expected": true } ] },
-    { "name": "Close disposable document", "operation": { "op": "unload", "target": "document" } },
-    { "name": "Close template", "operation": { "op": "unload", "target": "template", "file": "$artifact" } }
+        {
+          "path": "/vba_compiled",
+          "kind": "equals",
+          "expected": true
+        }
+      ]
+    },
+    {
+      "name": "Hide VBE",
+      "operation": {
+        "op": "put",
+        "target": "app",
+        "member": "ShowVisualBasicEditor",
+        "value": false
+      }
+    },
+    {
+      "name": "Create document",
+      "operation": {
+        "op": "new",
+        "file": "$artifact",
+        "as": "document"
+      }
+    },
+    {
+      "name": "Abstract detected: caller state kept",
+      "operation": {
+        "op": "eval",
+        "value": "Dim d As Document\nSet d = ActiveDocument\nd.TrackRevisions = False\nd.Content.Text = \"Introduction heading\" & vbCr & \"This paragraph is the abstract of the article. It is written entirely in italics so that the detector recognizes it as the abstract of the submission and applies the abstract style to it without any manual review being needed by the editors of the journal.\" & vbCr & \"Body text follows here.\"\nd.Paragraphs(2).Range.Font.Italic = True\nApplication.Run \"ProgressBar_Start\", 1\nApplication.ScreenUpdating = False\nApplication.Run \"DetectAndStyleAbstract\"\nDim after As Boolean\nafter = Application.ScreenUpdating\nApplication.Run \"ProgressBar_End\"\nApplication.ScreenUpdating = True\nEvaluate = Array(after, d.Paragraphs(2).Style.NameLocal)"
+      },
+      "assert": [
+        {
+          "path": "/result/array/0",
+          "kind": "equals",
+          "expected": false
+        },
+        {
+          "path": "/result/array/1",
+          "kind": "equals",
+          "expected": "lawrev Abstract"
+        }
+      ]
+    },
+    {
+      "name": "No abstract: caller state kept",
+      "operation": {
+        "op": "eval",
+        "value": "Dim d As Document\nSet d = ActiveDocument\nd.Content.Text = \"Short one.\" & vbCr & \"Short two.\" & vbCr & \"Short three.\"\nApplication.Run \"ProgressBar_Start\", 1\nApplication.ScreenUpdating = False\nApplication.Run \"DetectAndStyleAbstract\"\nDim after As Boolean\nafter = Application.ScreenUpdating\nApplication.Run \"ProgressBar_End\"\nApplication.ScreenUpdating = True\nEvaluate = after"
+      },
+      "assert": [
+        {
+          "path": "/result",
+          "kind": "equals",
+          "expected": false
+        }
+      ]
+    },
+    {
+      "name": "Caller with redraw on is left on",
+      "operation": {
+        "op": "eval",
+        "value": "Dim d As Document\nSet d = ActiveDocument\nd.Content.Text = \"Short one.\" & vbCr & \"Short two.\"\nApplication.Run \"ProgressBar_Start\", 1\nApplication.ScreenUpdating = True\nApplication.Run \"DetectAndStyleAbstract\"\nDim after As Boolean\nafter = Application.ScreenUpdating\nApplication.Run \"ProgressBar_End\"\nEvaluate = after"
+      },
+      "assert": [
+        {
+          "path": "/result",
+          "kind": "equals",
+          "expected": true
+        }
+      ]
+    },
+    {
+      "name": "Close disposable document",
+      "operation": {
+        "op": "unload",
+        "target": "document"
+      }
+    },
+    {
+      "name": "Close template",
+      "operation": {
+        "op": "unload",
+        "target": "template",
+        "file": "$artifact"
+      }
+    }
   ]
 }

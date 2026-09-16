@@ -848,6 +848,7 @@ func CheckWithConstants(w *project.Workspace, constants map[string]any) (map[str
 	symbols := []Symbol{}
 	byName := map[string]bool{}
 	publicDeclarations := map[string][]Symbol{}
+	privateDeclarations := map[string][]Symbol{}
 	diagnostics := []map[string]any{}
 	parsedModules, skippedModules := 0, 0
 	for _, n := range orderedFiles {
@@ -872,6 +873,8 @@ func CheckWithConstants(w *project.Workspace, constants map[string]any) (map[str
 				if publicSymbol(x) {
 					byName[strings.ToLower(x.Name)] = true
 					publicDeclarations[strings.ToLower(x.Name)] = append(publicDeclarations[strings.ToLower(x.Name)], x)
+				} else {
+					privateDeclarations[strings.ToLower(x.Name)] = append(privateDeclarations[strings.ToLower(x.Name)], x)
 				}
 			}
 			if bytes.Contains(b, []byte{0}) {
@@ -937,6 +940,17 @@ func CheckWithConstants(w *project.Workspace, constants map[string]any) (map[str
 					expectedDeclaration, expectedKnown := office.RibbonCallbackDeclaration(s.Name.Local, a.Name.Local, a.Value)
 					if !byName[cb] {
 						diagnostic := map[string]any{"severity": "warning", "file": n, "message": "callback not lexically found: " + a.Value + "; dynamic/external routing needs native verification", "callback": a.Value, "control": s.Name.Local, "control_id": s.Attribute("", "id"), "attribute": a.Name.Local, "xml_start": s.Start}
+						if private := privateDeclarations[cb]; len(private) > 0 {
+							// Word invokes Private procedures from RibbonX (verified by a
+							// native Ribbon click on the ALR template), so this is not a
+							// broken button; it is only unreachable from Application.Run,
+							// hotkeys and the Macros dialog.
+							diagnostic["severity"] = "info"
+							diagnostic["message"] = "callback " + a.Value + " is declared Private; the Ribbon still invokes it, but Application.Run, key bindings and the Macros dialog cannot"
+							diagnostic["line"] = private[0].Line
+							diagnostic["vba_module"] = private[0].Module
+							diagnostic["actual_declaration"] = private[0].Declaration
+						}
 						if expectedKnown {
 							diagnostic["expected_declaration"] = expectedDeclaration
 						}

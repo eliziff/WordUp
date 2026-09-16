@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "name": "Bench: Unbind_ALR_Hotkeys removes the two template key bindings",
+  "require_compile": true,
+  "steps": [
+    {
+      "name": "Open exact template",
+      "operation": {
+        "op": "open",
+        "file": "$artifact",
+        "as": "template"
+      }
+    },
+    {
+      "name": "Compile template",
+      "operation": {
+        "op": "compile",
+        "target": "template",
+        "member": "$project"
+      },
+      "assert": [
+        {
+          "path": "/vba_compiled",
+          "kind": "equals",
+          "expected": true
+        }
+      ]
+    },
+    {
+      "name": "Hide VBE",
+      "operation": {
+        "op": "put",
+        "target": "app",
+        "member": "ShowVisualBasicEditor",
+        "value": false
+      }
+    },
+    {
+      "name": "Create document",
+      "operation": {
+        "op": "new",
+        "file": "$artifact",
+        "as": "document"
+      }
+    },
+    {
+      "name": "Bind, count, unbind, count",
+      "operation": {
+        "op": "eval",
+        "value": "Dim d As Document, baseline As Long, bound As Long, unbound As Long, qqc As Long, rjc As Long, foundAfterBind As Long, foundAfterUnbind As Long, kb As KeyBinding\nSet d = ActiveDocument\nApplication.CustomizationContext = d.AttachedTemplate\nqqc = BuildKeyCode(wdKeyControl, wdKeyShift, wdKeyQ)\nrjc = BuildKeyCode(wdKeyControl, wdKeyShift, wdKeyX)\nbaseline = Application.KeyBindings.Count\nApplication.Run \"Bind_ALR_Hotkeys\"\nApplication.CustomizationContext = d.AttachedTemplate\nbound = Application.KeyBindings.Count\nFor Each kb In Application.KeyBindings\nIf kb.KeyCode = qqc Or kb.KeyCode = rjc Then foundAfterBind = foundAfterBind + 1\nNext kb\nApplication.Run \"Unbind_ALR_Hotkeys\"\nApplication.CustomizationContext = d.AttachedTemplate\nunbound = Application.KeyBindings.Count\nFor Each kb In Application.KeyBindings\nIf kb.KeyCode = qqc Or kb.KeyCode = rjc Then foundAfterUnbind = foundAfterUnbind + 1\nNext kb\nEvaluate = Array(foundAfterBind, foundAfterUnbind, bound - baseline, unbound - baseline)"
+      },
+      "assert": [
+        {
+          "path": "/result/array/0",
+          "kind": "equals",
+          "expected": 2
+        },
+        {
+          "path": "/result/array/1",
+          "kind": "equals",
+          "expected": 0
+        },
+        {
+          "path": "/result/array/2",
+          "kind": "equals",
+          "expected": 2
+        },
+        {
+          "path": "/result/array/3",
+          "kind": "equals",
+          "expected": 0
+        }
+      ]
+    },
+    {
+      "name": "Bind again still works",
+      "operation": {
+        "op": "eval",
+        "value": "Dim d As Document, kb As KeyBinding, found As Long, qqc As Long, rjc As Long\nSet d = ActiveDocument\nqqc = BuildKeyCode(wdKeyControl, wdKeyShift, wdKeyQ)\nrjc = BuildKeyCode(wdKeyControl, wdKeyShift, wdKeyX)\nApplication.Run \"Bind_ALR_Hotkeys\"\nApplication.CustomizationContext = d.AttachedTemplate\nFor Each kb In Application.KeyBindings\nIf kb.KeyCode = qqc Or kb.KeyCode = rjc Then found = found + 1\nNext kb\nApplication.Run \"Unbind_ALR_Hotkeys\"\nEvaluate = found"
+      },
+      "assert": [
+        {
+          "path": "/result",
+          "kind": "equals",
+          "expected": 2
+        }
+      ]
+    },
+    {
+      "name": "Close disposable document",
+      "operation": {
+        "op": "unload",
+        "target": "document"
+      }
+    },
+    {
+      "name": "Close template",
+      "operation": {
+        "op": "unload",
+        "target": "template",
+        "file": "$artifact"
+      }
+    }
+  ]
+}

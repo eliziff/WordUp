@@ -1,0 +1,19 @@
+{
+  "id": "alr-hotkey-unbind",
+  "title": "ALR hotkeys cannot be removed",
+  "tags": [
+    "alr",
+    "seeded-defect",
+    "hotkeys"
+  ],
+  "fixture": {
+    "type": "workspace",
+    "path": "tools/bench/fixtures/alr-refactor-seeded"
+  },
+  "prompt": "This is the Alberta Law Review editing template (ALR_V1). Its ThisDocument module binds two template hotkeys (Ctrl+Shift+Q for QuickQuoteCopy and Ctrl+Shift+X for RejectThisChange_Key) through Bind_ALR_Hotkeys and is supposed to remove them through Unbind_ALR_Hotkeys. Users report that after running Unbind_ALR_Hotkeys the shortcuts still fire. Find and fix the defect so that Unbind_ALR_Hotkeys removes exactly those two bindings from the attached template's customization context while Bind_ALR_Hotkeys keeps working. Do not change the key assignments. Verify in real Word: create a document from the built template, bind, confirm the two KeyBindings exist in the template context, unbind, and confirm they are gone.",
+  "grade": {
+    "build_output": "dist/bench.dotm",
+    "suite": "suites/alr-hotkey-unbind.json"
+  },
+  "timeout_s": 1800
+}

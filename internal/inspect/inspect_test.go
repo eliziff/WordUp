@@ -60,7 +60,7 @@ func TestCheckDiagnosticsAreStableAcrossRuns(t *testing.T) {
 		t.Fatal(err)
 	}
 	for name, source := range map[string]string{
-		"vba/Zed.bas":  "Attribute VB_Name = \"Zed\"\nOption Explicit\nPublic Sub Shared(\nEnd Sub\n",
+		"vba/Zed.bas":   "Attribute VB_Name = \"Zed\"\nOption Explicit\nPublic Sub Shared(\nEnd Sub\n",
 		"vba/Alpha.bas": "Attribute VB_Name = \"Alpha\"\nOption Explicit\nPublic Sub Shared(\nEnd Sub\n",
 	} {
 		if err := project.Write(root, name, []byte(source), ""); err != nil {
@@ -483,5 +483,43 @@ func TestStyleReferenceIncludesSectionAndDocumentSettings(t *testing.T) {
 	}
 	if reference["settings_xml"] != string(p.Files["word/settings.xml"]) || reference["settings_sha256"] != office.Hash(p.Files["word/settings.xml"]) {
 		t.Fatalf("lost exact settings input: %#v", reference)
+	}
+}
+
+func TestPrivateRibbonCallbackIsInformational(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "workspace")
+	if _, err := project.New("PrivateCallback", root); err != nil {
+		t.Fatal(err)
+	}
+	ribbon := `<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui"><ribbon><tabs><tab id="tools" label="Tools"><group id="group" label="Group"><button id="dash" onAction="EmDash"/><button id="missing" onAction="Absent"/></group></tab></tabs></ribbon></customUI>`
+	if err := os.WriteFile(filepath.Join(root, "package", "customUI.xml"), []byte(ribbon), 0600); err != nil {
+		t.Fatal(err)
+	}
+	source := "Attribute VB_Name = \"Ribbon\"\nOption Explicit\nPrivate Sub EmDash(control As IRibbonControl)\nEnd Sub\n"
+	if err := project.Write(root, "vba/Ribbon.bas", []byte(source), ""); err != nil {
+		t.Fatal(err)
+	}
+	w, err := project.Open(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r, err := Check(w)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var private, absent map[string]any
+	for _, diagnostic := range r["diagnostics"].([]map[string]any) {
+		switch diagnostic["callback"] {
+		case "EmDash":
+			private = diagnostic
+		case "Absent":
+			absent = diagnostic
+		}
+	}
+	if private == nil || private["severity"] != "info" || private["line"] != 3 || !strings.Contains(private["message"].(string), "Private") {
+		t.Fatalf("private callback not reported as informational: %#v", private)
+	}
+	if absent == nil || absent["severity"] != "warning" {
+		t.Fatalf("absent callback lost its warning: %#v", absent)
 	}
 }
