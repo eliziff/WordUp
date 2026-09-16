@@ -1,5 +1,15 @@
 # Native feedback measurements
 
+A fresh artifact-bound run on 2026-09-15 against Microsoft Word 16.0 passed 22
+assertions in 5,169.8 ms (Word host handshake: 2,116.1 ms) on the private
+desktop; `word_executed=true`, `vba_compiled=true`, and no user Word process was
+attached. Warm native-call medians from the same artifact were 36.5 ms for
+selection normalization, 9.0 ms for the form/style/footnote/table acceptance,
+5.8 ms for building-block insertion, 11.3 ms for hotkey registration and
+execution, and 0.53 ms for an application property read. These are measured
+primitive timings, not a claim about a complete journal Setup workflow. The
+raw acceptance report is `reports/word-launch-guard/reports/acceptance.json`.
+
 Measured in real Microsoft Word on Windows x64, September 12, 2026. Processes run at Below Normal priority, with the owned job capped at 50% CPU and 2048 MB. These are measurements on the development computer, not a one-second guarantee or a test on low-end hardware.
 
 The signed Studio acceptance suite freshly executes 17 assertions: actual whole-project compilation, native signature presence, persisted nested UserForm, Ribbon initialization and button action, scratch VBA, native page rendering, form callback, template hotkey, context-menu callback, document contents, inherited content control, saved building block, and selection/format preservation. It also captures the real Word and UserForm windows. It does not substitute a cached pass for Word execution.
