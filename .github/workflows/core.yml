@@ -1,0 +1,61 @@
+name: Offline core
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: core-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Archive exact source under test
+        run: git archive --format=tar --output=source.tar HEAD
+      - uses: actions/upload-artifact@v4
+        with:
+          name: source-${{ github.sha }}
+          path: source.tar
+          retention-days: 7
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Select the installed toolchain explicitly
+        run: '"WORDUP_GO=$((Get-Command go).Source)" >> $env:GITHUB_ENV'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ../.tools/gocache
+            ../.tools/gomodcache
+          key: core-${{ runner.os }}-${{ hashFiles('go.mod', 'go.sum') }}-${{ github.sha }}
+          restore-keys: core-${{ runner.os }}-${{ hashFiles('go.mod', 'go.sum') }}-
+      - name: Download declared dependencies
+        run: ./tools/go.ps1 -Online mod download
+      - name: Export offline dependency sources
+        run: |
+          ./tools/go.ps1 -Online mod vendor
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          tar -cf dependencies.tar vendor
+          Remove-Item -Recurse -Force vendor
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dependency-sources
+          path: dependencies.tar
+          retention-days: 7
+      - name: Offline regression checks (not native Word acceptance)
+        run: ./tools/go.ps1 test -count=1 ./internal/... ./cmd/...
+      - name: Static checks
+        run: ./tools/go.ps1 vet ./internal/... ./cmd/...

@@ -5,7 +5,8 @@ if ($online) { $args = @($args | Select-Object -Skip 1) }
 
 $repo = Split-Path -Parent $PSScriptRoot
 $tools = Join-Path (Split-Path -Parent $repo) '.tools'
-$go = Join-Path $tools 'go\bin\go.exe'
+$go = $env:WORDUP_GO
+if (-not $go) { $go = Join-Path $tools 'go/bin/go.exe' }
 if (-not (Test-Path -LiteralPath $go -PathType Leaf)) {
     throw "Pinned Go toolchain not found: $go"
 }
