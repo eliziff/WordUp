@@ -829,7 +829,12 @@ Private Sub WU_ApplyResolvedParagraphStyles(ByVal story As Range, ByRef structur
                 Set desiredStyle = WU_HeadingStyleForLevel(level, heading1, heading2, heading3, heading4, heading5, heading6, heading7, heading8, heading9)
                 If level >= 1 And level <= 9 Then desiredName = headingNames(level)
             ElseIf StrComp(role, "body", vbTextCompare) = 0 Then
-                Set desiredStyle = bodyStyle: desiredName = bodyName
+                ' Do not flatten an explicit, unknown paragraph style merely
+                ' because the detector did not assign a stronger semantic
+                ' role. Lists, captions, callouts, and publisher-defined body
+                ' styles are preserved unless they are ordinary Word body
+                ' styles (or the neutral style already installed here).
+                If Len(styleName) = 0 Or StrComp(styleName, "Normal", vbTextCompare) = 0 Or StrComp(styleName, "Body Text", vbTextCompare) = 0 Or StrComp(styleName, bodyName, vbTextCompare) = 0 Then Set desiredStyle = bodyStyle: desiredName = bodyName
             ElseIf StrComp(role, "title", vbTextCompare) = 0 Then
                 Set desiredStyle = titleStyle: desiredName = titleName
             ElseIf StrComp(role, "author", vbTextCompare) = 0 Then

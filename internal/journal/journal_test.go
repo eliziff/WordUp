@@ -210,6 +210,9 @@ func TestCreateBuildsIndependentJournalWorkspace(t *testing.T) {
 			t.Fatalf("generated source lacks %s", marker)
 		}
 	}
+	if !strings.Contains(string(core), `If Len(styleName) = 0 Or StrComp(styleName, "Normal", vbTextCompare) = 0 Or StrComp(styleName, "Body Text", vbTextCompare) = 0 Or StrComp(styleName, bodyName, vbTextCompare) = 0 Then Set desiredStyle = bodyStyle`) {
+		t.Fatal("generated body pass would flatten explicit custom paragraph styles")
+	}
 	if strings.Contains(string(core), "noteText = note.Range.Text") {
 		t.Fatal("citation audit materialized every note's text instead of using the shared bounded count")
 	}
