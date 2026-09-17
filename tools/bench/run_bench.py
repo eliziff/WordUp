@@ -17,6 +17,7 @@ message, the grade, and summary.json. results/<stamp>/summary.md aggregates.
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import datetime as dt
 import fnmatch
 import glob
@@ -322,6 +323,41 @@ def median(values):
     return round(statistics.median(values), 1) if values else None
 
 
+def execute_run(root: pathlib.Path, exe: pathlib.Path, args, codex: str | None, task: dict, arm: str, n: int) -> dict:
+    """One (task, arm, run) unit: fixture copy, agent run, hidden-suite grade."""
+    profile = ARMS[arm]["profile"]
+    run_root = root / task["id"] / arm / f"run-{n}"
+    run_root.mkdir(parents=True, exist_ok=True)
+    workspace = run_root / "workspace"
+    tool = None
+    try:
+        prepare_fixture(exe, task, workspace)
+        tool = stage_tool(exe, run_root, profile)
+        agents_md = AGENTS_TEMPLATE.format(arm_note=ARMS[arm]["note"], prompt=task["prompt"])
+        (run_root / "AGENTS.md").write_text(agents_md, encoding="utf-8")
+        summary = {"task": task["id"], "arm": arm, "run": n, "profile": profile, "exe": str(exe),
+                   "exe_sha256": sha256(exe), "started": dt.datetime.now().isoformat(timespec="seconds")}
+        if arm != "none":
+            log(f"{task['id']} / {arm} / run-{n}: agent")
+            summary["agent"] = run_agent(codex, run_root, agents_md, args, profile)
+            # Leave no owned Word behind from the agent's own sessions.
+            run([str(tool / "wordup.cmd"), "-w", str(workspace), "session", "stop"], timeout=60)
+        log(f"{task['id']} / {arm} / run-{n}: grade")
+        summary["grade"] = grade(exe, run_root, task)
+        passed = summary["grade"]["passed"]
+    except Exception as e:  # one broken run must not end the benchmark
+        summary = {"task": task["id"], "arm": arm, "run": n, "profile": profile, "exe": str(exe),
+                   "started": dt.datetime.now().isoformat(timespec="seconds"),
+                   "error": f"{type(e).__name__}: {e}", "grade": {"passed": False}}
+        passed = False
+    (run_root / "summary.json").write_text(json.dumps(summary, indent=1), encoding="utf-8")
+    log(f"{task['id']} / {arm} / run-{n}: {'PASS' if passed else 'FAIL'}")
+    if not args.keep_workspaces:
+        shutil.rmtree(workspace, ignore_errors=True)
+        shutil.rmtree(run_root / "tmp", ignore_errors=True)
+    return summary
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--exe", default=str(REPO / "bin" / "wordup.exe"))
@@ -336,6 +372,7 @@ def main() -> int:
     ap.add_argument("--sandbox", default="danger-full-access", choices=["workspace-write", "danger-full-access", "read-only"],
                     help="Codex sandbox; Word needs its profile directories, so full access is the default")
     ap.add_argument("--keep-workspaces", action="store_true", help="keep the disposable workspace copies (default: delete after grading)")
+    ap.add_argument("--workers", type=int, default=1, help="runs executed concurrently (each gets its own workspace copy, tool staging and TEMP; the hidden-suite grading launches one owned Word per run)")
     args = ap.parse_args()
 
     exe = pathlib.Path(args.exe).resolve()
@@ -350,34 +387,19 @@ def main() -> int:
     stamp = dt.datetime.now().strftime("%Y%m%d-%H%M%S") + (f"-{args.label}" if args.label else "")
     root = pathlib.Path(args.out) / stamp
     root.mkdir(parents=True)
-    log(f"benchmark {stamp}: {len(tasks)} tasks x {arms} x {args.runs} runs; exe {exe}")
-    rows = []
+    log(f"benchmark {stamp}: {len(tasks)} tasks x {arms} x {args.runs} runs; exe {exe}; workers {max(1, args.workers)}")
+    jobs: list[tuple[dict, str, int]] = []
     for task in tasks:
         for arm in arms:
-            profile = ARMS[arm]["profile"]
             for n in range(1, args.runs + 1):
-                run_root = root / task["id"] / arm / f"run-{n}"
-                run_root.mkdir(parents=True)
-                workspace = run_root / "workspace"
-                prepare_fixture(exe, task, workspace)
-                tool = stage_tool(exe, run_root, profile)
-                agents_md = AGENTS_TEMPLATE.format(arm_note=ARMS[arm]["note"], prompt=task["prompt"])
-                (run_root / "AGENTS.md").write_text(agents_md, encoding="utf-8")
-                summary = {"task": task["id"], "arm": arm, "run": n, "profile": profile, "exe": str(exe),
-                           "exe_sha256": sha256(exe), "started": dt.datetime.now().isoformat(timespec="seconds")}
-                if arm != "none":
-                    log(f"{task['id']} / {arm} / run-{n}: agent")
-                    summary["agent"] = run_agent(codex, run_root, agents_md, args, profile)
-                    # Leave no owned Word behind from the agent's own sessions.
-                    run([str(tool / "wordup.cmd"), "-w", str(workspace), "session", "stop"], timeout=60)
-                log(f"{task['id']} / {arm} / run-{n}: grade")
-                summary["grade"] = grade(exe, run_root, task)
-                (run_root / "summary.json").write_text(json.dumps(summary, indent=1), encoding="utf-8")
-                rows.append(summary)
-                log(f"{task['id']} / {arm} / run-{n}: {'PASS' if summary['grade']['passed'] else 'FAIL'}")
-                if not args.keep_workspaces:
-                    shutil.rmtree(workspace, ignore_errors=True)
-                    shutil.rmtree(run_root / "tmp", ignore_errors=True)
+                jobs.append((task, arm, n))
+    workers = max(1, min(args.workers, len(jobs)))
+    if workers == 1:
+        rows = [execute_run(root, exe, args, codex, task, arm, n) for task, arm, n in jobs]
+    else:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = [pool.submit(execute_run, root, exe, args, codex, task, arm, n) for task, arm, n in jobs]
+            rows = [future.result() for future in concurrent.futures.as_completed(futures)]
     write_summary(root, rows, args)
     log(f"done: {root / 'summary.md'}")
     return 0
