@@ -74,6 +74,7 @@ Public Function Check() As String
         If Abs(d.Sections(1).PageSetup.LeftMargin - InchesToPoints(WU_TS_MARGIN_LEFT_IN)) > 0.5 Then Err.Raise 5, , "left margin was not applied"
     End If
     ' Styles: body leading, heading case and alignment, title alignment.
+    If d.UpdateStylesOnOpen <> True Then Err.Raise 5, , "styles auto-update is off"
     If d.Paragraphs(4).Style.NameLocal <> WU_JOURNAL_STYLE_BODY Then Err.Raise 5, , "body paragraph was not styled: " & d.Paragraphs(4).Style.NameLocal
     If d.Paragraphs(3).Style.NameLocal <> WU_JOURNAL_STYLE_H1 Then Err.Raise 5, , "heading was not styled: " & d.Paragraphs(3).Style.NameLocal
     If WU_TS_BODY_LEADING_PT > 0 Then

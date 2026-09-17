@@ -337,6 +337,9 @@ End Sub
 Public Sub WU_TypesetStyles()
     Dim doc As Document
     Set doc = ActiveDocument
+    ' This template now owns the house styles; a later edit to its style
+    ' definitions must reach every document it is attached to.
+    doc.UpdateStylesOnOpen = True
     WU_JournalApplyStyles
     WU_ShapeParagraphStyle doc, WU_JOURNAL_STYLE_BODY, WU_TS_BODY_LEADING_PT, "", "", 0, 0
     WU_ShapeParagraphStyle doc, WU_JOURNAL_STYLE_H1, 0, WU_TS_HEADING_CASE, WU_TS_HEADING_ALIGN, WU_TS_HEADING_SIZE_PT, 0

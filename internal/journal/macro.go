@@ -15,6 +15,12 @@ import (
 	"github.com/eliziff/WordUp/internal/project"
 )
 
+// settingsPartXML bakes the "Automatically update document styles" default
+// (<w:linkStyles/>) into every generated template's package, so documents
+// created from the template inherit it. A document attached to the template
+// later gets the same state from WU_TypesetStyles.
+const settingsPartXML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:settings xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:linkStyles/></w:settings>`
+
 type CreateReport struct {
 	Journal   Profile              `json:"journal"`
 	Workspace string               `json:"workspace"`
@@ -118,6 +124,28 @@ func Create(root string, profile Profile) (CreateReport, error) {
 	for path, data := range writes {
 		if err := project.Write(stageRoot, path, data, ""); err != nil {
 			return CreateReport{}, err
+		}
+	}
+	// The generated template owns the house styles, so every document created
+	// from it must update its styles from this template when opened
+	// ("Automatically update document styles" in the Templates and Add-ins
+	// dialog; Document.UpdateStylesOnOpen, stored as <w:linkStyles/>). The
+	// typesetting macro also sets it on documents it is attached to.
+	if err := project.Write(stageRoot, "package/word/settings.xml", []byte(settingsPartXML), ""); err != nil {
+		return CreateReport{}, fmt.Errorf("write settings part: %w", err)
+	}
+	ct, err := project.Read(stageRoot, "package/[Content_Types].xml")
+	if err != nil {
+		return CreateReport{}, fmt.Errorf("read content types: %w", err)
+	}
+	if !strings.Contains(string(ct), `PartName="/word/settings.xml"`) {
+		override := `<Override xmlns="http://schemas.openxmlformats.org/package/2006/content-types" PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/>`
+		if !strings.Contains(string(ct), "</Types>") {
+			return CreateReport{}, fmt.Errorf("content types part has no closing Types element")
+		}
+		patched := strings.Replace(string(ct), "</Types>", override+"</Types>", 1)
+		if err := project.Write(stageRoot, "package/[Content_Types].xml", []byte(patched), ""); err != nil {
+			return CreateReport{}, fmt.Errorf("register settings part: %w", err)
 		}
 	}
 	artifact := filepath.Join(stageRoot, "dist", name+".dotm")

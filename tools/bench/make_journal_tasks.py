@@ -55,6 +55,7 @@ def build_suite(profile: dict) -> dict:
     body_size = profile.get("body_size_pt")
     if body_font and body_size:
         checks.append(f'If StrComp(d.Paragraphs(4).Range.Font.Name, {json.dumps(body_font)}, vbTextCompare) <> 0 Or Abs(d.Paragraphs(4).Range.Font.Size - {body_size:.2f}) > 0.05 Then Err.Raise 5, , "body font " & d.Paragraphs(4).Range.Font.Name & " " & d.Paragraphs(4).Range.Font.Size')
+    checks.append('If d.UpdateStylesOnOpen <> True Then Err.Raise 5, , "styles auto-update is off"')
     note_size = profile.get("note_size_pt")
     if note_size:
         checks.append(f'If Abs(d.Footnotes(1).Range.Font.Size - {note_size:.2f}) > 0.05 Then Err.Raise 5, , "note size " & d.Footnotes(1).Range.Font.Size')
