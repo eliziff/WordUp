@@ -71,6 +71,7 @@ func TestTypesetSourceReflectsLayoutAndStages(t *testing.T) {
 		"Public Const WU_TS_PAGE_WIDTH_PT As Single = 432.00",
 		"Public Const WU_TS_PAGE_HEIGHT_PT As Single = 648.00",
 		`Public Const WU_TS_HEADING_CASE As String = "upper"`,
+		"Public Sub WU_Typeset()",
 		"Public Sub WU_TypesetPageSetup()",
 		"Public Sub WU_TypesetRunningHeads()",
 		"Public Sub WU_TypesetCitationAudit()",

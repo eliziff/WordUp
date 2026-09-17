@@ -493,6 +493,9 @@ func RunWithInputs(ctx context.Context, artifact string, s Suite, existing nativ
 		if ms == 0 {
 			ms = 30000
 		}
+		if op.TimeoutMS > ms {
+			ms = op.TimeoutMS // the operation's own declared timeout outranks the step default
+		}
 		if op.TimeoutMS == 0 {
 			op.TimeoutMS = ms
 		}

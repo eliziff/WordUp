@@ -42,12 +42,17 @@ func typesetStages(profile Profile) []typesetStage {
 	}
 	return []typesetStage{
 		{"chkPage", "Page size and margins", "WU_TypesetPageSetup", "Page size and margins", l.PageWidthPT > 0 || l.TopIn > 0 || l.LeftIn > 0 || l.InsideIn > 0},
-		{"chkStyles", "House styles (body, headings, quotes, title)", "WU_TypesetStyles", "House styles", true},
-		{"chkHeads", "Running heads and page numbers", "WU_TypesetRunningHeads", "Running heads", len(l.OddHead) > 0 || len(l.EvenHead) > 0 || l.PageNumber != ""},
+		// Two sequences split Word's custom undo record, both proven natively:
+		// a footnote-story insertion immediately followed by a ReplaceAll, and
+		// a ReplaceAll in the main story after a header-story edit. So the
+		// footnote tabs come right after page setup and the running heads go
+		// last; WU_Typeset and the native proof use the same order.
 		{"chkNoteTabs", "Tab after footnote numbers", "WU_TypesetFootnoteNumbers", "Footnote numbers", l.NoteNumberStyle == "number_gap" || l.NoteNumberStyle == "number_space"},
+		{"chkStyles", "House styles (body, headings, quotes, title)", "WU_TypesetStyles", "House styles", true},
 		{"chkQuotes", "Curly quotes", "WU_TypesetQuotes", "Curly quotes", c.Quotes == "curly"},
 		{"chkAudit", "Audit citation conventions (highlight only)", "WU_TypesetCitationAudit", "Citation audit", conventionRules(*c) != ""},
 		{"chkFix", "Fix unambiguous citation forms (Ibid case, et al, eg, ie)", "WU_TypesetCitationFix", "Citation fixes", c.IbidCase != "" || c.EtAl != "" || c.Eg != "" || c.Ie != ""},
+		{"chkHeads", "Running heads and page numbers", "WU_TypesetRunningHeads", "Running heads", len(l.OddHead) > 0 || len(l.EvenHead) > 0 || l.PageNumber != ""},
 	}
 }
 
@@ -254,6 +259,44 @@ Public Sub WU_JournalTypeset()
     WUJournalTypeset.Show vbModeless
 End Sub
 
+' One-shot typesetting: every stage with evidence, in the undo-safe order the
+' form uses, inside one undo record and one batch. WU_Notify messages go to
+' the batch log, so the macro never opens a dialog and one run is graded by
+' the log alone.
+Public Sub WU_Typeset()
+    Dim updating As Boolean, opened As Boolean, captured As Boolean
+    Dim failure As Long, failureSource As String, failureText As String, report As Variant
+    On Error GoTo Failed
+    WU_BeginSafeEdit updating, opened, captured, "Typeset " & WU_JOURNAL_NAME
+    WU_BatchStart 7
+    WU_BatchStage "Page size and margins": WU_TypesetPageSetup
+    WU_BatchStage "Footnote numbers": WU_TypesetFootnoteNumbers
+    WU_BatchStage "House styles": WU_TypesetStyles
+    WU_BatchStage "Curly quotes": WU_TypesetQuotes
+    WU_BatchStage "Citation audit": WU_TypesetCitationAudit
+    WU_BatchStage "Citation fixes": WU_TypesetCitationFix
+    WU_BatchStage "Running heads": WU_TypesetRunningHeads
+CleanUp:
+    On Error Resume Next
+    report = WU_BatchReport()
+    If failure <> 0 Then
+        WU_Notify "Typesetting failed: " & failureText, vbCritical
+    ElseIf report(0) Then
+        WU_Notify "Typesetting finished with warnings:" & vbCrLf & report(1), vbExclamation
+    Else
+        WU_Notify "Typesetting finished. One Undo reverses every change.", vbInformation
+    End If
+    WU_BatchEnd
+    WU_EndSafeEdit updating, opened, captured
+    Err.Clear
+    On Error GoTo 0
+    If failure <> 0 Then Err.Raise failure, failureSource, failureText
+    Exit Sub
+Failed:
+    failure = Err.Number: failureSource = Err.Source: failureText = Err.Description
+    Resume CleanUp
+End Sub
+
 ' ---- page setup ------------------------------------------------------------
 
 ' Writes only values that differ: every PageSetup write relays out the section.
@@ -373,6 +416,9 @@ Private Function WU_HeadText(ByVal doc As Document, ByVal classes As String) As 
             Case "volume_or_year": piece = WU_VolumeLabel(doc)
             Case "article_title": piece = WU_DocumentTitle(doc)
             Case "author": piece = WU_DocumentAuthor(doc)
+            ' Unclassified running-head text is almost always the article's
+            ' short title, which the measurement could not match.
+            Case "other": piece = WU_DocumentTitle(doc)
         End Select
         If Len(piece) > 0 Then
             If Len(out) > 0 Then out = out & vbTab

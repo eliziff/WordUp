@@ -48,13 +48,16 @@ Public Function Check() As String
     before = d.Content.Text
     WU_BatchStart 7
     WU_BeginSafeEdit updating, opened, captured, "Typeset proof"
+    ' Same order as the form and WU_Typeset: footnote tabs before the style
+    ' pass and running heads last, the two sequences that keep Word's custom
+    ' undo record whole (see typesetStages).
     WU_BatchStage "Page size and margins": stage = "page": WU_TypesetPageSetup
-    WU_BatchStage "House styles": stage = "styles": WU_TypesetStyles
-    WU_BatchStage "Running heads": stage = "heads": WU_TypesetRunningHeads
     WU_BatchStage "Footnote numbers": stage = "notes": WU_TypesetFootnoteNumbers
+    WU_BatchStage "House styles": stage = "styles": WU_TypesetStyles
     WU_BatchStage "Curly quotes": stage = "quotes": WU_TypesetQuotes
     WU_BatchStage "Citation audit": stage = "audit": WU_TypesetCitationAudit
     WU_BatchStage "Citation fixes": stage = "fix": WU_TypesetCitationFix
+    WU_BatchStage "Running heads": stage = "heads": WU_TypesetRunningHeads
     WU_EndSafeEdit updating, opened, captured
     WU_BatchEnd
     report = WU_BatchReport()
@@ -81,8 +84,10 @@ Public Function Check() As String
     If WU_TS_QUOTE_INDENT_IN > 0 Then If Abs(d.Styles(WU_JOURNAL_STYLE_QUOTATION).ParagraphFormat.LeftIndent - InchesToPoints(WU_TS_QUOTE_INDENT_IN)) > 0.5 Then Err.Raise 5, , "block quote indent was not applied"
     ' Running heads carry the journal name or title when the profile has them.
     If Len(WU_TS_ODD_HEAD) > 0 Then
+        ' The head holds whatever the journal prints there: its name, the
+        ' article title or author, or only a volume label and page number.
         headerText = d.Sections(1).Headers(wdHeaderFooterPrimary).Range.Text
-        If InStr(1, headerText, WU_JOURNAL_NAME, vbTextCompare) = 0 And InStr(1, headerText, "Synthetic Article", vbTextCompare) = 0 And InStr(1, headerText, "Jane Doe", vbTextCompare) = 0 Then Err.Raise 5, , "running head was not written: [" & headerText & "]"
+        If Len(Trim$(Replace(Replace(headerText, vbCr, ""), vbTab, ""))) = 0 And d.Sections(1).Headers(wdHeaderFooterPrimary).Range.Fields.Count = 0 Then Err.Raise 5, , "running head was not written: [" & headerText & "]"
         If Not WU_HeadIsOwned(d.Sections(1).Headers(wdHeaderFooterPrimary).Range) Then Err.Raise 5, , "running head is not marked as template-owned"
     End If
     If Left$(WU_TS_PAGE_NUMBER, 3) = "top" And Len(WU_TS_ODD_HEAD) > 0 Then
