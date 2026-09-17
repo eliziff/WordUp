@@ -54,11 +54,16 @@ def build_suite(profile: dict) -> dict:
     body_font = profile.get("body_font")
     body_size = profile.get("body_size_pt")
     if body_font and body_size:
-        checks.append(f'If StrComp(d.Paragraphs(4).Range.Font.Name, {json.dumps(body_font)}, vbTextCompare) <> 0 Or Abs(d.Paragraphs(4).Range.Font.Size - {body_size:.2f}) > 0.05 Then Err.Raise 5, , "body font " & d.Paragraphs(4).Range.Font.Name & " " & d.Paragraphs(4).Range.Font.Size')
+        # The first word of the body paragraph: the whole range also holds the
+        # footnote reference mark, whose size legitimately differs, and Word then
+        # reports a mixed font (empty name, size 9999999).
+        checks.append(f'If StrComp(d.Paragraphs(4).Range.Words(1).Font.Name, {json.dumps(body_font)}, vbTextCompare) <> 0 Or Abs(d.Paragraphs(4).Range.Words(1).Font.Size - {body_size:.2f}) > 0.05 Then Err.Raise 5, , "body font " & d.Paragraphs(4).Range.Words(1).Font.Name & " " & d.Paragraphs(4).Range.Words(1).Font.Size')
     checks.append('If d.UpdateStylesOnOpen <> True Then Err.Raise 5, , "styles auto-update is off"')
     note_size = profile.get("note_size_pt")
     if note_size:
-        checks.append(f'If Abs(d.Footnotes(1).Range.Font.Size - {note_size:.2f}) > 0.05 Then Err.Raise 5, , "note size " & d.Footnotes(1).Range.Font.Size')
+        # The note's first text word (a tab the macro inserted after the number is skipped).
+        checks.append('Set noteWord = d.Footnotes(1).Range.Words(1): If noteWord.Text = vbTab Then Set noteWord = d.Footnotes(1).Range.Words(2)')
+        checks.append(f'If Abs(noteWord.Font.Size - {note_size:.2f}) > 0.05 Then Err.Raise 5, , "note size " & noteWord.Font.Size')
     if layout.get("heading_case") == "upper":
         checks.append('If d.Paragraphs(3).Range.Font.AllCaps <> True And d.Paragraphs(3).Range.Text <> UCase$(d.Paragraphs(3).Range.Text) Then Err.Raise 5, , "heading is not upper case"')
     if layout.get("heading_alignment") == "center":
@@ -87,7 +92,7 @@ def build_suite(profile: dict) -> dict:
         "Evaluate = d.Footnotes.Count",
     ])
     verify = "\n".join([
-        "Dim d As Document, before As String, widthBefore As Single",
+        "Dim d As Document, before As String, widthBefore As Single, noteWord As Range",
         "Set d = ActiveDocument",
         'widthBefore = CSng(d.Variables("BenchWidthBefore").Value)',
         'before = d.Variables("BenchTextBefore").Value',
@@ -135,6 +140,7 @@ def prompt_for(profile: dict) -> str:
         "page size and margins on every section (write only values that differ), body and footnote fonts and sizes (through styles, not direct formatting), the top-level "
         "heading case and alignment on outline-level-1 paragraphs, the running heads and page-number field the profile describes (leave a header an editor already filled), "
         "a tab after each footnote number when the profile says so, and curly quotes when it says so. Body text must otherwise stay identical and one Undo must revert everything. "
+        "Set the document's UpdateStylesOnOpen property to True (Word's 'Automatically update document styles') so the manuscript keeps following the template's styles; the grader checks it. "
         "WU_Typeset must run without any user interaction (no message boxes or forms) because it is graded by automation. "
         "Build the template with `tool\\wordup.cmd -w workspace build` and prove WU_Typeset in real Word on a disposable document before you finish."
     )
