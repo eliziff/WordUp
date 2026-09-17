@@ -25,4 +25,6 @@ Results land in `tools/bench/results/<stamp>/` (gitignored): per-run `summary.js
 
 ## Tasks
 
+Journal-generation tasks (`journal-*`) are produced by `python tools/bench/make_journal_tasks.py --exe build/wordup.exe`: each fixture is a blank workspace holding the journal's inferred profile (`journal/profile.json`), the prompt asks for a Public Sub `WU_Typeset` that applies it unattended, and the hidden suite asserts the concrete measured values (page size, margins, fonts, heading case, running head or page number, footnote tab, curly quotes) plus body-text preservation and one-step undo. The `none` arm must fail them; a template produced by `journal.create`, whose generated `WU_Typeset` follows the same contract, is the positive control.
+
 `tasks/*.json` declare `id`, `fixture` (`{"type":"workspace","path":...}` relative to the repo, or `{"type":"example"}`), `prompt`, and `grade` (`suite` path relative to this directory, optional `check_forbid` substrings that must not appear in `check` output, optional `file_contains` globs). Suites live in `suites/` and use the ordinary acceptance-suite schema; the agent never sees them. Workspaces under `workspaces/` are private and gitignored, so the ALR tasks only run on a machine that has them.

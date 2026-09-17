@@ -1,0 +1,75 @@
+{
+ "schema": 1,
+ "name": "Bench: UBC-L-REV typeset from profile",
+ "require_compile": true,
+ "steps": [
+  {
+   "name": "Open template",
+   "operation": {
+    "op": "open",
+    "file": "$artifact",
+    "as": "template"
+   }
+  },
+  {
+   "name": "Compile template",
+   "operation": {
+    "op": "compile",
+    "target": "template",
+    "member": "$project"
+   },
+   "assert": [
+    {
+     "path": "/vba_compiled",
+     "kind": "equals",
+     "expected": true
+    }
+   ]
+  },
+  {
+   "name": "Create document from the template",
+   "operation": {
+    "op": "new",
+    "file": "$artifact",
+    "as": "document"
+   }
+  },
+  {
+   "name": "Seed a synthetic manuscript",
+   "operation": {
+    "op": "eval",
+    "value": "Dim d As Document, rng As Range\nSet d = ActiveDocument\nd.Content.Text = \"A Synthetic Article Title\" & vbCr & \"By Jane Doe\" & vbCr & \"Introduction\" & vbCr & \"Body text with \"\"straight quotes\"\" in it.\" & vbCr & \"Second paragraph.\" & vbCr\nd.Content.Style = wdStyleNormal\nd.Paragraphs(3).OutlineLevel = wdOutlineLevel1\nSet rng = d.Paragraphs(4).Range.Duplicate: rng.Collapse wdCollapseEnd: rng.Move wdCharacter, -1\nd.Footnotes.Add rng, , \"See Smith, ibid at para 12.\"\nd.BuiltInDocumentProperties(\"Title\").Value = \"A Synthetic Article Title\"\nd.Variables(\"BenchWidthBefore\").Value = CStr(d.Sections(1).PageSetup.PageWidth)\nd.Variables(\"BenchTextBefore\").Value = Replace(Replace(d.Content.Text, \"\"\"\", ChrW(8220)), \"straight quotes\" & ChrW(8220), \"straight quotes\" & ChrW(8221))\nEvaluate = d.Footnotes.Count"
+   },
+   "assert": [
+    {
+     "path": "/result",
+     "kind": "equals",
+     "expected": 1
+    }
+   ]
+  },
+  {
+   "name": "Run WU_Typeset",
+   "operation": {
+    "op": "run",
+    "macro": "WU_Typeset",
+    "timeout_ms": 120000
+   }
+  },
+  {
+   "name": "Verify the profile was applied",
+   "operation": {
+    "op": "eval",
+    "value": "Dim d As Document, before As String, widthBefore As Single\nSet d = ActiveDocument\nwidthBefore = CSng(d.Variables(\"BenchWidthBefore\").Value)\nbefore = d.Variables(\"BenchTextBefore\").Value\nIf Abs(d.Sections(1).PageSetup.PageWidth - 432.00) > 0.5 Or Abs(d.Sections(1).PageSetup.PageHeight - 648.00) > 0.5 Then Err.Raise 5, , \"page size \" & d.Sections(1).PageSetup.PageWidth & \"x\" & d.Sections(1).PageSetup.PageHeight\nIf Abs(d.Sections(1).PageSetup.TopMargin - InchesToPoints(1.25)) > 1 Then Err.Raise 5, , \"top margin \" & d.Sections(1).PageSetup.TopMargin\nIf d.Sections(1).PageSetup.MirrorMargins <> True Then Err.Raise 5, , \"mirror margins\"\nIf StrComp(d.Paragraphs(4).Range.Font.Name, \"Cambria\", vbTextCompare) <> 0 Or Abs(d.Paragraphs(4).Range.Font.Size - 11.00) > 0.05 Then Err.Raise 5, , \"body font \" & d.Paragraphs(4).Range.Font.Name & \" \" & d.Paragraphs(4).Range.Font.Size\nIf Abs(d.Footnotes(1).Range.Font.Size - 9.00) > 0.05 Then Err.Raise 5, , \"note size \" & d.Footnotes(1).Range.Font.Size\nIf d.Paragraphs(3).Range.Font.AllCaps <> True And d.Paragraphs(3).Range.Text <> UCase$(d.Paragraphs(3).Range.Text) Then Err.Raise 5, , \"heading is not upper case\"\nIf Len(Trim$(Replace(Replace(d.Sections(1).Headers(wdHeaderFooterPrimary).Range.Text, vbCr, \"\"), vbTab, \"\"))) = 0 And d.Sections(1).Headers(wdHeaderFooterPrimary).Range.Fields.Count = 0 And d.Sections(1).Footers(wdHeaderFooterPrimary).Range.Fields.Count = 0 Then Err.Raise 5, , \"no running head or page number\"\nIf Left$(d.Footnotes(1).Range.Text, 1) <> vbTab Then Err.Raise 5, , \"footnote has no tab after its number\"\nIf InStr(1, d.Paragraphs(4).Range.Text, \"\"\"\", vbBinaryCompare) > 0 Then Err.Raise 5, , \"straight quotes survived\"\nIf StrComp(d.Content.Text, before, vbTextCompare) <> 0 Then Err.Raise 5, , \"body text changed: \" & d.Content.Text\nd.Undo\nIf Abs(d.Sections(1).PageSetup.PageWidth - widthBefore) > 0.5 And True Then Err.Raise 5, , \"one undo did not restore the page size\"\nd.Close SaveChanges:=wdDoNotSaveChanges\nEvaluate = \"PASS\"",
+    "timeout_ms": 120000
+   },
+   "assert": [
+    {
+     "path": "/result",
+     "kind": "equals",
+     "expected": "PASS"
+    }
+   ]
+  }
+ ]
+}

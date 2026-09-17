@@ -1,0 +1,19 @@
+{
+  "id": "journal-mcgill-lj-health",
+  "title": "Typeset macro for McGill Journal of Law and Health from its measured profile",
+  "tags": [
+    "journal",
+    "generation",
+    "profile"
+  ],
+  "fixture": {
+    "type": "workspace",
+    "path": "tools/bench/fixtures/journal-mcgill-lj-health"
+  },
+  "prompt": "This workspace is a blank Word template project for McGill Journal of Law and Health. journal/profile.json describes how the journal typesets its published articles, measured on its 2025-2026 output: page 499 x 708 pt; margins left 1.15 in, right 1.15 in; top 1.3 in; body Times New Roman 11 pt, notes Times New Roman 10 pt; top-level headings title case, center aligned; running heads: odd pages ['journal_name', 'volume_or_year'], even pages ['article_title', 'volume_or_year'], page number top-inner; a tab between the footnote number and its text; curly quotes. Every field carries the evidence; fields listed under evidence_gaps have none and must be left alone. Write the VBA so that a Public Sub named WU_Typeset (no arguments) applies the profile to the active document in one Application.UndoRecord custom record: page size and margins on every section (write only values that differ), body and footnote fonts and sizes (through styles, not direct formatting), the top-level heading case and alignment on outline-level-1 paragraphs, the running heads and page-number field the profile describes (leave a header an editor already filled), a tab after each footnote number when the profile says so, and curly quotes when it says so. Body text must otherwise stay identical and one Undo must revert everything. WU_Typeset must run without any user interaction (no message boxes or forms) because it is graded by automation. Build the template with `tool\\wordup.cmd -w workspace build` and prove WU_Typeset in real Word on a disposable document before you finish.",
+  "grade": {
+    "build_output": "dist/bench.dotm",
+    "suite": "suites/journal-mcgill-lj-health.json"
+  },
+  "timeout_s": 1800
+}
