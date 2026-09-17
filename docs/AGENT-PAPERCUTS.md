@@ -100,3 +100,16 @@ build; `begin`/`ui.invoke`/`poll` drove both redesigned forms unattended.
     only way to find the Word behind one CLI call was walking parent PIDs by
     hand. Candidate fix: `session list`/`doctor --owned` printing CLI PID,
     host PID, Word PID and the operation in flight.
+
+13. **A hidden suite graded a requirement the prompt never stated, and read a
+    mixed range.** All twelve journal runs of `20260916-230047-journal-rerun`
+    failed grading: four because the suite asserted `UpdateStylesOnOpen` while
+    the task prompt never mentioned it, eight because the body-font check read
+    `Paragraphs(4).Range.Font`, a range that also holds the footnote reference
+    mark, so Word reported a mixed font (empty name, size 9999999). The agents'
+    own reports said "native acceptance passed", and they were right about what
+    they were asked. Fixed in `make_journal_tasks.py` (first word of the body
+    paragraph, first text word of the note, requirement added to the prompt).
+    Candidate fix for the loop: a bench self-check that runs each hidden suite
+    against its positive-control template AND lists every graded property the
+    prompt does not mention, before any agent run is paid for.
