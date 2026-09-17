@@ -153,3 +153,20 @@ Static checks retain all analyzers except ANTLR's known generated unreachable
 gotos, while the unreachable analyzer remains enabled on handwritten code.
 Raw local samples are retained in `docs/evidence/shared-core-before.txt` and
 `docs/evidence/shared-core-after.txt`.
+
+## ALR Suggester and Setup after the two-GUI reorganization (2026-09-16, night)
+
+Measured on the Dyson submission (190 paragraphs, 156 footnotes) while a six-worker benchmark ran on the same machine; macro stage time from `ALR_BatchReport`.
+
+| Stage (Suggester, tracked) | Before fixes | After |
+|---|---:|---:|
+| Spelling List (135 rules) | 8.5 s | 0.8 s |
+| Wording | 5.3 s | 0.7 s |
+| Section words (legacy, 24 wildcard Finds, regex-gated) | 3.6 s | 3.2 s |
+| Numbers | never finished (infinite empty-match loop inside the TOC field) | 1.0 s |
+| Dates | — | 0.8 s |
+| Bracketed paragraphs | 10.6 s (legacy, two Finds per footnote) | 0.1 s |
+| Whole Suggester (12 concepts) | — | 8.1 s |
+
+What changed: rules reach Word's Find only when an in-memory whole-word scan of the story finds their text; quote spans come from one string scan (or one Find pass when the story holds hidden content) and are shifted arithmetically after each write instead of rebuilt; every Find loop goes through `FindNext`, which skips empty or non-advancing matches and any match touching a field. Full Setup with all 24 concepts through the form on Dyson: about 6 s (original stage set 4.5 s median, unchanged). Red ink on Dyson: 85 tracked proposals, 78 inserted and 39 deleted characters.
+

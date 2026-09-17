@@ -54,7 +54,7 @@ func TestNativeALRCitationPassMatchesOracle(t *testing.T) {
 		{Name: "Compile", Operation: native.Operation{Op: "compile", Target: "template", Member: "$project"}, Assert: []verify.Assertion{{Path: "/vba_compiled", Kind: "equals", Expected: true}}},
 		{Name: "Create document from the template", Operation: native.Operation{Op: "new", File: "$artifact", As: "document"}},
 		{Name: "Seed footnotes", Operation: native.Operation{Op: "eval", Value: alrCitationSeed}, Assert: []verify.Assertion{{Path: "/result", Kind: "equals", Expected: 9}}},
-		{Name: "Run citation pass", Operation: native.Operation{Op: "run", Macro: "CitationPass", Args: []any{"fix"}, TimeoutMS: 120000}},
+		{Name: "Run citation pass", Operation: native.Operation{Op: "run", Macro: "ALR_CitationNormalizeAll", TimeoutMS: 120000}},
 		{Name: "Read notes", Operation: native.Operation{Op: "eval", Value: alrCitationRead}, Assert: []verify.Assertion{{Path: "/result", Kind: "contains", Expected: "|"}}},
 	}}
 	rep, err := verify.Run(context.Background(), artifact, suite, nil, true)
