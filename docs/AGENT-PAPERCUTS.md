@@ -113,3 +113,71 @@ build; `begin`/`ui.invoke`/`poll` drove both redesigned forms unattended.
     Candidate fix for the loop: a bench self-check that runs each hidden suite
     against its positive-control template AND lists every graded property the
     prompt does not mention, before any agent run is paid for.
+
+## 2026-09-17, ALR corpus overhaul (five Opus agents in parallel)
+
+14. **The harness reports a killed run as a pass.** `wordup … --execute test`
+    writes its result as JSON on stdout; when the process dies (session limit,
+    kill, host crash) or when its output is piped, stdout comes back empty and
+    the exit code is not distinguishable by a caller that only parses JSON. A
+    runner that reads `result.error` therefore prints "passed" for a suite that
+    never ran. One false green reached a phase report before it was caught.
+    Candidate fix: always emit a JSON envelope, with a fault code, on the way
+    out, including on signal; and make a non-zero exit code carry a machine
+    readable reason. Consumers should treat empty stdout as a failure, which
+    `workspaces/alr-refactor/tools/run_suites.py` now does.
+
+15. **Default step deadlines do not survive a busy machine.** `open` and `eval`
+    default to 30 s. With four agents each holding a Word instance, opening a
+    staged template routinely exceeded it, and a Suggester run over a real
+    manuscript exceeded the 900 s step budget. The shared workspace suites
+    carry no `timeout_ms`, so every agent hit this and each one discovered it
+    separately. Candidate fix: scale the default with the number of live hosts
+    the toolchain owns, or let a run set a global multiplier, and say in the
+    fault which deadline was hit and what it defaults to.
+
+16. **An agent could not write its own report file.** The corpus audit was
+    asked to produce `reports/qa/SUMMARY.md` and its harness refused the write,
+    so a 4,000 word analysis had to be relayed through the conversation and
+    written to disk by the parent session. Candidate fix: allow a subagent to
+    write under a declared output directory, or state the restriction up front
+    so the agent plans a different deliverable.
+
+17. **Two agents writing the same suite output path collide.** Two phases ran
+    the shared `corpus-proposals-dyson.json`, which writes a fixed report path,
+    and overwrote each other's evidence mid-analysis. Candidate fix: suites
+    that write files should namespace the path by artifact hash or run id, the
+    way `dist/acceptance-assets/<hash>/run-<n>/` already does for screenshots.
+
+18. **Freezing the artifact under test is the pattern that made the audit
+    possible.** Copying the build to `dist/qa/ALR_qa.dotm` let the audit measure
+    a stable target for five hours while three other agents rebuilt the same
+    source. Worth recommending in the docs as the way to audit a moving tree,
+    together with the rule that every observation names the frozen hash and
+    every root cause names a procedure rather than a line number.
+
+19. **Word re-orients a curly quote that a replacement inserts.** With
+    `Options.AutoFormatAsYouTypeReplaceQuotes` on, replacing `'9` with `’9`
+    literally yields `‘9`, because the inserted mark follows a space and Word
+    applies its own contextual rule to a programmatic write. Any pass that
+    cares about quote direction has to switch the option off around its writes
+    and back afterwards. Candidate fix: a note in `docs/WORD-OPERATIONS.md` and
+    a literal-replace helper in the bundled recipes.
+
+20. **Word's speller cannot identify an acronym.** It accepts `ai`, `us`, `it`,
+    `sec`, `act` and `ghg` as words, so "is this a dictionary word" does not
+    separate AI from AND when title-casing a heading typed in capitals. What
+    worked instead was harvesting the capital runs the author used inside
+    ordinary mixed-case text elsewhere in the same document. Candidate fix:
+    record the finding; a speller check is a tempting and wrong first instinct.
+
+21. **Seeded probes certify the wrong thing.** Every defect in the ranked list
+    the audit produced, including one that silently overwrote words in a
+    footnote for 72% of real manuscripts, passed the seeded acceptance suites
+    for weeks. The suites proved the rules do what they should on sentences
+    written to exercise them; nothing proved the rules leave alone what they
+    should. The fix that worked was mechanical: run the real corpus, dump every
+    proposal with surrounding context to a text file, and read it. Candidate
+    fix for the loop: make "dump every change with context and read it" a
+    first-class verb, so a rule change cannot be reported as verified until
+    someone has looked at what it did to real documents.

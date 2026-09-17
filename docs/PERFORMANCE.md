@@ -154,9 +154,47 @@ gotos, while the unreachable analyzer remains enabled on handwritten code.
 Raw local samples are retained in `docs/evidence/shared-core-before.txt` and
 `docs/evidence/shared-core-after.txt`.
 
+## ALR Suggester on a real manuscript (2026-09-17)
+
+The 8.1 s figure below was measured on the Dyson demo, which is small and holds no
+fields. On the real submission corpus the same build took two to eight minutes, and
+one paper did not finish at all. Measured on `0_63-2 The Pore Space Race`
+(278 paragraphs, 261 notes), macro stage time from `ALR_BatchReport`:
+
+| Stage (Suggester, tracked) | Before | After |
+|---|---:|---:|
+| Spelling List | 21.6 s | 4.4 s |
+| Wording | 48.0 s | 5.4 s |
+| Honorifics | 4.1 s | 0.0 s |
+| Latin italics | 21.9 s | 0.2 s |
+| Latin roman | 15.3 s | 0.2 s |
+| Audit | 6.0 s | 0.3 s |
+| Numbers | did not finish in 600 s | 0.1 s |
+| Dates | never reached | 1.9 s |
+| Bracketed paragraphs | never reached | 3.7 s |
+| All 13 rule stages | never finished | 17.7 s |
+
+Three causes, each measured before it was fixed:
+
+1. A story holding fields fell back to one Word `Find` per quotation mark, 5.4 s for
+   the main story and 11.6 s for the notes, on every call. The field map answers the
+   same question with string work.
+2. The quote-span cache held one story while a run walks about 17 stories per rule
+   family, so it never hit. It is now a 24-slot ring keyed on story and length.
+3. `Numbers` was the last rule driving Word's wildcard `Find` (percent, thousands,
+   year spans, ratios). All four are string scans now, which is the 600 s to 0.1 s line.
+
+Knock-on effects: `suggester-probe` 64 s to 8.4 s, `setup-rules-probe` 15 s to 8.6 s,
+the Dyson proposal report 240 s to 14 s, Rizzuto 950 s to 19 s.
+
+Red ink stays small: across the judge, section, journal and Ibid proposals in
+`judges-journals-probe`, 68 revisions cost 276 characters inserted and 195 deleted,
+about four in and three out per proposal. The Ibid converter alone went from a
+200-character delete-and-retype to inserting `Ibid` and deleting 58 characters.
+
 ## ALR Suggester and Setup after the two-GUI reorganization (2026-09-16, night)
 
-Measured on the Dyson submission (190 paragraphs, 156 footnotes) while a six-worker benchmark ran on the same machine; macro stage time from `ALR_BatchReport`.
+Measured on the Dyson submission (190 paragraphs, 156 footnotes) while a six-worker benchmark ran on the same machine; macro stage time from `ALR_BatchReport`. Superseded by the corpus measurements above: this document is small and holds no fields, so it never exercised the slow paths.
 
 | Stage (Suggester, tracked) | Before fixes | After |
 |---|---:|---:|
