@@ -207,4 +207,3 @@ Measured on the Dyson submission (190 paragraphs, 156 footnotes) while a six-wor
 | Whole Suggester (12 concepts; 13 since Latin italics moved here on 2026-09-17) | — | 8.1 s |
 
 What changed: rules reach Word's Find only when an in-memory whole-word scan of the story finds their text; quote spans come from one string scan (or one Find pass when the story holds hidden content) and are shifted arithmetically after each write instead of rebuilt; every Find loop goes through `FindNext`, which skips empty or non-advancing matches and any match touching a field. Full Setup with all 24 concepts through the form on Dyson (23 since 2026-09-17, Latin italics now a Suggester proposal): about 6 s (original stage set 4.5 s median, unchanged). Red ink on Dyson: 85 tracked proposals, 78 inserted and 39 deleted characters.
-
