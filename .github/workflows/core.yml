@@ -26,6 +26,13 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+      - name: Archive exact source under test
+        run: git archive --format=tar --output=source.tar HEAD
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: source-${{ runner.os }}-${{ github.sha }}
+          path: source.tar
+          retention-days: 7
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version-file: go.mod
@@ -44,6 +51,17 @@ jobs:
           restore-keys: core-${{ runner.os }}-${{ hashFiles('go.mod', 'go.sum') }}-
       - name: Download declared dependencies
         run: '& $env:WORDUP_WRAPPER -Online mod download'
+      - name: Export offline dependency sources
+        run: |
+          & $env:WORDUP_WRAPPER -Online mod vendor
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          tar -cf dependencies.tar vendor
+          Remove-Item -Recurse -Force vendor
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: dependency-sources-${{ runner.os }}
+          path: dependencies.tar
+          retention-days: 7
       - name: Offline regressions (not native Word acceptance)
         run: |
           & $env:WORDUP_WRAPPER test -count=1 ./internal/... ./cmd/... 2>&1 | Tee-Object tests.txt
