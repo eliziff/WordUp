@@ -107,6 +107,68 @@ func TestRuntimeFailureSurvivesDeadlineDuringUnwind(t *testing.T) {
 	}
 }
 
+type compileDialogHost struct {
+	mockHost
+	finished chan struct{}
+	acked    bool
+}
+
+func (h *compileDialogHost) Call(_ context.Context, op native.Operation) (any, error) {
+	switch op.Op {
+	case "ui.diagnostics":
+		return map[string]any{"dialogs": []any{map[string]any{
+			"hwnd": float64(456), "title": "Microsoft Visual Basic for Applications",
+			"buttons": []any{"OK", "Help"}, "messages": []any{"Compile error:\nMethod or data member not found"},
+		}}}, nil
+	case "ui.invoke":
+		if op.HWND != 456 || op.Named["name"] != "OK" || op.Named["message_pattern"] != `(?s)^\s*Compile error:` {
+			return nil, errors.New("unscoped compile acknowledgement")
+		}
+		h.acked = true
+		return nil, nil
+	case "ui.vba.reset":
+		if !h.acked {
+			return nil, errors.New("reset before compile acknowledgement")
+		}
+		close(h.finished)
+		return map[string]any{"module": "BrokenModule", "line": 12}, nil
+	}
+	return h.mockHost.Call(context.Background(), op)
+}
+
+func TestRunRetainsOrdinaryCompileErrorAfterNormalUnwind(t *testing.T) {
+	h := &compileDialogHost{finished: make(chan struct{})}
+	result, err := waitRuntime(context.Background(), h, func(context.Context, string) (any, error) {
+		<-h.finished
+		return map[string]any{"status": "completed"}, nil
+	}, "compile-test", native.Operation{Op: "run", Macro: "BrokenMacro"})
+	var fault *native.Fault
+	if !errors.As(err, &fault) || fault.Code != "vba_compile_error" {
+		t.Fatal("lost compile failure after Run unwound", result, err)
+	}
+	details := fault.Details.(map[string]any)
+	if len(details["observed_dialogs"].([]any)) != 1 {
+		t.Fatal("compile dialog evidence was discarded", details)
+	}
+	if details["compiler_location"].(map[string]any)["module"] != "BrokenModule" {
+		t.Fatal("compile location was discarded", details)
+	}
+}
+
+func TestCompileDialogAfterImmediateRunFailure(t *testing.T) {
+	h := &compileDialogHost{finished: make(chan struct{})}
+	_, err := waitRuntime(context.Background(), h, func(context.Context, string) (any, error) {
+		return nil, errors.New("Run returned before the polling tick")
+	}, "compile-test", native.Operation{Op: "run", Macro: "BrokenMacro"})
+	var fault *native.Fault
+	if !errors.As(err, &fault) || fault.Code != "vba_compile_error" {
+		t.Fatal("lost compiler dialog after immediate Run failure", err)
+	}
+	if fault.Details.(map[string]any)["compiler_location"] == nil {
+		t.Fatal("compiler was not reset and located", fault)
+	}
+}
+
 func TestRuntimeDialogRequiresVBEErrorAndActions(t *testing.T) {
 	dialog := map[string]any{"title": "Microsoft Visual Basic", "buttons": []any{"End", "Debug", "Help"}, "messages": []any{"Run-time error '-2147220991 (80040201)':\n\nDeliberate failure"}}
 	details := runtimeDialog(dialog)

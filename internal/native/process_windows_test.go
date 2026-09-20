@@ -3,10 +3,31 @@
 package native
 
 import (
+	"errors"
 	"fmt"
 	"syscall"
 	"testing"
 )
+
+func TestTerminationCauseSurvivesClosedSessionAndPendingCalls(t *testing.T) {
+	for _, code := range []string{"macro_deadline", "worker_exited", "word_exited"} {
+		t.Run(code, func(t *testing.T) {
+			cause := fault(Fail(code, "original cause", map[string]any{"task": "edit"}))
+			response := make(chan Response, 1)
+			h := &localHost{termination: cause, pending: map[uint64]chan Response{1: response}}
+			if !errors.Is(h.closedFault(), cause) {
+				t.Fatal("closed session lost its termination cause")
+			}
+			h.breakPending(Fail("session_closed", "cleanup", nil))
+			if got := <-response; got.Error != cause {
+				t.Fatalf("pending call lost cause: %#v", got.Error)
+			}
+		})
+	}
+	if got := fault((&localHost{}).closedFault()); got.Code != "session_closed" {
+		t.Fatalf("ordinary close misclassified: %#v", got)
+	}
+}
 
 func TestNoLogonSessionErrorClassification(t *testing.T) {
 	if !noLogonSessionError(fmt.Errorf("CreateProcessW: %w", syscall.Errno(1312))) {
@@ -17,6 +38,17 @@ func TestNoLogonSessionErrorClassification(t *testing.T) {
 	}
 	if noLogonSessionError(syscall.Errno(5)) {
 		t.Fatal("unrelated Windows errors must not trigger the fallback")
+	}
+}
+
+func TestCallerLaunchTokenFailureExplainsRecovery(t *testing.T) {
+	f := fault(callerLaunchTokenFailure(map[string]any{"create_error": "1312"}))
+	if f.Code != "native_launch_token_restricted" {
+		t.Fatalf("wrong classification: %#v", f)
+	}
+	details := f.Details.(map[string]any)
+	if details["session_restart_helpful"] != false || details["recovery"] == "" {
+		t.Fatalf("missing actionable recovery: %#v", details)
 	}
 }
 

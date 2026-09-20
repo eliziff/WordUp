@@ -1,6 +1,6 @@
 # Agent benchmark
 
-Measures whether WordUp's model-facing abstractions (bundled VBA components, journal generation, structure detection) actually help a coding agent build better templates than the core surface alone. This is the gate that decides which abstractions stay: an abstraction survives only when the `components` arm beats `core` on hidden native pass rate, or cuts tokens or wall time meaningfully on the tasks it applies to.
+Measures whether WordUp's model-facing abstractions (bundled VBA components, journal generation, structure detection) actually help a coding agent build better templates than the core surface alone. Use it when the value of an abstraction is uncertain; it is not a gate for routine changes. Prefer direct fixes and deletion of unnecessary machinery when the reason is already clear.
 
 ## What runs
 

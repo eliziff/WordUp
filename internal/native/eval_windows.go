@@ -19,6 +19,13 @@ func (h *wordHost) evaluate(op Operation) (out any, resultErr error) {
 	if !ok || len(body) > 1<<20 {
 		return nil, fmt.Errorf("eval value must be a bounded VBA function body; assign the result to Evaluate")
 	}
+	// Preserve the caller's actual document before any scratch preparation can
+	// affect Word's active window. Eval also remains valid when no document is
+	// open, so absence of ActiveDocument is not an error.
+	active, _ := objectProperty(h.app, "ActiveDocument")
+	if active.ptr != 0 {
+		defer active.release()
+	}
 	name := "WWEval" + randomID()[:16]
 	v := office.NewVBA(name)
 	module := "Evaluation" + randomID()[:16]
@@ -49,6 +56,13 @@ func (h *wordHost) evaluate(op Operation) (out any, resultErr error) {
 	defer func() {
 		resultErr = evaluationCleanupError(resultErr, h.uninstallEvaluation(name, path), path)
 	}()
+	if active.ptr != 0 {
+		activated, activateErr := active.call("Activate")
+		activated.clear()
+		if activateErr != nil {
+			return nil, fmt.Errorf("restore active document for evaluation: %w", activateErr)
+		}
+	}
 	value, e := h.app.invoke("Run", 1, []any{module + ".Evaluate"}, nil, h.objects)
 	if e != nil {
 		return nil, Fail("scratch_vba_failed", e.Error(), map[string]any{"generated_source": source, "scratch_sha256": office.Hash(data), "cause": fault(e)})

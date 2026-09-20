@@ -43,6 +43,7 @@ func Probe(ctx context.Context, opt Options, count int) (map[string]any, error) 
 			continue
 		}
 		info := h.Info()
+		record["startup_diagnostics"] = info["startup_diagnostics"]
 		if timing, ok := info["startup_timing_ms"].(map[string]float64); ok {
 			record["startup_ms"] = timing
 			startups = append(startups, timing["total"])

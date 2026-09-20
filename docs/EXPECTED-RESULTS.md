@@ -48,6 +48,13 @@ Here `target` is the expected file for `xml.verify`, and `named.comparison` can
 explicitly select `semantic`. Neither comparison operation counts as Word
 execution. Use `xml.snapshot` outside the editing action's undo record.
 
+For large documents, supply `file`: native XML is decoded to that file in
+chunks, retaining Word's exact UTF-8 export without the inline COM response
+limit. The response contains the file's hash, byte count and part names rather
+than its contents. Word still creates the original BSTR in memory; this does
+not make acquisition Word-free or prove DOCX byte parity. Failed XML parsing
+leaves an existing destination file unchanged.
+
 Word can regenerate editing-history identifiers or add document IDs during an
 edit. Exact comparison reports these differences too. When they are irrelevant
 to the particular test, use the existing suite `xml.compare` with an explicit
@@ -56,6 +63,10 @@ under that same policy. Do not discard IDs referenced by comments or other
 document features. There is no automatic ignore list.
 
 ## Repeating a native test
+
+For opt-in observations inside a macro, suites can also retain and compare
+[ordered native serial traces](SERIAL-TRACES.md). Trace comparison is separate
+from XML policy and never substitutes for native execution or document checks.
 
 Each test saves a distinct `saved_report` and retains the tested template bytes;
 `reports/acceptance.json` is only the latest report. To preserve a manuscript or

@@ -5,7 +5,7 @@ Use `wordup -w WORKSPACE call METHOD '@parameters.json'` for offline operations;
 - `structure.inspect` with a document `path` reads style ancestry, direct/inherited outline evidence and containment without launching Word. Follow it with `structure.resolve` when the agent needs generic candidate roles, levels, parents and ambiguity before conversion.
 - `reference.document` with `{"path":"dist/Template.dotm"}` inspects saved package styles, theme fonts, numbering, content types, the relationship graph, a hash inventory of every OPC part, and paragraph/story observations. Inspect both source and output; this is not a complete resolved style engine.
 - `check` checks source syntax/XML/Ribbon diagnostics. Use a native `compile` step separately; parser success is not compiler success.
-- `test` with `path`, `fresh:true`, and a `suite` executes native assertions. Keep requirement-specific suites in the workspace and reuse `test.replay`; use `test.compare` for compatible baseline/candidate suites.
+- `test` with `path` and a `suite` executes native assertions; choose `fresh:true` when an independent host is needed. Keep requirement-specific suites in the workspace and reuse `test.replay`; use `test.compare` for compatible baseline/candidate suites.
 - `native.call` supports `get`, `put`, `invoke`, `eval`, `xml`, `render`, and UI operations. Use retained objects and batches rather than repeated process launches. See the API for asynchronous forms and captures.
 
 ## Saved style assertion pattern
@@ -29,7 +29,7 @@ For UI, locate/invoke actual controls using the native UI operations, then asser
 ## Requested user preview
 
 ```json
-{"path":"dist/Template.dotm","reference":"reports/acceptance.json","document":"inputs/manuscript.docx"}
+{"path":"dist/Template.dotm","document":"inputs/manuscript.docx"}
 ```
 
-Pass this to `--execute call preview`. The current implementation opens an isolated copy with the tested template attached, enables automatic style updates, and applies those styles immediately. Omit `document` to start a new document from the template. This does not run the conversion workflow and does not replace conversion acceptance.
+Pass this to `--execute call preview`. The current implementation opens an isolated copy with the template attached, enables automatic style updates, applies them immediately, saves and reopens the copy, and verifies the attachment and setting. Acceptance is not a prerequisite; an optional reference reports its status and whether the artifact hash matches. Omit `document` to start a new document from the template. This does not run the conversion workflow and does not replace conversion acceptance.

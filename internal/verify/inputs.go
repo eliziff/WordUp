@@ -56,7 +56,10 @@ func stageInputs(output string, inputs map[string]inputBytes, replacements map[s
 	for name, input := range inputs {
 		filename := name + filepath.Ext(input.source)
 		snapshot := filepath.Join(output, "inputs", filename)
-		working := filepath.Join(output, "working-inputs", filename)
+		// Native staging keys files by basename. Give each disposable test input
+		// its own name so a prior SaveAs/Close cannot leave a stale basename that
+		// blocks an unrelated run in the same warm host. Frozen names stay stable.
+		working := filepath.Join(output, "working-inputs", name+"_"+office.Hash([]byte(output))[:16]+filepath.Ext(input.source))
 		if err := project.AtomicWrite(snapshot, input.data); err != nil {
 			return nil, err
 		}

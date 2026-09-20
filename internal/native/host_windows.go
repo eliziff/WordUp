@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"sync"
@@ -119,6 +120,7 @@ type wordHost struct {
 	app          dispatch
 	objects      map[string]dispatch
 	staged       map[string]string
+	openedPaths  map[string]string // Original staged path, retained across SaveAs until unload.
 	execute      bool
 	uiWindows    sync.Map
 	evalPrograms map[string]*evalProgram
@@ -129,6 +131,38 @@ type wordHost struct {
 // caller's desktop; in that case Word and opened documents must stay hidden.
 func (h *wordHost) windowsVisible() bool {
 	return h.cfg.Visible || h.cfg.Desktop != ""
+}
+
+const wordSafeModeStartupPrompt = "Word couldn't start last time. Safe mode could help you troubleshoot the problem, but some features might not be available in this mode.\n\nDo you want to start in safe mode?"
+
+// Recognize only Word's exact safe-mode startup dialog in the owned process.
+// Requiring the message and both expected choices keeps unrelated or changed
+// startup prompts visible for diagnosis instead of dismissing them.
+func wordSafeModeStartupWindow(windows []any) (uint64, bool) {
+	for _, item := range windows {
+		window, ok := item.(map[string]any)
+		if !ok || window["class"] != "#32770" || window["title"] != "Microsoft Word" || window["visible_on_private_desktop"] != true {
+			continue
+		}
+		hasPrompt, hasNo, hasYes := false, false, false
+		children, _ := window["children"].([]any)
+		for _, childItem := range children {
+			child, _ := childItem.(map[string]any)
+			switch child["title"] {
+			case wordSafeModeStartupPrompt:
+				hasPrompt = child["class"] == "Static"
+			case "&No":
+				hasNo = child["class"] == "Button"
+			case "&Yes":
+				hasYes = child["class"] == "Button"
+			}
+		}
+		if hasPrompt && hasNo && hasYes {
+			hwnd, ok := window["hwnd"].(uint64)
+			return hwnd, ok
+		}
+	}
+	return 0, false
 }
 
 func connectWord(cfg hostConfig) (*wordHost, error) {
@@ -197,9 +231,23 @@ func connectWord(cfg hostConfig) (*wordHost, error) {
 	start := end.Add(-duration)
 	var last error
 	tries := 0
+	safeModePromptAttempted := false
 	for time.Now().Before(end) {
 		tries++
 		pump()
+		if cfg.Execute && !safeModePromptAttempted {
+			dialogs := scopedWindowInventory(p.PID, "#32770")
+			if hwnd, recognized := wordSafeModeStartupWindow(dialogs); recognized {
+				safeModePromptAttempted = true
+				action, actionErr := uiOperation(p.PID, cfg.Directory, true, Operation{Op: "ui.invoke", HWND: hwnd, Named: map[string]any{
+					"name": "No", "scope": "dialog", "message_pattern": "^" + regexp.QuoteMeta(wordSafeModeStartupPrompt) + "$",
+				}})
+				diagf("connectWord: exact owned safe-mode startup prompt=%q action=No result=%v error=%v", wordSafeModeStartupPrompt, action, actionErr)
+				if actionErr != nil {
+					last = actionErr
+				}
+			}
+		}
 		state, _, _ := waitSingle.Call(uintptr(p.Process), 0)
 		if tries%50 == 0 {
 			diagf("connectWord: waiting elapsed=%.1fs state=0x%X windows=%d", time.Since(start).Seconds(), state, len(windowInventory(p.PID)))
@@ -208,10 +256,13 @@ func connectWord(cfg hostConfig) (*wordHost, error) {
 			return nil, Fail("word_process_exited", "The explicitly launched Word process exited before a document window appeared; no other Word instance was attached", nil)
 		}
 		if hwnd := documentWindow(p.PID); hwnd != 0 {
+			diagf("connectWord: document window found; requesting native accessibility object")
 			win, e := fromNativeWindow(hwnd, 0xfffffff0)
+			diagf("connectWord: native accessibility returned error=%v", e)
 			if e == nil {
 				// Word exposes Hwnd on Window, not Application. Verify the native
 				// window before extracting its Application object.
+				diagf("connectWord: reading Window.Hwnd")
 				hv, windowErr := win.get("Hwnd")
 				if windowErr != nil {
 					win.release()
@@ -224,20 +275,25 @@ func connectWord(cfg hostConfig) (*wordHost, error) {
 					win.release()
 					return nil, Fail("word_ownership_mismatch", "Refusing to automate a Word window outside the app-owned process", nil)
 				}
+				diagf("connectWord: ownership checked; reading Window.Application")
 				v, e := win.get("Application")
 				win.release()
 				if e == nil {
 					app, e := v.object()
 					v.clear()
 					if e == nil {
+						diagf("connectWord: Application acquired; setting AutomationSecurity")
 						if e = app.put("AutomationSecurity", 3); e != nil {
 							app.release()
 							return nil, e
 						}
 						h.app = app
 						h.objects["app"] = app
+						diagf("connectWord: setting DisplayAlerts")
 						_ = app.put("DisplayAlerts", 0)
+						diagf("connectWord: setting Visible")
 						_ = app.put("Visible", cfg.Visible || cfg.Desktop != "")
+						diagf("connectWord: application settings complete")
 						if cfg.Visible {
 							seedValue, err := app.get("ActiveDocument")
 							if err != nil {
@@ -270,7 +326,8 @@ func connectWord(cfg hostConfig) (*wordHost, error) {
 		}
 		time.Sleep(40 * time.Millisecond)
 	}
-	return nil, Fail("word_startup_timeout", "The app-owned Word process did not expose its native document window", map[string]any{"last_error": fmt.Sprint(last), "windows": windowInventory(p.PID), "worker_diagnostics": diagTail()})
+	dialogs, dialogErr := uiOperation(p.PID, cfg.Directory, cfg.Execute, Operation{Op: "ui.diagnostics", Named: map[string]any{"window_class": "#32770", "trees": true}})
+	return nil, Fail("word_startup_timeout", "The app-owned Word process did not expose its native document window", map[string]any{"last_error": fmt.Sprint(last), "windows": windowInventory(p.PID), "dialogs": dialogs, "dialog_diagnostics_error": fmt.Sprint(dialogErr), "worker_diagnostics": diagTail()})
 }
 func (h *wordHost) close() {
 	for name, d := range h.objects {
@@ -300,6 +357,7 @@ func (h *wordHost) store(name string, d dispatch) error {
 		old.release()
 	}
 	h.objects[name] = d
+	delete(h.openedPaths, name)
 	return nil
 }
 func (h *wordHost) result(v *variant, name string) (any, error) {
@@ -366,8 +424,13 @@ func (h *wordHost) stage(source string) (string, error) {
 		return target, nil
 	}
 	if !strings.EqualFold(source, target) {
-		if e = os.WriteFile(target, b, 0600); e != nil {
-			return "", e
+		// Unload releases our handle, but Word can retain an attached template.
+		// Reuse identical bytes even after that handle left the staging map.
+		current, err := os.ReadFile(target)
+		if err != nil || office.Hash(current) != hash {
+			if e = os.WriteFile(target, b, 0600); e != nil {
+				return "", e
+			}
 		}
 	}
 	h.staged[key] = hash
@@ -381,10 +444,12 @@ func (h *wordHost) operation(op Operation) (any, error) {
 		if op.Value != h.cfg.Token {
 			return nil, Fail("invalid_handshake", "worker handshake token mismatch", nil)
 		}
+		diagf("hello: reading Word.Version")
 		version, _ := h.app.get("Version")
 		defer version.clear()
 		v, _ := version.value(0)
-		return map[string]any{"pid": h.process.PID, "word_version": v, "desktop": h.cfg.Desktop, "desktop_isolation": h.cfg.Desktop != "", "visible": h.windowsVisible(), "visible_desktop_switched": false, "owns_word_process": true, "user_word_attached": false, "runtime": "Microsoft Word", "macro_execution_authorized": h.execute, "registry_security_settings_modified": false, "automation_open_mode": "ForceDisable for inspection; Low only for explicitly authorized staged input", "directory": h.cfg.Directory, "private_desktop_is_security_sandbox": false}, nil
+		diagf("hello: ready")
+		return map[string]any{"startup_diagnostics": diagTail(), "pid": h.process.PID, "word_version": v, "desktop": h.cfg.Desktop, "desktop_isolation": h.cfg.Desktop != "", "visible": h.windowsVisible(), "visible_desktop_switched": false, "owns_word_process": true, "user_word_attached": false, "runtime": "Microsoft Word", "macro_execution_authorized": h.execute, "registry_security_settings_modified": false, "automation_open_mode": "ForceDisable for inspection; Low only for explicitly authorized staged input", "directory": h.cfg.Directory, "private_desktop_is_security_sandbox": false}, nil
 	case "release":
 		if op.Target == "app" {
 			return nil, fmt.Errorf("cannot release application handle")
@@ -392,6 +457,7 @@ func (h *wordHost) operation(op Operation) (any, error) {
 		if d, ok := h.objects[op.Target]; ok {
 			d.release()
 			delete(h.objects, op.Target)
+			delete(h.openedPaths, op.Target)
 		}
 		return true, nil
 	case "get", "invoke", "put", "putref":
@@ -475,9 +541,24 @@ func (h *wordHost) operation(op Operation) (any, error) {
 			member = "Add"
 			named = map[string]any{"FileName": target, "Install": true}
 		}
+		var active dispatch
+		if op.Op == "addin" {
+			// Installing an add-in can activate Word's blank host document. Keep
+			// evaluation bound to the document that was active before installation.
+			active, _ = objectProperty(h.app, "ActiveDocument")
+			defer active.release()
+		}
 		v, e := coll.invoke(member, 1, nil, named, h.objects)
 		if e != nil {
 			return nil, e
+		}
+		if active.ptr != 0 {
+			activated, activateErr := active.call("Activate")
+			activated.clear()
+			if activateErr != nil {
+				v.clear()
+				return nil, fmt.Errorf("restore active document after add-in installation: %w", activateErr)
+			}
 		}
 		name := op.As
 		if name == "" {
@@ -488,6 +569,12 @@ func (h *wordHost) operation(op Operation) (any, error) {
 			return nil, e
 		}
 		opened := map[string]any{"handle": r, "staged_path": target, "source_sha256": h.staged[strings.ToLower(target)], "macro_execution_authorized": h.execute, "open_and_repair": false}
+		if op.Op == "open" {
+			if h.openedPaths == nil {
+				h.openedPaths = map[string]string{}
+			}
+			h.openedPaths[name] = target
+		}
 		opened["macros_disabled_on_open"] = security == 3
 		if op.Op != "addin" {
 			if mode, modeErr := scalarNumber(h.objects[name], "CompatibilityMode"); modeErr == nil {
@@ -541,6 +628,10 @@ func (h *wordHost) operation(op Operation) (any, error) {
 		d.release()
 		delete(h.objects, op.Target)
 		h.uiWindows.Delete(op.Target)
+		if original := h.openedPaths[op.Target]; original != "" {
+			delete(h.staged, strings.ToLower(original))
+			delete(h.openedPaths, op.Target)
+		}
 		if target, ok := name.(string); ok && strings.EqualFold(filepath.Dir(target), h.cfg.Directory) {
 			delete(h.staged, strings.ToLower(target))
 		}

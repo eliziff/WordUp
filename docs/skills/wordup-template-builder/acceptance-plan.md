@@ -1,6 +1,6 @@
 # Template acceptance plan
 
-Copy this into the project as `references/template-acceptance.md`; replace examples with actual requirements. This is an editorial/evidence plan, not a machine-enforced coverage certificate. Keep unknowns visible.
+Optional checklist for substantial template work. Use only rows relevant to the request; no copied plan or separate document is required. This is a reference, not a coverage certificate. Keep unknowns visible.
 
 Record source/reference paths and hashes, target artifact hash, platform, and the intended workflow (new documents, conversion, or both).
 

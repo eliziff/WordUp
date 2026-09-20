@@ -149,6 +149,13 @@ func noLogonSessionError(err error) bool {
 	return errors.Is(err, syscall.Errno(1312)) || strings.Contains(strings.ToLower(err.Error()), "specified logon session does not exist")
 }
 
+func callerLaunchTokenFailure(details map[string]any) error {
+	details["likely_cause"] = "WordUp was launched with a restricted Windows process token"
+	details["recovery"] = "Rerun the native WordUp command outside the command sandbox"
+	details["session_restart_helpful"] = false
+	return Fail("native_launch_token_restricted", "The caller's Windows launch token cannot start Microsoft Word", details)
+}
+
 func duplicateInheritable(f *os.File) (syscall.Handle, error) {
 	var out syscall.Handle
 	self, _, _ := currentProcess.Call()
@@ -261,6 +268,7 @@ func spawnOnDesktop(exe string, args []string, desktop string, hidden bool, stdi
 	return result, nil
 }
 func Available() bool { _, e := findWord(); return e == nil }
+
 // Start launches the app-owned Word session. Restricted logon sessions can let
 // CreateDesktopW succeed yet refuse every CreateProcessW attempted from that
 // desktop-bound worker (ERROR_NO_SUCH_LOGON_SESSION, 1312). When the startup
@@ -412,7 +420,7 @@ func start(ctx context.Context, opt Options, degraded bool) (Host, error) {
 			}
 			h.process, e = spawnOnDesktop(exe, []string{"__host", configPath}, "", true, inRead, outWrite, logWrite, h.job)
 			if e != nil {
-				return nil, Fail("native_session_restricted", "Windows refused hidden Word creation in the current logon session", map[string]any{
+				return nil, callerLaunchTokenFailure(map[string]any{
 					"desktop":                     privateDesktop,
 					"word_path":                   h.cfg.WordPath,
 					"create_error":                e.Error(),
@@ -468,7 +476,7 @@ func start(ctx context.Context, opt Options, degraded bool) (Host, error) {
 				if !errors.As(retryErr, &retryFault) {
 					retryFault = &Fault{Code: "native_error", Message: retryErr.Error()}
 				}
-				return nil, Fail("native_session_restricted", "Windows refused hidden Word creation in the current logon session", map[string]any{
+				return nil, callerLaunchTokenFailure(map[string]any{
 					"private_desktop_fault":   restricted,
 					"inherited_desktop_fault": retryFault,
 				})
@@ -560,10 +568,22 @@ func (h *localHost) readResponses() {
 func (h *localHost) breakPending(e error) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
+	if h.termination != nil {
+		e = h.termination
+	}
 	for id, ch := range h.pending {
 		ch <- Response{ID: id, Error: fault(e)}
 		delete(h.pending, id)
 	}
+}
+
+func (h *localHost) closedFault() error {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if h.termination != nil {
+		return h.termination
+	}
+	return Fail("session_closed", "native session closed", nil)
 }
 
 func (h *localHost) observeWordExit(process uintptr, pid uint32) {
@@ -643,7 +663,7 @@ func (h *localHost) Call(ctx context.Context, op Operation) (any, error) {
 		h.Close()
 		return nil, Fail("native_deadline", "Native request write timed out; only the owned Word job was terminated", ctx.Err().Error())
 	case <-h.closed:
-		return nil, Fail("session_closed", "native session closed", nil)
+		return nil, h.closedFault()
 	}
 	if e != nil {
 		h.mu.Lock()
@@ -666,7 +686,7 @@ func (h *localHost) Call(ctx context.Context, op Operation) (any, error) {
 					if ms == 0 {
 						ms = 30000
 					}
-					go h.watchTask(task, time.Duration(ms)*time.Millisecond)
+					go h.watchTask(task, time.Duration(ms)*time.Millisecond, op)
 				}
 			}
 		}
@@ -689,11 +709,11 @@ func (h *localHost) Call(ctx context.Context, op Operation) (any, error) {
 		h.logMu.Unlock()
 		return nil, Fail("native_deadline", "The app-owned Word job was terminated after the deadline; the user's Word processes were not touched", map[string]any{"cause": ctx.Err().Error(), "worker_log_tail": tail})
 	case <-h.closed:
-		return nil, Fail("session_closed", "native session closed", nil)
+		return nil, h.closedFault()
 	}
 }
 
-func (h *localHost) watchTask(task string, limit time.Duration) {
+func (h *localHost) watchTask(task string, limit time.Duration, operation Operation) {
 	h.mu.Lock()
 	completion := h.tasks[task]
 	h.mu.Unlock()
@@ -713,7 +733,9 @@ func (h *localHost) watchTask(task string, limit time.Duration) {
 			h.mu.Unlock()
 			return
 		}
-		h.termination = fault(Fail("macro_deadline", "The asynchronous task exceeded its wall-clock limit; only the owned Word job was terminated", map[string]any{"task": task, "timeout_ms": limit.Milliseconds()}))
+		if h.termination == nil {
+			h.termination = fault(Fail("macro_deadline", "The asynchronous task exceeded its wall-clock limit; only the owned Word job was terminated", map[string]any{"task": task, "timeout_ms": limit.Milliseconds(), "operation": operation}))
+		}
 		h.mu.Unlock()
 		h.Close()
 		return

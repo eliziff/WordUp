@@ -1292,29 +1292,16 @@ func dropSignatures(p *office.Package) error {
 
 const AgentInstructions = `# WordUp source workspace
 
-Commit editable source, tests, assets and the .wordwright baseline/index; treat dist outputs and reports as generated local evidence. Generated .gitattributes preserves imported bytes and exact XML expectations regardless of Git autocrlf settings while keeping source diffs readable. Do not merge DOTM binaries; merge source and rebuild. Private inputs remain private even when a workspace is Git-ready.
-Use the wordup executable. No module imports, VBE typing, or Python setup.
+Use the wordup executable to build and inspect the artifact. Keep originals and private inputs safe. Editable source and the .wordwright baseline/index can be versioned; retain reports and captures as local evidence. Merge source, not DOTM binaries.
 
-- Edit vba/*.bas, *.cls, and *.vba as ordinary UTF-8 files; module names and VB_Name must agree.
-- Keep source-tree roots named exactly package/, vba/, forms/, and assets/; case variants are rejected before check, build, or component installation.
-- New .bas files become standard modules; new .cls files become classes; .vba files are UserForm code.
-- forms/<name>.json describes persistent native MSForms design, in points. Existing unsupported controls remain opaque.
-- package/ is the full original Open XML package, including RibbonX XML, embedded assets and native saved parts. Do not rewrite the ZIP by hand.
-- Local component bundles may keep binary assets under assets/ or package/ and declare ribbon_merges in component.json; the normal build composes those fragments into the named customUI part and rejects collisions before copying source.
-- Edit package XML directly or use native Word operations for document content, styles, numbering and saved building blocks.
-- For fast journal text work, prefer the bundled bounded Find/range helpers (WU_CountLiteral, WU_ReplaceLiteralBatch, WU_ApplyCharacterStyleRuns, and WU_ApplyParagraphStyleRuns) and pass detector offsets directly; they preserve existing text, fields and inline runs. Use the generated neutral role-style seam for publisher-specific typography, and leave ambiguous candidates unresolved until the adaptation decides.
-- Use xml.query for exact XML part offsets and hashes, then xml.patch for guarded byte-range edits that preserve every other byte; use xml.verify/xml.compare for direct expected-output checks.
-- build performs deterministic package and binary checks; it is not a VBA compiler.
-- native execution is local Microsoft Word, never an emulator. Authorize execution only for code the user intends to run. The private desktop is UI separation, NOT a security sandbox.
-- Wrap each user-facing editing action in one Application.UndoRecord custom record. For bulk edits, save Application.ScreenUpdating, set it False, and restore the saved value in shared success/error cleanup. Always close an opened undo record; do not blindly restore True when a caller already disabled updates. Read-only actions need no undo record. Test that one undo restores the edited content and that failures restore application state. Capture WordOpenXML outside the editing action and its undo record: a native opening-layout test demonstrated that exporting it during the record disrupted undo grouping.
-- Use fresh native acceptance before deployment. Preserve fixture files and assert specific observable behavior; a passing self-test does not establish all other macros work.
-- Keep reusable acceptance steps in tests/suite.json and run the test tool with path and fresh=true. Do not build a separate driver script for normal UI workflows.
-- For Ribbon actions use ui.invoke with target=document and named:{scope:ribbon,name:caption,role:37 for tabs or 43 for buttons}. For form actions use named:{scope:form,name:caption,window:optional exact form title}. Names are exact; ambiguous selectors fail.
-- Follow actions with assertions on document text, formatting, fields or macro diagnostics. A successful action return alone proves no document behavior. Use ui.find with named.wait_ms for bounded control appearance waits. Duplicate names can be narrowed with named.ancestor (exact accessible container name), in addition to window, scope and role; uniqueness remains required. For a modal macro, begin one run with an as task name, handle its owned dialog, then poll that task with eventually_ms and assert both /status equals completed and /error absent. Completed alone is not success; absent requires an existing parent object.
-- Keep native tests lean too: use For Each for collection traversal when edits do not invalidate enumeration, and read unchanged Range.Text once before repeated checks. Repeated Paragraphs(i) lookups and full-story reads can dominate the feature under test. For destructive edits, preserve the required reverse order or stable ranges. Measure fixture setup and assertions separately from the editing operation before attributing suite time to the macro.
-- xml.snapshot records exact WordOpenXML without saving. Preserve this evidence, but do not assume repeated exports have identical run boundaries: Word pagination can change serialization without a macro. Use explicit behavior assertions; xml.compare is available when exact structure is the intended invariant.
-- Failed native suite steps automatically capture owned-window diagnostics and screenshots. Read the errors and images before changing code; do not ask the user to reproduce the failure manually.
-- Mac static checks and Windows native tests are not Mac execution evidence.
-- Raw XML, native object-model calls and arbitrary VBA are the authoring surface. Unsupported serialization must error rather than substitute an approximation.
-- For legal heading/numbering/footnote primitives, consult https://github.com/eliziff/legal-structure-parser. For PDF geometry, reading order and source witnesses, consult https://github.com/eliziff/legal-pdf-parser. These are optional reusable tools, not WordUp runtime dependencies. Prefer native Word evidence, preserve source offsets, and record revisions/licenses for adapted code.
+- Edit UTF-8 VBA in vba/; module names and VB_Name must agree. .bas files are standard modules, .cls files are classes, and .vba files are UserForm code.
+- Keep roots exactly package/, vba/, forms/ and assets/. forms/<name>.json stores native MSForms design in points; unsupported controls remain opaque. package/ contains the original Open XML parts, including RibbonX and saved content. Preserve unknown properties.
+- Use package XML, native object-model calls or arbitrary VBA as appropriate. xml.query and xml.patch support guarded edits; xml.snapshot captures live Word XML; xml.review, xml.verify and xml.compare inspect retained output without Word.
+- Reuse a warm session and batch native access where semantics permit. Measure slow operations, including setup and evidence capture. Use help, doctor or selftest when needed, not as a startup ritual.
+- Normally group each editing action into one undo record and restore prior application state on success or failure. Capture XML outside the undo record.
+- Check the intended result through the actual user entry point. Preserve pending revisions when relevant. Assertions, expected XML, native renders and suites are options, not a required sequence. Baseline/final captures usually suffice; detailed tracing is optional.
+- Keep expensive evidence and inspect failures before rerunning. Build success is not compilation or runtime success; execution success is not output correctness. Report only what the observed evidence establishes, on the platform tested.
+- Native execution requires authority to run the code. A private desktop separates UI; it is not a security sandbox. Deployment requires fresh artifact-bound native acceptance and preserves backups.
+
+Use wordup help or rpc help to discover operations. The supplied README and docs cover source format, Word behavior, diagnostics and optional reusable-template guidance.
 `

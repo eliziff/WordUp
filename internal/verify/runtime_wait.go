@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/eliziff/WordUp/internal/native"
@@ -58,6 +59,11 @@ func waitRuntime(ctx context.Context, h native.Host, wait func(context.Context, 
 	for {
 		select {
 		case c := <-done:
+			if failure == nil && c.err != nil {
+				// Run can fail before the first polling tick while its compiler
+				// dialog remains open. Capture that failure before generic diagnostics.
+				failure = acknowledgeRuntimeError(ctx, h, task, op)
+			}
 			if failure != nil {
 				return c.result, failure
 			}
@@ -88,17 +94,29 @@ func acknowledgeRuntimeError(ctx context.Context, h native.Host, task string, op
 		if dialog["title"] == "Microsoft Visual Basic" || dialog["title"] == "Microsoft Visual Basic for Applications" {
 			messages, _ := dialog["messages"].([]any)
 			for _, message := range messages {
-				if !hiddenCompileMessage.MatchString(fmt.Sprint(message)) {
+				text := fmt.Sprint(message)
+				ordinary := compilerErrorDialog(dialog) && strings.HasPrefix(strings.TrimSpace(text), "Compile error:")
+				if !ordinary && !hiddenCompileMessage.MatchString(text) {
 					continue
 				}
 				details := map[string]any{"operation": op, "task": task, "observed_dialogs": []any{dialog}}
 				if hwnd, ok := dialog["hwnd"].(float64); ok {
-					_, ackErr := h.Call(ctx, native.Operation{Op: "ui.invoke", HWND: uint64(hwnd), Named: map[string]any{"scope": "dialog", "name": "OK", "role": 43, "message_pattern": hiddenCompileMessage.String()}})
+					pattern := hiddenCompileMessage.String()
+					if ordinary {
+						pattern = `(?s)^\s*Compile error:`
+					}
+					_, ackErr := h.Call(ctx, native.Operation{Op: "ui.invoke", HWND: uint64(hwnd), Named: map[string]any{"scope": "dialog", "name": "OK", "role": 43, "message_pattern": pattern}})
 					if ackErr != nil {
 						details["acknowledgement_error"] = ErrorValue(ackErr)
+					} else if ordinary {
+						location, resetErr := h.Call(ctx, native.Operation{Op: "ui.vba.reset"})
+						details["compiler_location"] = location
+						if resetErr != nil {
+							details["reset_error"] = ErrorValue(resetErr)
+						}
 					}
 				}
-				return native.Fail("vba_compile_error", fmt.Sprint(message), details)
+				return native.Fail("vba_compile_error", text, details)
 			}
 		}
 		details := runtimeDialog(dialog)

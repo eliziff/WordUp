@@ -47,7 +47,7 @@ func scopedWindowInventory(pid uint32, windowClass string) []any {
 		}
 		v, _, _ := windowVisible.Call(hwnd)
 		node := map[string]any{"hwnd": uint64(hwnd), "pid": pid, "class": class, "title": textOf(hwnd), "visible_on_private_desktop": v != 0}
-		if class == "OpusApp" || class == "ThunderDFrame" || class == "ThunderXFrame" {
+		if class == "OpusApp" || class == "ThunderDFrame" || class == "ThunderXFrame" || class == "#32770" {
 			q := windowEnum{pid: pid}
 			enumChildren.Call(hwnd, collectWindowsCallback, uintptr(unsafe.Pointer(&q)))
 			children := []any{}

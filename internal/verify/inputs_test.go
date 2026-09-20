@@ -46,6 +46,9 @@ func TestReplayInputsUseFreshWorkingCopies(t *testing.T) {
 		t.Fatal(err)
 	}
 	b, err := os.ReadFile(again["$input:manuscript$"])
+	if filepath.Base(again["$input:manuscript$"]) == filepath.Base(working) {
+		t.Fatal("warm native staging would reuse the prior run's basename")
+	}
 	if err != nil || string(b) != "original bytes" || again["$input:manuscript$"] == working {
 		t.Fatal("working copy not reset", err)
 	}
@@ -65,5 +68,14 @@ func TestInputNamesCannotCollideOnWindows(t *testing.T) {
 	s := Suite{Schema: 1, Name: "collision", Inputs: map[string]string{"manuscript": path, "Manuscript": path}}
 	if err := s.Validate(); err == nil || !strings.Contains(err.Error(), "collision") {
 		t.Fatalf("input collision not diagnosed: %v", err)
+	}
+}
+
+func TestExpansionDoesNotMutateRecordedSuite(t *testing.T) {
+	op := native.Operation{Op: "invoke", Args: []any{"$output/saved.docx"}, Named: map[string]any{"nested": []any{"$input:manuscript$"}}}
+	first := expand(op, map[string]string{"$output": "first", "$input:manuscript$": "one"})
+	second := expand(op, map[string]string{"$output": "second", "$input:manuscript$": "two"})
+	if op.Args[0] != "$output/saved.docx" || first.Args[0] != "first/saved.docx" || second.Args[0] != "second/saved.docx" || op.Named["nested"].([]any)[0] != "$input:manuscript$" {
+		t.Fatal("path expansion mutated suite or a previous operation", op, first, second)
 	}
 }

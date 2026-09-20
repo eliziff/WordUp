@@ -45,7 +45,7 @@ func TestNativeReplayInputIsolation(t *testing.T) {
 		{Name: "Content", Operation: native.Operation{Op: "get", Target: "manuscript", Member: "Content", As: "body"}},
 		{Name: "Original text", Operation: native.Operation{Op: "get", Target: "body", Member: "Text"}, Assert: []verify.Assertion{{Kind: "equals", Expected: "Original\r"}}},
 		{Name: "Edit", Operation: native.Operation{Op: "put", Target: "body", Member: "Text", Value: "Saved edit"}},
-		{Name: "Save working copy", Operation: native.Operation{Op: "invoke", Target: "manuscript", Member: "Save"}},
+		{Name: "Save working copy", Operation: native.Operation{Op: "invoke", Target: "manuscript", Member: "SaveAs2", Args: []any{"$output/saved.docx"}}},
 		{Name: "Release range", Operation: native.Operation{Op: "release", Target: "body"}},
 		{Name: "Close working copy", Operation: native.Operation{Op: "unload", Target: "manuscript"}},
 	}}
@@ -96,4 +96,36 @@ func TestNativeReplayInputIsolation(t *testing.T) {
 		t.Fatal("replay did not preserve input identity and isolation")
 	}
 	t.Logf("native input isolation and replay passed: %.1f ms then %.1f ms", first.DurationMS, second.DurationMS)
+	// Direct staging must work too, without the harness's unique input names.
+	direct := filepath.Join(root, "direct.docx")
+	if err := os.WriteFile(direct, source, 0600); err != nil {
+		t.Fatal(err)
+	}
+	call := func(op native.Operation) any {
+		t.Helper()
+		result, err := h.Call(ctx, op)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return result
+	}
+	call(native.Operation{Op: "open", File: direct, As: "direct"})
+	call(native.Operation{Op: "invoke", Target: "direct", Member: "SaveAs2", Args: []any{filepath.Join(root, "saved-direct.docx")}})
+	call(native.Operation{Op: "unload", Target: "direct"})
+	p.Files["word/document.xml"] = []byte(`<w:document xmlns:w="` + office.W + `"><w:body><w:p><w:r><w:t>Changed source</w:t></w:r></w:p></w:body></w:document>`)
+	changed, err := p.Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(direct, changed, 0600); err != nil {
+		t.Fatal(err)
+	}
+	call(native.Operation{Op: "open", File: direct, As: "direct"})
+	call(native.Operation{Op: "get", Target: "direct", Member: "Content", As: "directBody"})
+	actual := call(native.Operation{Op: "get", Target: "directBody", Member: "Text"})
+	if actual != "Changed source\r" {
+		t.Fatal("reopened stale source", actual)
+	}
+	call(native.Operation{Op: "release", Target: "directBody"})
+	call(native.Operation{Op: "unload", Target: "direct"})
 }

@@ -313,6 +313,12 @@ func TestNativeScratchLocations(t *testing.T) {
 	if _, err = h.Call(ctx, native.Operation{Op: "new", As: "scratch"}); err != nil {
 		t.Fatal(err)
 	}
+	if _, err = h.Call(ctx, native.Operation{Op: "get", Target: "scratch", Member: "Content", As: "scratch_content"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = h.Call(ctx, native.Operation{Op: "put", Target: "scratch_content", Member: "Text", Value: "active scratch document"}); err != nil {
+		t.Fatal(err)
+	}
 	body := "Dim x As String\nx = \"a\" & _\n    \"b\"\nRem comment\n#If VBA7 Then\nIf x = \"ab\" Then\nErr.Raise 5, , \"located failure\"\nElse\nEvaluate = False\nEnd If\n#End If"
 	check := func(op native.Operation) {
 		t.Helper()
@@ -326,7 +332,16 @@ func TestNativeScratchLocations(t *testing.T) {
 			t.Fatalf("missing original source location: %s", b)
 		}
 	}
+	assertActive := func() {
+		t.Helper()
+		got, err := h.Call(ctx, native.Operation{Op: "eval", Value: "Evaluate = ActiveDocument.Content.Text"})
+		result, ok := got.(map[string]any)
+		if err != nil || !ok || !strings.Contains(fmt.Sprint(result["result"]), "active scratch document") {
+			t.Fatalf("scratch installation changed the active document: %v, %v", got, err)
+		}
+	}
 	check(native.Operation{Op: "eval", Value: body})
+	assertActive()
 	selected, selectErr := h.Call(ctx, native.Operation{Op: "eval", Value: "Select Case 2\nCase 1, 2\nEvaluate = 42\nCase Else\nEvaluate = 0\nEnd Select"})
 	if selectErr != nil || fmt.Sprint(selected.(map[string]any)["result"]) != "42" {
 		t.Fatalf("instrumented Select Case failed: %v %v", selected, selectErr)
@@ -352,6 +367,7 @@ func TestNativeScratchLocations(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	assertActive()
 	program := prepared.(map[string]any)["program"].(string)
 	// Modal workflows can load a direct scratch add-in while a prepared
 	// program remains installed. Its retained COM AddIn may become stale.

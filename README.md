@@ -16,13 +16,13 @@ See [agent diagnostics](docs/DIAGNOSTICS.md) for live XML evidence, Immediate-st
 
 Unpack the matching binary and give a local coding agent its path, this README, and the template or document you want changed. The agent can use an ordinary terminal; MCP is optional. Microsoft Word must already be installed and usable for actual VBA execution and Word rendering. The harness does not bundle Microsoft Office or change its activation, enterprise policy, or the user's Trust Center registry settings.
 
-A useful instruction to the agent is in `AGENTS.md`. The app's `selftest` creates its own integrated example and tests it—no user-imported modules or hand-created fixtures required:
+Workspace instructions are generated on import; this repository's `AGENTS.md` also covers contributing to WordUp. For environment diagnosis, use `doctor`; when an integrated native check is useful, `selftest` creates its own example and tests it—no user-imported modules or hand-created fixtures required:
 
 ```powershell
 .\wordup.exe --execute selftest
 ```
 
-That command deliberately returns a nonzero exit code and structured evidence on failure. It is the first native gate, not a proof of every future macro. The agent should run it and investigate the resulting logs itself rather than asking the user to do VBE work.
+That command deliberately returns a nonzero exit code and structured evidence on failure. It checks its own example, not every future macro. Use it when establishing or diagnosing native execution; a working session need not repeat it. Inspect failures directly rather than asking the user to do VBE work.
 
 For a real project:
 
@@ -49,7 +49,7 @@ wordup.exe --workspace C:\Work\MyTemplate --execute mcp
 
 There is no global agent configuration installer. Clients that support stdio MCP can use that command; any terminal-capable coding agent can use the CLI and local session. Protocol revisions 2025-03-26, 2025-06-18 and 2025-11-25 are explicitly negotiated; newer capabilities are not silently claimed.
 
-For reference-driven template work, use the [WordUp template-builder agent skill](docs/skills/wordup-template-builder/SKILL.md). It defines the minimum style, conversion, UI and native-evidence workflow, with a reusable acceptance plan.
+For reference-driven template work, use the [WordUp template-builder agent skill](docs/skills/wordup-template-builder/SKILL.md). It offers style, conversion, UI and native-evidence advice, with an optional acceptance checklist.
 
 On Windows, run the pinned toolchain through `tools/go.ps1`. It keeps Go's build cache, module cache, and temporary work inside the repository tool area, disables redundant VCS probing, and keeps normal iterations offline. On a fresh checkout, fetch dependencies explicitly with `tools/go.ps1 -Online mod download`.
 

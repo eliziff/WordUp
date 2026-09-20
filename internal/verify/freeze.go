@@ -121,6 +121,11 @@ func Freeze(reference, destination string) (map[string]any, error) {
 			}
 		}
 	}
+	if report.SerialTrace != nil {
+		if err := copyFile(report.SerialTrace.File, "serial-trace.json"); err != nil {
+			return nil, err
+		}
+	}
 	err = filepath.WalkDir(report.EvidenceDirectory, func(path string, entry fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return walkErr
@@ -221,6 +226,12 @@ func LoadReport(path string) (*Report, string, error) {
 		paths[file.Source] = resolved
 	}
 	report.ArtifactSnapshot = paths[report.ArtifactSnapshot]
+	if report.SerialTrace != nil {
+		report.SerialTrace.File = paths[report.SerialTrace.File]
+		if report.SerialTrace.File == "" {
+			return nil, "", fmt.Errorf("frozen serial trace missing")
+		}
+	}
 	if report.ArtifactSnapshot == "" {
 		return nil, "", fmt.Errorf("frozen artifact missing")
 	}

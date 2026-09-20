@@ -89,6 +89,13 @@ func checkedReport(r *Report) error {
 			return err
 		}
 	}
+	if r.Suite.SerialTrace != "" {
+		if _, err := readTrace(r.SerialTrace); err != nil {
+			return err
+		}
+	} else if r.SerialTrace != nil {
+		return fmt.Errorf("undeclared serial trace evidence")
+	}
 	return nil
 }
 
@@ -117,6 +124,16 @@ func CompareWithPolicy(baseline, candidate *Report, policy office.XMLComparePoli
 		if baseline.InputSnapshots[name].SHA256 != candidate.InputSnapshots[name].SHA256 {
 			return r, fmt.Errorf("parity input %s differs between runs", name)
 		}
+	}
+	if baseline.Suite.SerialTrace != "" {
+		difference, err := compareTraces(baseline.SerialTrace, candidate.SerialTrace)
+		if err != nil {
+			return r, err
+		}
+		if difference != nil {
+			r.Differences = append(r.Differences, *difference)
+		}
+		r.Coverage += " Compared exact ordered instrumented events; recorder coverage is not exhaustive macro coverage or DOCX byte identity."
 	}
 	for i, step := range baseline.Suite.Steps {
 		before, after := baseline.Observations[i], candidate.Observations[i]

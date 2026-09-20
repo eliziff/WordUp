@@ -12,6 +12,30 @@ import (
 	"unsafe"
 )
 
+func TestWordSafeModeStartupWindowRequiresExactOwnedDialog(t *testing.T) {
+	dialog := func(message string) []any {
+		return []any{map[string]any{
+			"hwnd": uint64(42), "class": "#32770", "title": "Microsoft Word", "visible_on_private_desktop": true,
+			"children": []any{
+				map[string]any{"class": "Static", "title": message},
+				map[string]any{"class": "Button", "title": "&No"},
+				map[string]any{"class": "Button", "title": "&Yes"},
+			},
+		}}
+	}
+	if hwnd, ok := wordSafeModeStartupWindow(dialog(wordSafeModeStartupPrompt)); !ok || hwnd != 42 {
+		t.Fatalf("exact prompt was not recognized: hwnd=%d ok=%v", hwnd, ok)
+	}
+	if _, ok := wordSafeModeStartupWindow(dialog(wordSafeModeStartupPrompt + " ")); ok {
+		t.Fatal("changed startup prompt was recognized")
+	}
+	other := dialog(wordSafeModeStartupPrompt)
+	other[0].(map[string]any)["class"] = "OpusApp"
+	if _, ok := wordSafeModeStartupWindow(other); ok {
+		t.Fatal("non-dialog window was recognized")
+	}
+}
+
 func TestCloseRetainsCleanupFailure(t *testing.T) {
 	directory := t.TempDir()
 	path := filepath.Join(directory, "locked.dotm")

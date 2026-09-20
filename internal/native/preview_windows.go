@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
 // Preview hands an explicitly launched visible Word instance to the user.
@@ -36,7 +37,7 @@ func Preview(ctx context.Context, file, document string) (any, error) {
 		return nil, fmt.Errorf("preview COM initialization failed")
 	}
 	defer coUninit.Call()
-	h, err := connectWord(hostConfig{Options: Options{Directory: directory, Execute: true, StartupTimeoutMS: 30000}, Desktop: "Default", WordPath: word})
+	h, err := connectWord(hostConfig{Options: Options{Directory: directory, Execute: true, Visible: true, StartupTimeoutMS: 30000}, Desktop: "Default", WordPath: word})
 	if err != nil {
 		return nil, err
 	}
@@ -51,61 +52,110 @@ func Preview(ctx context.Context, file, document string) (any, error) {
 		}
 		closeHandle.Call(uintptr(h.process.Process))
 	}()
-	documents, err := h.app.get("Documents")
-	if err != nil {
-		return nil, err
-	}
-	docs, err := documents.object()
-	documents.clear()
-	if err != nil {
-		return nil, err
-	}
-	closed, err := docs.call("Close", 0)
-	closed.clear()
-	docs.release()
-	if err != nil {
-		return nil, err
-	}
+	// Both new documents and manuscripts use the same attachment and style contract.
 	var opened any
 	if document == "" {
 		opened, err = h.operation(Operation{Op: "new", File: file, As: "preview"})
 	} else {
-		var loaded any
-		loaded, err = h.operation(Operation{Op: "addin", File: file, As: "template"})
-		if err != nil {
-			return nil, err
-		}
-		templatePath := loaded.(map[string]any)["staged_path"].(string)
 		opened, err = h.operation(Operation{Op: "open", File: document, As: "preview"})
-		if err != nil {
-			return nil, err
-		}
-		d := h.objects["preview"]
-		if err = d.put("UpdateStylesOnOpen", true); err != nil {
-			return nil, err
-		}
-		if err = d.put("AttachedTemplate", templatePath); err != nil {
-			return nil, err
-		}
-		updated, updateErr := d.call("UpdateStyles")
-		updated.clear()
-		if updateErr != nil {
-			return nil, updateErr
-		}
-		saved, saveErr := d.call("Save")
-		saved.clear()
-		if saveErr != nil {
-			return nil, saveErr
-		}
 	}
 	if err != nil {
 		return nil, err
 	}
-	activated, err := h.app.call("Activate")
+	templatePath, err := h.stage(file)
+	if err != nil {
+		return nil, err
+	}
+	state, err := preparePreviewDocument(h.objects["preview"], templatePath, filepath.Join(directory, "preview-document.docx"))
+	if err != nil {
+		return nil, err
+	}
+	// Reopen the saved copy so Word loads the attached template's Ribbon too.
+	if _, err = h.operation(Operation{Op: "unload", Target: "preview"}); err != nil {
+		return nil, err
+	}
+	opened, err = h.operation(Operation{Op: "open", File: state["document"].(string), As: "preview"})
+	if err != nil {
+		return nil, err
+	}
+	state, err = verifyPreviewAttachment(h.objects["preview"], templatePath, state["document"].(string))
+	if err != nil {
+		return nil, err
+	}
+	// Foreground focus is best-effort; do not discard a verified visible copy
+	// merely because Word is busy activating its window. Retain the diagnostic.
+	activated, activationErr := h.app.call("Activate")
 	activated.clear()
+	handedOff = true
+	result := map[string]any{"opened": true, "pid": h.process.PID, "template": file, "document": opened, "attachment": state, "persistent_trust_changed": false, "automation_security_restored": true, "priority": "below_normal", "user_owned_after_launch": true}
+	if activationErr != nil {
+		result["activation_error"] = fault(activationErr)
+	}
+	return result, nil
+}
+
+// preparePreviewDocument makes attachment a checked operation, not a UI convention.
+func preparePreviewDocument(d dispatch, templatePath, output string) (map[string]any, error) {
+	if err := d.put("AttachedTemplate", templatePath); err != nil {
+		return nil, err
+	}
+	if err := d.put("UpdateStylesOnOpen", true); err != nil {
+		return nil, err
+	}
+	v, err := d.call("UpdateStyles")
+	v.clear()
 	if err != nil {
 		return nil, err
 	}
-	handedOff = true
-	return map[string]any{"opened": true, "pid": h.process.PID, "template": file, "document": opened, "persistent_trust_changed": false, "automation_security_restored": true, "priority": "below_normal", "user_owned_after_launch": true}, nil
+	v, err = d.get("HasVBProject")
+	if err != nil {
+		return nil, err
+	}
+	hasVBA, err := v.value(0)
+	v.clear()
+	if err != nil {
+		return nil, err
+	}
+	format := 12 // wdFormatXMLDocument
+	if hasVBA == true {
+		format = 13 // Preserve a manuscript's own VBA project.
+		output = strings.TrimSuffix(output, filepath.Ext(output)) + ".docm"
+	}
+	v, err = d.call("SaveAs2", output, format)
+	v.clear()
+	if err != nil {
+		return nil, err
+	}
+	return verifyPreviewAttachment(d, templatePath, output)
+}
+
+func verifyPreviewAttachment(d dispatch, templatePath, output string) (map[string]any, error) {
+	template, err := objectProperty(d, "AttachedTemplate")
+	if err != nil {
+		return nil, err
+	}
+	defer template.release()
+	v, err := template.get("FullName")
+	if err != nil {
+		return nil, err
+	}
+	name, err := v.value(0)
+	v.clear()
+	if err != nil {
+		return nil, err
+	}
+	v, err = d.get("UpdateStylesOnOpen")
+	if err != nil {
+		return nil, err
+	}
+	update, err := v.value(0)
+	v.clear()
+	if err != nil {
+		return nil, err
+	}
+	actual, ok := name.(string)
+	if !ok || !strings.EqualFold(filepath.Clean(actual), filepath.Clean(templatePath)) || update != true {
+		return nil, Fail("preview_attachment_mismatch", "Word did not retain the requested template and automatic style updates", map[string]any{"expected_template": templatePath, "attached_template": name, "update_styles_on_open": update})
+	}
+	return map[string]any{"document": output, "attached_template": actual, "update_styles_on_open": update, "styles_applied": true, "saved": true}, nil
 }

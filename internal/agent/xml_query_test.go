@@ -41,3 +41,21 @@ func TestXMLQueryPackageThroughAgent(t *testing.T) {
 		t.Fatal("query modified the input document")
 	}
 }
+
+func TestXMLReviewDoesNotStartWord(t *testing.T) {
+	root := t.TempDir()
+	for _, name := range []string{"before.xml", "after.xml"} {
+		data := []byte(`<w:document xmlns:w="` + office.W + `"><w:body><w:p><w:r><w:t>` + name + `</w:t></w:r></w:p></w:body></w:document>`)
+		if err := project.Write(root, name, data, ""); err != nil {
+			t.Fatal(err)
+		}
+	}
+	e := &Engine{Root: root}
+	r, err := e.Call(context.Background(), "xml.review", Parameters{Reference: "before.xml", Path: "after.xml", Limit: 1})
+	if err != nil || e.host != nil {
+		t.Fatal(r, err)
+	}
+	if r.(map[string]any)["changed_paragraphs"] != 1 {
+		t.Fatal(r)
+	}
+}

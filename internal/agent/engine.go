@@ -55,6 +55,7 @@ type Parameters struct {
 	Query                string                  `json:"query,omitempty"`
 	Operation            native.Operation        `json:"operation,omitempty"`
 	Suite                *verify.Suite           `json:"suite,omitempty"`
+	Cases                []verify.CorpusCase     `json:"cases,omitempty"`
 	TimeoutMS            int                     `json:"timeout_ms,omitempty"`
 	Reference            string                  `json:"reference,omitempty"`
 	Tolerance            int                     `json:"tolerance,omitempty"`
@@ -268,7 +269,7 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 			return nil, err
 		}
 		return office.QueryXMLInput(ctx, data, p.Part, p.Query, p.Namespaces, p.Limit)
-	case "xml.compare", "xml.verify":
+	case "xml.compare", "xml.verify", "xml.review":
 		read := func(path string) ([]byte, error) {
 			data, err := e.read(path)
 			if err != nil {
@@ -286,6 +287,9 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		}
 		if method == "xml.verify" {
 			return office.VerifyXML(a, b, p.Comparison)
+		}
+		if method == "xml.review" {
+			return office.XMLReview(ctx, a, b, p.Offset, p.Limit)
 		}
 		return office.CompareXML(a, b, p.XMLPolicy)
 	case "alr.grade":
@@ -341,8 +345,13 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 		if !e.Execute {
 			return nil, fmt.Errorf("preview requires --execute authority")
 		}
-		if err := e.resolve(&p.Path, &p.Reference); err != nil {
+		if err := e.resolve(&p.Path); err != nil {
 			return nil, err
+		}
+		if p.Reference != "" {
+			if err := e.resolve(&p.Reference); err != nil {
+				return nil, err
+			}
 		}
 		document := ""
 		if p.Document != "" {
@@ -758,6 +767,48 @@ func (e *Engine) Call(ctx context.Context, method string, p Parameters) (any, er
 			_ = e.Close()
 		}
 		return result, err
+	case "test.corpus":
+		if !e.Execute {
+			return nil, fmt.Errorf("test.corpus requires --execute authority")
+		}
+		if p.Suite == nil {
+			return nil, fmt.Errorf("corpus suite required")
+		}
+		if err := e.resolve(&p.Path, &p.Output); err != nil {
+			return nil, err
+		}
+		if p.Reference != "" {
+			if err := e.resolve(&p.Reference); err != nil {
+				return nil, err
+			}
+		}
+		p.Cases = append([]verify.CorpusCase(nil), p.Cases...)
+		for i := range p.Cases {
+			inputs := map[string]string{}
+			for name, source := range p.Cases[i].Inputs {
+				path, err := e.path(source)
+				if err != nil {
+					return nil, err
+				}
+				inputs[name] = path
+			}
+			p.Cases[i].Inputs = inputs
+		}
+		return verify.RunCorpus(ctx, p.Path, *p.Suite, p.Cases, p.Output, p.Reference, func(ctx context.Context, artifact string, suite verify.Suite) (*verify.Report, error) {
+			h, err := e.Host(ctx)
+			if err != nil {
+				return nil, err
+			}
+			r, err := verify.RunWithInputs(ctx, artifact, suite, h, true, nil)
+			if r != nil {
+				err = errors.Join(err, verify.SaveReport(e.Root, r))
+			}
+			// A failed case must not poison the next case's warm Word state.
+			if err != nil {
+				err = errors.Join(err, e.Close())
+			}
+			return r, err
+		})
 	case "test", "test.replay":
 		var replay *verify.ReplaySource
 		var replayInputs map[string]verify.InputSnapshot

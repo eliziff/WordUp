@@ -36,6 +36,7 @@ type Step struct {
 	TimeoutMS    int              `json:"timeout_ms,omitempty"`
 }
 type Suite struct {
+	SerialTrace    string            `json:"serial_trace,omitempty"` // Filename below $output; opt-in project instrumentation.
 	Inputs         map[string]string `json:"inputs,omitempty"`
 	Schema         int               `json:"schema"`
 	Name           string            `json:"name"`
@@ -61,6 +62,7 @@ type ReplaySource struct {
 }
 
 type Report struct {
+	SerialTrace       *TraceEvidence           `json:"serial_trace,omitempty"`
 	InputSnapshots    map[string]InputSnapshot `json:"input_snapshots,omitempty"`
 	ArtifactSnapshot  string                   `json:"artifact_snapshot,omitempty"`
 	SavedReport       string                   `json:"saved_report,omitempty"`
@@ -296,6 +298,9 @@ func (a Assertion) validate() error {
 }
 
 func (s Suite) Validate() error {
+	if s.SerialTrace != "" && (!inputName.MatchString(strings.TrimSuffix(s.SerialTrace, ".json")) || !strings.HasSuffix(s.SerialTrace, ".json")) {
+		return fmt.Errorf("serial_trace must be a simple filename ending in .json below $output")
+	}
 	if len(s.Inputs) > 32 {
 		return fmt.Errorf("suite input limit is 32")
 	}
@@ -617,7 +622,7 @@ func RunWithInputs(ctx context.Context, artifact string, s Suite, existing nativ
 					}
 
 				}
-				if fault.Code == "ui_provider_timeout" || fault.Code == "scratch_vba_failed" || (fault.Code == "vba_runtime_error" && details["runtime_location"] != nil) {
+				if fault.Code == "ui_provider_timeout" || fault.Code == "scratch_vba_failed" || (fault.Code == "vba_runtime_error" && details["runtime_location"] != nil) || (fault.Code == "vba_compile_error" && details["compiler_location"] != nil) {
 					// Located failures and stalled providers retain screenshots and dialog evidence without
 					// walking unrelated document/editor accessibility trees.
 					capture.Named = map[string]any{"trees": false}
@@ -674,6 +679,13 @@ func RunWithInputs(ctx context.Context, artifact string, s Suite, existing nativ
 	}
 	if r.Assertions == 0 || !r.WordExecuted {
 		return finish(fmt.Errorf("no native assertion evidence"))
+	}
+	if s.SerialTrace != "" {
+		trace, err := captureTrace(output, s.SerialTrace)
+		r.SerialTrace = trace
+		if err != nil {
+			return finish(fmt.Errorf("serial trace: %w", err))
+		}
 	}
 	r.Status = "passed"
 	return finish(nil)
@@ -906,8 +918,11 @@ func expand(op native.Operation, replacements map[string]string) native.Operatio
 	var v any
 	_ = json.Unmarshal(b, &v)
 	b, _ = json.Marshal(walk(v))
-	_ = json.Unmarshal(b, &op)
-	return op
+	// Decode into fresh storage: unmarshalling into op reuses Args/Named backing
+	// storage from the suite and would replace its frozen $output/$input tokens.
+	var expanded native.Operation
+	_ = json.Unmarshal(b, &expanded)
+	return expanded
 }
 
 func createEvidenceDirectory(artifact, hash string) (string, error) {
