@@ -1,0 +1,158 @@
+id,feature,status,entry
+TXT-01,Collapse repeated ordinary spaces,tested-subset,rules.plan_author_text; ooxml.bind/prepare/apply_batch
+TXT-02,Trim trailing ordinary spaces,unimplemented,
+TXT-03,Punctuation spacing,unimplemented,
+TXT-04,Nonbreaking lexical spaces,unimplemented,
+TXT-05,Em-dash spacing,unimplemented,
+TXT-06,Hyphen/double-hyphen to em dash,unimplemented,
+TXT-07,Smart quotation delimiters,unimplemented,
+TXT-08,Apostrophe typography,unimplemented,
+TXT-09,Final-s possessive,unimplemented,
+TXT-10,Quotation comma/period placement,selected,rules.quote_separator
+TXT-11,Footnote-marker punctuation,unimplemented,
+TXT-12,Oxford-comma proposals,unimplemented,
+TXT-13,Ellipsis typography,unimplemented,
+TXT-14,Question/exclamation scope,unimplemented,
+NUM-01,Written date to day-month-year,tested-subset,rules.plan_author_text; citations._date; ooxml.prepare
+NUM-02,Ambiguous or invalid dates,tested-subset,rules.plan_author_text; citations._date
+NUM-03,Percent in prose,tested-subset,rules.plan_author_text; ooxml.prepare
+NUM-04,One through ten in words,selected,rules.selected_number(role=count)
+NUM-05,Cardinals above ten as figures,partial,rules.selected_number(role=count)
+NUM-06,Sentence-initial number,unimplemented,
+NUM-07,Thousands separators,selected,rules.selected_number(role=count)
+NUM-08,Unit spacing,unimplemented,
+NUM-09,Prose ordinals,selected,rules.selected_number(role=ordinal)
+NUM-10,Full-year spans,unimplemented,
+NUM-11,Ordinary prose ranges,selected,rules.selected_number(role=count-range)
+NUM-12,Prose ratios,selected,rules.selected_number(role=ratio)
+NUM-13,Prose fractions,unimplemented,
+NUM-14,Known currency display,unimplemented,
+NUM-15,Equation operator spacing,unimplemented,
+LEX-01,Toward,tested-subset,rules.plan_author_text; ooxml.scan/bind/prepare
+LEX-02,Judgment,tested-subset,rules.plan_author_text; ooxml.scan/bind/prepare
+LEX-03,Case law,tested-subset,rules.plan_author_text; ooxml.scan/bind/prepare
+LEX-04,ALR spelling lexicon,tested-subset,rules.plan_author_text; ooxml.scan/bind/prepare
+LEX-05,Noun/verb spelling choices,unimplemented,
+LEX-06,Compound-word choices,unimplemented,
+LEX-07,Article self-reference,unimplemented,
+LEX-08,And/or decision,unimplemented,
+LEX-09,Quebec accent policy,unimplemented,
+ENT-01,Prose section/article/rule expansion,selected,rules.selected_legal_reference
+ENT-02,Nested section naming,selected,rules.selected_legal_reference
+ENT-03,Judge-office expansion,unimplemented,
+ENT-04,Court abbreviation expansion,unimplemented,
+ENT-05,Supreme Court referent review,unimplemented,
+ENT-06,First and subsequent author mentions,unimplemented,
+ENT-07,Honorific normalization,unimplemented,
+ENT-08,Name initials,unimplemented,
+ENT-09,Acronym introduction/first-use audit,unimplemented,
+ENT-10,Prose e.g./i.e./etc expansion,unimplemented,
+ENT-11,US/UK/UN first-use policy,unimplemented,
+ENT-12,Indigenous terminology review,unimplemented,
+ENT-13,Prose ampersands,unimplemented,
+FMT-01,English Title Case,tested-subset,rules.title_case; ooxml.plan_source_titles/title_guards
+FMT-02,Language-specific title case,tested-subset,rules.title_case
+FMT-03,Debold short forms,unimplemented,
+FMT-04,Bold/underline emphasis to italics,unimplemented,
+FMT-05,Italicizer,retained-selector,kernels.phrase_italics
+FMT-06,DeItalicizer,retained-selector,kernels.phrase_italics
+FMT-07,DeSuperScript,unimplemented,
+QUO-01,Quote boundary audit,tested-subset,kernels.quotation_guards; ooxml.scan
+QUO-02,Supplied-source text comparison,unimplemented,
+QUO-03,Bracketed quote capitalization,unimplemented,
+QUO-04,Quote qualifications,tested-subset,rules.qualifications; citations.normalize_note
+QUO-05,Nested quotation marks,unimplemented,
+QUO-06,Rendered-line block conversion,unimplemented,
+QUO-07,Centred inter-paragraph omission,unimplemented,
+CIT-01,Citation inventory/classification,tested-subset,citations.normalize_note; ooxml.plan_note
+CIT-02,Citation abbreviation periods,partial,citations.locator_edits/normalize_note
+CIT-03,Body case-name periods,unimplemented,
+CIT-04,Citation case-name periods,tested-subset,citations.normalize_note(case-names)
+CIT-05,Case connector language,unimplemented,
+CIT-06,Case-name et al cleanup,unimplemented,
+CIT-07,Para/paras spelling and cardinality,tested-subset,citations._locator/locator_edits
+CIT-08,Bracketed paragraph pinpoint,unimplemented,
+CIT-09,Page p/pp label removal,tested-subset,citations._numbers/locator_edits; ooxml.plan_note/apply_batch
+CIT-10,Pinpoint en dash,tested-subset,citations._numbers/locator_edits; ooxml.plan_note/apply_batch
+CIT-11,Pinpoint range spaces,tested-subset,citations._numbers/locator_edits; ooxml.plan_note/apply_batch
+CIT-12,Shorten page ranges,tested-subset,citations._numbers/locator_edits; ooxml.plan_note/apply_batch
+CIT-13,Hyphenated section range,tested-subset,citations.LegalLocator/_locator
+CIT-14,CanLII court/pinpoint positioning,tested-subset,citations.normalize_note(court-order)
+CIT-15,Journal exact name/abbreviation,tested-subset,citations.Registry/normalize_note(journal-names)
+CIT-16,Journal formatting,unimplemented,
+CIT-17,Fuzzy journal lookup,unimplemented,
+CIT-18,Citation date/year-volume-issue syntax,partial,citations._date/normalize_note
+CIT-19,Top-level citation separators,tested-subset,citations.split_top
+CIT-20,Note initial/final punctuation,partial,citations.normalize_note(terminal)
+CIT-21,Signals and ordering review,unimplemented,
+CIT-22,Duplicate information from body,unimplemented,
+CIT-23,Source hierarchy upgrade,unimplemented,
+CIT-24,Parallel citation removal,unimplemented,
+CIT-25,Online source type label,unimplemented,
+CIT-26,Online access-date/DOI display,unimplemented,
+CIT-27,Premade/exceptional citation forms,unimplemented,
+REF-01,Supra Checker,tested-subset,references.compile_graph
+REF-02,Fix supra note numbers,tested-subset,references.Graph.correct_alias_target
+REF-03,Add/repair supra fields,partial,references.Graph.preserve_pointer
+REF-04,Short-form declarations,partial,citations.normalize_note; references.compile_graph
+REF-05,Repeated full citation to short form,unimplemented,
+REF-06,Ibid conversion/maintenance,tested-subset,kernels.ibid_payload; references.compile_graph/repair_ibid_after_reorder
+REF-07,Text versus note cross-reference,unimplemented,
+REF-08,Heading/Part references,partial,layout.heading_labels
+REF-09,Infra review,unimplemented,
+REF-10,Reference graph integrity audit,tested-subset,references.compile_graph
+PER-01,Extract/copy non-Perma URLs,unimplemented,
+PER-02,Perma CSV preview,retained-selector,kernels.perma_mapping/perma_token_change
+PER-03,Perma exact mapping replacement,retained-selector,kernels.perma_mapping/perma_token_change
+PER-04,Perma verification queue,unimplemented,
+PER-05,Optional Perma API queue,unimplemented,
+PER-06,Failed-capture/manual archive import,unimplemented,
+PER-07,Citation hyperlink appearance,unimplemented,
+UTIL-01,Chief Highlighter,unimplemented,
+UTIL-02,Student/chief verified marking,unimplemented,
+UTIL-03,QuickQuoteCopy,unimplemented,
+UTIL-04,Literal DePeriodizer,unimplemented,
+UTIL-05,Insert em dash,unimplemented,
+UTIL-06,Insert en dash,unimplemented,
+UTIL-07,Accept this change,unimplemented,
+UTIL-08,Reject this change,unimplemented,
+UTIL-09,Highlight next change/comment,unimplemented,
+UTIL-10,Insert custom asterisk note,unimplemented,
+UTIL-11,Bind/unbind hotkeys,unimplemented,
+UTIL-12,Footnote JSONL export,unimplemented,
+UTIL-13,Local source manifest/file naming,unimplemented,
+UTIL-14,Clear owned diagnostic flags,unimplemented,
+NOTE-01,Student/Chief I note-change request,unimplemented,
+NOTE-02,Chief II approved note materialization,unimplemented,
+LAY-01,Document-kind and role confirmation,unimplemented,
+LAY-02,Page size and margins,partial,layout.twips
+LAY-03,Body style normalization,partial,layout.affected_styles/style_uses/require_style_ownership
+LAY-04,Paragraph indent/continuation,unimplemented,
+LAY-05,Empty structural spacing cleanup,unimplemented,
+LAY-06,Article title/author style,unimplemented,
+LAY-07,Abstract style/count,unimplemented,
+LAY-08,Heading level styles,partial,layout.heading_labels
+LAY-09,Heading typed-prefix cleanup,unimplemented,
+LAY-10,Introduction numbering profile,partial,layout.heading_labels
+LAY-11,Printed TOC regeneration,unimplemented,
+LAY-12,TOC heading style/fit,unimplemented,
+LAY-13,Body blockquote style,unimplemented,
+LAY-14,Footnote blockquote style,unimplemented,
+LAY-15,Body native note-reference style,unimplemented,
+LAY-16,Footnote marker separator tab,unimplemented,
+LAY-17,Footnote paragraph formatting,unimplemented,
+LAY-18,Headers/footers and licence,unimplemented,
+LAY-19,Page-numbering continuity,unimplemented,
+LAY-20,Book-review layout,unimplemented,
+LAY-21,List layout,unimplemented,
+LAY-22,Table typography,unimplemented,
+LAY-23,Table geometry,unimplemented,
+LAY-24,Figure sizing/anchors,unimplemented,
+LAY-25,Caption label/title layout,unimplemented,
+LAY-26,Figure/table explanatory notes,unimplemented,
+LAY-27,Alt-text completeness,unimplemented,
+LAY-28,Layout convergence,unimplemented,
+LAY-29,Publication layout audit,unimplemented,
+EXP-01,Clean publication copy,unimplemented,
+EXP-02,Native PDF publication export,unimplemented,
+EXP-03,Run audit/report export,partial,audit_corpus.audit; evidence.json
