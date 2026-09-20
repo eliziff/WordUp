@@ -14,7 +14,13 @@ import (
 
 // Preview hands an explicitly launched visible Word instance to the user.
 // It never attaches to an existing instance or changes persistent trust settings.
-func Preview(ctx context.Context, file, document string) (any, error) {
+func Preview(ctx context.Context, file, document string) (result any, err error) {
+	phase := "start Word"
+	defer func() {
+		if err != nil {
+			err = Fail("preview_failed", "Preview failed while attempting to "+phase, map[string]any{"phase": phase, "cause": fault(err)})
+		}
+	}()
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -52,6 +58,7 @@ func Preview(ctx context.Context, file, document string) (any, error) {
 		}
 		closeHandle.Call(uintptr(h.process.Process))
 	}()
+	phase = "open working document"
 	// Both new documents and manuscripts use the same attachment and style contract.
 	var opened any
 	if document == "" {
@@ -66,18 +73,22 @@ func Preview(ctx context.Context, file, document string) (any, error) {
 	if err != nil {
 		return nil, err
 	}
+	phase = "attach template, apply styles and save"
 	state, err := preparePreviewDocument(h.objects["preview"], templatePath, filepath.Join(directory, "preview-document.docx"))
 	if err != nil {
 		return nil, err
 	}
 	// Reopen the saved copy so Word loads the attached template's Ribbon too.
+	phase = "close saved working document"
 	if _, err = h.operation(Operation{Op: "unload", Target: "preview"}); err != nil {
 		return nil, err
 	}
+	phase = "reopen saved working document"
 	opened, err = h.operation(Operation{Op: "open", File: state["document"].(string), As: "preview"})
 	if err != nil {
 		return nil, err
 	}
+	phase = "verify reopened attachment and automatic styles"
 	state, err = verifyPreviewAttachment(h.objects["preview"], templatePath, state["document"].(string))
 	if err != nil {
 		return nil, err
@@ -87,9 +98,9 @@ func Preview(ctx context.Context, file, document string) (any, error) {
 	activated, activationErr := h.app.call("Activate")
 	activated.clear()
 	handedOff = true
-	result := map[string]any{"opened": true, "pid": h.process.PID, "template": file, "document": opened, "attachment": state, "persistent_trust_changed": false, "automation_security_restored": true, "priority": "below_normal", "user_owned_after_launch": true}
+	result = map[string]any{"opened": true, "pid": h.process.PID, "template": file, "document": opened, "attachment": state, "persistent_trust_changed": false, "automation_security_restored": true, "priority": "below_normal", "user_owned_after_launch": true}
 	if activationErr != nil {
-		result["activation_error"] = fault(activationErr)
+		result.(map[string]any)["activation_error"] = fault(activationErr)
 	}
 	return result, nil
 }

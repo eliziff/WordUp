@@ -105,7 +105,7 @@ func fromNativeWindow(hwnd uintptr, objid uint32) (dispatch, error) {
 }
 func (d dispatch) ids(names []string) ([]int32, error) {
 	if d.ptr == 0 {
-		return nil, fmt.Errorf("released COM object")
+		return nil, fmt.Errorf("cannot access %v: COM object reference is nil", names)
 	}
 	pointers := make([]*uint16, len(names))
 	for i, s := range names {

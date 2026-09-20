@@ -5,6 +5,7 @@ import "fmt"
 // Keep actionable dialog text prominent without throwing away the original tree.
 func dialogSummary(tree any) map[string]any {
 	texts, buttons := []string{}, []string{}
+	controls := []any{}
 	seen := map[string]bool{}
 	var visit func(any)
 	visit = func(value any) {
@@ -20,6 +21,9 @@ func dialogSummary(tree any) map[string]any {
 			}
 			if role == "43" {
 				buttons = append(buttons, name)
+				if node["selector"] != nil {
+					controls = append(controls, map[string]any{"name": name, "role": node["role"], "selector": node["selector"]})
+				}
 			}
 			seen[role+name] = true
 		}
@@ -29,5 +33,5 @@ func dialogSummary(tree any) map[string]any {
 		}
 	}
 	visit(tree)
-	return map[string]any{"messages": texts, "buttons": buttons}
+	return map[string]any{"messages": texts, "buttons": buttons, "controls": controls}
 }

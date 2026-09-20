@@ -60,6 +60,51 @@ func scopedWindowInventory(pid uint32, windowClass string) []any {
 	}
 	return out
 }
+
+// Standard dialog controls remain usable when MSAA exposes an incomplete tree.
+func nativeButtonName(hwnd uintptr) (string, bool) {
+	if classOf(hwnd) != "Button" {
+		return "", false
+	}
+	style, _, _ := user32.NewProc("GetWindowLongW").Call(hwnd, ^uintptr(15)) // GWL_STYLE
+	switch style & 15 {
+	case 0, 1, 14, 15:
+	default:
+		return "", false
+	}
+	// A doubled ampersand is literal; a single one introduces a mnemonic.
+	caption := textOf(hwnd)
+	var name strings.Builder
+	for i := 0; i < len(caption); i++ {
+		if caption[i] == '&' {
+			if i+1 >= len(caption) || caption[i+1] != '&' {
+				continue
+			}
+			i++
+		}
+		name.WriteByte(caption[i])
+	}
+	return name.String(), true
+}
+
+func nativeDialogSummary(window map[string]any) map[string]any {
+	messages, buttons := []string{}, []string{}
+	controls := []any{}
+	children, _ := window["children"].([]any)
+	for _, item := range children {
+		child := item.(map[string]any)
+		if child["class"] == "Static" && child["title"] != "" {
+			messages = append(messages, child["title"].(string))
+		}
+		hwnd, _ := child["hwnd"].(uint64)
+		if name, ok := nativeButtonName(uintptr(hwnd)); ok {
+			buttons = append(buttons, name)
+			controls = append(controls, map[string]any{"name": name, "role": 43, "selector": Operation{HWND: hwnd, Named: map[string]any{"expected_name": name}}})
+		}
+	}
+	return map[string]any{"messages": messages, "buttons": buttons, "controls": controls, "hwnd": window["hwnd"], "title": window["title"]}
+}
+
 func childrenOf(d dispatch) ([]variant, error) {
 	v, e := d.invokeIDs("accChildCount", 2, nil, nil, nil, nil, []int32{-5001})
 	if e != nil {
@@ -363,7 +408,7 @@ func uiOperation(pid uint32, directory string, execute bool, op Operation) (any,
 		}
 		for _, item := range scopedWindowInventory(pid, inventoryClass) {
 			w := item.(map[string]any)
-			if w["visible_on_private_desktop"] != true {
+			if w["visible_on_private_desktop"] != true && w["class"] != "#32770" {
 				continue
 			}
 			hwnd := w["hwnd"].(uint64)
@@ -374,20 +419,31 @@ func uiOperation(pid uint32, directory string, execute bool, op Operation) (any,
 			if !selected && w["class"] != "#32770" {
 				continue
 			}
-			if op.Named["trees"] != false || w["class"] == "#32770" {
+			var summary map[string]any
+			if w["class"] == "#32770" {
+				summary = nativeDialogSummary(w)
+			}
+			needTree := op.Named["trees"] != false || (summary != nil && (len(summary["messages"].([]string)) == 0 || len(summary["buttons"].([]string)) == 0))
+			if needTree {
 				tree, err := uiOperation(pid, directory, execute, Operation{Op: "ui.tree", HWND: hwnd, Depth: 4})
-				w["tree"] = tree
 				if err != nil {
 					w["tree_error"] = err.Error()
 				}
-				if w["class"] == "#32770" {
-					summary := dialogSummary(tree)
-					summary["hwnd"], summary["title"] = hwnd, w["title"]
-					dialogs = append(dialogs, summary)
+				if op.Named["trees"] != false {
+					w["tree"] = tree
 				}
-				if op.Named["trees"] == false {
-					delete(w, "tree")
+				if summary != nil {
+					accessible := dialogSummary(tree)
+					if len(summary["messages"].([]string)) == 0 {
+						summary["messages"] = accessible["messages"]
+					}
+					if len(summary["buttons"].([]string)) == 0 {
+						summary["buttons"], summary["controls"] = accessible["buttons"], accessible["controls"]
+					}
 				}
+			}
+			if summary != nil {
+				dialogs = append(dialogs, summary)
 			}
 			if op.File != "" {
 				if err := os.MkdirAll(op.File, 0700); err != nil {
@@ -449,7 +505,7 @@ func uiOperation(pid uint32, directory string, execute bool, op Operation) (any,
 		scope, _ := op.Named["scope"].(string)
 		for _, item := range windowInventory(pid) {
 			w := item.(map[string]any)
-			if w["visible_on_private_desktop"] != true || (op.HWND != 0 && op.HWND != w["hwnd"]) {
+			if (w["visible_on_private_desktop"] != true && op.HWND != w["hwnd"]) || (op.HWND != 0 && op.HWND != w["hwnd"]) {
 				continue
 			}
 			if title, ok := op.Named["window"].(string); ok && title != w["title"] {
@@ -460,16 +516,31 @@ func uiOperation(pid uint32, directory string, execute bool, op Operation) (any,
 				if w["class"] != "#32770" {
 					continue
 				}
+				matchedDialog = nativeDialogSummary(w)
 				if messagePattern != nil {
-					tree, err := uiOperation(pid, directory, execute, Operation{Op: "ui.tree", HWND: w["hwnd"].(uint64), Depth: 4})
-					if err != nil {
-						return nil, err
+					messages := matchedDialog["messages"].([]string)
+					if len(messages) == 0 {
+						tree, err := uiOperation(pid, directory, execute, Operation{Op: "ui.tree", HWND: w["hwnd"].(uint64), Depth: 4})
+						if err != nil {
+							return nil, err
+						}
+						messages = dialogSummary(tree)["messages"].([]string)
+						matchedDialog["messages"] = messages
 					}
-					matchedDialog = dialogSummary(tree)
-					messages, _ := matchedDialog["messages"].([]string)
 					if !messagePattern.MatchString(strings.Join(messages, "\n")) {
-						matchedDialog["hwnd"], matchedDialog["title"] = w["hwnd"], w["title"]
 						unmatchedDialogs = append(unmatchedDialogs, matchedDialog)
+						continue
+					}
+				}
+				if ancestor == "" && (op.Named["role"] == nil || fmt.Sprint(op.Named["role"]) == "43") {
+					before := len(matches)
+					for _, item := range matchedDialog["controls"].([]any) {
+						control := item.(map[string]any)
+						if control["name"] == name {
+							matches = append(matches, map[string]any{"name": control["name"], "role": control["role"], "selector": control["selector"], "dialog": matchedDialog})
+						}
+					}
+					if len(matches) != before {
 						continue
 					}
 				}
@@ -574,6 +645,25 @@ func uiOperation(pid uint32, directory string, execute bool, op Operation) (any,
 			return nil, e
 		}
 		return map[string]any{"file": file, "capture": "PrintWindow on the app-owned desktop", "hwnd": op.HWND}, nil
+	}
+	if op.Op == "ui.invoke" && len(op.Args) == 0 && op.Child == 0 {
+		if name, ok := nativeButtonName(hwnd); ok {
+			if expected, exists := op.Named["expected_name"]; exists && expected != name {
+				return nil, Fail("stale_ui_selector", "Button name no longer matches the supplied precondition", map[string]any{"expected": expected, "actual": name})
+			}
+			if !execute {
+				return nil, Fail("execution_not_authorized", "Native UI interaction requires explicit execute authorization", nil)
+			}
+			enabled, _, _ := user32.NewProc("IsWindowEnabled").Call(hwnd)
+			if enabled == 0 {
+				return nil, Fail("ui_control_disabled", "The selected button is disabled", nil)
+			}
+			posted, _, err := user32.NewProc("PostMessageW").Call(hwnd, 0x00F5, 0, 0) // BM_CLICK
+			if posted == 0 {
+				return nil, winError("PostMessageW(BM_CLICK)", err)
+			}
+			return map[string]any{"posted": true, "backend": "native Button", "hwnd": op.HWND, "dialog": op.Named["matched_dialog"]}, nil
+		}
 	}
 	resolveStarted := time.Now()
 	a, e := resolveAccessible(hwnd, op.Args)

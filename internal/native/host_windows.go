@@ -141,7 +141,7 @@ const wordSafeModeStartupPrompt = "Word couldn't start last time. Safe mode coul
 func wordSafeModeStartupWindow(windows []any) (uint64, bool) {
 	for _, item := range windows {
 		window, ok := item.(map[string]any)
-		if !ok || window["class"] != "#32770" || window["title"] != "Microsoft Word" || window["visible_on_private_desktop"] != true {
+		if !ok || window["class"] != "#32770" || window["title"] != "Microsoft Word" {
 			continue
 		}
 		hasPrompt, hasNo, hasYes := false, false, false
@@ -242,7 +242,7 @@ func connectWord(cfg hostConfig) (*wordHost, error) {
 				action, actionErr := uiOperation(p.PID, cfg.Directory, true, Operation{Op: "ui.invoke", HWND: hwnd, Named: map[string]any{
 					"name": "No", "scope": "dialog", "message_pattern": "^" + regexp.QuoteMeta(wordSafeModeStartupPrompt) + "$",
 				}})
-				diagf("connectWord: exact owned safe-mode startup prompt=%q action=No result=%v error=%v", wordSafeModeStartupPrompt, action, actionErr)
+				diagf("connectWord: exact owned safe-mode startup prompt action=No result=%v error=%v", action, actionErr)
 				if actionErr != nil {
 					last = actionErr
 				}
@@ -436,7 +436,22 @@ func (h *wordHost) stage(source string) (string, error) {
 	h.staged[key] = hash
 	return target, nil
 }
-func (h *wordHost) operation(op Operation) (any, error) {
+func (h *wordHost) operation(op Operation) (result any, err error) {
+	defer func() {
+		if f := fault(err); f != nil && f.Code == "word_busy" {
+			details, ok := f.Details.(map[string]any)
+			if !ok {
+				details = map[string]any{"cause": f.Details}
+			}
+			diagnostics, captureErr := uiOperation(h.process.PID, h.cfg.Directory, h.execute, Operation{Op: "ui.diagnostics", File: filepath.Join(h.cfg.Directory, "busy-dialogs"), Named: map[string]any{"window_class": "#32770", "trees": false}})
+			details["dialog_diagnostics"] = diagnostics
+			if captureErr != nil {
+				details["dialog_diagnostics_error"] = captureErr.Error()
+			}
+			f.Details = details
+			err = f
+		}
+	}()
 	switch op.Op {
 	case "profile":
 		return profileOperations(op.Steps, h.operation)
@@ -564,10 +579,16 @@ func (h *wordHost) operation(op Operation) (any, error) {
 		if name == "" {
 			name = "document"
 		}
-		r, e := h.result(&v, name)
+		openedObject, e := v.object()
+		resultType := v.VT
+		v.clear()
 		if e != nil {
+			return nil, Fail("document_open_no_object", "Word did not return an object from "+collection+"."+member, map[string]any{"file": target, "variant_type": resultType, "cause": e.Error()})
+		}
+		if e = h.store(name, openedObject); e != nil {
 			return nil, e
 		}
+		r := map[string]any{"object": name}
 		opened := map[string]any{"handle": r, "staged_path": target, "source_sha256": h.staged[strings.ToLower(target)], "macro_execution_authorized": h.execute, "open_and_repair": false}
 		if op.Op == "open" {
 			if h.openedPaths == nil {

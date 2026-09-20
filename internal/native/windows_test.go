@@ -3,6 +3,7 @@
 package native
 
 import (
+	"encoding/json"
 	"image/png"
 	"os"
 	"path/filepath"
@@ -25,6 +26,11 @@ func TestWordSafeModeStartupWindowRequiresExactOwnedDialog(t *testing.T) {
 	}
 	if hwnd, ok := wordSafeModeStartupWindow(dialog(wordSafeModeStartupPrompt)); !ok || hwnd != 42 {
 		t.Fatalf("exact prompt was not recognized: hwnd=%d ok=%v", hwnd, ok)
+	}
+	hidden := dialog(wordSafeModeStartupPrompt)
+	hidden[0].(map[string]any)["visible_on_private_desktop"] = false
+	if _, ok := wordSafeModeStartupWindow(hidden); !ok {
+		t.Fatal("owned hidden startup prompt was not recognized")
 	}
 	if _, ok := wordSafeModeStartupWindow(dialog(wordSafeModeStartupPrompt + " ")); ok {
 		t.Fatal("changed startup prompt was recognized")
@@ -139,5 +145,88 @@ func TestOwnedWindowEnumeration(t *testing.T) {
 	defer destroy.Call(wordChild)
 	if got := documentWindow(uint32(os.Getpid())); got != wordChild {
 		t.Fatalf("document window: %v, want %v", got, wordChild)
+	}
+}
+
+func TestNativeDialogButtonSelectors(t *testing.T) {
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
+	pid := uint32(os.Getpid())
+	create := func(class, text string, style, parent uintptr) uintptr {
+		t.Helper()
+		c, _ := utf(class)
+		label, _ := utf(text)
+		hwnd, _, err := user32.NewProc("CreateWindowExW").Call(0, uintptr(unsafe.Pointer(c)), uintptr(unsafe.Pointer(label)), style, 0, 0, 200, 100, parent, 0, 0, 0)
+		if hwnd == 0 {
+			t.Fatal(err)
+		}
+		return hwnd
+	}
+	dialog := create("#32770", "Owned test dialog", 0, 0)
+	defer user32.NewProc("DestroyWindow").Call(dialog)
+	create("Static", "A decision is required.", 0x40000000, dialog)
+	button := create("Button", "&No", 0x40000000, dialog)
+	invoked := false
+	callback := syscall.NewCallback(func(hwnd uintptr, message uint32, wparam, lparam uintptr) uintptr {
+		if message == 0x0111 && lparam == button {
+			invoked = true
+			return 0
+		}
+		result, _, _ := user32.NewProc("DefWindowProcW").Call(hwnd, uintptr(message), wparam, lparam)
+		return result
+	})
+	original, _, _ := user32.NewProc("SetWindowLongPtrW").Call(dialog, ^uintptr(3), callback)
+	defer user32.NewProc("SetWindowLongPtrW").Call(dialog, ^uintptr(3), original)
+	op := Operation{Op: "ui.find", HWND: uint64(dialog), Named: map[string]any{"name": "No", "role": 43, "scope": "dialog", "message_pattern": "^A decision is required\\.$"}}
+	found, err := uiOperation(pid, t.TempDir(), false, op)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Selectors must serialize without cycles and be reusable without a name search.
+	encoded, err := json.Marshal(found)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var selected struct{ Selector Operation }
+	if err = json.Unmarshal(encoded, &selected); err != nil {
+		t.Fatal(err)
+	}
+	selected.Selector.Op = "ui.invoke"
+	expectFault := func(operation Operation, execute bool, code string) {
+		t.Helper()
+		_, err := uiOperation(pid, t.TempDir(), execute, operation)
+		if f := fault(err); f == nil || f.Code != code {
+			t.Fatalf("want %s, got %v", code, err)
+		}
+	}
+	expectFault(selected.Selector, false, "execution_not_authorized")
+	selected.Selector.Named["expected_name"] = "Changed"
+	expectFault(selected.Selector, true, "stale_ui_selector")
+	selected.Selector.Named["expected_name"] = "No"
+	user32.NewProc("EnableWindow").Call(button, 0)
+	expectFault(selected.Selector, true, "ui_control_disabled")
+	user32.NewProc("EnableWindow").Call(button, 1)
+	if _, err := uiOperation(pid+1, t.TempDir(), true, selected.Selector); fault(err).Code != "window_not_owned" {
+		t.Fatal(err)
+	}
+	if _, err := uiOperation(pid, t.TempDir(), true, selected.Selector); err != nil {
+		t.Fatal(err)
+	}
+	pump()
+	if !invoked {
+		t.Fatal("native button did not deliver its command")
+	}
+	op.Named["message_pattern"] = "^Different prompt$"
+	expectFault(op, true, "ui_selector_not_found")
+	delete(op.Named, "message_pattern")
+	create("Button", "N&o", 0x40000000, dialog)
+	expectFault(op, true, "ui_selector_not_unique")
+	literal := create("Button", "Save && Close", 0x40000000, dialog)
+	if name, ok := nativeButtonName(literal); !ok || name != "Save & Close" {
+		t.Fatalf("literal caption: %q", name)
+	}
+	group := create("Button", "Group", 0x40000007, dialog)
+	if _, ok := nativeButtonName(group); ok {
+		t.Fatal("group box treated as push button")
 	}
 }

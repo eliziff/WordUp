@@ -253,7 +253,7 @@ it does not execute Word.
 
 ## Interactive preview
 
-On an explicit request to open Word, use `call preview` with `path` naming the template and optional `document` naming a manuscript. It creates isolated copies, attaches the template as the document template (not a global add-in), enables automatic style updates, applies them, saves and reopens the document, then checks attachment and automatic-update state before reporting success. The result includes the actual attachment and document paths. Without a manuscript it creates a new document from the template. Requires execution authority; Windows only.
+On an explicit request to open Word, use `call preview` with `path` naming the template and optional `document` naming a manuscript. It creates isolated copies with short filenames under the WordUp user cache (independent of source path length), attaches the template as the document template (not a global add-in), enables automatic style updates, applies them, saves and reopens the document, then checks attachment and automatic-update state before reporting success. The result includes the actual attachment and document paths. Without a manuscript it creates a new document from the template. Requires execution authority; Windows only.
 
 Preview does not require acceptance or signing. Optional `reference` supplies an acceptance report: its reported status, compilation flag and artifact-hash match are returned as information, not certification or deployment approval. Deployment retains its separate acceptance requirements.
 
